@@ -15,6 +15,7 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync, statSync } from "no
 import { join, resolve } from "node:path"
 import { Effect, Exit, Cause } from "effect"
 import {
+  compileDesign,
   decodeHir,
   diffHir,
   formatDiff,
@@ -27,6 +28,7 @@ import {
   compileFile,
   type CompileFileResult
 } from "@grayhaven/nerve-compiler"
+import { exportWireViz, importWireViz } from "@grayhaven/nerve-wireviz"
 import {
   assemblyInstructions,
   boardSvg,
@@ -130,7 +132,8 @@ Usage:
   nerve compile  <file.harness.ts> [--out dir]
   nerve validate <file.harness.ts>
   nerve render   <file.harness.ts> [--format svg] [--view schematic|board] [--out dir]
-  nerve export   <file.harness.ts> [--target manufacturing-packet] [--out dir]
+  nerve export   <file.harness.ts> [--target manufacturing-packet|wireviz] [--out dir]
+  nerve import   <file.yml> [--id harness-id] [--out dir]   (WireViz YAML → HIR)
   nerve diff     <revA> <revB> [--json]   (each: harness.json, .harness.ts, or revision dir)
   nerve inspect  <harness.json>`
 
@@ -211,8 +214,17 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       const file = positional[0]
       if (file === undefined) return usage(io)
       const target = flags["target"] ?? "manufacturing-packet"
+      if (target === "wireviz") {
+        const result = await compileOrExit(file, io)
+        if (typeof result === "number") return result
+        const { yaml, diagnostics } = exportWireViz(result.hir)
+        printDiagnostics(diagnostics, io)
+        const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+        writeOut(outDir, "wireviz.yml", yaml, io)
+        return 0
+      }
       if (target !== "manufacturing-packet") {
-        io.err(`Unsupported export target: ${target} (supported: manufacturing-packet)`)
+        io.err(`Unsupported export target: ${target} (supported: manufacturing-packet, wireviz)`)
         return 2
       }
       const result = await compileOrExit(file, io)
@@ -241,6 +253,31 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       writeOut(outDir, "manufacturing-packet.zip", (await buildPacket(result.hir, options)).zip, io)
       io.out(summarize(result.hir))
       return 0
+    }
+
+    case "import": {
+      const file = positional[0]
+      if (file === undefined) return usage(io)
+      let result
+      try {
+        result = importWireViz(readFileSync(resolve(file), "utf8"), {
+          ...(flags["id"] !== undefined ? { harnessId: flags["id"] } : {})
+        })
+      } catch (cause) {
+        io.err(
+          `Failed to import ${file}: ${cause instanceof Error ? cause.message : String(cause)}`
+        )
+        return 2
+      }
+      const { hir, diagnostics: structural } = compileDesign(result.design)
+      const diagnostics = [...result.diagnostics, ...structural]
+      const full = { ...hir, diagnostics }
+      printDiagnostics(diagnostics, io)
+      const outDir = resolve(flags["out"] ?? "dist")
+      writeOut(outDir, "harness.json", JSON.stringify(full, null, 2) + "\n", io)
+      writeOut(outDir, "diagnostics.json", JSON.stringify(diagnostics, null, 2) + "\n", io)
+      io.out(summarize(full))
+      return hasErrors(diagnostics) ? 1 : 0
     }
 
     case "diff": {

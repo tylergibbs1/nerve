@@ -14,6 +14,7 @@
     "@grayhaven/nerve": "workspace:*",
     "@grayhaven/nerve-compiler": "workspace:*",
     "@grayhaven/nerve-exporters": "workspace:*",
+    "@grayhaven/nerve-wireviz": "workspace:*",
     "effect": "^3.16.0",
     "jiti": "^2.4.2"
   },

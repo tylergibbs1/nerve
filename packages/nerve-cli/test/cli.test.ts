@@ -145,6 +145,31 @@ export default harness("bad", {
   })
 })
 
+describe("nerve import / export --target wireviz", () => {
+  const WV_FIXTURE = resolve(
+    import.meta.dirname,
+    "../../nerve-wireviz/test/fixtures/motor.yml"
+  )
+
+  it("imports WireViz YAML to HIR", async () => {
+    const out = tmp()
+    const io = capture()
+    expect(await run(["import", WV_FIXTURE, "--id", "imported", "--out", out], io)).toBe(0)
+    const hir = JSON.parse(readFileSync(join(out, "harness.json"), "utf8"))
+    expect(hir.harness.id).toBe("imported")
+    expect(hir.wires).toHaveLength(4)
+  })
+
+  it("exports a design to WireViz YAML", async () => {
+    const out = tmp()
+    expect(await run(["export", FIXTURE, "--target", "wireviz", "--out", out], capture())).toBe(0)
+    const yml = readFileSync(join(out, "wireviz.yml"), "utf8")
+    expect(yml).toContain("connectors:")
+    expect(yml).toContain("J1:")
+    expect(yml).toContain("connections:")
+  })
+})
+
 describe("nerve diff", () => {
   it("diffs two compiled revisions and exits 1 on differences", async () => {
     const dirA = tmp()

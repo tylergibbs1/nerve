@@ -1,0 +1,18 @@
+{
+  "name": "@grayhaven/nerve-wireviz",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "WireViz YAML import/export adapter for Grayhaven Nerve (PRD §27.2).",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@grayhaven/nerve": "workspace:*",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

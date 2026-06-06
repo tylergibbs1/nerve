@@ -1,0 +1,170 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`WireViz import (PRD §27.2) > matches the import snapshot 1`] = `
+{
+  "bom": [
+    {
+      "category": "connector",
+      "mpn": "Molex Micro-Fit 3.0",
+      "quantity": 2,
+      "unitOfMeasure": "ea",
+      "usedBy": [
+        "connector:X1",
+        "connector:X2",
+      ],
+    },
+  ],
+  "branches": [],
+  "cables": [
+    {
+      "conductors": 4,
+      "cutLength": 420,
+      "id": "W1",
+      "shield": "shield",
+      "type": "4x20 AWG",
+      "wires": [
+        "W1.1",
+        "W1.2",
+        "W1.3",
+        "W1.4",
+      ],
+    },
+  ],
+  "connectors": [
+    {
+      "family": "Molex Micro-Fit 3.0",
+      "gender": "receptacle",
+      "mpn": "Molex Micro-Fit 3.0",
+      "pinCount": 4,
+      "pins": [
+        {
+          "pin": "1",
+          "signal": "VBAT",
+        },
+        {
+          "pin": "2",
+          "signal": "GND",
+        },
+        {
+          "pin": "3",
+          "signal": "CAN_H",
+        },
+        {
+          "pin": "4",
+          "signal": "CAN_L",
+        },
+      ],
+      "ref": "X1",
+    },
+    {
+      "family": "Molex Micro-Fit 3.0",
+      "gender": "plug",
+      "mpn": "Molex Micro-Fit 3.0",
+      "pinCount": 4,
+      "pins": [
+        {
+          "pin": "1",
+          "signal": "VBAT",
+        },
+        {
+          "pin": "2",
+          "signal": "GND",
+        },
+        {
+          "pin": "3",
+          "signal": "CAN_H",
+        },
+        {
+          "pin": "4",
+          "signal": "CAN_L",
+        },
+      ],
+      "ref": "X2",
+    },
+  ],
+  "diagnostics": [],
+  "exports": {},
+  "harness": {
+    "id": "imported-motor",
+    "metadata": {
+      "importedFrom": "wireviz",
+    },
+    "revision": "A",
+    "units": "mm",
+  },
+  "labels": [],
+  "layoutHints": [],
+  "schemaVersion": "0.1.0",
+  "splices": [],
+  "wires": [
+    {
+      "cable": "W1",
+      "color": "red",
+      "conductor": "1",
+      "from": {
+        "connector": "X1",
+        "pin": "1",
+      },
+      "gauge": "20AWG",
+      "id": "W1.1",
+      "length": 420,
+      "signal": "VBAT",
+      "to": {
+        "connector": "X2",
+        "pin": "1",
+      },
+    },
+    {
+      "cable": "W1",
+      "color": "black",
+      "conductor": "2",
+      "from": {
+        "connector": "X1",
+        "pin": "2",
+      },
+      "gauge": "20AWG",
+      "id": "W1.2",
+      "length": 420,
+      "signal": "GND",
+      "to": {
+        "connector": "X2",
+        "pin": "2",
+      },
+    },
+    {
+      "cable": "W1",
+      "color": "white",
+      "conductor": "3",
+      "from": {
+        "connector": "X1",
+        "pin": "3",
+      },
+      "gauge": "20AWG",
+      "id": "W1.3",
+      "length": 420,
+      "signal": "CAN_H",
+      "to": {
+        "connector": "X2",
+        "pin": "3",
+      },
+    },
+    {
+      "cable": "W1",
+      "color": "blue",
+      "conductor": "4",
+      "from": {
+        "connector": "X1",
+        "pin": "4",
+      },
+      "gauge": "20AWG",
+      "id": "W1.4",
+      "length": 420,
+      "signal": "CAN_L",
+      "to": {
+        "connector": "X2",
+        "pin": "4",
+      },
+    },
+  ],
+}
+`;

@@ -1,0 +1,26 @@
+# WireViz fixture: motor harness with a 4-conductor cable.
+connectors:
+  X1:
+    type: Molex Micro-Fit 3.0
+    subtype: female
+    pincount: 4
+    pinlabels: [VBAT, GND, CAN_H, CAN_L]
+  X2:
+    type: Molex Micro-Fit 3.0
+    subtype: male
+    pincount: 4
+    pinlabels: [VBAT, GND, CAN_H, CAN_L]
+
+cables:
+  W1:
+    gauge: 20 AWG
+    length: 0.42
+    wirecount: 4
+    colors: [RD, BK, WH, BU]
+    shield: true
+
+connections:
+  -
+    - X1: [1-4]
+    - W1: [1-4]
+    - X2: [1-4]

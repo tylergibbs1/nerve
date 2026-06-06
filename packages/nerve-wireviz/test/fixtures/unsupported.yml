@@ -1,0 +1,30 @@
+# WireViz fixture exercising unsupported concepts → diagnostics.
+options:
+  fontname: arial
+metadata:
+  title: Demo
+
+connectors:
+  X1:
+    type: JST PH
+    pincount: 2
+    pinlabels: [V5, GND]
+    image:
+      src: x1.png
+  X2:
+    type: JST PH
+    pincount: 2
+    pinlabels: [V5, GND]
+
+cables:
+  B1:
+    category: bundle
+    wirecount: 2
+    color_code: DIN
+    length: 0.1
+
+connections:
+  -
+    - X1: [1, 2]
+    - B1: [1, 2]
+    - X2: [1, 2]
