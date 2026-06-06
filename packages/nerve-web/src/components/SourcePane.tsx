@@ -10,7 +10,7 @@ import {
   countDiagnostics,
   setCompileResult
 } from "../lib/compile-client.js"
-import { getSource, isDirty, resetSource, setSource } from "../lib/sources.js"
+import { getSource, isDirty, resetSource, setSource, subscribeSource } from "../lib/sources.js"
 
 /**
  * Persistent source editor (PRD §11.1 left pane). Auto-compiles on type;
@@ -28,6 +28,23 @@ export function SourcePane({ projectId }: { projectId: string }) {
     setLocalSource(getSource(projectId))
     lastCompiled.current = undefined
   }, [projectId])
+
+  // Reflect writes made elsewhere (the AI pane applying a verified patch).
+  // AI edits arrive already compiled, so mark them as lastCompiled to keep
+  // the auto-compile effect from re-running the same text.
+  useEffect(
+    () =>
+      subscribeSource((changed) => {
+        if (changed !== projectId) return
+        const text = getSource(projectId)
+        setLocalSource((local) => {
+          if (local === text) return local
+          lastCompiled.current = text
+          return text
+        })
+      }),
+    [projectId]
+  )
 
   const compile = useMutation({
     mutationFn: (text: string) => compileSource(projectId, text),

@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query"
 import { compileQueryOptions, countDiagnostics } from "../lib/compile-client.js"
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js"
 import { SourcePane } from "../components/SourcePane.js"
+import { AiPane } from "../components/AiPane.js"
 import { isDirty } from "../lib/sources.js"
 import { PROJECTS } from "../lib/projects.js"
 
@@ -40,7 +41,7 @@ const TABS = [
 
 function ProjectWorkspace() {
   const { projectId } = Route.useParams()
-  const workspaceLayout = useDefaultLayout({ id: "nerve-workspace", panelIds: ["source", "render"] })
+  const workspaceLayout = useDefaultLayout({ id: "nerve-workspace-3", panelIds: ["ai", "source", "render"] })
   const { data } = useSuspenseQuery(compileQueryOptions(projectId))
   const { errors, warnings } = countDiagnostics(data.hir.diagnostics)
 
@@ -81,11 +82,15 @@ function ProjectWorkspace() {
         className="workspace-split"
         {...workspaceLayout}
       >
-        <Panel id="source" defaultSize="42%" minSize="320px" maxSize="65%" collapsible>
+        <Panel id="ai" defaultSize="22%" minSize="220px" maxSize="34%" collapsible>
+          <AiPane projectId={projectId} />
+        </Panel>
+        <Separator className="pane-handle" />
+        <Panel id="source" defaultSize="38%" minSize="300px" maxSize="60%" collapsible>
           <SourcePane projectId={projectId} />
         </Panel>
         <Separator className="pane-handle" />
-        <Panel id="render" minSize="30%">
+        <Panel id="render" minSize="25%">
           <div className="render-pane">
             <Outlet />
           </div>

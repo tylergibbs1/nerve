@@ -42,9 +42,19 @@ const fromStorage = (projectId: string): string | undefined => {
 export const getSource = (projectId: string): string =>
   edited.get(projectId) ?? fromStorage(projectId) ?? initial[projectId] ?? ""
 
+// Change subscription: lets the editor reflect writes made elsewhere
+// (e.g. the AI pane applying a patch).
+const listeners = new Set<(projectId: string) => void>()
+
+export const subscribeSource = (listener: (projectId: string) => void): (() => void) => {
+  listeners.add(listener)
+  return () => listeners.delete(listener)
+}
+
 export const setSource = (projectId: string, source: string): void => {
   edited.set(projectId, source)
   persist.maybeExecute(projectId, source)
+  for (const listener of listeners) listener(projectId)
 }
 
 /** True when the working source differs from the bundled example. */
