@@ -1,0 +1,203 @@
+# Grayhaven Nerve — complete documentation
+
+> Harnesses as code. This file embeds every docs page; no further fetches needed. Index: https://nerve-demo.vercel.app/llms.txt
+
+# Harnesses are programs.
+
+A Nerve harness is a TypeScript module. You describe connectors, wires, splices, and cables once; the compiler validates the design against electrical and manufacturing rules, then emits every artifact a build needs — deterministically.
+
+## Install
+
+```bash
+npm install @grayhaven/nerve @grayhaven/nerve-connectors @grayhaven/nerve-cli
+
+npx --package=@grayhaven/nerve-cli nerve init .
+npx --package=@grayhaven/nerve-cli nerve compile ./src/main.harness.ts
+npx --package=@grayhaven/nerve-cli nerve export  ./src/main.harness.ts
+```
+
+## First harness
+
+```ts
+import { harness, connector, wire } from "@grayhaven/nerve"
+import { MolexMicroFit } from "@grayhaven/nerve-connectors"
+
+const controller = connector("J1", MolexMicroFit["43025-0800"], {
+  pins: { 1: "VBAT_24V", 2: "GND", 3: "CAN_H", 4: "CAN_L" },
+})
+
+export default harness("motor-controller-harness", {
+  revision: "A",
+  units: "mm",
+  connectors: [controller, motor],
+  wires: [
+    wire("W1", controller.pin(1), motor.pin(1), {
+      gauge: "20AWG", color: "red", length: 420,
+    }),
+  ],
+})
+```
+
+`nerve export` writes `dist/`: the canonical `harness.json` (HIR), schematic and board SVGs, BOM / cut-list / label CSVs, a continuity test plan, assembly instructions, and the PDF manufacturing packet — all byte-identical across runs.
+
+Or skip the install entirely: [the editor in this app](/projects) compiles in your browser as you type.
+
+
+---
+
+# The design surface.
+
+Everything imports from `@grayhaven/nerve`. The DSL builds a typed design graph; `compileDesign` lowers it to the versioned HIR that every exporter and rule consumes.
+
+## harness(id, options)
+
+```ts
+harness(id, { revision, units, connectors, wires, branches?, labels?, splices?, cables? })
+```
+
+The root design object. `revision` and `units` are required — releases fail closed without them.
+
+## connector(id, part, { pins })
+
+Place a connector from a part definition. `pins` maps pin numbers to signal names; parts declare `pinCount`, `gender`, and `wireGaugeRange`, and the rules hold wires to them.
+
+## wire(id, from, to, options)
+
+```ts
+wire(id, from, to, { gauge, color, length, twistGroup?, current? })
+```
+
+Point-to-point conductor. Endpoints are `connector.pin(n)` references or splice ids. Gauge strings like `"20AWG"` are checked against ampacity and the connector range.
+
+## splice(id, { type, notes? })
+
+A junction node (`"crimp"`, `"solder"`, `"ultrasonic"`). Wires may terminate on a splice; nets are computed across it and splice-verification tests are generated.
+
+## cable(id, { conductors, shield? })
+
+Groups wires into a multi-conductor cable, optionally shielded. Shield drains must land on a pin or the rules flag it.
+
+## branch(id, { from, to, length })
+
+Physical bundle segment for the board view and cut-length math.
+
+## label(id, { text, position })
+
+Printed label on the loom; exported to the label schedule CSV.
+
+## variant(base, overrides)
+
+Derive a configuration from a base harness — add/remove wires per option code without forking the file.
+
+## rule(name, run, { code })
+
+Author a custom validation rule; `report()` diagnostics with a stable code. Plug in via `defineConfig({ rules })`.
+
+
+---
+
+# 17 built-in validation rules.
+
+Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated from the shipped `builtinRules` array in `@grayhaven/nerve-rules` — it cannot drift from the code. Custom rules use the same `rule()` API and get their own codes.
+
+| Code | Rule | Checks |
+| --- | --- | --- |
+| `HK-DOC-001` | `missingRevision` | Harness must declare a revision — releases fail closed without one. |
+| `HK-DOC-002` | `branchMissingLabel` | Bundle branches should carry a printed label. |
+| `HK-DOC-003` | `spliceMissingNotes` | Splices should document their joint (type/notes) for the build book. |
+| `HK-MFG-001` | `missingWireLength` | Every wire should declare a length; cut lists need real numbers. |
+| `HK-MFG-002` | `missingWireColor` | Every wire should declare a color for the cut list and loom work. |
+| `HK-MFG-003` | `missingWireGauge` | Every wire must declare a gauge. |
+| `HK-MFG-004` | `gaugeOutsideConnectorRange` | Wire gauge must sit inside the connector part's wireGaugeRange. |
+| `HK-WIRE-004` | `gaugeCurrentMismatch` | Wire gauge must carry the declared or estimated current (ampacity table). |
+| `HK-ELEC-001` | `differentialPairNotTwisted` | Differential pairs (CAN_H/CAN_L…) must share a twist group. |
+| `HK-ELEC-002` | `twistGroupTooSmall` | A twist group needs at least two wires. |
+| `HK-ELEC-003` | `missingGroundReturn` | Power signals need a ground return path in the same harness. |
+| `HK-ELEC-004` | `shieldDrainUnconnected` | Cable shields must land their drain on a pin. |
+| `HK-CONN-010` | `unconnectedAssignedPin` | A pin assigned a signal must be touched by at least one wire. |
+| `HK-CONN-011` | `wireSignalMismatch` | A wire's endpoints must agree on the signal it carries. |
+| `HK-CONN-012` | `terminalIncompatible` | Terminal part must accept the wire gauge crimped into it. |
+| `HK-CONN-013` | `missingSeal` | Sealed connector families require a seal part on each wired cavity. |
+| `HK-CONN-014` | `sealIncompatible` | Seal part must match the wire gauge it seals. |
+
+## Example diagnostic
+
+```
+HK-CONN-011 Error  connector:P1.pin:1
+  Wire W2 carries V5 but pin P1.1 is assigned V9.
+```
+
+Severity drives exit codes: errors fail `nerve validate` (exit 1), warnings pass with notice. Releases fail closed on any error.
+
+
+---
+
+# nerve — deterministic, CI-ready.
+
+Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exits nonzero on validation errors, and every artifact is byte-identical for the same input.
+
+| Command | Does |
+| --- | --- |
+| `nerve init` | Scaffold a harness project (nerve.config.ts, src/main.harness.ts). |
+| `nerve compile` | Compile to HIR; print diagnostics; nonzero exit on errors. |
+| `nerve validate` | Compile + rules only — the CI gate. Exit code mirrors severity. |
+| `nerve render` | Schematic / board SVG from the HIR. |
+| `nerve export` | Everything: HIR, drawings, CSVs, test plan, assembly steps, PDF packet + zip. |
+| `nerve import` | WireViz YAML → Nerve harness source. |
+| `nerve diff` | Semantic diff between two revisions, down to a single pin swap. |
+| `nerve inspect` | Query the HIR (nets, pins, wires) from the terminal. |
+| `nerve quote` | Cost roll-up from the BOM with a pricing model. |
+| `nerve analyze` | Electrical analysis: voltage drop, current per wire. |
+| `nerve machine` | Machine-readable exports for cutting/marking equipment. |
+| `nerve contract` | Manufacturing contract bundle for an external shop. |
+| `nerve release` | Cut a release: fail-closed validation + frozen artifact set. |
+| `nerve record` | Build record for a completed unit (serials, operators, results). |
+| `nerve redline` | Capture as-built deviations against the released design. |
+
+## CI example
+
+```yaml
+- name: Validate harness
+  run: npx --package=@grayhaven/nerve-cli nerve validate ./src/main.harness.ts
+# Exit 1 on any HK-* error — the release gate fails closed.
+```
+
+
+---
+
+# One compile, every output.
+
+`nerve export` emits the complete set. Determinism is load-bearing: the same source produces byte-identical bytes — drawings, CSVs, the PDF, even the zip — so artifacts diff cleanly in review and hash-verify in CI.
+
+| File | Contents |
+| --- | --- |
+| `harness.json` | Canonical HIR — versioned schema, the single source every other artifact derives from. |
+| `schematic.svg` | Connection diagram: connectors, pins, wires with gauge/color annotations. |
+| `board.svg` | Harness-board (nailboard) view at real lengths for the build fixture. |
+| `bom.csv` | Rolled-up bill of materials with MPNs, quantities, and design-object references. |
+| `cut-list.csv` | Per-wire cut lengths, gauges, colors, strip specs. |
+| `labels.csv` | Label schedule: text, position, wire/branch reference. |
+| `test-plan.csv` | Continuity, splice-verification, and no-short tests derived from the net list. |
+| `assembly.md` | Ordered build instructions generated from the design graph. |
+| `manufacturing-packet.pdf` | The build book: every drawing and table in one reviewed, printable document. |
+| `packet.zip` | Everything above, zipped byte-identically (fixed timestamps) for release archival. |
+
+The renderer never owns truth — every line in every artifact traces back to a design object in the HIR.
+
+
+---
+
+# Compile-verified edits.
+
+The editor's left pane is an agent that changes the harness for you — "add a third sensor on the CAN bus", "swap W2 to 18AWG and fix whatever breaks". It is not a chat box that pastes code: every proposed edit is a structured patch.
+
+## The loop
+
+Each tool call the agent makes is compiled in the local worker **before** it lands. Diagnostics feed back into the loop: if a patch introduces `HK-*` errors, the agent sees them and must converge to a clean compile — it cannot bypass rule failures. Applied edits write through the editor and the diagram live, exactly like keystrokes.
+
+## Keys and privacy
+
+There is no server. Your browser calls Anthropic directly with an API key you paste into the pane; the key lives in localStorage and is sent nowhere else. The "key ✕" button forgets it.
+
+Try it in [the editor](/projects) — open a project and ask for a change while watching the diagram.
+

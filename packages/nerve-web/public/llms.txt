@@ -1,0 +1,29 @@
+# Grayhaven Nerve
+
+> Harnesses as code: typed wiring-harness design in TypeScript, compiled deterministically into schematics, BOMs, cut lists, labels, continuity tests, and build records. Validation rules with stable HK-* codes gate releases fail-closed.
+
+## Docs
+
+- [Quickstart](https://nerve-demo.vercel.app/docs/quickstart.md)
+- [DSL Reference](https://nerve-demo.vercel.app/docs/dsl.md)
+- [Validation Rules](https://nerve-demo.vercel.app/docs/rules.md) — generated from the shipped rule set
+- [CLI](https://nerve-demo.vercel.app/docs/cli.md)
+- [Artifacts](https://nerve-demo.vercel.app/docs/artifacts.md)
+- [AI Copilot](https://nerve-demo.vercel.app/docs/ai.md)
+
+Everything above embedded in one file: https://nerve-demo.vercel.app/llms-full.txt
+
+## Packages (npm)
+
+- [@grayhaven/nerve](https://www.npmjs.com/package/@grayhaven/nerve) — DSL, HIR schema, compileDesign, diff, rule API
+- [@grayhaven/nerve-rules](https://www.npmjs.com/package/@grayhaven/nerve-rules) — 17 built-in validation rules (HK-* codes)
+- [@grayhaven/nerve-compiler](https://www.npmjs.com/package/@grayhaven/nerve-compiler) — .harness.ts loading, fail-closed gate
+- [@grayhaven/nerve-exporters](https://www.npmjs.com/package/@grayhaven/nerve-exporters) — SVG/PDF/CSV/test-plan/packet generation
+- [@grayhaven/nerve-wireviz](https://www.npmjs.com/package/@grayhaven/nerve-wireviz) — WireViz YAML import/export
+- [@grayhaven/nerve-cli](https://www.npmjs.com/package/@grayhaven/nerve-cli) — nerve init/compile/validate/export/diff/release…
+- [@grayhaven/nerve-connectors](https://www.npmjs.com/package/@grayhaven/nerve-connectors) — verified connector part library
+
+## Source
+
+- [GitHub repository](https://github.com/tylergibbs1/nerve) — Apache-2.0, monorepo with golden-fixture examples
+- [Live editor](https://nerve-demo.vercel.app/projects) — compiles in the browser (note: the app routes are client-rendered; use the .md variants above)

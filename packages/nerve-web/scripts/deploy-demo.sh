@@ -5,7 +5,29 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 bun run build
 cat > dist/vercel.json <<'JSON'
-{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Link", "value": "</llms.txt>; rel=\"llms-txt\", </llms-full.txt>; rel=\"llms-full-txt\"" },
+        { "key": "X-Llms-Txt", "value": "/llms.txt" }
+      ]
+    },
+    {
+      "source": "/docs/(.*).md",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Content-Type", "value": "text/markdown; charset=utf-8" }
+      ]
+    },
+    {
+      "source": "/llms(.*).txt",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    }
+  ]
+}
 JSON
 cd dist
 # One app, two aliases: deploy the same build to both Vercel projects so
