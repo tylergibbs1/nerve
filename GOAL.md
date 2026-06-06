@@ -69,7 +69,7 @@ Registry, Build Record, AI features, plugin SDK. (PRD §7.2, §25 — wedge firs
 7. ✅ **M6 — Variants** (§8.4): `variant(base, mods)` with add/remove/override, lineage metadata, diff-visible differences, consistent validation; `variants/long.ts` example.
 8. ✅ **M7 — WireViz adapter** (§27.2): YAML subset import with diagnostics for unmapped concepts, export with round-trip test, fixture corpus, `nerve import` / `nerve export --target wireviz`.
 9. ✅ **M8 — In-browser authoring** (§9.6): Source tab (CodeMirror), sucrase TS compile in the worker sandbox, edits update every tab live.
-10. ✅ **M9 — Publish prep**: tsup `dist` builds with types for all 7 library packages, GitHub Actions CI, MIT license (**flagged for review — license choice is a business decision**), `publishConfig` ready (packages stay `private: true` until a deliberate publish).
+10. ✅ **M9 — Publish prep**: tsup `dist` builds with types for all 7 library packages, GitHub Actions CI, Apache-2.0 license (user-confirmed 2026-06-06) + NOTICE, `publishConfig` ready (packages stay `private: true` until a deliberate publish).
 
 **Roadmap complete (2026-06-06).** Future direction lives in the PRD: BOP/costing (§28–29),
 Registry + verified component data (§30), shop-floor adapters (§31), formboard 1:1 printing (§33),

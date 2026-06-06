@@ -66,4 +66,4 @@ const j1 = connector("J1", MolexMicroFit["43025-0800"], {
 - **Future** (PRD §28–40): BOP/costing, Registry, shop-floor adapters, 1:1 formboard, analysis, ECO/release, Build Record, interface contracts, plugin SDK
 
 > Publishing note: packages carry `publishConfig` but remain `private: true` —
-> flip deliberately when ready to publish. License is MIT (review before release).
+> flip deliberately when ready to publish. Licensed under Apache-2.0.
