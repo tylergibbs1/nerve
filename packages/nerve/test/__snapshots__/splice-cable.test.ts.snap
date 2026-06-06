@@ -4,6 +4,16 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
 {
   "bom": [
     {
+      "category": "splice",
+      "mpn": "GT-0.5",
+      "quantity": 2,
+      "unitOfMeasure": "ea",
+      "usedBy": [
+        "splice:S1",
+        "splice:S2",
+      ],
+    },
+    {
       "category": "connector",
       "description": "JST PH housing, 3 circuits",
       "manufacturer": "JST",

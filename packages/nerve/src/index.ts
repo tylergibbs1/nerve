@@ -16,6 +16,7 @@ export type {
   HarnessProps,
   LabelDef,
   LabelProps,
+  PartProvenance,
   PinAssignments,
   PinRef,
   SpliceDef,
@@ -35,7 +36,8 @@ export {
   label,
   splice,
   wire,
-  type EndpointInput
+  type EndpointInput,
+  type PinPartAssignment
 } from "./dsl.js"
 
 export {

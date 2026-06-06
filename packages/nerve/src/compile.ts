@@ -96,9 +96,25 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         wireGaugeRange: c.part.wireGaugeRange
           ? { min: c.part.wireGaugeRange.min, max: c.part.wireGaugeRange.max }
           : undefined,
+        sealed: c.part.sealed,
+        compatibleTerminals: c.part.compatibleTerminals
+          ? [...c.part.compatibleTerminals]
+          : undefined,
+        compatibleSeals: c.part.compatibleSeals
+          ? [...c.part.compatibleSeals]
+          : undefined,
+        crimpTool: c.part.crimpTool,
+        provenance: c.part.provenance ? { ...c.part.provenance } : undefined,
         pins: Object.entries(c.pins)
           .sort(([a], [b]) => comparePins(a, b))
-          .map(([pin, signal]) => compact({ pin, signal }))
+          .map(([pin, signal]) =>
+            compact({
+              pin,
+              signal,
+              terminal: c.terminals[pin],
+              seal: c.seals[pin]
+            })
+          )
       })
     )
 
@@ -377,28 +393,53 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
   }
   labels.sort((a, b) => compareStrings(a.id, b.id))
 
-  // --- BOM (connector housings; wire/terminal rollups arrive in M2) --------
-  const bomByMpn = new Map<string, { item: Omit<HirBomItem, "usedBy">; usedBy: Array<string> }>()
-  for (const c of [...connectorByRef.values()].sort((a, b) => compareStrings(a.ref, b.ref))) {
-    const existing = bomByMpn.get(c.part.mpn)
+  // --- BOM (connector housings + terminals + seals; wire rollups in CSVs) ---
+  const bomByMpn = new Map<
+    string,
+    { item: Omit<HirBomItem, "usedBy" | "quantity">; usedBy: Array<string>; qty: number }
+  >()
+  const bomAdd = (
+    mpn: string,
+    category: string,
+    usedBy: string,
+    extra: Partial<Omit<HirBomItem, "usedBy" | "quantity" | "mpn">> = {}
+  ): void => {
+    const existing = bomByMpn.get(mpn)
     if (existing) {
-      existing.usedBy.push(refs.connector(c.ref))
+      existing.qty += 1
+      existing.usedBy.push(usedBy)
     } else {
-      bomByMpn.set(c.part.mpn, {
-        item: compact({
-          mpn: c.part.mpn,
-          manufacturer: c.part.manufacturer,
-          description: c.part.description,
-          category: "connector",
-          quantity: 0,
-          unitOfMeasure: "ea"
-        }),
-        usedBy: [refs.connector(c.ref)]
+      bomByMpn.set(mpn, {
+        item: compact({ mpn, category, unitOfMeasure: "ea", ...extra }) as Omit<
+          HirBomItem,
+          "usedBy" | "quantity"
+        >,
+        usedBy: [usedBy],
+        qty: 1
       })
     }
   }
+  for (const c of [...connectorByRef.values()].sort((a, b) => compareStrings(a.ref, b.ref))) {
+    bomAdd(c.part.mpn, "connector", refs.connector(c.ref), {
+      manufacturer: c.part.manufacturer,
+      description: c.part.description
+    })
+    for (const [pin, terminal] of Object.entries(c.terminals).sort(([a], [b]) =>
+      comparePins(a, b)
+    )) {
+      bomAdd(terminal, "terminal", refs.pin(c.ref, pin))
+    }
+    for (const [pin, seal] of Object.entries(c.seals).sort(([a], [b]) =>
+      comparePins(a, b)
+    )) {
+      bomAdd(seal, "seal", refs.pin(c.ref, pin))
+    }
+  }
+  for (const s of splices) {
+    if (s.part !== undefined) bomAdd(s.part, "splice", refs.splice(s.id))
+  }
   const bom: Array<HirBomItem> = [...bomByMpn.values()]
-    .map(({ item, usedBy }) => ({ ...item, quantity: usedBy.length, usedBy }))
+    .map(({ item, usedBy, qty }) => ({ ...item, quantity: qty, usedBy }))
     .sort((a, b) => compareStrings(a.mpn, b.mpn))
 
   // --- Diagnostics (canonical order) ----------------------------------------

@@ -8,9 +8,13 @@ export {
   missingRevision,
   missingWireColor,
   missingWireGauge,
+  missingSeal,
   missingWireLength,
+  requireApprovedParts,
+  sealIncompatible,
   shieldDrainUnconnected,
   spliceMissingNotes,
+  terminalIncompatible,
   twistGroupTooSmall,
   unconnectedAssignedPin,
   wireSignalMismatch

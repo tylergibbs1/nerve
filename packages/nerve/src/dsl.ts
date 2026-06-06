@@ -28,11 +28,34 @@ import type {
 const toRef = (target: ConnectorInstance | string): string =>
   typeof target === "string" ? target : target.ref
 
-/** Place a connector in the harness: `connector("J1", MolexMicroFit["43025-0800"], { pins: {...} })`. */
+/**
+ * Per-pin part assignment: a map of pin → MPN, or a single MPN applied to
+ * every assigned pin (the common case — one terminal type per housing).
+ */
+export type PinPartAssignment = string | Readonly<Record<string | number, string>>
+
+const expandPinParts = (
+  assignment: PinPartAssignment | undefined,
+  pins: Readonly<Record<string, string>>
+): Record<string, string> => {
+  if (assignment === undefined) return {}
+  if (typeof assignment === "string") {
+    return Object.fromEntries(Object.keys(pins).map((pin) => [pin, assignment]))
+  }
+  return Object.fromEntries(
+    Object.entries(assignment).map(([pin, mpn]) => [String(pin), mpn])
+  )
+}
+
+/** Place a connector in the harness: `connector("J1", MolexMicroFit["43025-0800"], { pins: {...}, terminals: "43030-0007" })`. */
 export const connector = (
   ref: string,
   part: ConnectorPart,
-  opts: { readonly pins: PinAssignments }
+  opts: {
+    readonly pins: PinAssignments
+    readonly terminals?: PinPartAssignment
+    readonly seals?: PinPartAssignment
+  }
 ): ConnectorInstance => {
   const pins: Record<string, string> = {}
   for (const [pin, signal] of Object.entries(opts.pins)) {
@@ -43,6 +66,8 @@ export const connector = (
     ref,
     part,
     pins,
+    terminals: expandPinParts(opts.terminals, pins),
+    seals: expandPinParts(opts.seals, pins),
     pin: (pin: string | number): PinRef => ({
       kind: "pin-ref",
       connector: ref,

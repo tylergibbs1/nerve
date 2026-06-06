@@ -28,7 +28,16 @@ export const HirEndpoint = Schema.Union(HirPinRef, HirSpliceRef)
 
 export const HirPin = Schema.Struct({
   pin: Schema.String,
-  signal: Schema.optional(Schema.String)
+  signal: Schema.optional(Schema.String),
+  terminal: Schema.optional(Schema.String),
+  seal: Schema.optional(Schema.String)
+})
+
+export const HirProvenance = Schema.Struct({
+  source: Schema.optional(Schema.String),
+  datasheet: Schema.optional(Schema.String),
+  verification: Schema.Literal("unverified", "inspired-by", "verified"),
+  lastVerified: Schema.optional(Schema.String)
 })
 
 export const HirConnector = Schema.Struct({
@@ -42,6 +51,11 @@ export const HirConnector = Schema.Struct({
   wireGaugeRange: Schema.optional(
     Schema.Struct({ min: Schema.String, max: Schema.String })
   ),
+  sealed: Schema.optional(Schema.Boolean),
+  compatibleTerminals: Schema.optional(Schema.Array(Schema.String)),
+  compatibleSeals: Schema.optional(Schema.Array(Schema.String)),
+  crimpTool: Schema.optional(Schema.String),
+  provenance: Schema.optional(HirProvenance),
   pins: Schema.Array(HirPin)
 })
 

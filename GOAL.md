@@ -79,7 +79,13 @@ nerve-site.vercel.app), and the first expansion wedge — **§28 Bill of Process
 inspect/test operations with workstations, tooling, labor estimates, HIR-linked targets;
 bop.csv/bop.json in every packet + PDF page).
 
-Remaining future direction in the PRD: costing (§29),
+Also shipped (2026-06-06, second expansion pass): **§29 costing/quotes** (CostModel in
+config, material+labor+scrap+yield quote with long-lead/lifecycle/unpriced flags, quote
+diff, `nerve quote`, quote.csv/json/PDF page) and **§30 registry depth** (per-pin
+terminals/seals into HIR + BOM, HK-CONN-012/013/014 compatibility rules, part provenance
++ crimp/insertion tooling on library data, `requireApprovedParts` org-approval rule).
+
+Remaining future direction in the PRD:
 Registry + verified component data (§30), shop-floor adapters (§31), formboard 1:1 printing (§33),
 engineering analysis (§34), ECO/release workflow (§35), Build Record (§36), interface contracts (§37),
 redlines (§39), plugin SDK (§40).

@@ -10,6 +10,16 @@ export type Units = "mm" | "in"
 
 export type ConnectorGender = "plug" | "receptacle" | "hermaphroditic"
 
+/** Datasheet/source provenance and verification state (PRD §30, §38). */
+export interface PartProvenance {
+  readonly source?: string
+  readonly datasheet?: string
+  /** "verified" requires a review pass; library seed data is "inspired-by". */
+  readonly verification: "unverified" | "inspired-by" | "verified"
+  /** ISO date of last verification. */
+  readonly lastVerified?: string
+}
+
 /**
  * Component master data for a connector housing (PRD §9.2, §30).
  * Instances reference a part; parts live in libraries such as
@@ -27,7 +37,16 @@ export interface ConnectorPart {
   readonly matingMpn?: string
   readonly compatibleTerminals?: ReadonlyArray<string>
   readonly compatibleSeals?: ReadonlyArray<string>
+  readonly compatibleBackshells?: ReadonlyArray<string>
   readonly wireGaugeRange?: { readonly min: string; readonly max: string }
+  /** Environmentally sealed housing: every populated cavity needs a seal. */
+  readonly sealed?: boolean
+  readonly currentLimitA?: number
+  readonly voltageLimitV?: number
+  readonly crimpTool?: string
+  readonly insertionTool?: string
+  readonly extractionTool?: string
+  readonly provenance?: PartProvenance
 }
 
 /** A reference to a specific pin/cavity on a connector instance. */
@@ -55,6 +74,10 @@ export interface ConnectorInstance {
   readonly ref: string
   readonly part: ConnectorPart
   readonly pins: Readonly<Record<string, string>>
+  /** Terminal MPN per pin (PRD §30). */
+  readonly terminals: Readonly<Record<string, string>>
+  /** Seal MPN per pin. */
+  readonly seals: Readonly<Record<string, string>>
   /** Build a `PinRef` for a pin on this connector. */
   pin(pin: string | number): PinRef
 }

@@ -69,6 +69,16 @@ export interface CutListOptions {
   readonly defaultWireTolerance?: number
 }
 
+/** Terminal MPN at an endpoint, from per-pin assignments (PRD §30). */
+const terminalAt = (hir: Hir, e: HirEndpoint): string => {
+  if (!isPinEndpoint(e)) return ""
+  return (
+    hir.connectors
+      .find((c) => c.ref === e.connector)
+      ?.pins.find((p) => p.pin === e.pin)?.terminal ?? ""
+  )
+}
+
 /** Wire cut list table data (PRD §20.2 columns). */
 export const cutListTable = (hir: Hir, options: CutListOptions = {}): TableData => ({
   headers: [
@@ -100,8 +110,8 @@ export const cutListTable = (hir: Hir, options: CutListOptions = {}): TableData 
     w.lengthTolerance ?? options.defaultWireTolerance,
     ...endpointCells(w.from),
     ...endpointCells(w.to),
-    "", // terminal assignment lands with process data (PRD §28)
-    "",
+    terminalAt(hir, w.from),
+    terminalAt(hir, w.to),
     w.branch ?? w.cable,
     w.notes
   ])

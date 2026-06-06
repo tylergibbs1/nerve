@@ -331,6 +331,90 @@ export const wireSignalMismatch: Rule = rule(
   { code: "HK-CONN-011" }
 )
 
+// --- Component compatibility (PRD §30) ---------------------------------------
+
+export const terminalIncompatible: Rule = rule(
+  "terminalIncompatible",
+  (ctx) => {
+    for (const c of ctx.hir.connectors) {
+      if (c.compatibleTerminals === undefined) continue
+      for (const p of c.pins) {
+        if (p.terminal !== undefined && !c.compatibleTerminals.includes(p.terminal)) {
+          ctx.report({
+            severity: Err,
+            message: `Pin ${c.ref}.${p.pin} uses terminal ${p.terminal}, which is not compatible with ${c.mpn} (allowed: ${c.compatibleTerminals.join(", ")}).`,
+            target: refs.pin(c.ref, p.pin)
+          })
+        }
+      }
+    }
+  },
+  { code: "HK-CONN-012" }
+)
+
+export const missingSeal: Rule = rule(
+  "missingSeal",
+  (ctx) => {
+    const wired = wiredPins(ctx.hir)
+    for (const c of ctx.hir.connectors) {
+      if (c.sealed !== true) continue
+      for (const p of c.pins) {
+        if (wired.has(`${c.ref}:${p.pin}`) && p.seal === undefined) {
+          ctx.report({
+            severity: Err,
+            message: `Connector ${c.ref} (${c.mpn}) is sealed, but populated pin ${p.pin} has no seal assigned.`,
+            target: refs.pin(c.ref, p.pin)
+          })
+        }
+      }
+    }
+  },
+  { code: "HK-CONN-013" }
+)
+
+export const sealIncompatible: Rule = rule(
+  "sealIncompatible",
+  (ctx) => {
+    for (const c of ctx.hir.connectors) {
+      if (c.compatibleSeals === undefined) continue
+      for (const p of c.pins) {
+        if (p.seal !== undefined && !c.compatibleSeals.includes(p.seal)) {
+          ctx.report({
+            severity: Err,
+            message: `Pin ${c.ref}.${p.pin} uses seal ${p.seal}, which is not compatible with ${c.mpn} (allowed: ${c.compatibleSeals.join(", ")}).`,
+            target: refs.pin(c.ref, p.pin)
+          })
+        }
+      }
+    }
+  },
+  { code: "HK-CONN-014" }
+)
+
+/**
+ * Org approval gate (PRD §30 acceptance: organizations override approval
+ * state without mutating library data). Pass the approved MPN list from
+ * org config; anything else in the BOM is flagged.
+ */
+export const requireApprovedParts = (approvedMpns: ReadonlyArray<string>): Rule => {
+  const approved = new Set(approvedMpns)
+  return rule(
+    "requireApprovedParts",
+    (ctx) => {
+      for (const item of ctx.hir.bom) {
+        if (!approved.has(item.mpn)) {
+          ctx.report({
+            severity: Warn,
+            message: `Part ${item.mpn} (${item.category ?? "part"}) is not on the approved parts list.`,
+            target: refs.bom(item.mpn)
+          })
+        }
+      }
+    },
+    { code: "HK-DOC-004" }
+  )
+}
+
 /** All built-in rules, in stable order. */
 export const builtinRules: ReadonlyArray<Rule> = [
   missingRevision,
@@ -346,5 +430,8 @@ export const builtinRules: ReadonlyArray<Rule> = [
   missingGroundReturn,
   shieldDrainUnconnected,
   unconnectedAssignedPin,
-  wireSignalMismatch
+  wireSignalMismatch,
+  terminalIncompatible,
+  missingSeal,
+  sealIncompatible
 ]

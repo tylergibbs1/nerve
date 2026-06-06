@@ -21,7 +21,15 @@ export const MolexMicroFit = {
     cavityLayout: { rows: 2, columns: 4 },
     matingMpn: "43020-0800",
     compatibleTerminals: ["43030-0007", "43030-0010"],
-    wireGaugeRange: { min: "30AWG", max: "18AWG" }
+    wireGaugeRange: { min: "30AWG", max: "18AWG" },
+    crimpTool: "63819-0000",
+    insertionTool: "11-03-0044",
+    extractionTool: "11-03-0043",
+    provenance: {
+      source: "Molex catalog",
+      datasheet: "https://www.molex.com/en-us/products/part-detail/430250800",
+      verification: "inspired-by"
+    }
   },
   /** Micro-Fit 3.0 plug housing, dual row, 8 circuits. */
   "43020-0800": {
@@ -35,7 +43,15 @@ export const MolexMicroFit = {
     cavityLayout: { rows: 2, columns: 4 },
     matingMpn: "43025-0800",
     compatibleTerminals: ["43031-0007", "43031-0010"],
-    wireGaugeRange: { min: "30AWG", max: "18AWG" }
+    wireGaugeRange: { min: "30AWG", max: "18AWG" },
+    crimpTool: "63819-0000",
+    insertionTool: "11-03-0044",
+    extractionTool: "11-03-0043",
+    provenance: {
+      source: "Molex catalog",
+      datasheet: "https://www.molex.com/en-us/products/part-detail/430200800",
+      verification: "inspired-by"
+    }
   }
 } as const satisfies Readonly<Record<string, ConnectorPart>>
 

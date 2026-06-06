@@ -40,6 +40,11 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
   "cables": [],
   "connectors": [
     {
+      "compatibleTerminals": [
+        "43030-0007",
+        "43030-0010",
+      ],
+      "crimpTool": "63819-0000",
       "description": "Micro-Fit 3.0 receptacle housing, dual row, 8 circuits",
       "family": "Micro-Fit 3.0",
       "gender": "receptacle",
@@ -80,6 +85,11 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
           "signal": "SHIELD_DRAIN",
         },
       ],
+      "provenance": {
+        "datasheet": "https://www.molex.com/en-us/products/part-detail/430250800",
+        "source": "Molex catalog",
+        "verification": "inspired-by",
+      },
       "ref": "J1",
       "wireGaugeRange": {
         "max": "18AWG",
@@ -87,6 +97,11 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
       },
     },
     {
+      "compatibleTerminals": [
+        "43031-0007",
+        "43031-0010",
+      ],
+      "crimpTool": "63819-0000",
       "description": "Micro-Fit 3.0 plug housing, dual row, 8 circuits",
       "family": "Micro-Fit 3.0",
       "gender": "plug",
@@ -127,6 +142,11 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
           "signal": "SHIELD_DRAIN",
         },
       ],
+      "provenance": {
+        "datasheet": "https://www.molex.com/en-us/products/part-detail/430200800",
+        "source": "Molex catalog",
+        "verification": "inspired-by",
+      },
       "ref": "M1",
       "wireGaugeRange": {
         "max": "18AWG",
