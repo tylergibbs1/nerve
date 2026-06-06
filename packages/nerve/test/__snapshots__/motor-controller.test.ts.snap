@@ -81,6 +81,10 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
         },
       ],
       "ref": "J1",
+      "wireGaugeRange": {
+        "max": "18AWG",
+        "min": "30AWG",
+      },
     },
     {
       "description": "Micro-Fit 3.0 plug housing, dual row, 8 circuits",
@@ -124,6 +128,10 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
         },
       ],
       "ref": "M1",
+      "wireGaugeRange": {
+        "max": "18AWG",
+        "min": "30AWG",
+      },
     },
   ],
   "diagnostics": [],

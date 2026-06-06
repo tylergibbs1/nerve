@@ -21,7 +21,7 @@ export const MolexMicroFit = {
     cavityLayout: { rows: 2, columns: 4 },
     matingMpn: "43020-0800",
     compatibleTerminals: ["43030-0007", "43030-0010"],
-    wireGaugeRange: { min: "30AWG", max: "20AWG" }
+    wireGaugeRange: { min: "30AWG", max: "18AWG" }
   },
   /** Micro-Fit 3.0 plug housing, dual row, 8 circuits. */
   "43020-0800": {
@@ -35,7 +35,7 @@ export const MolexMicroFit = {
     cavityLayout: { rows: 2, columns: 4 },
     matingMpn: "43025-0800",
     compatibleTerminals: ["43031-0007", "43031-0010"],
-    wireGaugeRange: { min: "30AWG", max: "20AWG" }
+    wireGaugeRange: { min: "30AWG", max: "18AWG" }
   }
 } as const satisfies Readonly<Record<string, ConnectorPart>>
 

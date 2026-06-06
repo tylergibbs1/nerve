@@ -89,6 +89,9 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         description: c.part.description,
         gender: c.part.gender,
         pinCount: c.part.pinCount,
+        wireGaugeRange: c.part.wireGaugeRange
+          ? { min: c.part.wireGaugeRange.min, max: c.part.wireGaugeRange.max }
+          : undefined,
         pins: Object.entries(c.pins)
           .sort(([a], [b]) => comparePins(a, b))
           .map(([pin, signal]) => compact({ pin, signal }))

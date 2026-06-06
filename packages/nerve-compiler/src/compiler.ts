@@ -1,0 +1,157 @@
+/**
+ * File-level compilation (PRD §9.3, §10.3).
+ *
+ * Loads a user-authored `.harness.ts` module, extracts the default-exported
+ * `HarnessDesign`, normalizes it to HIR, and runs structural + rule
+ * validation. TypeScript loading is the only impure step; everything past
+ * the design object is pure and deterministic.
+ *
+ * User code runs in-process via jiti for now. The PRD §13 sandboxing
+ * controls (workers/isolated processes, no network during compile) land
+ * with the hosted service; the CLI treats local project code as trusted
+ * the same way a bundler does.
+ */
+import { dirname, join, resolve } from "node:path"
+import { existsSync } from "node:fs"
+import { createJiti } from "jiti"
+import { Effect } from "effect"
+import {
+  compileDesign,
+  runRules,
+  type Diagnostic,
+  type HarnessDesign,
+  type Hir,
+  type NerveConfig,
+  type Rule
+} from "@grayhaven/nerve"
+import { builtinRules } from "@grayhaven/nerve-rules"
+import { CompileError, ValidationError } from "./errors.js"
+
+const jiti = createJiti(import.meta.url, { interopDefault: true })
+
+export interface CompileFileOptions {
+  /** Extra rules to run alongside the built-ins. */
+  readonly rules?: ReadonlyArray<Rule>
+  /** Project config; when omitted, `nerve.config.ts` next to the file is loaded if present. */
+  readonly config?: NerveConfig
+}
+
+export interface CompileFileResult {
+  readonly design: HarnessDesign
+  readonly hir: Hir
+  /** Structural + rule diagnostics, canonically ordered. */
+  readonly diagnostics: ReadonlyArray<Diagnostic>
+  readonly config: NerveConfig
+}
+
+const isHarnessDesign = (value: unknown): value is HarnessDesign =>
+  typeof value === "object" &&
+  value !== null &&
+  (value as { kind?: unknown }).kind === "harness"
+
+/** Load the default-exported design from a `.harness.ts` module. */
+export const loadDesign = (
+  file: string
+): Effect.Effect<HarnessDesign, CompileError> =>
+  Effect.tryPromise({
+    try: async () => {
+      const mod = await jiti.import<unknown>(resolve(file))
+      const design =
+        isHarnessDesign(mod) ? mod : (mod as { default?: unknown })?.default
+      if (!isHarnessDesign(design)) {
+        throw new CompileError({
+          message: `${file} does not default-export a harness design (expected the result of harness(...)).`,
+          source: file
+        })
+      }
+      return design
+    },
+    catch: (cause) =>
+      cause instanceof CompileError
+        ? cause
+        : new CompileError({
+            message: `Failed to load ${file}: ${cause instanceof Error ? cause.message : String(cause)}`,
+            source: file,
+            cause
+          })
+  })
+
+const CONFIG_FILES = ["nerve.config.ts", "interconnect.config.ts"]
+
+/** Load `nerve.config.ts` (or legacy `interconnect.config.ts`) from a directory, walking up to the package root. */
+export const loadConfig = (
+  fromDir: string
+): Effect.Effect<NerveConfig, CompileError> =>
+  Effect.tryPromise({
+    try: async () => {
+      let dir = resolve(fromDir)
+      for (;;) {
+        for (const name of CONFIG_FILES) {
+          const candidate = join(dir, name)
+          if (existsSync(candidate)) {
+            const mod = await jiti.import<{ default?: NerveConfig }>(candidate)
+            return (mod as { default?: NerveConfig }).default ?? (mod as NerveConfig)
+          }
+        }
+        if (existsSync(join(dir, "package.json"))) return {}
+        const parent = dirname(dir)
+        if (parent === dir) return {}
+        dir = parent
+      }
+    },
+    catch: (cause) =>
+      new CompileError({
+        message: `Failed to load project config: ${cause instanceof Error ? cause.message : String(cause)}`,
+        cause
+      })
+  })
+
+/** Compile a `.harness.ts` file to HIR with full diagnostics. */
+export const compileFile = (
+  file: string,
+  options: CompileFileOptions = {}
+): Effect.Effect<CompileFileResult, CompileError> =>
+  Effect.gen(function* () {
+    const design = yield* loadDesign(file)
+    const config =
+      options.config ?? (yield* loadConfig(dirname(resolve(file))))
+    const { hir, diagnostics: structural } = compileDesign(design)
+    const ruleDiagnostics = runRules(
+      hir,
+      [...builtinRules, ...(options.rules ?? [])],
+      config.rules ?? {}
+    )
+    const diagnostics = [...structural, ...ruleDiagnostics]
+    return {
+      design,
+      hir: { ...hir, diagnostics },
+      diagnostics,
+      config
+    }
+  })
+
+/** Fail with `ValidationError` when diagnostics contain errors (fail-closed gate, PRD §15). */
+export const failOnErrors = (
+  result: CompileFileResult
+): Effect.Effect<CompileFileResult, ValidationError> => {
+  const errors = result.diagnostics.filter((d) => d.severity === "error")
+  return errors.length > 0
+    ? Effect.fail(new ValidationError({ diagnostics: errors }))
+    : Effect.succeed(result)
+}
+
+/**
+ * CompilerService (PRD §10.3): the Effect service boundary used by the CLI
+ * and (later) the web editor's worker host.
+ */
+export class CompilerService extends Effect.Service<CompilerService>()(
+  "nerve/CompilerService",
+  {
+    succeed: {
+      loadDesign,
+      loadConfig,
+      compileFile,
+      failOnErrors
+    }
+  }
+) {}

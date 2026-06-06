@@ -1,0 +1,18 @@
+{
+  "name": "@grayhaven/nerve-rules",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Built-in validation and linting rules for Grayhaven Nerve.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@grayhaven/nerve": "workspace:*"
+  },
+  "devDependencies": {
+    "@grayhaven/nerve-connectors": "workspace:*",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

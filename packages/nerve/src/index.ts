@@ -46,3 +46,15 @@ export {
 } from "./hir/schema.js"
 
 export { compileDesign, type CompileResult } from "./compile.js"
+
+export { defineConfig, type NerveConfig } from "./config.js"
+
+export {
+  rule,
+  runRules,
+  type Rule,
+  type RuleConfig,
+  type RuleContext,
+  type RuleOptions,
+  type RuleReport
+} from "./rules.js"

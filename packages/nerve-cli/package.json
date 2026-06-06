@@ -1,0 +1,26 @@
+{
+  "name": "@grayhaven/nerve-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Grayhaven Nerve CLI: compile, validate, render, and export harnesses locally and in CI.",
+  "bin": {
+    "nerve": "./bin/nerve.js"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@grayhaven/nerve": "workspace:*",
+    "@grayhaven/nerve-compiler": "workspace:*",
+    "@grayhaven/nerve-exporters": "workspace:*",
+    "effect": "^3.16.0",
+    "jiti": "^2.4.2"
+  },
+  "devDependencies": {
+    "@grayhaven/nerve-connectors": "workspace:*",
+    "@types/node": "^25.9.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

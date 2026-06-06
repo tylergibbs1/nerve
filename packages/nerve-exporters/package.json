@@ -1,0 +1,22 @@
+{
+  "name": "@grayhaven/nerve-exporters",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Grayhaven Nerve exporters: CSV, SVG, JSON, and zip manufacturing outputs generated from HIR.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@grayhaven/nerve": "workspace:*",
+    "effect": "^3.16.0",
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "@grayhaven/nerve-compiler": "workspace:*",
+    "@grayhaven/nerve-connectors": "workspace:*",
+    "@types/node": "^25.9.2",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

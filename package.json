@@ -4,9 +4,10 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc -b"
+    "typecheck": "pnpm -r exec tsc -p . --noEmit"
   },
   "devDependencies": {
+    "@types/node": "^25.9.2",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   },

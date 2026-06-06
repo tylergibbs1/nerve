@@ -32,6 +32,9 @@ export const HirConnector = Schema.Struct({
   description: Schema.optional(Schema.String),
   gender: Schema.optional(Schema.Literal("plug", "receptacle", "hermaphroditic")),
   pinCount: Schema.Number,
+  wireGaugeRange: Schema.optional(
+    Schema.Struct({ min: Schema.String, max: Schema.String })
+  ),
   pins: Schema.Array(HirPin)
 })
 

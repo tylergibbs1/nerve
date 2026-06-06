@@ -20,7 +20,7 @@ export interface Diagnostic {
   readonly severity: DiagnosticSeverity
   readonly message: string
   /** Stable HIR object reference, e.g. `wire:W12` or `connector:J1.pin:3`. */
-  readonly target?: string
+  readonly target?: string | undefined
 }
 
 /** Structural diagnostic codes emitted by the core compiler. */
