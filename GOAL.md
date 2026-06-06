@@ -23,15 +23,15 @@ TypeScript DSL  →  HIR (harness.json)  →  validation diagnostics  →  SVG s
 1. `nerve compile ./src/main.harness.ts` — CLI, deterministic output, nonzero exit on errors.
 2. A Vite/React web editor showing the schematic + data tables for the same project.
 
-### Success criteria
+### Success criteria — ALL MET ✅
 
-- [ ] The PRD §9.1 example harness compiles unmodified (same API surface: `harness`, `connector`, `wire`, `branch`, `label`).
-- [ ] HIR is an Effect `Schema`-validated, versioned JSON document (`schemaVersion: "0.1.0"`) — reloadable without executing user code.
-- [ ] ≥10 built-in validation rules from PRD §9.4 (duplicate wire ID, gauge-vs-current, missing color/length, untwisted CAN pair, etc.) with stable `HK-*` diagnostic codes.
-- [ ] Same input + lockfile ⇒ byte-identical HIR (determinism, PRD §9.3).
-- [ ] SVG schematic renders connectors, pins, wires, colors, gauges from HIR only.
-- [ ] CSV exporters for BOM, cut list, label schedule, continuity test plan (PRD §20 column specs).
-- [ ] Web editor: `/projects/$projectId/{diagram,bom,cut-list,labels,tests}` routes, TanStack Table views, diagnostics panel.
+- [x] The PRD §9.1 example harness compiles unmodified (`examples/motor-controller`, golden fixture + snapshot).
+- [x] HIR is an Effect `Schema`-validated, versioned JSON document (`schemaVersion: "0.1.0"`) — round-trip tested without executing user code.
+- [x] 13 built-in validation rules + 6 structural checks, all with stable `HK-*` codes (`@grayhaven/nerve-rules`, severity-configurable, custom `rule()` API).
+- [x] Same input ⇒ byte-identical HIR, CSVs, SVG, and zip (determinism tests at every layer; authoring order never changes output).
+- [x] SVG schematic renders connectors, pins, wires, colors, gauges, twist annotations, and error highlighting from HIR only.
+- [x] CSV exporters for BOM, cut list, label schedule, continuity test plan (PRD §20 columns; §9.9 plan covers every wired net).
+- [x] Web editor: `/projects/$projectId/{diagram,bom,cut-list,labels,tests}` routes, TanStack Table views, diagnostics panel, Web Worker compile — verified in Chrome.
 
 ## Architecture commitments (from PRD §10 + current library docs)
 
@@ -52,7 +52,12 @@ Registry, Build Record, AI features, plugin SDK. (PRD §7.2, §25 — wedge firs
 
 ## Milestones
 
-1. **M0 — Skeleton**: pnpm monorepo, core domain types + DSL builders, HIR Schema, golden fixture from PRD example.
-2. **M1 — Compiler + rules**: deterministic HIR emit, 10+ rules, diagnostics with stable codes, CLI `compile`/`validate`.
-3. **M2 — Exports**: CSV BOM/cut-list/labels/test-plan, SVG schematic, CLI `render`/`export`.
-4. **M3 — Web editor**: project view, schematic canvas, data tables, diagnostics panel, worker-based compile.
+1. ✅ **M0 — Skeleton**: pnpm monorepo, core domain types + DSL builders, HIR Schema, golden fixture from PRD example.
+2. ✅ **M1 — Compiler + rules**: deterministic HIR emit, 13 rules, diagnostics with stable codes, CLI `compile`/`validate`.
+3. ✅ **M2 — Exports**: CSV BOM/cut-list/labels/test-plan, SVG schematic, zip packet, CLI `render`/`export`/`inspect`/`init`.
+4. ✅ **M3 — Web editor**: project view, schematic canvas, data tables, diagnostics panel, worker-based compile.
+
+**First milestone complete (2026-06-06).** Candidate next milestones (from the PRD, in wedge order):
+harness-board/nailboard view (§9.5.3) · `nerve diff` for revisions (§21) · PDF manufacturing
+packet (§9.8) · WireViz import (§27.2) · in-browser TS authoring with Monaco + compile worker
+(§9.6) · variants (§8.4).
