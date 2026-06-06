@@ -20,6 +20,11 @@
 
 * { box-sizing: border-box; }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   margin: 0;
   font-family: var(--sans);
@@ -216,8 +221,11 @@ table.data td.mono, table.data th.mono { font-family: var(--mono); }
   letter-spacing: 0.08em;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+  transition-property: background-color, color, border-color, opacity, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
 }
+.compile-button:active:not(:disabled) { scale: 0.96; }
 .compile-button:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--bg); }
 .compile-button:disabled { opacity: 0.5; cursor: default; }
 .compile-button.ghost { background: transparent; border-color: var(--border); color: var(--muted); }
@@ -234,6 +242,30 @@ table.data td.mono, table.data th.mono { font-family: var(--mono); }
   cursor: pointer;
 }
 table.data th.sortable { cursor: pointer; user-select: none; }
+.sort-icons { position: relative; display: inline-block; width: 1em; margin-left: 2px; }
+.sort-icon {
+  display: inline-block;
+  opacity: 0;
+  scale: 0.25;
+  transition-property: opacity, scale;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+.sort-icon.abs { position: absolute; left: 0; top: 0; }
+.sort-icon.on { opacity: 1; scale: 1; }
 table.data th.sortable:hover { color: var(--text); }
+.toolbar-status {
+  opacity: 0;
+  transform: translateY(-3px);
+  transition-property: opacity, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in;
+}
+.toolbar-status.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-duration: 300ms;
+  transition-timing-function: ease-out;
+}
 .compile-error { color: var(--error); font-family: var(--mono); font-size: 11px; }
 .compile-ok { color: var(--ok); font-family: var(--mono); font-size: 11px; }

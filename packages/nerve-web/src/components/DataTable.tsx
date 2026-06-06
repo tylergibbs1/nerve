@@ -53,7 +53,12 @@ export function DataTable<T>({
                   {header.isPlaceholder
                     ? null
                     : flexRender(header.column.columnDef.header, header.getContext())}
-                  {dir === "asc" ? " ▲" : dir === "desc" ? " ▼" : ""}
+                  {canSort && (
+                    <span className="sort-icons" aria-hidden="true">
+                      <span className={`sort-icon${dir === "asc" ? " on" : ""}`}>▲</span>
+                      <span className={`sort-icon abs${dir === "desc" ? " on" : ""}`}>▼</span>
+                    </span>
+                  )}
                 </th>
               )
             })}

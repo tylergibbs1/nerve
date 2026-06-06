@@ -5,7 +5,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { routeTree } from "./routeTree.gen"
 import "./styles.css"
 
-const queryClient = new QueryClient()
+// Every query in this app is a deterministic Web Worker compile: failures
+// don't heal on retry, and "offline" must not pause local compilation.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { networkMode: "always", retry: false },
+    mutations: { networkMode: "always", retry: false }
+  }
+})
 
 const router = createRouter({
   routeTree,

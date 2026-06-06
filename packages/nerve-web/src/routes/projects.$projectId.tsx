@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, Outlet } from "@tanstack/react-router"
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { compileQueryOptions, useDiagnosticCounts } from "../lib/compile-client.js"
+import { compileQueryOptions, countDiagnostics } from "../lib/compile-client.js"
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js"
 import { isDirty } from "../lib/sources.js"
 import { PROJECTS } from "../lib/projects.js"
@@ -38,9 +38,7 @@ const TABS = [
 function ProjectWorkspace() {
   const { projectId } = Route.useParams()
   const { data } = useSuspenseQuery(compileQueryOptions(projectId))
-  const { data: counts } = useDiagnosticCounts(projectId)
-  const errors = counts?.errors ?? 0
-  const warnings = counts?.warnings ?? 0
+  const { errors, warnings } = countDiagnostics(data.hir.diagnostics)
 
   return (
     <div className="workspace">

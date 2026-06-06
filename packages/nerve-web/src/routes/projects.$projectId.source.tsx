@@ -5,7 +5,12 @@ import { useDebouncedValue } from "@tanstack/react-pacer"
 import CodeMirror from "@uiw/react-codemirror"
 import { javascript } from "@codemirror/lang-javascript"
 import { oneDark } from "@codemirror/theme-one-dark"
-import { compileSource, setCompileResult } from "../lib/compile-client.js"
+import {
+  compileKeys,
+  compileSource,
+  countDiagnostics,
+  setCompileResult
+} from "../lib/compile-client.js"
 import { getSource, isDirty, resetSource, setSource } from "../lib/sources.js"
 
 export const Route = createFileRoute("/projects/$projectId/source")({
@@ -39,10 +44,45 @@ function SourceView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSource, autoCompile])
 
+  // Close the stale window (tanstack-query qk-include-dependencies): if the
+  // editor unmounts with uncompiled edits — tab switch inside the debounce
+  // window, or auto turned off — invalidate so other tabs recompile the
+  // current source (the queryFn always reads getSource).
+  useEffect(() => {
+    return () => {
+      if (getSource(projectId) !== lastCompiled.current) {
+        void queryClient.invalidateQueries({ queryKey: compileKeys.project(projectId) })
+      }
+    }
+  }, [projectId, queryClient])
+
+  const onToggleAuto = (enabled: boolean) => {
+    setAutoCompile(enabled)
+    if (!enabled && getSource(projectId) !== lastCompiled.current) {
+      void queryClient.invalidateQueries({ queryKey: compileKeys.project(projectId) })
+    }
+  }
+
   const onChange = (text: string) => {
     setLocalSource(text)
     setSource(projectId, text)
   }
+
+  // Keep the status span mounted; animate visibility (make-interfaces rule 4).
+  const status = compile.isError
+    ? { kind: "error" as const, text: String(compile.error.message) }
+    : compile.isSuccess
+      ? {
+          kind: "ok" as const,
+          text: (() => {
+            const { errors, warnings } = countDiagnostics(compile.data.hir.diagnostics)
+            return `Compiled — ${errors} error(s), ${warnings} warning(s)`
+          })()
+        }
+      : undefined
+  const lastStatus = useRef(status)
+  if (status !== undefined) lastStatus.current = status
+  const shown = status ?? lastStatus.current
 
   return (
     <div className="source-pane">
@@ -58,7 +98,7 @@ function SourceView() {
           <input
             type="checkbox"
             checked={autoCompile}
-            onChange={(e) => setAutoCompile(e.target.checked)}
+            onChange={(e) => onToggleAuto(e.target.checked)}
           />
           auto
         </label>
@@ -74,16 +114,11 @@ function SourceView() {
             Reset to example
           </button>
         )}
-        {compile.isError && (
-          <span className="compile-error">{String(compile.error.message)}</span>
-        )}
-        {compile.isSuccess && !compile.isError && (
-          <span className="compile-ok">
-            Compiled — {compile.data.hir.diagnostics.filter((d) => d.severity === "error").length}{" "}
-            error(s),{" "}
-            {compile.data.hir.diagnostics.filter((d) => d.severity === "warning").length} warning(s)
-          </span>
-        )}
+        <span
+          className={`toolbar-status ${shown?.kind === "error" ? "compile-error" : "compile-ok"} ${status !== undefined ? "visible" : ""}`}
+        >
+          {shown?.text ?? ""}
+        </span>
       </div>
       <CodeMirror
         value={source}

@@ -102,13 +102,24 @@ export interface DiagnosticCounts {
   readonly total: number
 }
 
-/** Selector-based subscription: re-renders only when the counts change. */
+/** Single pass, no intermediate arrays (vercel-react js-combine-iterations). */
+export const countDiagnostics = (
+  diagnostics: ReadonlyArray<{ readonly severity: string }>
+): DiagnosticCounts => {
+  let errors = 0
+  let warnings = 0
+  for (const d of diagnostics) {
+    if (d.severity === "error") errors++
+    else if (d.severity === "warning") warnings++
+  }
+  return { errors, warnings, total: diagnostics.length }
+}
+
+// Module-scope selector: the stable reference lets Query memoize the
+// select result instead of recomputing on every render.
+const selectCounts = (r: CompileResult): DiagnosticCounts =>
+  countDiagnostics(r.hir.diagnostics)
+
+/** Selector-based subscription for components that need only the counts. */
 export const useDiagnosticCounts = (projectId: string) =>
-  useQuery({
-    ...compileQueryOptions(projectId),
-    select: (r): DiagnosticCounts => ({
-      errors: r.hir.diagnostics.filter((d) => d.severity === "error").length,
-      warnings: r.hir.diagnostics.filter((d) => d.severity === "warning").length,
-      total: r.hir.diagnostics.length
-    })
-  })
+  useQuery({ ...compileQueryOptions(projectId), select: selectCounts })

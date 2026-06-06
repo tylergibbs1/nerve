@@ -17,6 +17,7 @@
       --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; margin: 0; }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     body { background: var(--bg); color: var(--fg); font-family: var(--sans); padding-bottom: 1.5rem; }
     a { color: inherit; text-decoration: none; }
     .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
@@ -30,6 +31,9 @@
     .strip .links { display: flex; gap: 18px; }
     .strip .links a { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); transition: color .15s; }
     .strip .links a:hover { color: var(--accent); }
+    /* 40px hit areas without layout change (18px gap → +16px stays collision-free) */
+    .strip .links a { position: relative; }
+    .strip .links a::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% + 16px); height: 40px; }
 
     .hero { display: grid; grid-template-columns: 1fr; gap: 40px; padding: 72px 0 56px; align-items: end; }
     @media (min-width: 960px) { .hero { grid-template-columns: 7fr 5fr; } }
@@ -37,12 +41,13 @@
     .rule { width: 96px; height: 2px; background: var(--fg); margin: 28px 0; }
     .sub { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); max-width: 540px; line-height: 1.8; }
     .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
-    .btn { display: inline-block; padding: 12px 22px; font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid var(--fg); color: var(--fg); transition: all .15s; }
+    .btn { display: inline-block; padding: 12px 22px; font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid var(--fg); color: var(--fg); transition-property: background-color, color, border-color, scale; transition-duration: .15s; transition-timing-function: ease-out; }
     .btn:hover { background: var(--fg); color: #ffffff; }
     .btn.solid { background: var(--fg); color: #ffffff; border-color: var(--fg); }
     .btn.solid:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #ffffff; }
     .btn.ghost { border-color: var(--border); color: var(--muted); }
     .btn.ghost:hover { background: transparent; border-color: var(--fg); color: var(--fg); }
+    .btn:active { scale: 0.96; }
 
     .dossier { border: 1px solid var(--border); background: color-mix(in srgb, var(--card) 60%, transparent); padding: 24px; position: relative; }
     .dossier::before, .dossier::after { content: ""; position: absolute; width: 14px; height: 14px; border-color: var(--accent); border-style: solid; }
@@ -68,7 +73,9 @@
     @media (min-width: 760px) { .grid3 { grid-template-columns: repeat(3, 1fr); } }
     .cell { background: var(--card); padding: 26px; }
     .cell h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; margin: 10px 0 8px; }
-    .cell p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .cell p { font-size: 13px; color: var(--muted); line-height: 1.65; text-wrap: pretty; }
+    .cell h3 { text-wrap: balance; }
+    .sub { text-wrap: pretty; }
     .cell .idx { font-family: var(--mono); font-size: 10px; color: var(--accent); }
 
     .code { background: var(--card); border: 1px solid var(--border); padding: 24px; font-family: var(--mono); font-size: 12.5px; line-height: 1.75; overflow-x: auto; white-space: pre; }
@@ -78,7 +85,7 @@
     .code .f { color: var(--fg); }
 
     .sheet { background: #ffffff; border: 1px solid var(--border); padding: 8px; }
-    .sheet img { display: block; width: 100%; height: auto; }
+    .sheet img { display: block; width: 100%; height: auto; outline: 1px solid rgba(0, 0, 0, 0.1); outline-offset: -1px; }
     .sheet-caption { display: flex; justify-content: space-between; padding-top: 10px; }
 
     .diag-sample { font-family: var(--mono); font-size: 12px; line-height: 1.9; background: var(--card); border: 1px solid var(--border); padding: 24px; overflow-x: auto; white-space: pre; }
