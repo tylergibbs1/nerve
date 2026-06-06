@@ -10,7 +10,7 @@ TypeScript DSL → compiler → HIR → validation → rendering → manufacturi
 
 See [`GOAL.md`](./GOAL.md) for the current milestone and [`docs/prd.md`](./docs/prd.md) for the full PRD.
 
-## Status: roadmap complete ✅ — PRD §26 Definition of Done met, M0–M9 shipped
+## Status: v0.2.0 — PRD implemented end to end (142 tests)
 
 | Package | What it is |
 | --- | --- |
@@ -19,7 +19,7 @@ See [`GOAL.md`](./GOAL.md) for the current milestone and [`docs/prd.md`](./docs/
 | [`@grayhaven/nerve-compiler`](./packages/nerve-compiler) | `.harness.ts` loading, config discovery, Effect `CompilerService` + tagged errors, fail-closed gate |
 | [`@grayhaven/nerve-exporters`](./packages/nerve-exporters) | DrawingIR → SVG/PDF; BOM / cut-list / label CSVs (§20), continuity + splice + no-short test plan (§9.9), schematic + harness-board views, assembly instructions, byte-deterministic PDF packet + zip |
 | [`@grayhaven/nerve-wireviz`](./packages/nerve-wireviz) | WireViz YAML import/export adapter with fixture corpus (§27.2) |
-| [`@grayhaven/nerve-cli`](./packages/nerve-cli) | `nerve init/compile/validate/render/export/import/diff/inspect` — deterministic, CI-ready exit codes |
+| [`@grayhaven/nerve-cli`](./packages/nerve-cli) | `nerve init/compile/validate/render/export/import/diff/inspect/quote/analyze/machine/contract/release/record/redline` — deterministic, CI-ready exit codes |
 | [`@grayhaven/nerve-web`](./packages/nerve-web) | Vite/React/TanStack editor: in-browser source authoring, diagram + board + data tables + diagnostics, compile in a Web Worker |
 | [`@grayhaven/nerve-connectors`](./packages/nerve-connectors) | Verified connector library (Molex Micro-Fit 3.0 seed data) |
 | [`examples/`](./examples) | Golden fixtures: PRD §9.1 motor-controller (verbatim) + variant, sensor-splice (splices/cables) |
@@ -48,7 +48,7 @@ All packages: [`@grayhaven/nerve`](https://www.npmjs.com/package/@grayhaven/nerv
 
 ```bash
 pnpm install
-pnpm test        # 98 tests: golden corpus, rules, compiler, exporters, wireviz, CLI
+pnpm test        # 142 tests: golden corpus, rules, compiler, exporters, wireviz, CLI, workflow
 pnpm typecheck   # strict TS across all packages
 pnpm build       # dist builds for every package
 
@@ -79,8 +79,7 @@ const j1 = connector("J1", MolexMicroFit["43025-0800"], {
 - **M6 — Variants** ✅ `variant()` with lineage and diff-visible changes
 - **M7 — WireViz** ✅ YAML import/export adapter, `nerve import`
 - **M8 — In-browser authoring** ✅ Source tab, worker-sandboxed TS compile
-- **M9 — Publish prep** ✅ tsup `dist` builds, CI workflow, MIT license, `publishConfig`
-- **Future** (PRD §28–40): BOP/costing, Registry, shop-floor adapters, 1:1 formboard, analysis, ECO/release, Build Record, interface contracts, plugin SDK
+- **M9 — Publish prep** ✅ tsup `dist` builds, CI workflow, Apache-2.0, published to npm
+- **Expansion tier** ✅ (v0.2.0, see [CHANGELOG](./CHANGELOG.md)): Bill of Process (§28), costing/quotes (§29), verified component registry (§30), shop-floor adapters (§31), formboard 1:1 tiling (§33), engineering analysis (§34), ECO/releases (§35), Build Records (§36), interface contracts (§37), redlines (§39), plugin SDK (§40)
 
-> Publishing note: packages carry `publishConfig` but remain `private: true` —
-> flip deliberately when ready to publish. Licensed under Apache-2.0.
+**Live**: [landing](https://nerve-site.vercel.app) · [demo editor](https://nerve-demo.vercel.app). Licensed under Apache-2.0.

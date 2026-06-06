@@ -1,6 +1,6 @@
 {
   "name": "@grayhaven/nerve",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Grayhaven Nerve core: domain model, DSL builders, HIR types and schema, compiler interface, validation primitives.",
   "exports": {
