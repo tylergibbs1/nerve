@@ -34,6 +34,19 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
+  examples/robot-platform:
+    dependencies:
+      '@grayhaven/nerve':
+        specifier: workspace:*
+        version: link:../../packages/nerve
+      '@grayhaven/nerve-connectors':
+        specifier: workspace:*
+        version: link:../../packages/nerve-connectors
+    devDependencies:
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
   examples/sensor-splice:
     dependencies:
       '@grayhaven/nerve':
@@ -193,6 +206,9 @@ importers:
       '@grayhaven/example-motor-controller':
         specifier: workspace:*
         version: link:../../examples/motor-controller
+      '@grayhaven/example-robot-platform':
+        specifier: workspace:*
+        version: link:../../examples/robot-platform
       '@grayhaven/example-sensor-splice':
         specifier: workspace:*
         version: link:../../examples/sensor-splice

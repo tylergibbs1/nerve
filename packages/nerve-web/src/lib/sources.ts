@@ -5,10 +5,12 @@
  */
 import motorControllerSource from "../../../../examples/motor-controller/src/main.harness.ts?raw"
 import sensorSpliceSource from "../../../../examples/sensor-splice/src/main.harness.ts?raw"
+import robotPlatformSource from "../../../../examples/robot-platform/src/main.harness.ts?raw"
 
 const initial: Readonly<Record<string, string>> = {
   "motor-controller": motorControllerSource,
-  "sensor-splice": sensorSpliceSource
+  "sensor-splice": sensorSpliceSource,
+  "robot-platform": robotPlatformSource
 }
 
 const edited = new Map<string, string>()

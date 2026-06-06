@@ -18,5 +18,10 @@ export const PROJECTS: ReadonlyArray<ProjectMeta> = [
     id: "sensor-splice",
     name: "Sensor Splice Harness",
     description: "Spliced power feed to two sensors, CAN in a shielded cable"
+  },
+  {
+    id: "robot-platform",
+    name: "Robot Platform Harness",
+    description: "GH-R1 mobile platform — 22 connectors, CAN trunk with splice taps, 4 drive modules"
   }
 ]

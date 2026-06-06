@@ -12,6 +12,7 @@
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.5",
     "@grayhaven/example-motor-controller": "workspace:*",
+    "@grayhaven/example-robot-platform": "workspace:*",
     "@grayhaven/example-sensor-splice": "workspace:*",
     "@grayhaven/nerve": "workspace:*",
     "@grayhaven/nerve-connectors": "workspace:*",
