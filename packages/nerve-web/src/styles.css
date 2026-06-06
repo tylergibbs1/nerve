@@ -1,5 +1,5 @@
-/* Grayhaven TensorPoint Spec theme — dark industrial, sharp edges,
-   mono spec labels, orange accent. Tokens match grayhavenlabs.com. */
+/* Grayhaven brand — stark black/white monochrome (current direction),
+   sharp edges, mono spec labels. Severity colors are functional only. */
 :root {
   --bg: #0d0d0d;
   --panel: #171717;
@@ -7,8 +7,8 @@
   --border: #2e2e2e;
   --text: #f5f5f5;
   --muted: #a6a6a6;
-  --accent: #f75b1b;
-  --accent-hover: #d44712;
+  --accent: #ffffff;
+  --accent-hover: #d4d4d4;
   --error: #ff5c5c;
   --warning: #e0a830;
   --info: #6ea8fe;
@@ -206,9 +206,9 @@ table.data td.mono, table.data th.mono { font-family: var(--mono); }
 }
 .compile-button {
   padding: 6px 14px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--text);
   background: transparent;
-  color: var(--accent);
+  color: var(--text);
   font-family: var(--mono);
   font-size: 11px;
   text-transform: uppercase;
@@ -217,7 +217,7 @@ table.data td.mono, table.data th.mono { font-family: var(--mono); }
   cursor: pointer;
   transition: all 0.15s;
 }
-.compile-button:hover:not(:disabled) { background: var(--accent); color: var(--bg); }
+.compile-button:hover:not(:disabled) { background: var(--text); color: var(--bg); }
 .compile-button:disabled { opacity: 0.5; cursor: default; }
 .compile-error { color: var(--error); font-family: var(--mono); font-size: 11px; }
 .compile-ok { color: var(--ok); font-family: var(--mono); font-size: 11px; }
