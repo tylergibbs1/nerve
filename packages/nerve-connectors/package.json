@@ -1,0 +1,16 @@
+{
+  "name": "@grayhaven/nerve-connectors",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Verified connector library for Grayhaven Nerve.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@grayhaven/nerve": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

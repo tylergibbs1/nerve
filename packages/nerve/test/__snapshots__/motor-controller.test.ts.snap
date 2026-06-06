@@ -1,0 +1,212 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR snapshot 1`] = `
+{
+  "bom": [
+    {
+      "category": "connector",
+      "description": "Micro-Fit 3.0 plug housing, dual row, 8 circuits",
+      "manufacturer": "Molex",
+      "mpn": "43020-0800",
+      "quantity": 1,
+      "unitOfMeasure": "ea",
+      "usedBy": [
+        "connector:M1",
+      ],
+    },
+    {
+      "category": "connector",
+      "description": "Micro-Fit 3.0 receptacle housing, dual row, 8 circuits",
+      "manufacturer": "Molex",
+      "mpn": "43025-0800",
+      "quantity": 1,
+      "unitOfMeasure": "ea",
+      "usedBy": [
+        "connector:J1",
+      ],
+    },
+  ],
+  "branches": [
+    {
+      "id": "main",
+      "nominalLength": 420,
+      "path": [
+        "J1",
+        "M1",
+      ],
+      "sleeve": "braided-pet",
+    },
+  ],
+  "cables": [],
+  "connectors": [
+    {
+      "description": "Micro-Fit 3.0 receptacle housing, dual row, 8 circuits",
+      "family": "Micro-Fit 3.0",
+      "gender": "receptacle",
+      "manufacturer": "Molex",
+      "mpn": "43025-0800",
+      "pinCount": 8,
+      "pins": [
+        {
+          "pin": "1",
+          "signal": "VBAT_24V",
+        },
+        {
+          "pin": "2",
+          "signal": "GND",
+        },
+        {
+          "pin": "3",
+          "signal": "CAN_H",
+        },
+        {
+          "pin": "4",
+          "signal": "CAN_L",
+        },
+        {
+          "pin": "5",
+          "signal": "ENC_A",
+        },
+        {
+          "pin": "6",
+          "signal": "ENC_B",
+        },
+        {
+          "pin": "7",
+          "signal": "MOTOR_TEMP",
+        },
+        {
+          "pin": "8",
+          "signal": "SHIELD_DRAIN",
+        },
+      ],
+      "ref": "J1",
+    },
+    {
+      "description": "Micro-Fit 3.0 plug housing, dual row, 8 circuits",
+      "family": "Micro-Fit 3.0",
+      "gender": "plug",
+      "manufacturer": "Molex",
+      "mpn": "43020-0800",
+      "pinCount": 8,
+      "pins": [
+        {
+          "pin": "1",
+          "signal": "VBAT_24V",
+        },
+        {
+          "pin": "2",
+          "signal": "GND",
+        },
+        {
+          "pin": "3",
+          "signal": "CAN_H",
+        },
+        {
+          "pin": "4",
+          "signal": "CAN_L",
+        },
+        {
+          "pin": "5",
+          "signal": "ENC_A",
+        },
+        {
+          "pin": "6",
+          "signal": "ENC_B",
+        },
+        {
+          "pin": "7",
+          "signal": "MOTOR_TEMP",
+        },
+        {
+          "pin": "8",
+          "signal": "SHIELD_DRAIN",
+        },
+      ],
+      "ref": "M1",
+    },
+  ],
+  "diagnostics": [],
+  "exports": {},
+  "harness": {
+    "id": "motor-controller-harness",
+    "metadata": {},
+    "revision": "A",
+    "units": "mm",
+  },
+  "labels": [
+    {
+      "attachTo": "main",
+      "distance": 50,
+      "id": "L1",
+      "offsetFrom": "J1",
+      "text": "MOTOR CTRL A",
+    },
+  ],
+  "layoutHints": [],
+  "schemaVersion": "0.1.0",
+  "splices": [],
+  "wires": [
+    {
+      "color": "red",
+      "from": {
+        "connector": "J1",
+        "pin": "1",
+      },
+      "gauge": "18AWG",
+      "id": "W1",
+      "length": 420,
+      "signal": "VBAT_24V",
+      "to": {
+        "connector": "M1",
+        "pin": "1",
+      },
+    },
+    {
+      "color": "black",
+      "from": {
+        "connector": "J1",
+        "pin": "2",
+      },
+      "gauge": "18AWG",
+      "id": "W2",
+      "length": 420,
+      "signal": "GND",
+      "to": {
+        "connector": "M1",
+        "pin": "2",
+      },
+    },
+    {
+      "color": "white",
+      "from": {
+        "connector": "J1",
+        "pin": "3",
+      },
+      "gauge": "24AWG",
+      "id": "W3",
+      "signal": "CAN_H",
+      "to": {
+        "connector": "M1",
+        "pin": "3",
+      },
+      "twistGroup": "CAN_PAIR",
+    },
+    {
+      "color": "blue",
+      "from": {
+        "connector": "J1",
+        "pin": "4",
+      },
+      "gauge": "24AWG",
+      "id": "W4",
+      "signal": "CAN_L",
+      "to": {
+        "connector": "M1",
+        "pin": "4",
+      },
+      "twistGroup": "CAN_PAIR",
+    },
+  ],
+}
+`;

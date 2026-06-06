@@ -1,0 +1,17 @@
+{
+  "name": "@grayhaven/nerve",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Grayhaven Nerve core: domain model, DSL builders, HIR types and schema, compiler interface, validation primitives.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "effect": "^3.16.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@grayhaven/example-motor-controller",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Golden fixture: the PRD §9.1 motor-controller harness, verbatim.",
+  "exports": {
+    ".": "./src/main.harness.ts"
+  },
+  "dependencies": {
+    "@grayhaven/nerve": "workspace:*",
+    "@grayhaven/nerve-connectors": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
