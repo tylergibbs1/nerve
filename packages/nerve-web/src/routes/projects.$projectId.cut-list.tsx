@@ -11,21 +11,22 @@ export const Route = createFileRoute("/projects/$projectId/cut-list")({
 })
 
 const columns: ColumnDef<HirWire, string | number>[] = [
-  { id: "id", header: "Wire", accessorKey: "id" },
-  { id: "signal", header: "Signal", accessorFn: (w) => w.signal ?? "" },
-  { id: "gauge", header: "Gauge", accessorFn: (w) => w.gauge ?? "" },
-  { id: "color", header: "Color", accessorFn: (w) => w.color ?? "" },
+  { id: "id", meta: { kind: "code" }, header: "Wire", accessorKey: "id" },
+  { id: "signal", meta: { kind: "code" }, header: "Signal", accessorFn: (w) => w.signal ?? "" },
+  { id: "gauge", meta: { kind: "code" }, header: "Gauge", accessorFn: (w) => w.gauge ?? "" },
+  { id: "color", meta: { kind: "text" }, header: "Color", accessorFn: (w) => w.color ?? "" },
   {
     id: "length",
+    meta: { kind: "num" },
     header: "Length",
     // Numeric accessor keeps sort semantics; presentation lives in `cell`.
     accessorFn: (w) => w.length ?? 0,
     cell: (ctx) => ctx.row.original.length ?? "—"
   },
-  { id: "from", header: "From", accessorFn: (w) => endpointLabel(w.from) },
-  { id: "to", header: "To", accessorFn: (w) => endpointLabel(w.to) },
-  { id: "twist", header: "Twist", accessorFn: (w) => w.twistGroup ?? "" },
-  { id: "cable", header: "Cable", accessorFn: (w) => w.cable ?? "" }
+  { id: "from", meta: { kind: "code" }, header: "From", accessorFn: (w) => endpointLabel(w.from) },
+  { id: "to", meta: { kind: "code" }, header: "To", accessorFn: (w) => endpointLabel(w.to) },
+  { id: "twist", meta: { kind: "code" }, header: "Twist", accessorFn: (w) => w.twistGroup ?? "" },
+  { id: "cable", meta: { kind: "code" }, header: "Cable", accessorFn: (w) => w.cable ?? "" }
 ]
 
 function CutListView() {

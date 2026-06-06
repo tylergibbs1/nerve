@@ -340,6 +340,10 @@ table.data td {
   font-variant-numeric: tabular-nums;
 }
 table.data td.mono, table.data th.mono { font-family: var(--mono); }
+/* Column voices: codes/IDs mono, numerics tabular muted, prose sans. */
+table.data td.cell-code { font-family: var(--mono); font-size: 12px; }
+table.data td.cell-num { color: var(--muted); }
+table.data td.cell-text { white-space: normal; }
 .table-empty {
   border: 1px solid var(--border);
   background: var(--panel);
@@ -483,6 +487,13 @@ table.data th.sortable:hover { color: var(--text); }
 .compile-error { color: var(--error); font-family: var(--mono); font-size: 11px; }
 .compile-ok { color: var(--ok); font-family: var(--mono); font-size: 11px; }
 
+/* Route view transitions: reference vt timings — exit 150ms fade+blur
+   ease-in, enter 210ms delayed ease-out. Subtle, never sliding. */
+@keyframes vt-out { to { opacity: 0; filter: blur(3px); } }
+@keyframes vt-in { from { opacity: 0; filter: blur(3px); } }
+::view-transition-old(root) { animation: vt-out 150ms var(--ease-in) both; }
+::view-transition-new(root) { animation: vt-in 210ms var(--ease-out) 150ms both; }
+
 /* Motion kill switch (reference globals.css pattern). */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -492,6 +503,7 @@ table.data th.sortable:hover { color: var(--text); }
     scroll-behavior: auto !important;
   }
   .ai-pill.running { animation: none; opacity: 0.7; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
   .compile-button:active:not(:disabled) { scale: none; }
   .tabs a:active { scale: none; }
 }

@@ -21,6 +21,7 @@ const router = createRouter({
   // Compiles are deterministic; don't re-run the loader on every hover —
   // the query's own staleTime governs freshness via ensureQueryData.
   defaultPreloadStaleTime: 30_000,
+  defaultViewTransition: true,
   scrollRestoration: true
 })
 

@@ -10,9 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..700&family=IBM+Plex+Mono:wght@400;500;600&family=Chakra+Petch:wght@600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #000000; --card: #0a0a0a; --muted-bg: #161616; --border: hsl(0 0% 14%);
+      --bg: #000000; --border: hsl(0 0% 14%);
       --fg: #ffffff; --muted: hsl(0 0% 53%);
-      --accent: #ffffff; --accent-hover: #bfbfbf; --ok: #4ade80; --error: #f87171;
+      --accent: #ffffff; --accent-hover: #bfbfbf;
       --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
       --sans: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       --display: "Chakra Petch", "Archivo", sans-serif;
@@ -21,221 +21,143 @@
     }
     * { box-sizing: border-box; margin: 0; }
     html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-    body { background: var(--bg); color: var(--fg); font-family: var(--sans); padding-bottom: 1.5rem; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
     a { color: inherit; text-decoration: none; }
-    .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-    @media (min-width: 1024px) { .wrap { padding: 0 32px; } }
 
-    *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; box-shadow: 0 0 0 4px rgb(255 255 255 / 0.2); }
-    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; box-shadow: 0 0 0 4px rgb(255 255 255 / 0.2); }
+    *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; box-shadow: 0 0 0 4px rgb(255 255 255 / 0.2); border-radius: 4px; }
     ::selection { background: rgb(255 255 255 / 0.3); }
 
-    /* The one spec-tag eyebrow per lockup: accent brackets, muted label. */
+    .strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+    }
+    @media (min-width: 1024px) { .strip { padding: 0 32px; } }
+    .wordmark { font-family: var(--mono); font-size: 14px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fg); }
+    .strip .links { display: flex; align-items: center; gap: 18px; }
+    .strip .links a { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); transition: color 0.2s var(--ease-default); position: relative; }
+    .strip .links a:hover { color: var(--accent); }
+    .strip .links a::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% + 16px); height: 40px; }
+    .strip .links .sep { font-family: var(--mono); color: color-mix(in srgb, var(--muted) 50%, transparent); }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px 24px;
+      max-width: 880px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    @media (min-width: 1024px) { main { padding: 48px 32px; } }
+
     .spec-tag { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
     .spec-tag::before { content: "["; color: var(--accent); }
     .spec-tag::after { content: "]"; color: var(--accent); }
-    .spec-label { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
 
-    /* Masthead wordmark: reference Logo voice — mono, normal weight, unbracketed. */
-    .wordmark { font-family: var(--mono); font-size: 14px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fg); }
+    h1 {
+      font-family: var(--display);
+      font-size: clamp(28px, 4.5vw, 48px);
+      font-weight: 600;
+      text-transform: uppercase;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      text-wrap: balance;
+      margin: 20px 0 0;
+    }
+    .sub {
+      font-family: var(--mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 560px;
+      margin-top: 24px;
+      text-wrap: pretty;
+    }
+    .links-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      margin-top: 40px;
+      font-family: var(--mono);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .links-row a { color: var(--fg); border-bottom: 1px solid var(--fg); padding-bottom: 2px; transition: color 0.2s var(--ease-default), border-color 0.2s var(--ease-default); }
+    .links-row a:hover { color: var(--accent-hover); border-color: var(--accent-hover); }
+    .links-row .sep { color: color-mix(in srgb, var(--muted) 50%, transparent); }
 
-    .strip { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); padding: 14px 0; }
-    .strip .links { display: flex; align-items: center; gap: 18px; }
-    .strip .links a { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); transition: color 0.2s var(--ease-default); }
-    .strip .links a:hover { color: var(--accent); }
-    .strip .links .sep { font-family: var(--mono); color: color-mix(in srgb, var(--muted) 50%, transparent); }
-    /* 40px hit areas without layout change (18px gap → +16px stays collision-free) */
-    .strip .links a { position: relative; }
-    .strip .links a::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% + 16px); height: 40px; }
-
-    .hero { display: grid; grid-template-columns: 1fr; gap: 40px; padding: 72px 0 56px; align-items: end; }
-    @media (min-width: 960px) { .hero { grid-template-columns: 7fr 5fr; } }
-    h1 { font-family: var(--display); font-size: clamp(40px, 7vw, 84px); font-weight: 600; text-transform: uppercase; line-height: 0.92; letter-spacing: -0.01em; text-wrap: balance; }
-    .rule { width: 96px; height: 2px; background: var(--fg); margin: 28px 0; }
-    .sub { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); max-width: 540px; line-height: 1.8; text-wrap: pretty; }
-    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
-    .btn { display: inline-flex; align-items: center; height: 48px; padding: 0 32px; font-family: var(--mono); font-size: 14px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.04em; border: 2px solid var(--fg); color: var(--fg); transition-property: background-color, color, border-color, scale; transition-duration: 0.2s; transition-timing-function: var(--ease-default); }
-    .btn:hover { background: var(--fg); color: #000000; }
-    .btn.solid { background: var(--fg); color: #000000; border-color: var(--fg); }
-    .btn.solid:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #000000; }
-    .btn.ghost { border: 1px solid var(--border); color: var(--muted); }
-    .btn.ghost:hover { background: transparent; border-color: var(--fg); color: var(--fg); }
-    .btn:active { scale: 0.96; }
-
-    /* Hero entrance: spec-rise with a 90ms stagger ladder. */
     @keyframes spec-rise {
       from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
       to { opacity: 1; transform: none; filter: blur(0); }
     }
-    .hero h1, .hero .rule, .hero .sub, .hero .cta-row, .hero .dossier {
-      animation: spec-rise 0.5s var(--ease-out) both;
+    main > * { animation: spec-rise 0.5s var(--ease-out) both; }
+    main > h1 { animation-delay: 90ms; }
+    main > .sub { animation-delay: 180ms; }
+    main > .links-row { animation-delay: 270ms; }
+
+    .footer {
+      height: 1.5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
-    .hero .rule { animation-delay: 90ms; }
-    .hero .sub { animation-delay: 180ms; }
-    .hero .cta-row { animation-delay: 270ms; }
-    .hero .dossier { animation-delay: 360ms; }
-
-    .dossier { border: 2px solid var(--border); background: color-mix(in srgb, var(--card) 60%, transparent); padding: 24px; position: relative; }
-    .dossier::before, .dossier::after, .dossier .corner { position: absolute; width: 14px; height: 14px; border-color: var(--accent); border-style: solid; }
-    .dossier::before { content: ""; top: -2px; left: -2px; border-width: 2px 0 0 2px; }
-    .dossier::after { content: ""; bottom: -2px; right: -2px; border-width: 0 2px 2px 0; }
-    .dossier .corner.tr { top: -2px; right: -2px; border-width: 2px 2px 0 0; }
-    .dossier .corner.bl { bottom: -2px; left: -2px; border-width: 0 0 2px 2px; }
-    .dossier .head { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 12px; }
-    .kv { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 6px 0; border-bottom: 1px solid hsl(0 0% 14% / 0.5); }
-    .kv:last-child { border-bottom: 0; }
-    .kv dt { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
-    .kv dd { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
-    .kv dd.accent { color: var(--accent); }
-
-    section { padding: 96px 0 0; }
-    @media (min-width: 640px) { section { padding: 128px 0 0; } }
-    section.hero { padding: 72px 0 56px; }
-    section.last { padding-bottom: 96px; }
-    .divider { display: flex; align-items: center; gap: 14px; padding: 96px 0 0; }
-    @media (min-width: 640px) { .divider { padding: 128px 0 0; } }
-    .divider + section { padding-top: 28px; }
-    .divider .line { flex: 1; height: 1px; background: var(--border); }
-    .divider span { font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; color: color-mix(in srgb, var(--muted) 70%, transparent); text-transform: uppercase; }
-
-    .pipeline { font-family: var(--mono); font-size: clamp(10px, 1.5vw, 13px); color: var(--muted); background: var(--card); border: 1px solid var(--border); padding: 26px; overflow-x: auto; white-space: pre; line-height: 1.9; }
-    .pipeline b { color: var(--fg); font-weight: 700; }
-    .pipeline em { color: var(--accent); font-style: normal; }
-
-    .grid3 { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); grid-template-columns: 1fr; }
-    @media (min-width: 760px) { .grid3 { grid-template-columns: repeat(3, 1fr); } }
-    .cell { background: var(--card); padding: 26px; }
-    .cell h3 { font-size: 18px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; margin: 10px 0 8px; text-wrap: balance; }
-    .cell p { font-size: 14px; color: var(--muted); line-height: 1.65; text-wrap: pretty; }
-    .cell .idx { font-family: var(--mono); font-size: 10px; color: var(--muted); }
-
-    .code { background: var(--card); border: 1px solid var(--border); padding: 24px; font-family: var(--mono); font-size: 12.5px; line-height: 1.75; overflow-x: auto; white-space: pre; }
-    .code .k { color: var(--fg); font-weight: 700; }
-    .code .s { color: #bfbfbf; }
-    .code .c { color: color-mix(in srgb, var(--muted) 70%, transparent); }
-    .code .f { color: var(--fg); }
-
-    .sheet { background: #fafafa; border: 1px solid var(--border); padding: 8px; }
-    .sheet img { display: block; width: 100%; height: auto; outline: 1px solid rgba(0, 0, 0, 0.08); outline-offset: -1px; }
-    .sheet-caption { display: flex; justify-content: space-between; padding-top: 10px; }
-
-    .diag-sample { font-family: var(--mono); font-size: 12px; line-height: 1.9; background: var(--card); border: 1px solid var(--border); padding: 24px; overflow-x: auto; white-space: pre; }
-    .diag-sample .err { color: var(--error); font-weight: 700; }
-    .diag-sample .wrn { color: var(--fg); font-weight: 700; }
-    .diag-sample .dim { color: var(--muted); }
-
-    .footer { position: fixed; left: 0; right: 0; bottom: 0; height: 1.5rem; background: var(--bg); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); z-index: 10; }
     .footer .live { color: var(--fg); }
+    .footer span:first-child, .footer span:last-child { flex: 1; }
+    .footer span:last-child { text-align: right; }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-      .btn:active { scale: 1; }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="strip">
-      <span class="wordmark">Grayhaven Nerve</span>
-      <nav class="links">
-        <a href="https://nerve-demo.vercel.app">Demo</a>
-        <span class="sep">/</span>
-        <a href="https://github.com/tylergibbs1/nerve">GitHub</a>
-        <span class="sep">/</span>
-        <a href="https://www.npmjs.com/org/grayhaven">npm</a>
-      </nav>
-    </header>
+  <header class="strip">
+    <span class="wordmark">Grayhaven Nerve</span>
+    <nav class="links">
+      <a href="https://nerve-demo.vercel.app">Demo</a>
+      <span class="sep">/</span>
+      <a href="https://github.com/tylergibbs1/nerve">GitHub</a>
+      <span class="sep">/</span>
+      <a href="https://www.npmjs.com/org/grayhaven">npm</a>
+    </nav>
+  </header>
 
-    <section class="hero">
-      <div>
-        <h1>Harnesses as code for machines that need a nervous&nbsp;system.</h1>
-        <div class="rule"></div>
-        <p class="sub">From pinout to production: wiring, BOMs, labels, tests, and build records from one typed source of truth.</p>
-        <div class="cta-row">
-          <a class="btn solid" href="https://nerve-demo.vercel.app">Open Live Demo</a>
-          <a class="btn" href="https://github.com/tylergibbs1/nerve">Source on GitHub</a>
-          <a class="btn ghost" href="https://www.npmjs.com/package/@grayhaven/nerve">npm i @grayhaven/nerve</a>
-        </div>
-      </div>
-      <div class="dossier">
-        <i class="corner tr"></i><i class="corner bl"></i>
-        <div class="head">
-          <span class="spec-tag">System Status</span>
-          <span class="spec-label">REV A</span>
-        </div>
-        <dl>
-          <div class="kv"><dt>Release</dt><dd class="accent">v0.2.0 · Live</dd></div>
-          <div class="kv"><dt>Packages</dt><dd>7 on npm</dd></div>
-          <div class="kv"><dt>License</dt><dd>Apache-2.0</dd></div>
-          <div class="kv"><dt>Validation rules</dt><dd>17 built-in · HK-* codes</dd></div>
-          <div class="kv"><dt>Determinism</dt><dd class="accent">Byte-identical</dd></div>
-          <div class="kv"><dt>Test corpus</dt><dd>142 passing</dd></div>
-        </dl>
-      </div>
-    </section>
-
-    <div class="divider"><div class="line"></div><span>[01] Pipeline</span><div class="line"></div></div>
-    <section>
-      <div class="pipeline"><b>typed harness spec</b> ──▶ <b>compiler</b> ──▶ <em>validation</em> ──▶ <b>HIR</b> ──▶ schematic · board · <b>BOM</b> · cut list · labels · <em>continuity tests</em> · <b>PDF packet</b>
-
-  <span>one source of truth. every artifact reproducible. every line traceable to a design object.</span></div>
-    </section>
-
-    <div class="divider"><div class="line"></div><span>[02] Author</span><div class="line"></div></div>
-    <section>
-      <div class="code"><span class="c">// main.harness.ts — this is the entire design surface</span>
-<span class="k">import</span> { harness, connector, wire } <span class="k">from</span> <span class="s">"@grayhaven/nerve"</span>
-<span class="k">import</span> { MolexMicroFit } <span class="k">from</span> <span class="s">"@grayhaven/nerve-connectors"</span>
-
-<span class="k">const</span> controller = <span class="f">connector</span>(<span class="s">"J1"</span>, MolexMicroFit[<span class="s">"43025-0800"</span>], {
-  pins: { 1: <span class="s">"VBAT_24V"</span>, 2: <span class="s">"GND"</span>, 3: <span class="s">"CAN_H"</span>, 4: <span class="s">"CAN_L"</span> },
-})
-
-<span class="k">export default</span> <span class="f">harness</span>(<span class="s">"motor-controller-harness"</span>, {
-  revision: <span class="s">"A"</span>, units: <span class="s">"mm"</span>,
-  connectors: [controller, motor],
-  wires: [<span class="f">wire</span>(<span class="s">"W1"</span>, controller.<span class="f">pin</span>(1), motor.<span class="f">pin</span>(1), { gauge: <span class="s">"20AWG"</span>, color: <span class="s">"red"</span>, length: 420 })],
-})</div>
-    </section>
-
-    <div class="divider"><div class="line"></div><span>[03] Validate</span><div class="line"></div></div>
-    <section>
-      <div class="diag-sample"><span class="err">HK-WIRE-004 Error</span>  <span class="dim">wire:W17</span>
-  Wire W17 uses 24AWG but its 5A estimate requires at least 18AWG.
-<span class="err">HK-CONN-011 Error</span>  <span class="dim">connector:P1.pin:1</span>
-  Wire W2 carries V5 but pin P1.1 is assigned V9.
-<span class="wrn">HK-ELEC-001 Error</span>  <span class="dim">wire:W3</span>
-  Differential pair CAN_H/CAN_L (wire W3) must share a twist group.</div>
-      <p class="sub" style="margin-top:18px">Swapped pins, undersized gauge, untwisted CAN pairs, missing seals — caught before a technician cuts wire, not after. Releases fail closed.</p>
-    </section>
-
-    <div class="divider"><div class="line"></div><span>[04] Manufacture</span><div class="line"></div></div>
-    <section>
-      <div class="sheet">
-        <img src="schematic.svg" alt="Generated wiring schematic: J1 controller to M1 motor with colored, gauge-annotated wires" loading="lazy" />
-      </div>
-      <div class="sheet-caption">
-        <span class="spec-label">Drawing generated from HIR — deterministic, diffable, never hand-edited</span>
-        <span class="spec-label">SHT 1 · REV A</span>
-      </div>
-    </section>
-
-    <div class="divider"><div class="line"></div><span>[05] Capability</span><div class="line"></div></div>
-    <section class="last">
-      <div class="grid3">
-        <div class="cell"><span class="idx">[01]</span><h3>Git-native hardware</h3><p>Harnesses live next to firmware. Reviewable diffs, CI validation with exit codes, revision diffing down to a single pin swap.</p></div>
-        <div class="cell"><span class="idx">[02]</span><h3>Manufacturing packet</h3><p>One command emits the PDF build book: schematic, nailboard, BOM, cut list, label schedule, assembly steps, continuity tests.</p></div>
-        <div class="cell"><span class="idx">[03]</span><h3>Deterministic compiler</h3><p>Same input, byte-identical output — drawings, CSVs, even the zip. The renderer never owns truth; the typed graph does.</p></div>
-        <div class="cell"><span class="idx">[04]</span><h3>Splices &amp; cables</h3><p>Splice taps and multi-conductor cables are first-class: nets computed across them, splice-verification tests generated.</p></div>
-        <div class="cell"><span class="idx">[05]</span><h3>WireViz migration</h3><p>Import existing WireViz YAML and instantly gain validation, cut lists, and test plans. Export back when you need to.</p></div>
-        <div class="cell"><span class="idx">[06]</span><h3>Open core</h3><p>Apache-2.0. Seven typed packages on npm. The compiler runs locally, in CI, and in your browser.</p></div>
-      </div>
-      <div class="cta-row" style="margin-top:40px">
-        <a class="btn solid" href="https://nerve-demo.vercel.app/projects/robot-platform/diagram">Explore the robot-platform demo</a>
-        <a class="btn ghost" href="https://github.com/tylergibbs1/nerve#quick-start-npm">Quickstart</a>
-      </div>
-    </section>
-  </div>
+  <main>
+    <span class="spec-tag">Interconnect Systems</span>
+    <h1>Harnesses as code.</h1>
+    <p class="sub">Typed wiring harnesses, compiled: one source of truth emits the schematics, BOMs, cut lists, labels, continuity tests, and build records that ship the machine. Deterministic, validated, fail-closed.</p>
+    <div class="links-row">
+      <a href="https://nerve-demo.vercel.app">Open the demo</a>
+      <span class="sep">/</span>
+      <a href="https://github.com/tylergibbs1/nerve">Read the source</a>
+      <span class="sep">/</span>
+      <a href="https://www.npmjs.com/package/@grayhaven/nerve">npm i @grayhaven/nerve</a>
+    </div>
+  </main>
 
   <footer class="footer">
     <span>Grayhaven Industries · Interconnect Systems</span>

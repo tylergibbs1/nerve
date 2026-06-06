@@ -12,15 +12,16 @@ export const Route = createFileRoute("/projects/$projectId/bom")({
 })
 
 const columns: ColumnDef<HirBomItem, string | number>[] = [
-  { id: "idx", header: "#", cell: (ctx) => ctx.row.index + 1, enableSorting: false },
-  { id: "qty", header: "Qty", accessorKey: "quantity" },
-  { id: "uom", header: "UoM", accessorKey: "unitOfMeasure" },
-  { id: "manufacturer", header: "Manufacturer", accessorFn: (r) => r.manufacturer ?? "" },
-  { id: "mpn", header: "MPN", accessorKey: "mpn" },
-  { id: "description", header: "Description", accessorFn: (r) => r.description ?? "" },
-  { id: "category", header: "Category", accessorFn: (r) => r.category ?? "" },
+  { id: "idx", meta: { kind: "num" }, header: "#", cell: (ctx) => ctx.row.index + 1, enableSorting: false },
+  { id: "qty", meta: { kind: "num" }, header: "Qty", accessorKey: "quantity" },
+  { id: "uom", meta: { kind: "text" }, header: "UoM", accessorKey: "unitOfMeasure" },
+  { id: "manufacturer", meta: { kind: "text" }, header: "Manufacturer", accessorFn: (r) => r.manufacturer ?? "" },
+  { id: "mpn", meta: { kind: "code" }, header: "MPN", accessorKey: "mpn" },
+  { id: "description", meta: { kind: "text" }, header: "Description", accessorFn: (r) => r.description ?? "" },
+  { id: "category", meta: { kind: "text" }, header: "Category", accessorFn: (r) => r.category ?? "" },
   {
     id: "usedBy",
+    meta: { kind: "code" },
     header: "Used by",
     accessorFn: (r) => r.usedBy.join(", "),
     enableSorting: false

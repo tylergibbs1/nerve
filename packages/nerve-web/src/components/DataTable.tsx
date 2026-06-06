@@ -8,6 +8,20 @@ import {
   type SortingState
 } from "@tanstack/react-table"
 
+/** Per-column type treatment (reference admin tables): IDs/codes get mono,
+ * numerics get sans + tabular-nums + muted, prose stays sans foreground. */
+export type ColumnKind = "code" | "num" | "text"
+
+declare module "@tanstack/react-table" {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData, TValue> {
+    kind?: ColumnKind
+  }
+}
+
+const cellClass = (kind: ColumnKind | undefined): string =>
+  kind === "code" ? "cell-code" : kind === "num" ? "cell-num" : "cell-text"
+
 export function DataTable<T>({
   data,
   columns,
@@ -73,7 +87,7 @@ export function DataTable<T>({
         {table.getRowModel().rows.map((row) => (
           <tr key={row.id}>
             {row.getVisibleCells().map((cell) => (
-              <td key={cell.id} className="mono">
+              <td key={cell.id} className={cellClass(cell.column.columnDef.meta?.kind)}>
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </td>
             ))}
