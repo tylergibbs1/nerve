@@ -102,6 +102,17 @@ textarea:focus-visible, select:focus-visible {
   transition: color 200ms var(--ease-default);
 }
 .topbar .brand:hover { color: var(--accent-hover); }
+.topnav { margin-left: auto; display: flex; gap: 18px; }
+.topnav a {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  transition: color 200ms var(--ease-default);
+}
+.topnav a:hover { color: var(--text); }
+.topnav a.active { color: var(--accent); }
 .topbar .tagline {
   font-family: var(--mono);
   color: var(--muted);
@@ -111,6 +122,86 @@ textarea:focus-visible, select:focus-visible {
 }
 
 .app-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+/* Docs section: calm sidebar + measured prose column. */
+.docs {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+.docs-nav {
+  width: 200px;
+  flex: 0 0 auto;
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+.docs-nav a {
+  padding: 6px 24px;
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-left: 2px solid transparent;
+  transition: color 200ms var(--ease-default), border-color 200ms var(--ease-default);
+}
+.docs-nav a:hover { color: var(--text); }
+.docs-nav a.active { color: var(--accent); border-left-color: var(--accent); }
+.docs-body {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 40px;
+  max-width: 760px;
+}
+.docs-body h1 {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin: 16px 0 0;
+}
+.docs-body h2 {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin: 36px 0 0;
+}
+.docs-body p { font-size: 14px; line-height: 1.7; color: var(--muted); margin: 16px 0 0; max-width: 620px; }
+.docs-body p code, .docs-body td code {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text);
+  background: var(--muted-bg);
+  padding: 1px 5px;
+}
+.docs-body table.data { margin-top: 20px; }
+.docs-body table.data td.cell-text { white-space: normal; color: var(--muted); }
+.doc-code {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 16px 18px;
+  margin: 16px 0 0;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  overflow-x: auto;
+  color: var(--text);
+}
+.doc-entry { margin-top: 28px; }
+.doc-entry p { margin-top: 10px; }
+@media (max-width: 760px) {
+  .docs { flex-direction: column; }
+  .docs-nav { width: 100%; flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--border); padding: 8px 12px; }
+  .docs-nav a { border-left: none; padding: 6px 10px; }
+}
 
 /* Minimal landing at / — the marketing surface inside the app. */
 .landing {

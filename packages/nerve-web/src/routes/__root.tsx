@@ -39,6 +39,14 @@ function RootLayout() {
           GRAYHAVEN NERVE
         </Link>
         <span className="tagline">harnesses as code</span>
+        <nav className="topnav">
+          <Link to="/projects" activeProps={{ className: "active" }}>
+            Projects
+          </Link>
+          <Link to="/docs" activeProps={{ className: "active" }}>
+            Docs
+          </Link>
+        </nav>
       </header>
       <main className="app-main">
         <Outlet />

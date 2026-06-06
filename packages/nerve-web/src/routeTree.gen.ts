@@ -9,9 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
+import { Route as DocsIndexRouteImport } from './routes/docs.index'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
+import { Route as DocsRulesRouteImport } from './routes/docs.rules'
+import { Route as DocsDslRouteImport } from './routes/docs.dsl'
+import { Route as DocsCliRouteImport } from './routes/docs.cli'
+import { Route as DocsArtifactsRouteImport } from './routes/docs.artifacts'
+import { Route as DocsAiRouteImport } from './routes/docs.ai'
 import { Route as ProjectsProjectIdIndexRouteImport } from './routes/projects.$projectId.index'
 import { Route as ProjectsProjectIdTestsRouteImport } from './routes/projects.$projectId.tests'
 import { Route as ProjectsProjectIdLabelsRouteImport } from './routes/projects.$projectId.labels'
@@ -20,6 +27,11 @@ import { Route as ProjectsProjectIdCutListRouteImport } from './routes/projects.
 import { Route as ProjectsProjectIdBomRouteImport } from './routes/projects.$projectId.bom'
 import { Route as ProjectsProjectIdBoardRouteImport } from './routes/projects.$projectId.board'
 
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -30,10 +42,40 @@ const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
   path: '/projects/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DocsRoute,
+} as any)
 const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
   id: '/projects/$projectId',
   path: '/projects/$projectId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRulesRoute = DocsRulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsDslRoute = DocsDslRouteImport.update({
+  id: '/dsl',
+  path: '/dsl',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsCliRoute = DocsCliRouteImport.update({
+  id: '/cli',
+  path: '/cli',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsArtifactsRoute = DocsArtifactsRouteImport.update({
+  id: '/artifacts',
+  path: '/artifacts',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsAiRoute = DocsAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => DocsRoute,
 } as any)
 const ProjectsProjectIdIndexRoute = ProjectsProjectIdIndexRouteImport.update({
   id: '/',
@@ -75,7 +117,14 @@ const ProjectsProjectIdBoardRoute = ProjectsProjectIdBoardRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/docs/ai': typeof DocsAiRoute
+  '/docs/artifacts': typeof DocsArtifactsRoute
+  '/docs/cli': typeof DocsCliRoute
+  '/docs/dsl': typeof DocsDslRoute
+  '/docs/rules': typeof DocsRulesRoute
   '/projects/$projectId': typeof ProjectsProjectIdRouteWithChildren
+  '/docs/': typeof DocsIndexRoute
   '/projects/': typeof ProjectsIndexRoute
   '/projects/$projectId/board': typeof ProjectsProjectIdBoardRoute
   '/projects/$projectId/bom': typeof ProjectsProjectIdBomRoute
@@ -87,6 +136,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/docs/ai': typeof DocsAiRoute
+  '/docs/artifacts': typeof DocsArtifactsRoute
+  '/docs/cli': typeof DocsCliRoute
+  '/docs/dsl': typeof DocsDslRoute
+  '/docs/rules': typeof DocsRulesRoute
+  '/docs': typeof DocsIndexRoute
   '/projects': typeof ProjectsIndexRoute
   '/projects/$projectId/board': typeof ProjectsProjectIdBoardRoute
   '/projects/$projectId/bom': typeof ProjectsProjectIdBomRoute
@@ -99,7 +154,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/docs/ai': typeof DocsAiRoute
+  '/docs/artifacts': typeof DocsArtifactsRoute
+  '/docs/cli': typeof DocsCliRoute
+  '/docs/dsl': typeof DocsDslRoute
+  '/docs/rules': typeof DocsRulesRoute
   '/projects/$projectId': typeof ProjectsProjectIdRouteWithChildren
+  '/docs/': typeof DocsIndexRoute
   '/projects/': typeof ProjectsIndexRoute
   '/projects/$projectId/board': typeof ProjectsProjectIdBoardRoute
   '/projects/$projectId/bom': typeof ProjectsProjectIdBomRoute
@@ -113,7 +175,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/docs'
+    | '/docs/ai'
+    | '/docs/artifacts'
+    | '/docs/cli'
+    | '/docs/dsl'
+    | '/docs/rules'
     | '/projects/$projectId'
+    | '/docs/'
     | '/projects/'
     | '/projects/$projectId/board'
     | '/projects/$projectId/bom'
@@ -125,6 +194,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/docs/ai'
+    | '/docs/artifacts'
+    | '/docs/cli'
+    | '/docs/dsl'
+    | '/docs/rules'
+    | '/docs'
     | '/projects'
     | '/projects/$projectId/board'
     | '/projects/$projectId/bom'
@@ -136,7 +211,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/docs'
+    | '/docs/ai'
+    | '/docs/artifacts'
+    | '/docs/cli'
+    | '/docs/dsl'
+    | '/docs/rules'
     | '/projects/$projectId'
+    | '/docs/'
     | '/projects/'
     | '/projects/$projectId/board'
     | '/projects/$projectId/bom'
@@ -149,12 +231,20 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DocsRoute: typeof DocsRouteWithChildren
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRouteWithChildren
   ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -169,12 +259,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/': {
+      id: '/docs/'
+      path: '/'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/projects/$projectId': {
       id: '/projects/$projectId'
       path: '/projects/$projectId'
       fullPath: '/projects/$projectId'
       preLoaderRoute: typeof ProjectsProjectIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/docs/rules': {
+      id: '/docs/rules'
+      path: '/rules'
+      fullPath: '/docs/rules'
+      preLoaderRoute: typeof DocsRulesRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/dsl': {
+      id: '/docs/dsl'
+      path: '/dsl'
+      fullPath: '/docs/dsl'
+      preLoaderRoute: typeof DocsDslRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/cli': {
+      id: '/docs/cli'
+      path: '/cli'
+      fullPath: '/docs/cli'
+      preLoaderRoute: typeof DocsCliRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/artifacts': {
+      id: '/docs/artifacts'
+      path: '/artifacts'
+      fullPath: '/docs/artifacts'
+      preLoaderRoute: typeof DocsArtifactsRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/ai': {
+      id: '/docs/ai'
+      path: '/ai'
+      fullPath: '/docs/ai'
+      preLoaderRoute: typeof DocsAiRouteImport
+      parentRoute: typeof DocsRoute
     }
     '/projects/$projectId/': {
       id: '/projects/$projectId/'
@@ -228,6 +360,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface DocsRouteChildren {
+  DocsAiRoute: typeof DocsAiRoute
+  DocsArtifactsRoute: typeof DocsArtifactsRoute
+  DocsCliRoute: typeof DocsCliRoute
+  DocsDslRoute: typeof DocsDslRoute
+  DocsRulesRoute: typeof DocsRulesRoute
+  DocsIndexRoute: typeof DocsIndexRoute
+}
+
+const DocsRouteChildren: DocsRouteChildren = {
+  DocsAiRoute: DocsAiRoute,
+  DocsArtifactsRoute: DocsArtifactsRoute,
+  DocsCliRoute: DocsCliRoute,
+  DocsDslRoute: DocsDslRoute,
+  DocsRulesRoute: DocsRulesRoute,
+  DocsIndexRoute: DocsIndexRoute,
+}
+
+const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
+
 interface ProjectsProjectIdRouteChildren {
   ProjectsProjectIdBoardRoute: typeof ProjectsProjectIdBoardRoute
   ProjectsProjectIdBomRoute: typeof ProjectsProjectIdBomRoute
@@ -253,6 +405,7 @@ const ProjectsProjectIdRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DocsRoute: DocsRouteWithChildren,
   ProjectsProjectIdRoute: ProjectsProjectIdRouteWithChildren,
   ProjectsIndexRoute: ProjectsIndexRoute,
 }

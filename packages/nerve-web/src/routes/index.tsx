@@ -18,6 +18,8 @@ function Landing() {
       <div className="landing-links">
         <Link to="/projects">Open the demo</Link>
         <span className="sep">/</span>
+        <Link to="/docs">Read the docs</Link>
+        <span className="sep">/</span>
         <a href="https://github.com/tylergibbs1/nerve">Read the source</a>
         <span className="sep">/</span>
         <a href="https://www.npmjs.com/package/@grayhaven/nerve">npm i @grayhaven/nerve</a>
