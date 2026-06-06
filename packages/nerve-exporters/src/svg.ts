@@ -8,7 +8,7 @@
  * Layout is intentionally simple and fully deterministic: connectors
  * alternate between a left and right column in canonical HIR order.
  */
-import type { Hir } from "@grayhaven/nerve"
+import { isPinEndpoint, type Hir, type HirEndpoint } from "@grayhaven/nerve"
 import { renderSvg, type DrawItem, type Drawing } from "./drawing.js"
 
 const BOX_W = 180
@@ -68,10 +68,22 @@ export const schematicDrawing = (hir: Hir): Drawing => {
     )
   )
 
+  // Splices live in the channel between the columns.
+  const spliceCenterX = MARGIN + BOX_W + COL_GAP / 2
+  const splicePos = new Map(
+    hir.splices.map((s, i) => [
+      s.id,
+      { x: spliceCenterX, y: TITLE_H + MARGIN + 60 + i * 70 }
+    ])
+  )
+
   const width = rightX + BOX_W + MARGIN
   const height =
-    Math.max(...[...placed.values()].map((p) => p.y + p.height), TITLE_H + MARGIN) +
-    MARGIN
+    Math.max(
+      ...[...placed.values()].map((p) => p.y + p.height),
+      ...[...splicePos.values()].map((p) => p.y + 40),
+      TITLE_H + MARGIN
+    ) + MARGIN
 
   const errorWires = new Set(
     hir.diagnostics
@@ -99,20 +111,36 @@ export const schematicDrawing = (hir: Hir): Drawing => {
     }
   ]
 
+  // Resolve an endpoint to its anchor point and curve direction.
+  const anchorOf = (
+    e: HirEndpoint
+  ): { x: number; y: number; dir: 1 | -1 | 0 } | undefined => {
+    if (isPinEndpoint(e)) {
+      const p = placed.get(e.connector)
+      const y = p?.pinY.get(e.pin)
+      if (p === undefined || y === undefined) return undefined
+      return p.side === "left"
+        ? { x: p.x + BOX_W, y, dir: 1 }
+        : { x: p.x, y, dir: -1 }
+    }
+    const s = splicePos.get(e.splice)
+    return s !== undefined ? { x: s.x, y: s.y, dir: 0 } : undefined
+  }
+
   // Wires beneath connector boxes.
   for (const w of hir.wires) {
-    const from = placed.get(w.from.connector)
-    const to = placed.get(w.to.connector)
-    const y1 = from?.pinY.get(w.from.pin)
-    const y2 = to?.pinY.get(w.to.pin)
-    if (from === undefined || to === undefined || y1 === undefined || y2 === undefined) {
+    const a = anchorOf(w.from)
+    const b = anchorOf(w.to)
+    if (a === undefined || b === undefined) {
       continue // structural diagnostics already flagged the dangling endpoint
     }
-    const x1 = from.side === "left" ? from.x + BOX_W : from.x
-    const x2 = to.side === "left" ? to.x + BOX_W : to.x
+    const { x: x1, y: y1 } = a
+    const { x: x2, y: y2 } = b
     const dx = Math.max(60, Math.abs(x2 - x1) / 3)
-    const c1 = from.side === "left" ? x1 + dx : x1 - dx
-    const c2 = to.side === "left" ? x2 + dx : x2 - dx
+    const dir1 = a.dir !== 0 ? a.dir : x2 > x1 ? 1 : -1
+    const dir2 = b.dir !== 0 ? b.dir : x1 > x2 ? 1 : -1
+    const c1 = x1 + dir1 * dx
+    const c2 = x2 + dir2 * dx
     const isError = errorWires.has(w.id)
     items.push({
       kind: "path",
@@ -177,6 +205,24 @@ export const schematicDrawing = (hir: Hir): Drawing => {
         { kind: "text", x: p.x + 34, y: y + 4, text: pin.signal ?? "", fill: "#555" }
       )
     }
+  }
+
+  // Splice symbols (PRD §9.5.1) above the wires that meet them.
+  for (const s of hir.splices) {
+    const pos = splicePos.get(s.id)
+    if (pos === undefined) continue
+    items.push(
+      { kind: "circle", cx: pos.x, cy: pos.y, r: 6, fill: "#333" },
+      {
+        kind: "text",
+        x: pos.x,
+        y: pos.y - 12,
+        text: `${s.id}${s.type !== undefined ? ` · ${s.type}` : ""}`,
+        size: 11,
+        fill: "#333",
+        anchor: "middle"
+      }
+    )
   }
 
   return { width, height, background: "#fafafa", items }

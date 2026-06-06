@@ -159,6 +159,23 @@ export const boardDrawing = (hir: Hir): Drawing => {
       )
     }
 
+    // Splices located on this branch.
+    for (const s of hir.splices.filter((sp) => sp.branch === branch.id)) {
+      const sx = x0 + Math.min((s.location ?? 0) * SCALE, len)
+      items.push(
+        { kind: "circle", cx: sx, cy: cy, r: 6, fill: "#333" },
+        {
+          kind: "text",
+          x: sx,
+          y: cy + NODE_H / 2 + 30,
+          text: `${s.id}${s.type !== undefined ? ` (${s.type})` : ""}`,
+          size: 11,
+          fill: "#333",
+          anchor: "middle"
+        }
+      )
+    }
+
     // Breakout children: drop down-right from the breakout point.
     let childY = cy
     for (const child of children(branch.id)) {

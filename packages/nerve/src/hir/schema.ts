@@ -19,6 +19,13 @@ export const HirPinRef = Schema.Struct({
   pin: Schema.String
 })
 
+export const HirSpliceRef = Schema.Struct({
+  splice: Schema.String
+})
+
+/** A wire endpoint: a connector pin or a splice node. */
+export const HirEndpoint = Schema.Union(HirPinRef, HirSpliceRef)
+
 export const HirPin = Schema.Struct({
   pin: Schema.String,
   signal: Schema.optional(Schema.String)
@@ -40,8 +47,8 @@ export const HirConnector = Schema.Struct({
 
 export const HirWire = Schema.Struct({
   id: Schema.String,
-  from: HirPinRef,
-  to: HirPinRef,
+  from: HirEndpoint,
+  to: HirEndpoint,
   gauge: Schema.optional(Schema.String),
   color: Schema.optional(Schema.String),
   stripe: Schema.optional(Schema.String),
@@ -54,8 +61,35 @@ export const HirWire = Schema.Struct({
   currentEstimate: Schema.optional(Schema.Number),
   twistGroup: Schema.optional(Schema.String),
   shieldGroup: Schema.optional(Schema.String),
+  cable: Schema.optional(Schema.String),
+  conductor: Schema.optional(Schema.String),
   branch: Schema.optional(Schema.String),
   notes: Schema.optional(Schema.String)
+})
+
+export const HirSplice = Schema.Struct({
+  id: Schema.String,
+  type: Schema.optional(Schema.String),
+  part: Schema.optional(Schema.String),
+  branch: Schema.optional(Schema.String),
+  location: Schema.optional(Schema.Number),
+  notes: Schema.optional(Schema.String),
+  /** Wire IDs attached to this splice (computed by the compiler). */
+  wires: Schema.Array(Schema.String)
+})
+
+export const HirCable = Schema.Struct({
+  id: Schema.String,
+  type: Schema.optional(Schema.String),
+  conductors: Schema.optional(Schema.Number),
+  shield: Schema.optional(Schema.String),
+  jacket: Schema.optional(Schema.String),
+  outerDiameter: Schema.optional(Schema.Number),
+  /** Longest member wire — the cable cut length (computed). */
+  cutLength: Schema.optional(Schema.Number),
+  notes: Schema.optional(Schema.String),
+  /** Member wire IDs (computed by the compiler). */
+  wires: Schema.Array(Schema.String)
 })
 
 export const HirBranch = Schema.Struct({
@@ -106,9 +140,9 @@ export const Hir = Schema.Struct({
   }),
   connectors: Schema.Array(HirConnector),
   wires: Schema.Array(HirWire),
-  cables: Schema.Array(Schema.Unknown),
+  cables: Schema.Array(HirCable),
   branches: Schema.Array(HirBranch),
-  splices: Schema.Array(Schema.Unknown),
+  splices: Schema.Array(HirSplice),
   labels: Schema.Array(HirLabel),
   bom: Schema.Array(HirBomItem),
   diagnostics: Schema.Array(HirDiagnostic),
@@ -123,6 +157,17 @@ export type HirBranch = Schema.Schema.Type<typeof HirBranch>
 export type HirLabel = Schema.Schema.Type<typeof HirLabel>
 export type HirBomItem = Schema.Schema.Type<typeof HirBomItem>
 export type HirPinRef = Schema.Schema.Type<typeof HirPinRef>
+export type HirSpliceRef = Schema.Schema.Type<typeof HirSpliceRef>
+export type HirEndpoint = Schema.Schema.Type<typeof HirEndpoint>
+export type HirSplice = Schema.Schema.Type<typeof HirSplice>
+export type HirCable = Schema.Schema.Type<typeof HirCable>
+
+/** Narrow an endpoint to a pin ref. */
+export const isPinEndpoint = (e: HirEndpoint): e is HirPinRef => "connector" in e
+
+/** Stable display form: `J1.1` or `S1`. */
+export const endpointLabel = (e: HirEndpoint): string =>
+  isPinEndpoint(e) ? `${e.connector}.${e.pin}` : e.splice
 
 /** Decode an untrusted value (e.g. a cached `harness.json`) into HIR. Throws `ParseError`. */
 export const decodeHir = Schema.decodeUnknownSync(Hir)

@@ -14,13 +14,17 @@
 import type { HarnessDesign } from "./domain.js"
 import { Codes, DiagnosticSeverity, type Diagnostic } from "./diagnostics.js"
 import {
+  endpointLabel,
   HIR_SCHEMA_VERSION,
   refs,
   type Hir,
   type HirBomItem,
   type HirBranch,
+  type HirCable,
   type HirConnector,
+  type HirEndpoint,
   type HirLabel,
+  type HirSplice,
   type HirWire
 } from "./hir/schema.js"
 
@@ -106,7 +110,42 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
     return Number.isInteger(n) && n >= 1 && n <= c.part.pinCount
   }
 
-  const checkEndpoint = (owner: string, end: { connector: string; pin: string }) => {
+  // Splice IDs must be known before wires can validate endpoints.
+  const spliceIds = new Set<string>()
+  for (const s of design.splices) {
+    if (spliceIds.has(s.id)) {
+      report(
+        Codes.DuplicateSpliceId,
+        `Splice ID ${s.id} is defined more than once.`,
+        refs.splice(s.id)
+      )
+    }
+    spliceIds.add(s.id)
+  }
+
+  const cableIds = new Set<string>()
+  for (const c of design.cables) {
+    if (cableIds.has(c.id)) {
+      report(
+        Codes.DuplicateCableId,
+        `Cable ID ${c.id} is defined more than once.`,
+        `cable:${c.id}`
+      )
+    }
+    cableIds.add(c.id)
+  }
+
+  const checkEndpoint = (owner: string, end: HirEndpoint) => {
+    if (!("connector" in end)) {
+      if (!spliceIds.has(end.splice)) {
+        report(
+          Codes.UndefinedSpliceRef,
+          `${owner} references undefined splice ${end.splice}.`,
+          refs.splice(end.splice)
+        )
+      }
+      return
+    }
     if (!connectorByRef.has(end.connector)) {
       report(
         Codes.UndefinedConnectorRef,
@@ -121,6 +160,11 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
       )
     }
   }
+
+  const toHirEndpoint = (e: (typeof design.wires)[number]["from"]): HirEndpoint =>
+    e.kind === "pin-ref"
+      ? { connector: e.connector, pin: e.pin }
+      : { splice: e.splice }
 
   // --- Wires --------------------------------------------------------------
   const wireIds = new Set<string>()
@@ -137,12 +181,21 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
     wireIds.add(w.id)
 
     const ownerLabel = `Wire ${w.id}`
-    checkEndpoint(ownerLabel, w.from)
-    checkEndpoint(ownerLabel, w.to)
-    if (w.from.connector === w.to.connector && w.from.pin === w.to.pin) {
+    const from = toHirEndpoint(w.from)
+    const to = toHirEndpoint(w.to)
+    checkEndpoint(ownerLabel, from)
+    checkEndpoint(ownerLabel, to)
+    if (endpointLabel(from) === endpointLabel(to)) {
       report(
         Codes.WireEndpointsIdentical,
-        `Wire ${w.id} starts and ends on the same pin ${w.from.connector}.${w.from.pin}.`,
+        `Wire ${w.id} starts and ends on the same endpoint ${endpointLabel(from)}.`,
+        refs.wire(w.id)
+      )
+    }
+    if (w.cable !== undefined && !cableIds.has(w.cable)) {
+      report(
+        Codes.UndefinedCableRef,
+        `Wire ${w.id} references undefined cable ${w.cable}.`,
         refs.wire(w.id)
       )
     }
@@ -150,8 +203,8 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
     wires.push(
       compact({
         id: w.id,
-        from: { connector: w.from.connector, pin: w.from.pin },
-        to: { connector: w.to.connector, pin: w.to.pin },
+        from,
+        to,
         gauge: w.gauge,
         color: w.color,
         stripe: w.stripe,
@@ -164,11 +217,85 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         currentEstimate: w.currentEstimate,
         twistGroup: w.twistGroup,
         shieldGroup: w.shieldGroup,
+        cable: w.cable,
+        conductor: w.conductor !== undefined ? String(w.conductor) : undefined,
         notes: w.notes
       })
     )
   }
   wires.sort((a, b) => compareStrings(a.id, b.id))
+
+  // --- Splices --------------------------------------------------------------
+  const spliceWires = (id: string): Array<string> =>
+    wires
+      .filter(
+        (w) =>
+          (!("connector" in w.from) && w.from.splice === id) ||
+          (!("connector" in w.to) && w.to.splice === id)
+      )
+      .map((w) => w.id)
+
+  const designBranchIds = new Set(design.branches.map((b) => b.id))
+  const seenSplices = new Set<string>()
+  const splices: Array<HirSplice> = []
+  for (const s of design.splices) {
+    if (seenSplices.has(s.id)) continue // duplicate already reported
+    seenSplices.add(s.id)
+    if (s.branch !== undefined && !designBranchIds.has(s.branch)) {
+      report(
+        Codes.SpliceUndefinedBranch,
+        `Splice ${s.id} is located on undefined branch ${s.branch}.`,
+        refs.splice(s.id)
+      )
+    }
+    const attached = spliceWires(s.id)
+    if (attached.length < 2) {
+      report(
+        Codes.SpliceTooFewWires,
+        `Splice ${s.id} joins ${attached.length} wire(s); a splice needs at least 2.`,
+        refs.splice(s.id),
+        DiagnosticSeverity.Error
+      )
+    }
+    splices.push(
+      compact({
+        id: s.id,
+        type: s.type,
+        part: s.part,
+        branch: s.branch,
+        location: s.location,
+        notes: s.notes,
+        wires: attached
+      })
+    )
+  }
+  splices.sort((a, b) => compareStrings(a.id, b.id))
+
+  // --- Cables ---------------------------------------------------------------
+  const seenCables = new Set<string>()
+  const cables: Array<HirCable> = []
+  for (const c of design.cables) {
+    if (seenCables.has(c.id)) continue
+    seenCables.add(c.id)
+    const members = wires.filter((w) => w.cable === c.id)
+    const lengths = members
+      .map((w) => w.length)
+      .filter((l): l is number => l !== undefined)
+    cables.push(
+      compact({
+        id: c.id,
+        type: c.type,
+        conductors: c.conductors,
+        shield: c.shield,
+        jacket: c.jacket,
+        outerDiameter: c.outerDiameter,
+        cutLength: lengths.length > 0 ? Math.max(...lengths) : undefined,
+        notes: c.notes,
+        wires: members.map((w) => w.id)
+      })
+    )
+  }
+  cables.sort((a, b) => compareStrings(a.id, b.id))
 
   // --- Branches -----------------------------------------------------------
   const branchIds = new Set<string>()
@@ -292,9 +419,9 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
     },
     connectors,
     wires,
-    cables: [],
+    cables,
     branches,
-    splices: [],
+    splices,
     labels,
     bom,
     diagnostics,

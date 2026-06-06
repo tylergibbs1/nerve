@@ -16,6 +16,7 @@
   "devDependencies": {
     "@grayhaven/nerve-compiler": "workspace:*",
     "@grayhaven/nerve-connectors": "workspace:*",
+    "@grayhaven/nerve-rules": "workspace:*",
     "@types/node": "^25.9.2",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"

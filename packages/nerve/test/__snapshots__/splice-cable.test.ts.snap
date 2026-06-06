@@ -1,0 +1,314 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden snapshot 1`] = `
+{
+  "bom": [
+    {
+      "category": "connector",
+      "description": "JST PH housing, 3 circuits",
+      "manufacturer": "JST",
+      "mpn": "PHR-3",
+      "quantity": 2,
+      "unitOfMeasure": "ea",
+      "usedBy": [
+        "connector:P1",
+        "connector:P2",
+      ],
+    },
+    {
+      "category": "connector",
+      "description": "JST PH housing, 4 circuits",
+      "manufacturer": "JST",
+      "mpn": "PHR-4",
+      "quantity": 1,
+      "unitOfMeasure": "ea",
+      "usedBy": [
+        "connector:J1",
+      ],
+    },
+  ],
+  "branches": [
+    {
+      "id": "main",
+      "nominalLength": 300,
+      "path": [
+        "J1",
+        "P1",
+        "P2",
+      ],
+      "sleeve": "braided-pet",
+    },
+  ],
+  "cables": [
+    {
+      "conductors": 2,
+      "cutLength": 300,
+      "id": "C1",
+      "jacket": "PVC",
+      "outerDiameter": 3.4,
+      "shield": "braid",
+      "type": "2x26AWG twisted shielded",
+      "wires": [
+        "W7",
+        "W8",
+      ],
+    },
+  ],
+  "connectors": [
+    {
+      "description": "JST PH housing, 4 circuits",
+      "family": "PH",
+      "gender": "receptacle",
+      "manufacturer": "JST",
+      "mpn": "PHR-4",
+      "pinCount": 4,
+      "pins": [
+        {
+          "pin": "1",
+          "signal": "V5",
+        },
+        {
+          "pin": "2",
+          "signal": "GND",
+        },
+        {
+          "pin": "3",
+          "signal": "CAN_H",
+        },
+        {
+          "pin": "4",
+          "signal": "CAN_L",
+        },
+      ],
+      "ref": "J1",
+      "wireGaugeRange": {
+        "max": "24AWG",
+        "min": "32AWG",
+      },
+    },
+    {
+      "description": "JST PH housing, 3 circuits",
+      "family": "PH",
+      "gender": "receptacle",
+      "manufacturer": "JST",
+      "mpn": "PHR-3",
+      "pinCount": 3,
+      "pins": [
+        {
+          "pin": "1",
+          "signal": "V5",
+        },
+        {
+          "pin": "2",
+          "signal": "GND",
+        },
+        {
+          "pin": "3",
+          "signal": "CAN_H",
+        },
+      ],
+      "ref": "P1",
+      "wireGaugeRange": {
+        "max": "24AWG",
+        "min": "32AWG",
+      },
+    },
+    {
+      "description": "JST PH housing, 3 circuits",
+      "family": "PH",
+      "gender": "receptacle",
+      "manufacturer": "JST",
+      "mpn": "PHR-3",
+      "pinCount": 3,
+      "pins": [
+        {
+          "pin": "1",
+          "signal": "V5",
+        },
+        {
+          "pin": "2",
+          "signal": "GND",
+        },
+        {
+          "pin": "3",
+          "signal": "CAN_L",
+        },
+      ],
+      "ref": "P2",
+      "wireGaugeRange": {
+        "max": "24AWG",
+        "min": "32AWG",
+      },
+    },
+  ],
+  "diagnostics": [],
+  "exports": {},
+  "harness": {
+    "id": "sensor-splice-harness",
+    "metadata": {},
+    "revision": "A",
+    "units": "mm",
+  },
+  "labels": [
+    {
+      "attachTo": "main",
+      "distance": 40,
+      "id": "L1",
+      "offsetFrom": "J1",
+      "text": "SENSOR TRUNK",
+    },
+  ],
+  "layoutHints": [],
+  "schemaVersion": "0.1.0",
+  "splices": [
+    {
+      "branch": "main",
+      "id": "S1",
+      "location": 120,
+      "notes": "Seal with adhesive-lined heat shrink.",
+      "part": "GT-0.5",
+      "type": "crimp",
+      "wires": [
+        "W1",
+        "W2",
+        "W3",
+      ],
+    },
+    {
+      "branch": "main",
+      "id": "S2",
+      "location": 130,
+      "notes": "Seal with adhesive-lined heat shrink.",
+      "part": "GT-0.5",
+      "type": "crimp",
+      "wires": [
+        "W4",
+        "W5",
+        "W6",
+      ],
+    },
+  ],
+  "wires": [
+    {
+      "color": "red",
+      "from": {
+        "connector": "J1",
+        "pin": "1",
+      },
+      "gauge": "24AWG",
+      "id": "W1",
+      "length": 120,
+      "signal": "V5",
+      "to": {
+        "splice": "S1",
+      },
+    },
+    {
+      "color": "red",
+      "from": {
+        "splice": "S1",
+      },
+      "gauge": "26AWG",
+      "id": "W2",
+      "length": 180,
+      "signal": "V5",
+      "to": {
+        "connector": "P1",
+        "pin": "1",
+      },
+    },
+    {
+      "color": "red",
+      "from": {
+        "splice": "S1",
+      },
+      "gauge": "26AWG",
+      "id": "W3",
+      "length": 220,
+      "signal": "V5",
+      "to": {
+        "connector": "P2",
+        "pin": "1",
+      },
+    },
+    {
+      "color": "black",
+      "from": {
+        "connector": "J1",
+        "pin": "2",
+      },
+      "gauge": "24AWG",
+      "id": "W4",
+      "length": 130,
+      "signal": "GND",
+      "to": {
+        "splice": "S2",
+      },
+    },
+    {
+      "color": "black",
+      "from": {
+        "splice": "S2",
+      },
+      "gauge": "26AWG",
+      "id": "W5",
+      "length": 170,
+      "signal": "GND",
+      "to": {
+        "connector": "P1",
+        "pin": "2",
+      },
+    },
+    {
+      "color": "black",
+      "from": {
+        "splice": "S2",
+      },
+      "gauge": "26AWG",
+      "id": "W6",
+      "length": 210,
+      "signal": "GND",
+      "to": {
+        "connector": "P2",
+        "pin": "2",
+      },
+    },
+    {
+      "cable": "C1",
+      "color": "white",
+      "conductor": "1",
+      "from": {
+        "connector": "J1",
+        "pin": "3",
+      },
+      "gauge": "26AWG",
+      "id": "W7",
+      "length": 300,
+      "signal": "CAN_H",
+      "to": {
+        "connector": "P1",
+        "pin": "3",
+      },
+      "twistGroup": "CAN",
+    },
+    {
+      "cable": "C1",
+      "color": "blue",
+      "conductor": "2",
+      "from": {
+        "connector": "J1",
+        "pin": "4",
+      },
+      "gauge": "26AWG",
+      "id": "W8",
+      "length": 300,
+      "signal": "CAN_L",
+      "to": {
+        "connector": "P2",
+        "pin": "3",
+      },
+      "twistGroup": "CAN",
+    },
+  ],
+}
+`;

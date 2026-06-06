@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
-import type { HirWire } from "@grayhaven/nerve"
+import { endpointLabel, type HirWire } from "@grayhaven/nerve"
 import { DataTable } from "../components/DataTable.js"
 import { useCompile } from "../lib/compile-client.js"
 
@@ -14,9 +14,10 @@ const columns: ColumnDef<HirWire, string | number>[] = [
   { header: "Gauge", accessorFn: (w) => w.gauge ?? "" },
   { header: "Color", accessorFn: (w) => w.color ?? "" },
   { header: "Length", accessorFn: (w) => w.length ?? "—" },
-  { header: "From", accessorFn: (w) => `${w.from.connector}.${w.from.pin}` },
-  { header: "To", accessorFn: (w) => `${w.to.connector}.${w.to.pin}` },
-  { header: "Twist", accessorFn: (w) => w.twistGroup ?? "" }
+  { header: "From", accessorFn: (w) => endpointLabel(w.from) },
+  { header: "To", accessorFn: (w) => endpointLabel(w.to) },
+  { header: "Twist", accessorFn: (w) => w.twistGroup ?? "" },
+  { header: "Cable", accessorFn: (w) => w.cable ?? "" }
 ]
 
 function CutListView() {

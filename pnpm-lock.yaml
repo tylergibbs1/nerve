@@ -31,6 +31,19 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
+  examples/sensor-splice:
+    dependencies:
+      '@grayhaven/nerve':
+        specifier: workspace:*
+        version: link:../../packages/nerve
+      '@grayhaven/nerve-connectors':
+        specifier: workspace:*
+        version: link:../../packages/nerve-connectors
+    devDependencies:
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
   packages/nerve:
     dependencies:
       effect:
@@ -134,6 +147,9 @@ importers:
       '@grayhaven/nerve-connectors':
         specifier: workspace:*
         version: link:../nerve-connectors
+      '@grayhaven/nerve-rules':
+        specifier: workspace:*
+        version: link:../nerve-rules
       '@types/node':
         specifier: ^25.9.2
         version: 25.9.2
@@ -165,6 +181,9 @@ importers:
       '@grayhaven/example-motor-controller':
         specifier: workspace:*
         version: link:../../examples/motor-controller
+      '@grayhaven/example-sensor-splice':
+        specifier: workspace:*
+        version: link:../../examples/sensor-splice
       '@grayhaven/nerve':
         specifier: workspace:*
         version: link:../nerve

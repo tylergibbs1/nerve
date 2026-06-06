@@ -37,6 +37,15 @@ export interface PinRef {
   readonly pin: string
 }
 
+/** A reference to a splice node. */
+export interface SpliceRef {
+  readonly kind: "splice-ref"
+  readonly splice: string
+}
+
+/** Where a wire terminates: a connector pin or a splice. */
+export type WireEndpoint = PinRef | SpliceRef
+
 /** Map of pin number/name to assigned signal name. */
 export type PinAssignments = Readonly<Record<string | number, string>>
 
@@ -63,14 +72,51 @@ export interface WireProps {
   readonly currentEstimate?: number
   readonly twistGroup?: string
   readonly shieldGroup?: string
+  /** Cable this wire is a conductor of (see `cable()`). */
+  readonly cable?: string
+  /** Conductor number/name within the cable. */
+  readonly conductor?: string | number
   readonly notes?: string
 }
 
 export interface WireDef extends WireProps {
   readonly kind: "wire"
   readonly id: string
-  readonly from: PinRef
-  readonly to: PinRef
+  readonly from: WireEndpoint
+  readonly to: WireEndpoint
+}
+
+export interface SpliceProps {
+  /** crimp, solder-sleeve, ultrasonic-weld, ... */
+  readonly type?: string
+  /** Crimp or solder-sleeve part number. */
+  readonly part?: string
+  /** Branch the splice sits on. */
+  readonly branch?: string
+  /** Distance along the branch from its start, in harness units. */
+  readonly location?: number
+  /** Seal / heat-shrink / inspection notes (PRD §9.2). */
+  readonly notes?: string
+}
+
+export interface SpliceDef extends SpliceProps {
+  readonly kind: "splice"
+  readonly id: string
+}
+
+export interface CableProps {
+  /** Catalog type, e.g. "2x24AWG twisted shielded". */
+  readonly type?: string
+  readonly conductors?: number
+  readonly shield?: string
+  readonly jacket?: string
+  readonly outerDiameter?: number
+  readonly notes?: string
+}
+
+export interface CableDef extends CableProps {
+  readonly kind: "cable"
+  readonly id: string
 }
 
 export interface BranchProps {
@@ -119,6 +165,8 @@ export interface HarnessProps {
   readonly wires: ReadonlyArray<WireDef>
   readonly branches?: ReadonlyArray<BranchDef>
   readonly labels?: ReadonlyArray<LabelDef>
+  readonly splices?: ReadonlyArray<SpliceDef>
+  readonly cables?: ReadonlyArray<CableDef>
 }
 
 /** The root design object returned by `harness(...)` — the unit of compilation. */
@@ -132,4 +180,6 @@ export interface HarnessDesign {
   readonly wires: ReadonlyArray<WireDef>
   readonly branches: ReadonlyArray<BranchDef>
   readonly labels: ReadonlyArray<LabelDef>
+  readonly splices: ReadonlyArray<SpliceDef>
+  readonly cables: ReadonlyArray<CableDef>
 }

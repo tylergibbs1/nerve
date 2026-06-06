@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@grayhaven/example-motor-controller": "workspace:*",
+    "@grayhaven/example-sensor-splice": "workspace:*",
     "@grayhaven/nerve": "workspace:*",
     "@grayhaven/nerve-exporters": "workspace:*",
     "@grayhaven/nerve-rules": "workspace:*",

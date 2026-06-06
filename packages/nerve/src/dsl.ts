@@ -8,6 +8,8 @@
 import type {
   BranchDef,
   BranchProps,
+  CableDef,
+  CableProps,
   ConnectorInstance,
   ConnectorPart,
   HarnessDesign,
@@ -16,7 +18,10 @@ import type {
   LabelProps,
   PinAssignments,
   PinRef,
+  SpliceDef,
+  SpliceProps,
   WireDef,
+  WireEndpoint,
   WireProps
 } from "./domain.js"
 
@@ -46,17 +51,43 @@ export const connector = (
   }
 }
 
-/** Define a wire between two pins: `wire("W1", j1.pin(1), m1.pin(1), { gauge: "18AWG", ... })`. */
+/** Anything a wire can terminate on: a pin ref, a splice (def or ref). */
+export type EndpointInput = PinRef | SpliceDef | { kind: "splice-ref"; splice: string }
+
+const toEndpoint = (input: EndpointInput): WireEndpoint =>
+  input.kind === "splice"
+    ? { kind: "splice-ref", splice: input.id }
+    : input
+
+/**
+ * Define a wire between two endpoints:
+ * `wire("W1", j1.pin(1), m1.pin(1), { gauge: "18AWG", ... })` or
+ * `wire("W5", j1.pin(2), s1, {...})` where `s1` is a splice.
+ */
 export const wire = (
   id: string,
-  from: PinRef,
-  to: PinRef,
+  from: EndpointInput,
+  to: EndpointInput,
   props: WireProps = {}
 ): WireDef => ({
   kind: "wire",
   id,
-  from,
-  to,
+  from: toEndpoint(from),
+  to: toEndpoint(to),
+  ...props
+})
+
+/** Define a splice node: `splice("S1", { type: "crimp", branch: "main", location: 120 })`. */
+export const splice = (id: string, props: SpliceProps = {}): SpliceDef => ({
+  kind: "splice",
+  id,
+  ...props
+})
+
+/** Define a multi-conductor cable that wires can belong to via `cable`/`conductor` props. */
+export const cable = (id: string, props: CableProps = {}): CableDef => ({
+  kind: "cable",
+  id,
   ...props
 })
 
@@ -93,5 +124,7 @@ export const harness = (id: string, props: HarnessProps): HarnessDesign => ({
   connectors: props.connectors,
   wires: props.wires,
   branches: props.branches ?? [],
-  labels: props.labels ?? []
+  labels: props.labels ?? [],
+  splices: props.splices ?? [],
+  cables: props.cables ?? []
 })

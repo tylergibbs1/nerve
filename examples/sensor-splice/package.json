@@ -1,0 +1,17 @@
+{
+  "name": "@grayhaven/example-sensor-splice",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Example exercising splices and cables: one power feed spliced to two sensors, CAN in a shielded cable.",
+  "exports": {
+    ".": "./src/main.harness.ts"
+  },
+  "dependencies": {
+    "@grayhaven/nerve": "workspace:*",
+    "@grayhaven/nerve-connectors": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

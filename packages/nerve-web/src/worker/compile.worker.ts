@@ -10,10 +10,12 @@ import { compileDesign, runRules, type HarnessDesign } from "@grayhaven/nerve"
 import { builtinRules } from "@grayhaven/nerve-rules"
 import { boardSvg, generateTestPlan, schematicSvg } from "@grayhaven/nerve-exporters"
 import motorController from "@grayhaven/example-motor-controller"
+import sensorSplice from "@grayhaven/example-sensor-splice"
 import type { CompileRequest, CompileResponse } from "../lib/compile-types.js"
 
 const designs: Readonly<Record<string, HarnessDesign>> = {
-  "motor-controller": motorController
+  "motor-controller": motorController,
+  "sensor-splice": sensorSplice
 }
 
 self.onmessage = (event: MessageEvent<CompileRequest>) => {

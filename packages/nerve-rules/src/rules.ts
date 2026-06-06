@@ -5,7 +5,15 @@
  * that projects can override per-rule via `RuleConfig`
  * (e.g. `{ missingWireLength: "error" }`).
  */
-import { DiagnosticSeverity, refs, rule, type Hir, type Rule } from "@grayhaven/nerve"
+import {
+  DiagnosticSeverity,
+  isPinEndpoint,
+  refs,
+  rule,
+  type Hir,
+  type HirEndpoint,
+  type Rule
+} from "@grayhaven/nerve"
 import {
   AMPACITY_BY_AWG,
   differentialPartner,
@@ -18,8 +26,8 @@ import {
 
 const { Error: Err, Warning: Warn } = DiagnosticSeverity
 
-const endpointKey = (e: { connector: string; pin: string }): string =>
-  `${e.connector}:${e.pin}`
+const endpointKey = (e: HirEndpoint): string =>
+  isPinEndpoint(e) ? `${e.connector}:${e.pin}` : `splice:${e.splice}`
 
 /** Pins touched by at least one wire endpoint. */
 const wiredPins = (hir: Hir): ReadonlySet<string> => {
@@ -61,6 +69,22 @@ export const branchMissingLabel: Rule = rule(
     }
   },
   { code: "HK-DOC-002" }
+)
+
+export const spliceMissingNotes: Rule = rule(
+  "spliceMissingNotes",
+  (ctx) => {
+    for (const s of ctx.hir.splices) {
+      if (s.notes === undefined && s.type === undefined && s.part === undefined) {
+        ctx.report({
+          severity: Warn,
+          message: `Splice ${s.id} has no type, part, or manufacturing notes.`,
+          target: refs.splice(s.id)
+        })
+      }
+    }
+  },
+  { code: "HK-DOC-003" }
 )
 
 // --- Manufacturing ----------------------------------------------------------
@@ -121,6 +145,7 @@ export const gaugeOutsideConnectorRange: Rule = rule(
       const awg = w.gauge !== undefined ? parseAwg(w.gauge) : undefined
       if (awg === undefined) continue
       for (const end of [w.from, w.to]) {
+        if (!isPinEndpoint(end)) continue
         const range = byRef.get(end.connector)?.wireGaugeRange
         if (range === undefined) continue
         const thinnest = parseAwg(range.min)
@@ -289,6 +314,7 @@ export const wireSignalMismatch: Rule = rule(
     for (const w of ctx.hir.wires) {
       if (w.signal === undefined) continue
       for (const end of [w.from, w.to]) {
+        if (!isPinEndpoint(end)) continue
         const pinSignal = byRef
           .get(end.connector)
           ?.pins.find((p) => p.pin === end.pin)?.signal
@@ -309,6 +335,7 @@ export const wireSignalMismatch: Rule = rule(
 export const builtinRules: ReadonlyArray<Rule> = [
   missingRevision,
   branchMissingLabel,
+  spliceMissingNotes,
   missingWireLength,
   missingWireColor,
   missingWireGauge,

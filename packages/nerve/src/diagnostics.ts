@@ -33,7 +33,13 @@ export const Codes = {
   DuplicateBranchId: "HK-BRANCH-001",
   BranchUndefinedEndpoint: "HK-BRANCH-002",
   DuplicateLabelId: "HK-LABEL-001",
-  LabelUndefinedTarget: "HK-LABEL-002"
+  LabelUndefinedTarget: "HK-LABEL-002",
+  DuplicateSpliceId: "HK-SPLICE-001",
+  UndefinedSpliceRef: "HK-SPLICE-002",
+  SpliceTooFewWires: "HK-SPLICE-003",
+  SpliceUndefinedBranch: "HK-SPLICE-004",
+  DuplicateCableId: "HK-CABLE-001",
+  UndefinedCableRef: "HK-CABLE-002"
 } as const
 
 export const hasErrors = (diagnostics: ReadonlyArray<Diagnostic>): boolean =>

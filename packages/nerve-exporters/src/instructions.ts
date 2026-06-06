@@ -7,7 +7,7 @@
  * Manufacturing Operations IR (PRD §28); these instructions cover what HIR
  * already knows.
  */
-import type { Hir } from "@grayhaven/nerve"
+import { isPinEndpoint, type Hir } from "@grayhaven/nerve"
 
 export const assemblyInstructions = (hir: Hir): string => {
   const lines: Array<string> = []
@@ -54,14 +54,32 @@ export const assemblyInstructions = (hir: Hir): string => {
     }
   }
 
+  if (hir.splices.length > 0) {
+    section("Splices")
+    for (const s of hir.splices) {
+      const parts = [
+        `Splice ${s.id}: join ${s.wires.join(" + ")}`,
+        s.type !== undefined ? `(${s.type}${s.part !== undefined ? `, ${s.part}` : ""})` : undefined,
+        s.branch !== undefined && s.location !== undefined
+          ? `at ${s.location} ${hir.harness.units} along ${s.branch}`
+          : undefined,
+        s.notes
+      ].filter((x): x is string => x !== undefined)
+      add(parts.join(" ") + ".")
+    }
+  }
+
   section("Populate connectors")
   for (const c of hir.connectors) {
-    const wired = hir.wires.filter(
-      (w) => w.from.connector === c.ref || w.to.connector === c.ref
+    const wired = hir.wires.filter((w) =>
+      [w.from, w.to].some((e) => isPinEndpoint(e) && e.connector === c.ref)
     )
     add(`Populate ${c.ref} (${c.mpn}${c.gender !== undefined ? `, ${c.gender}` : ""}):`)
     for (const w of wired) {
-      const end = w.from.connector === c.ref ? w.from : w.to
+      const end = [w.from, w.to].find(
+        (e) => isPinEndpoint(e) && e.connector === c.ref
+      )
+      if (end === undefined || !isPinEndpoint(end)) continue
       lines.push(`      cavity ${end.pin}: ${w.id}${w.signal !== undefined ? ` (${w.signal})` : ""}`)
     }
   }

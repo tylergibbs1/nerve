@@ -13,5 +13,10 @@ export const PROJECTS: ReadonlyArray<ProjectMeta> = [
     id: "motor-controller",
     name: "Motor Controller Harness",
     description: "PRD §9.1 example — J1 controller to M1 motor, power + CAN"
+  },
+  {
+    id: "sensor-splice",
+    name: "Sensor Splice Harness",
+    description: "Spliced power feed to two sensors, CAN in a shielded cable"
   }
 ]

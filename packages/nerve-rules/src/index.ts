@@ -10,6 +10,7 @@ export {
   missingWireGauge,
   missingWireLength,
   shieldDrainUnconnected,
+  spliceMissingNotes,
   twistGroupTooSmall,
   unconnectedAssignedPin,
   wireSignalMismatch

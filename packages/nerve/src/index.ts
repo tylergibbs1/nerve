@@ -7,6 +7,8 @@
 export type {
   BranchDef,
   BranchProps,
+  CableDef,
+  CableProps,
   ConnectorGender,
   ConnectorInstance,
   ConnectorPart,
@@ -16,12 +18,25 @@ export type {
   LabelProps,
   PinAssignments,
   PinRef,
+  SpliceDef,
+  SpliceProps,
+  SpliceRef,
   Units,
   WireDef,
+  WireEndpoint,
   WireProps
 } from "./domain.js"
 
-export { branch, connector, harness, label, wire } from "./dsl.js"
+export {
+  branch,
+  cable,
+  connector,
+  harness,
+  label,
+  splice,
+  wire,
+  type EndpointInput
+} from "./dsl.js"
 
 export {
   Codes,
@@ -34,14 +49,20 @@ export {
   decodeHir,
   decodeHirEffect,
   encodeHir,
+  endpointLabel,
   Hir,
   HIR_SCHEMA_VERSION,
   HirBomItem,
   HirBranch,
+  HirCable,
   HirConnector,
+  HirEndpoint,
   HirLabel,
   HirPinRef,
+  HirSplice,
+  HirSpliceRef,
   HirWire,
+  isPinEndpoint,
   refs
 } from "./hir/schema.js"
 

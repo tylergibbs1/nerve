@@ -6,8 +6,12 @@
  * HIR's canonical ordering, line endings are `\n`, and there are no
  * timestamps.
  */
-import type { Hir } from "@grayhaven/nerve"
+import { isPinEndpoint, type Hir, type HirEndpoint } from "@grayhaven/nerve"
 import type { TestPlan } from "./test-plan.js"
+
+/** CSV cell pair for an endpoint: connector + pin, or splice id + "". */
+const endpointCells = (e: HirEndpoint): readonly [string, string] =>
+  isPinEndpoint(e) ? [e.connector, e.pin] : [e.splice, ""]
 
 export type Cell = string | number | undefined
 
@@ -94,13 +98,11 @@ export const cutListTable = (hir: Hir, options: CutListOptions = {}): TableData 
     w.length,
     w.length,
     w.lengthTolerance ?? options.defaultWireTolerance,
-    w.from.connector,
-    w.from.pin,
-    w.to.connector,
-    w.to.pin,
+    ...endpointCells(w.from),
+    ...endpointCells(w.to),
     "", // terminal assignment lands with process data (PRD §28)
     "",
-    w.branch,
+    w.branch ?? w.cable,
     w.notes
   ])
 })

@@ -6,7 +6,7 @@
  * BOM rows — the categories §21 requires. Deterministic: output order
  * follows canonical HIR ordering.
  */
-import type { Hir } from "./hir/schema.js"
+import { endpointLabel, type Hir } from "./hir/schema.js"
 
 export interface FieldChange {
   readonly field: string
@@ -37,6 +37,8 @@ export interface HirDiff {
   readonly connectors: SectionDiff
   readonly pinouts: ReadonlyArray<PinoutChange>
   readonly wires: SectionDiff
+  readonly splices: SectionDiff
+  readonly cables: SectionDiff
   readonly branches: SectionDiff
   readonly labels: SectionDiff
   readonly bom: SectionDiff
@@ -107,13 +109,27 @@ export const diffHir = (a: Hir, b: Hir): HirDiff => {
     ]),
     pinouts,
     wires: sectionDiff(a.wires, b.wires, (w) => w.id, [
-      ["from", (w) => `${w.from.connector}.${w.from.pin}`],
-      ["to", (w) => `${w.to.connector}.${w.to.pin}`],
+      ["from", (w) => endpointLabel(w.from)],
+      ["to", (w) => endpointLabel(w.to)],
       ["gauge", (w) => w.gauge],
       ["color", (w) => w.color],
       ["length", (w) => w.length],
       ["signal", (w) => w.signal],
-      ["twistGroup", (w) => w.twistGroup]
+      ["twistGroup", (w) => w.twistGroup],
+      ["cable", (w) => w.cable]
+    ]),
+    splices: sectionDiff(a.splices, b.splices, (s) => s.id, [
+      ["type", (s) => s.type],
+      ["part", (s) => s.part],
+      ["branch", (s) => s.branch],
+      ["location", (s) => s.location],
+      ["wires", (s) => s.wires.join(", ")]
+    ]),
+    cables: sectionDiff(a.cables, b.cables, (c) => c.id, [
+      ["type", (c) => c.type],
+      ["conductors", (c) => c.conductors],
+      ["cutLength", (c) => c.cutLength],
+      ["wires", (c) => c.wires.join(", ")]
     ]),
     branches: sectionDiff(a.branches, b.branches, (br) => br.id, [
       ["path", (br) => br.path.join(" → ")],
@@ -137,7 +153,7 @@ export const diffHir = (a: Hir, b: Hir): HirDiff => {
 export const isEmptyDiff = (d: HirDiff): boolean =>
   d.harness.length === 0 &&
   d.pinouts.length === 0 &&
-  [d.connectors, d.wires, d.branches, d.labels, d.bom].every(
+  [d.connectors, d.wires, d.splices, d.cables, d.branches, d.labels, d.bom].every(
     (s) => s.added.length === 0 && s.removed.length === 0 && s.changed.length === 0
   )
 
@@ -171,6 +187,8 @@ export const formatDiff = (d: HirDiff): string => {
     }
   }
   section("wires", d.wires, "wire")
+  section("splices", d.splices, "splice")
+  section("cables", d.cables, "cable")
   section("branches", d.branches, "branch")
   section("labels", d.labels, "label")
   section("bom", d.bom, "bom")
