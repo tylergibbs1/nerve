@@ -35,9 +35,18 @@ import {
   bomCsv,
   bopCsv,
   bopJson,
+  analysisCsv,
+  analysisJson,
+  analyzeHarness,
+  builtinAdapters,
+  contractJson,
+  exportConnectorContract,
+  findAdapter,
   generateQuote,
+  importPinoutCsv,
   quoteCsv,
   quoteJson,
+  validateContract,
   buildPacket,
   canRelease,
   cutListCsv,
@@ -140,6 +149,9 @@ Usage:
   nerve export   <file.harness.ts> [--target manufacturing-packet|wireviz] [--out dir]
   nerve import   <file.yml> [--id harness-id] [--out dir]   (WireViz YAML → HIR)
   nerve quote    <file.harness.ts> [--out dir]   (requires costing in nerve.config.ts)
+  nerve analyze  <file.harness.ts> [--out dir]   (resistance, drop, bundle, weight §34)
+  nerve machine  <adapter-id> <file.harness.ts> [--out dir]   (shop-floor exports §31)
+  nerve contract <file.harness.ts> --connector <ref> [--against contract.json|pinout.csv] [--out dir]
   nerve diff     <revA> <revB> [--json]   (each: harness.json, .harness.ts, or revision dir)
   nerve inspect  <harness.json>`
 
@@ -315,6 +327,76 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       for (const mpn of quote.longLeadItems) io.out(`LONG-LEAD: ${mpn}`)
       for (const mpn of quote.lifecycleRisks) io.out(`LIFECYCLE: ${mpn}`)
       for (const item of quote.unpricedItems) io.out(`UNPRICED: ${item}`)
+      return 0
+    }
+
+    case "analyze": {
+      const file = positional[0]
+      if (file === undefined) return usage(io)
+      const result = await compileOrExit(file, io)
+      if (typeof result === "number") return result
+      const report = analyzeHarness(result.hir)
+      const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+      writeOut(outDir, "analysis.csv", analysisCsv(result.hir), io)
+      writeOut(outDir, "analysis.json", analysisJson(result.hir), io)
+      io.out(
+        `${report.harness.id} rev ${report.harness.revision} — ${report.totals.wireLengthM} m wire, ~${report.totals.estimatedWeightG} g, ${report.branches.map((b) => `${b.id}: Ø${b.bundleDiameterMm}mm`).join(", ")}`
+      )
+      return 0
+    }
+
+    case "machine": {
+      const [adapterId, file] = positional
+      if (adapterId === undefined || file === undefined) return usage(io)
+      const adapter = findAdapter(adapterId)
+      if (adapter === undefined) {
+        io.err(`Unknown adapter: ${adapterId}. Available: ${builtinAdapters.map((a) => a.id).join(", ")}`)
+        return 2
+      }
+      const result = await compileOrExit(file, io)
+      if (typeof result === "number") return result
+      const { files, diagnostics } = adapter.generate(result.hir)
+      printDiagnostics(diagnostics, io)
+      if (hasErrors(diagnostics)) return 1
+      const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+      for (const [name, contents] of files) writeOut(outDir, name, contents, io)
+      return 0
+    }
+
+    case "contract": {
+      const file = positional[0]
+      const connectorRef = flags["connector"]
+      if (file === undefined || connectorRef === undefined) return usage(io)
+      const result = await compileOrExit(file, io)
+      if (typeof result === "number") return result
+      const against = flags["against"]
+      if (against !== undefined) {
+        let contract
+        try {
+          const raw = readFileSync(resolve(against), "utf8")
+          contract = against.endsWith(".csv")
+            ? importPinoutCsv(raw, { connector: connectorRef })
+            : JSON.parse(raw)
+        } catch (cause) {
+          io.err(`Failed to load contract ${against}: ${cause instanceof Error ? cause.message : String(cause)}`)
+          return 2
+        }
+        const diagnostics = validateContract(result.hir, contract)
+        printDiagnostics(diagnostics, io)
+        io.out(
+          diagnostics.length === 0
+            ? `Connector ${connectorRef} conforms to ${against}.`
+            : `${diagnostics.length} contract issue(s) for ${connectorRef}.`
+        )
+        return hasErrors(diagnostics) ? 1 : 0
+      }
+      const contract = exportConnectorContract(result.hir, connectorRef)
+      if (contract === undefined) {
+        io.err(`Connector ${connectorRef} not found in ${result.hir.harness.id}.`)
+        return 2
+      }
+      const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+      writeOut(outDir, `contract-${connectorRef}.json`, contractJson(contract), io)
       return 0
     }
 
