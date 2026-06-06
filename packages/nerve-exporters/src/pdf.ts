@@ -23,6 +23,8 @@ import { boardDrawing } from "./board.js"
 import { scaleDrawing, type Drawing } from "./drawing.js"
 import { assemblyInstructions } from "./instructions.js"
 import { bopTable, generateBop } from "./bop.js"
+import { generateQuote, quoteTable } from "./cost.js"
+import type { CostModel } from "@grayhaven/nerve"
 
 // Letter landscape for everything: drawings need the width, and a single
 // orientation keeps the packet printable as one document.
@@ -241,9 +243,13 @@ const drawTextPages = (
   }
 }
 
+export interface PdfOptions extends CutListOptions {
+  readonly costing?: CostModel
+}
+
 export const manufacturingPacketPdf = async (
   hir: Hir,
-  options: CutListOptions = {}
+  options: PdfOptions = {}
 ): Promise<Uint8Array> => {
   const doc = await PDFDocument.create()
   // Pin all metadata so identical input yields identical bytes (PRD §15).
@@ -320,6 +326,11 @@ export const manufacturingPacketPdf = async (
   drawTablePages(doc, fonts, hir, "Bill of Process", bopTable(generateBop(hir)))
   drawTablePages(doc, fonts, hir, "Label Schedule", labelScheduleTable(hir))
   drawTablePages(doc, fonts, hir, "Continuity Test Procedure", testPlanTable(generateTestPlan(hir)))
+
+  // --- Quote (when the org provides a cost model, PRD §29) ---------------------
+  if (options.costing !== undefined) {
+    drawTablePages(doc, fonts, hir, "Quote", quoteTable(generateQuote(hir, options.costing)))
+  }
 
   // --- Assembly instructions ---------------------------------------------------
   drawTextPages(doc, fonts, hir, "Assembly Instructions", assemblyInstructions(hir))

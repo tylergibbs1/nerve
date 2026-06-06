@@ -1,0 +1,16 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`quote generation (PRD §29) > is deterministic and exports CSV with totals 1`] = `
+"Category,Item,Qty,Unit,Unit cost (USD),Extended (USD),Flags
+connector,43020-0800,1,ea,0.72,0.72,LONG-LEAD 90d; NRND
+connector,43025-0800,1,ea,0.68,0.68,
+wire,wire 18AWG,0.84,m,0.34,0.29,
+sleeve,sleeving,0.42,m,1.40,0.59,
+label,labels,1,ea,0.35,0.35,
+,MATERIAL,,,,2.63,
+,SCRAP @ 5.0%,,,,0.13,
+,LABOR (11 min @ 36/h),,,,6.73,
+,TOTAL,,,,9.49,
+,PER UNIT @ 96.0% yield,,,,9.89,
+"
+`;

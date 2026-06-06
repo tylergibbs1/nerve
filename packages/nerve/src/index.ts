@@ -68,7 +68,13 @@ export {
 
 export { compileDesign, type CompileResult } from "./compile.js"
 
-export { defineConfig, type NerveConfig } from "./config.js"
+export {
+  defineConfig,
+  type CostModel,
+  type NerveConfig,
+  type PartCost,
+  type PartLifecycle
+} from "./config.js"
 
 export { variant, type VariantOptions } from "./variant.js"
 

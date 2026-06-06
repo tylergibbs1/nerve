@@ -35,6 +35,9 @@ import {
   bomCsv,
   bopCsv,
   bopJson,
+  generateQuote,
+  quoteCsv,
+  quoteJson,
   buildPacket,
   canRelease,
   cutListCsv,
@@ -136,6 +139,7 @@ Usage:
   nerve render   <file.harness.ts> [--format svg] [--view schematic|board] [--out dir]
   nerve export   <file.harness.ts> [--target manufacturing-packet|wireviz] [--out dir]
   nerve import   <file.yml> [--id harness-id] [--out dir]   (WireViz YAML → HIR)
+  nerve quote    <file.harness.ts> [--out dir]   (requires costing in nerve.config.ts)
   nerve diff     <revA> <revB> [--json]   (each: harness.json, .harness.ts, or revision dir)
   nerve inspect  <harness.json>`
 
@@ -240,7 +244,10 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       }
       const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
       const tolerance = result.config.defaultWireTolerance
-      const options = tolerance !== undefined ? { defaultWireTolerance: tolerance } : {}
+      const options = {
+        ...(tolerance !== undefined ? { defaultWireTolerance: tolerance } : {}),
+        ...(result.config.costing !== undefined ? { costing: result.config.costing } : {})
+      }
       const plan = generateTestPlan(result.hir)
       writeOut(outDir, "harness.json", JSON.stringify(result.hir, null, 2) + "\n", io)
       writeOut(outDir, "schematic.svg", schematicSvg(result.hir), io)
@@ -253,6 +260,10 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       writeOut(outDir, "tests.csv", testPlanCsv(plan), io)
       writeOut(outDir, "test-plan.json", testPlanJson(result.hir), io)
       writeOut(outDir, "assembly-instructions.txt", assemblyInstructions(result.hir), io)
+      if (result.config.costing !== undefined) {
+        writeOut(outDir, "quote.csv", quoteCsv(result.hir, result.config.costing), io)
+        writeOut(outDir, "quote.json", quoteJson(result.hir, result.config.costing), io)
+      }
       writeOut(outDir, "manufacturing-packet.pdf", await manufacturingPacketPdf(result.hir, options), io)
       writeOut(outDir, "manufacturing-packet.zip", (await buildPacket(result.hir, options)).zip, io)
       io.out(summarize(result.hir))
@@ -282,6 +293,29 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       writeOut(outDir, "diagnostics.json", JSON.stringify(diagnostics, null, 2) + "\n", io)
       io.out(summarize(full))
       return hasErrors(diagnostics) ? 1 : 0
+    }
+
+    case "quote": {
+      const file = positional[0]
+      if (file === undefined) return usage(io)
+      const result = await compileOrExit(file, io)
+      if (typeof result === "number") return result
+      const model = result.config.costing
+      if (model === undefined) {
+        io.err("No costing model: add `costing: { laborRatePerHour, ... }` to nerve.config.ts (PRD §29).")
+        return 2
+      }
+      const quote = generateQuote(result.hir, model)
+      const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+      writeOut(outDir, "quote.csv", quoteCsv(result.hir, model), io)
+      writeOut(outDir, "quote.json", quoteJson(result.hir, model), io)
+      io.out(
+        `${quote.harness.id} rev ${quote.harness.revision} — material ${quote.materialCost.toFixed(2)} + scrap ${quote.scrapCost.toFixed(2)} + labor ${quote.laborCost.toFixed(2)} = ${quote.totalCost.toFixed(2)} ${quote.currency} (${quote.perUnitCost.toFixed(2)}/unit @ ${(quote.assumptions.yield * 100).toFixed(0)}% yield)`
+      )
+      for (const mpn of quote.longLeadItems) io.out(`LONG-LEAD: ${mpn}`)
+      for (const mpn of quote.lifecycleRisks) io.out(`LIFECYCLE: ${mpn}`)
+      for (const item of quote.unpricedItems) io.out(`UNPRICED: ${item}`)
+      return 0
     }
 
     case "diff": {

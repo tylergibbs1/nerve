@@ -14,9 +14,13 @@ import { schematicSvg } from "./svg.js"
 import { boardSvg } from "./board.js"
 import { assemblyInstructions } from "./instructions.js"
 import { bopCsv, bopJson } from "./bop.js"
+import { quoteCsv, quoteJson } from "./cost.js"
+import type { CostModel } from "@grayhaven/nerve"
 import { manufacturingPacketPdf } from "./pdf.js"
 
-export interface PacketOptions extends CutListOptions {}
+export interface PacketOptions extends CutListOptions {
+  readonly costing?: CostModel
+}
 
 export interface Packet {
   /** File name → contents, in archive order. */
@@ -71,7 +75,13 @@ export const buildPacket = async (
     ["bop.json", bopJson(hir)],
     ["tests.csv", testPlanCsv(plan)],
     ["test-plan.json", testPlanJson(hir)],
-    ["assembly-instructions.txt", assemblyInstructions(hir)]
+    ["assembly-instructions.txt", assemblyInstructions(hir)],
+    ...(options.costing !== undefined
+      ? ([
+          ["quote.csv", quoteCsv(hir, options.costing)],
+          ["quote.json", quoteJson(hir, options.costing)]
+        ] as const)
+      : [])
   ])
   // Zip's DOS timestamp floor is 1980-01-01 (interpreted in local time by
   // fflate); pin every entry well clear of the floor so the archive is
