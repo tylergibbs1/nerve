@@ -80,6 +80,8 @@ export {
 
 export { variant, type VariantOptions } from "./variant.js"
 
+export { definePlugin, isNervePlugin, type NervePlugin } from "./plugin.js"
+
 export {
   diffHir,
   formatDiff,

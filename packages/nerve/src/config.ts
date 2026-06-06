@@ -58,6 +58,8 @@ export interface NerveConfig {
   readonly outputDir?: string
   readonly rules?: RuleConfig
   readonly costing?: CostModel
+  /** Plugin module paths (relative to the harness file) — rule packs etc. (PRD §40). */
+  readonly plugins?: ReadonlyArray<string>
   readonly exports?: {
     readonly csv?: boolean
     readonly svg?: boolean

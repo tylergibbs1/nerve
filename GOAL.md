@@ -93,7 +93,18 @@ continuity tester JSON; `nerve machine <id>`), **§37 interface contracts**
 (`nerve contract --connector J1 [--against pcb.json|pinout.csv]` — swapped-pin detection
 between PCB and harness, HK-IFC-* codes).
 
-Remaining future direction in the PRD:
+Fourth expansion pass (2026-06-06) — the workflow tier: **§33 formboard 1:1 tiling**
+(mm-true SVG sheets with fiducials, calibration ruler, stitch borders; `nerve render
+--view formboard`), **§35 ECO/releases** (HIR fingerprint, impact + change-risk score vs
+previous release, fail-closed; `nerve release`), **§36 Build Records** (as-built evidence
+with measured-resistance verdicts replayed against the test plan; `nerve record`),
+**§39 redlines** (HIR-targeted technician feedback, accept/reject with retained reasons,
+accepted → variant()-shaped structured patch; `nerve redline add/resolve`), **§40 plugin
+SDK** (`definePlugin` rule packs loaded from config.plugins with HIR schema-version
+gating, HK-PLUGIN-001 on mismatch).
+
+PRD coverage is now effectively complete (§32 label depth and §42 part-data providers
+remain as data-model deepening). Remaining ideas:
 Registry + verified component data (§30), shop-floor adapters (§31), formboard 1:1 printing (§33),
 engineering analysis (§34), ECO/release workflow (§35), Build Record (§36), interface contracts (§37),
 redlines (§39), plugin SDK (§40).

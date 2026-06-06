@@ -75,17 +75,10 @@ const esc = (s: string): string =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
 
-/** Render a Drawing to standalone SVG. Deterministic. */
-export const renderSvg = (drawing: Drawing): string => {
-  const parts: Array<string> = [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${drawing.width}" height="${drawing.height}" viewBox="0 0 ${drawing.width} ${drawing.height}" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">`
-  ]
-  if (drawing.background !== undefined) {
-    parts.push(
-      `<rect width="${drawing.width}" height="${drawing.height}" fill="${esc(drawing.background)}"/>`
-    )
-  }
-  for (const item of drawing.items) {
+/** Render the item list only (no svg envelope) — used by tiled outputs. */
+export const renderItems = (items: ReadonlyArray<DrawItem>): string => {
+  const parts: Array<string> = []
+  for (const item of items) {
     switch (item.kind) {
       case "rect":
         parts.push(
@@ -114,6 +107,20 @@ export const renderSvg = (drawing: Drawing): string => {
         break
     }
   }
+  return parts.join("\n")
+}
+
+/** Render a Drawing to standalone SVG. Deterministic. */
+export const renderSvg = (drawing: Drawing): string => {
+  const parts: Array<string> = [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${drawing.width}" height="${drawing.height}" viewBox="0 0 ${drawing.width} ${drawing.height}" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">`
+  ]
+  if (drawing.background !== undefined) {
+    parts.push(
+      `<rect width="${drawing.width}" height="${drawing.height}" fill="${esc(drawing.background)}"/>`
+    )
+  }
+  parts.push(renderItems(drawing.items))
   parts.push("</svg>")
   return parts.join("\n") + "\n"
 }

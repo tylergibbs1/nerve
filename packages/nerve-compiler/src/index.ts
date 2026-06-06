@@ -5,6 +5,7 @@ export {
   failOnErrors,
   loadConfig,
   loadDesign,
+  loadPlugins,
   type CompileFileOptions,
   type CompileFileResult
 } from "./compiler.js"

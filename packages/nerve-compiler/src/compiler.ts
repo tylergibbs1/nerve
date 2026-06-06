@@ -17,11 +17,14 @@ import { createJiti } from "jiti"
 import { Effect } from "effect"
 import {
   compileDesign,
+  HIR_SCHEMA_VERSION,
+  isNervePlugin,
   runRules,
   type Diagnostic,
   type HarnessDesign,
   type Hir,
   type NerveConfig,
+  type NervePlugin,
   type Rule
 } from "@grayhaven/nerve"
 import { builtinRules } from "@grayhaven/nerve-rules"
@@ -106,6 +109,49 @@ export const loadConfig = (
       })
   })
 
+/** Load plugin modules declared in config (PRD §40). */
+export const loadPlugins = (
+  fromDir: string,
+  specifiers: ReadonlyArray<string>
+): Effect.Effect<
+  { plugins: ReadonlyArray<NervePlugin>; diagnostics: ReadonlyArray<Diagnostic> },
+  CompileError
+> =>
+  Effect.tryPromise({
+    try: async () => {
+      const plugins: Array<NervePlugin> = []
+      const diagnostics: Array<Diagnostic> = []
+      for (const spec of specifiers) {
+        const path = spec.startsWith(".") ? resolve(fromDir, spec) : spec
+        const mod = await jiti.import<{ default?: unknown }>(path)
+        const plugin = (mod as { default?: unknown }).default ?? mod
+        if (!isNervePlugin(plugin)) {
+          throw new CompileError({
+            message: `${spec} does not default-export a Nerve plugin (use definePlugin).`,
+            source: spec
+          })
+        }
+        if (!plugin.hirSchemaVersions.includes(HIR_SCHEMA_VERSION)) {
+          diagnostics.push({
+            code: "HK-PLUGIN-001",
+            severity: "error",
+            message: `Plugin ${plugin.name} supports HIR ${plugin.hirSchemaVersions.join(", ")}, but this compiler emits ${HIR_SCHEMA_VERSION}; its rules were not run.`
+          })
+          continue
+        }
+        plugins.push(plugin)
+      }
+      return { plugins, diagnostics }
+    },
+    catch: (cause) =>
+      cause instanceof CompileError
+        ? cause
+        : new CompileError({
+            message: `Failed to load plugins: ${cause instanceof Error ? cause.message : String(cause)}`,
+            cause
+          })
+  })
+
 /** Compile a `.harness.ts` file to HIR with full diagnostics. */
 export const compileFile = (
   file: string,
@@ -115,13 +161,21 @@ export const compileFile = (
     const design = yield* loadDesign(file)
     const config =
       options.config ?? (yield* loadConfig(dirname(resolve(file))))
+    const { plugins, diagnostics: pluginDiagnostics } =
+      config.plugins !== undefined && config.plugins.length > 0
+        ? yield* loadPlugins(dirname(resolve(file)), config.plugins)
+        : { plugins: [], diagnostics: [] }
     const { hir, diagnostics: structural } = compileDesign(design)
     const ruleDiagnostics = runRules(
       hir,
-      [...builtinRules, ...(options.rules ?? [])],
+      [
+        ...builtinRules,
+        ...plugins.flatMap((p) => p.rules ?? []),
+        ...(options.rules ?? [])
+      ],
       config.rules ?? {}
     )
-    const diagnostics = [...structural, ...ruleDiagnostics]
+    const diagnostics = [...pluginDiagnostics, ...structural, ...ruleDiagnostics]
     return {
       design,
       hir: { ...hir, diagnostics },

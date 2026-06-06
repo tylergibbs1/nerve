@@ -39,7 +39,17 @@ import {
   analysisJson,
   analyzeHarness,
   builtinAdapters,
+  buildRecordJson,
   contractJson,
+  createBuildRecord,
+  createRedline,
+  createRelease,
+  formboardSheets,
+  releaseJson,
+  ReleaseBlockedError,
+  resolveRedline,
+  suggestPatch,
+  validateRedlineTarget,
   exportConnectorContract,
   findAdapter,
   generateQuote,
@@ -145,13 +155,17 @@ Usage:
   nerve init [dir]
   nerve compile  <file.harness.ts> [--out dir]
   nerve validate <file.harness.ts>
-  nerve render   <file.harness.ts> [--format svg] [--view schematic|board] [--out dir]
+  nerve render   <file.harness.ts> [--format svg] [--view schematic|board|formboard] [--paper letter|a4] [--out dir]
   nerve export   <file.harness.ts> [--target manufacturing-packet|wireviz] [--out dir]
   nerve import   <file.yml> [--id harness-id] [--out dir]   (WireViz YAML → HIR)
   nerve quote    <file.harness.ts> [--out dir]   (requires costing in nerve.config.ts)
   nerve analyze  <file.harness.ts> [--out dir]   (resistance, drop, bundle, weight §34)
   nerve machine  <adapter-id> <file.harness.ts> [--out dir]   (shop-floor exports §31)
   nerve contract <file.harness.ts> --connector <ref> [--against contract.json|pinout.csv] [--out dir]
+  nerve release  <file.harness.ts> --eco <id> --reason <text> --date <iso> [--against release.json] [--out dir]
+  nerve record   <file.harness.ts> --release <release.json> --serial <sn> --operator <name> --date <iso> --results <measurements.json> [--out dir]
+  nerve redline  add <file.harness.ts> --target <hir-ref> --type <type> --description <text> [--value v] [--release id] [--serial sn]
+  nerve redline  resolve <redlines.json> --id <id> --accept|--reject --reason <text> --date <iso>
   nerve diff     <revA> <revB> [--json]   (each: harness.json, .harness.ts, or revision dir)
   nerve inspect  <harness.json>`
 
@@ -213,13 +227,22 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
         return 2
       }
       const view = flags["view"] ?? "schematic"
-      if (view !== "schematic" && view !== "board") {
-        io.err(`Unsupported render view: ${view} (supported: schematic, board)`)
+      if (view !== "schematic" && view !== "board" && view !== "formboard") {
+        io.err(`Unsupported render view: ${view} (supported: schematic, board, formboard)`)
         return 2
       }
       const result = await compileOrExit(file, io)
       if (typeof result === "number") return result
       const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+      if (view === "formboard") {
+        const paper = flags["paper"] === "a4" ? "a4" as const : "letter" as const
+        const board = formboardSheets(result.hir, { paper })
+        for (const sheet of board.sheets) writeOut(outDir, sheet.name, sheet.svg, io)
+        io.out(
+          `formboard ${board.boardWidthMm}x${board.boardHeightMm} mm → ${board.rows}x${board.cols} ${paper} sheet(s) at 1:1. Print at 100% and verify the calibration ruler.`
+        )
+        return 0
+      }
       if (view === "board") {
         writeOut(outDir, "board.svg", boardSvg(result.hir), io)
       } else {
@@ -398,6 +421,156 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
       writeOut(outDir, `contract-${connectorRef}.json`, contractJson(contract), io)
       return 0
+    }
+
+    case "release": {
+      const file = positional[0]
+      const eco = flags["eco"]
+      const reason = flags["reason"]
+      const date = flags["date"]
+      if (file === undefined || eco === undefined || reason === undefined || date === undefined) return usage(io)
+      const result = await compileOrExit(file, io)
+      if (typeof result === "number") return result
+      let previous
+      if (flags["against"] !== undefined) {
+        try {
+          const prevRelease = JSON.parse(readFileSync(resolve(flags["against"]), "utf8"))
+          const prevDir = resolve(flags["against"], "..")
+          const prevHir = decodeHir(JSON.parse(readFileSync(join(prevDir, "harness.json"), "utf8")))
+          previous = { hir: prevHir, releaseId: prevRelease.releaseId }
+        } catch (cause) {
+          io.err(`Failed to load previous release: ${cause instanceof Error ? cause.message : String(cause)}`)
+          return 2
+        }
+      }
+      try {
+        const release = createRelease(result.hir, {
+          eco: { id: eco, reason, ...(flags["author"] !== undefined ? { author: flags["author"] } : {}) },
+          createdAt: date,
+          ...(previous !== undefined ? { previous } : {})
+        })
+        const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+        writeOut(outDir, "harness.json", JSON.stringify(result.hir, null, 2) + "\n", io)
+        writeOut(outDir, `release-${result.hir.harness.revision}.json`, releaseJson(release), io)
+        io.out(
+          `Release ${release.releaseId} (${eco}) — fingerprint ${release.hirFingerprint}` +
+            (release.impact !== undefined
+              ? ` — impact: ${release.impact.riskScore} (${release.impact.risk}), ${release.impact.pinoutChanges} pinout / ${release.impact.wireChanges} wire change(s)`
+              : "")
+        )
+        return 0
+      } catch (cause) {
+        if (cause instanceof ReleaseBlockedError) {
+          io.err(cause.message)
+          return 1
+        }
+        throw cause
+      }
+    }
+
+    case "record": {
+      const file = positional[0]
+      const releasePath = flags["release"]
+      const serial = flags["serial"]
+      const operator = flags["operator"]
+      const date = flags["date"]
+      const resultsPath = flags["results"]
+      if (file === undefined || releasePath === undefined || serial === undefined || operator === undefined || date === undefined || resultsPath === undefined) {
+        return usage(io)
+      }
+      const result = await compileOrExit(file, io)
+      if (typeof result === "number") return result
+      let release, measurements
+      try {
+        release = JSON.parse(readFileSync(resolve(releasePath), "utf8"))
+        measurements = JSON.parse(readFileSync(resolve(resultsPath), "utf8"))
+      } catch (cause) {
+        io.err(`Failed to load inputs: ${cause instanceof Error ? cause.message : String(cause)}`)
+        return 2
+      }
+      const record = createBuildRecord(result.hir, release, measurements, {
+        serial,
+        operator,
+        buildDate: date,
+        ...(flags["lot"] !== undefined ? { lot: flags["lot"] } : {}),
+        ...(flags["workstation"] !== undefined ? { workstation: flags["workstation"] } : {})
+      })
+      const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+      writeOut(outDir, `build-record-${serial}.json`, buildRecordJson(record), io)
+      io.out(
+        `${serial}: ${record.summary.pass} pass / ${record.summary.fail} fail / ${record.summary.notRun} not run → ${record.summary.status.toUpperCase()}`
+      )
+      return record.summary.status === "fail" ? 1 : 0
+    }
+
+    case "redline": {
+      const sub = positional[0]
+      if (sub === "add") {
+        const file = positional[1]
+        const target = flags["target"]
+        const type = flags["type"]
+        const description = flags["description"]
+        if (file === undefined || target === undefined || type === undefined || description === undefined) return usage(io)
+        const result = await compileOrExit(file, io)
+        if (typeof result === "number") return result
+        const invalid = validateRedlineTarget(result.hir, target)
+        if (invalid !== undefined) {
+          printDiagnostics([invalid], io)
+          return 1
+        }
+        const redlinesPath = resolve(flags["file"] ?? "redlines.json")
+        const existing = existsSync(redlinesPath)
+          ? (JSON.parse(readFileSync(redlinesPath, "utf8")) as Array<unknown>)
+          : []
+        const redline = createRedline({
+          id: `RL-${String(existing.length + 1).padStart(3, "0")}`,
+          target,
+          type: type as never,
+          description,
+          ...(flags["value"] !== undefined ? { proposedValue: flags["value"] } : {}),
+          release: flags["release"] ?? `${result.hir.harness.id}@${result.hir.harness.revision}`,
+          ...(flags["serial"] !== undefined ? { serial: flags["serial"] } : {}),
+          ...(flags["by"] !== undefined ? { reportedBy: flags["by"] } : {})
+        })
+        writeFileSync(redlinesPath, JSON.stringify([...existing, redline], null, 2) + "\n")
+        io.out(`Recorded ${redline.id} against ${target} in ${redlinesPath}`)
+        return 0
+      }
+      if (sub === "resolve") {
+        const redlinesPath = positional[1]
+        const id = flags["id"]
+        const reason = flags["reason"]
+        const date = flags["date"]
+        const accept = flags["accept"] === "true"
+        const reject = flags["reject"] === "true"
+        if (redlinesPath === undefined || id === undefined || reason === undefined || date === undefined || accept === reject) return usage(io)
+        const redlines = JSON.parse(readFileSync(resolve(redlinesPath), "utf8")) as Array<never>
+        const existing = redlines.find((r: { id: string }) => r.id === id)
+        const index = redlines.findIndex((r: { id: string }) => r.id === id)
+        if (existing === undefined) {
+          io.err(`Redline ${id} not found in ${redlinesPath}.`)
+          return 2
+        }
+        const resolved = resolveRedline(existing, {
+          accept,
+          reason,
+          resolvedAt: date,
+          ...(flags["by"] !== undefined ? { by: flags["by"] } : {})
+        })
+        const updated = [...redlines]
+        updated[index] = resolved as never
+        writeFileSync(resolve(redlinesPath), JSON.stringify(updated, null, 2) + "\n")
+        io.out(`${id} ${resolved.status}.`)
+        if (resolved.status === "accepted") {
+          const patch = suggestPatch(resolved)
+          if (patch !== undefined) {
+            io.out("Structured patch (apply via variant() or edit the source):")
+            io.out(JSON.stringify(patch, null, 2))
+          }
+        }
+        return 0
+      }
+      return usage(io)
     }
 
     case "diff": {
