@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grayhaven Nerve — Harnesses as Code</title>
+  <meta name="description" content="Grayhaven Nerve turns a machine's electrical nervous system into typed, validated, manufacturable infrastructure. Define the harness once, then generate the drawings, cut lists, labels, tests, and build records needed to ship it." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700;800&family=Geist+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0d0d; --card: #171717; --muted-bg: #292929; --border: #2e2e2e;
+      --fg: #f5f5f5; --muted: #a6a6a6;
+      --accent: #f75b1b; --accent-hover: #d44712; --ok: #4ade80;
+      --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body { background: var(--bg); color: var(--fg); font-family: var(--sans); padding-bottom: 1.5rem; }
+    a { color: inherit; text-decoration: none; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+    .spec-tag { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); }
+    .spec-tag::before { content: "["; color: var(--accent); }
+    .spec-tag::after { content: "]"; color: var(--accent); }
+    .spec-label { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); }
+
+    .strip { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); padding: 14px 0; }
+    .strip .links { display: flex; gap: 18px; }
+    .strip .links a { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); transition: color .15s; }
+    .strip .links a:hover { color: var(--accent); }
+
+    .hero { display: grid; grid-template-columns: 1fr; gap: 40px; padding: 72px 0 56px; align-items: end; }
+    @media (min-width: 960px) { .hero { grid-template-columns: 7fr 5fr; } }
+    h1 { font-size: clamp(40px, 7vw, 84px); font-weight: 800; text-transform: uppercase; line-height: 0.95; letter-spacing: -0.02em; text-wrap: balance; }
+    .rule { width: 96px; height: 3px; background: var(--accent); margin: 28px 0; }
+    .sub { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); max-width: 540px; line-height: 1.8; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+    .btn { display: inline-block; padding: 12px 22px; font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid var(--accent); color: var(--accent); transition: all .15s; }
+    .btn:hover { background: var(--accent); color: var(--bg); }
+    .btn.solid { background: var(--accent); color: var(--bg); }
+    .btn.solid:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn.ghost { border-color: var(--border); color: var(--muted); }
+    .btn.ghost:hover { background: transparent; border-color: var(--fg); color: var(--fg); }
+
+    .dossier { border: 1px solid var(--border); background: color-mix(in srgb, var(--card) 60%, transparent); padding: 24px; position: relative; }
+    .dossier::before, .dossier::after { content: ""; position: absolute; width: 14px; height: 14px; border-color: var(--accent); border-style: solid; }
+    .dossier::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+    .dossier::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+    .dossier .head { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 12px; }
+    .kv { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0; border-bottom: 1px dotted var(--border); }
+    .kv:last-child { border-bottom: 0; }
+    .kv dt { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+    .kv dd { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .kv dd.accent { color: var(--accent); }
+    .kv dd.ok { color: var(--ok); }
+
+    .divider { display: flex; align-items: center; gap: 14px; padding: 56px 0 28px; }
+    .divider .line { flex: 1; height: 1px; background: var(--border); }
+    .divider span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; color: var(--muted); text-transform: uppercase; }
+
+    .pipeline { font-family: var(--mono); font-size: clamp(10px, 1.5vw, 13px); color: var(--muted); background: var(--card); border: 1px solid var(--border); padding: 26px; overflow-x: auto; white-space: pre; line-height: 1.9; }
+    .pipeline b { color: var(--fg); font-weight: 600; }
+    .pipeline em { color: var(--accent); font-style: normal; }
+
+    .grid3 { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); grid-template-columns: 1fr; }
+    @media (min-width: 760px) { .grid3 { grid-template-columns: repeat(3, 1fr); } }
+    .cell { background: var(--card); padding: 26px; }
+    .cell h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; margin: 10px 0 8px; }
+    .cell p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .cell .idx { font-family: var(--mono); font-size: 10px; color: var(--accent); }
+
+    .code { background: var(--card); border: 1px solid var(--border); padding: 24px; font-family: var(--mono); font-size: 12.5px; line-height: 1.75; overflow-x: auto; white-space: pre; }
+    .code .k { color: var(--accent); }
+    .code .s { color: #9ecb7a; }
+    .code .c { color: #6b6b6b; }
+    .code .f { color: #7eb8ff; }
+
+    .sheet { background: #fafafa; border: 1px solid var(--border); padding: 8px; }
+    .sheet img { display: block; width: 100%; height: auto; }
+    .sheet-caption { display: flex; justify-content: space-between; padding-top: 10px; }
+
+    .diag-sample { font-family: var(--mono); font-size: 12px; line-height: 1.9; background: var(--card); border: 1px solid var(--border); padding: 24px; overflow-x: auto; white-space: pre; }
+    .diag-sample .err { color: #ff5c5c; font-weight: 600; }
+    .diag-sample .wrn { color: #e0a830; font-weight: 600; }
+    .diag-sample .dim { color: var(--muted); }
+
+    .footer { position: fixed; left: 0; right: 0; bottom: 0; height: 1.5rem; background: var(--bg); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); z-index: 10; }
+    .footer .live { color: var(--ok); }
+    section.last { padding-bottom: 80px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="strip">
+      <span class="spec-tag">Grayhaven Nerve</span>
+      <nav class="links">
+        <a href="https://nerve-demo.vercel.app">Demo</a>
+        <a href="https://github.com/tylergibbs1/nerve">GitHub</a>
+        <a href="https://www.npmjs.com/org/grayhaven">npm</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <h1>Harnesses as code for machines that need a nervous&nbsp;system.</h1>
+        <div class="rule"></div>
+        <p class="sub">From pinout to production: wiring, BOMs, labels, tests, and build records from one typed source of truth.</p>
+        <div class="cta-row">
+          <a class="btn solid" href="https://nerve-demo.vercel.app">Open Live Demo</a>
+          <a class="btn" href="https://github.com/tylergibbs1/nerve">Source on GitHub</a>
+          <a class="btn ghost" href="https://www.npmjs.com/package/@grayhaven/nerve">npm i @grayhaven/nerve</a>
+        </div>
+      </div>
+      <div class="dossier">
+        <div class="head">
+          <span class="spec-tag">System Status</span>
+          <span class="spec-label">REV A</span>
+        </div>
+        <dl>
+          <div class="kv"><dt>Release</dt><dd class="ok">v0.1.0 · Live</dd></div>
+          <div class="kv"><dt>Packages</dt><dd>7 on npm</dd></div>
+          <div class="kv"><dt>License</dt><dd>Apache-2.0</dd></div>
+          <div class="kv"><dt>Validation rules</dt><dd>14 built-in · HK-* codes</dd></div>
+          <div class="kv"><dt>Determinism</dt><dd class="accent">Byte-identical</dd></div>
+          <div class="kv"><dt>Test corpus</dt><dd>102 passing</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <div class="divider"><span>Pipeline // 01</span><div class="line"></div></div>
+    <section>
+      <div class="pipeline"><b>typed harness spec</b> ──▶ <b>compiler</b> ──▶ <em>validation</em> ──▶ <b>HIR</b> ──▶ schematic · board · <b>BOM</b> · cut list · labels · <em>continuity tests</em> · <b>PDF packet</b>
+
+  <span style="color:#6b6b6b">one source of truth. every artifact reproducible. every line traceable to a design object.</span></div>
+    </section>
+
+    <div class="divider"><span>Author // 02</span><div class="line"></div></div>
+    <section>
+      <div class="code"><span class="c">// main.harness.ts — this is the entire design surface</span>
+<span class="k">import</span> { harness, connector, wire } <span class="k">from</span> <span class="s">"@grayhaven/nerve"</span>
+<span class="k">import</span> { MolexMicroFit } <span class="k">from</span> <span class="s">"@grayhaven/nerve-connectors"</span>
+
+<span class="k">const</span> controller = <span class="f">connector</span>(<span class="s">"J1"</span>, MolexMicroFit[<span class="s">"43025-0800"</span>], {
+  pins: { 1: <span class="s">"VBAT_24V"</span>, 2: <span class="s">"GND"</span>, 3: <span class="s">"CAN_H"</span>, 4: <span class="s">"CAN_L"</span> },
+})
+
+<span class="k">export default</span> <span class="f">harness</span>(<span class="s">"motor-controller-harness"</span>, {
+  revision: <span class="s">"A"</span>, units: <span class="s">"mm"</span>,
+  connectors: [controller, motor],
+  wires: [<span class="f">wire</span>(<span class="s">"W1"</span>, controller.<span class="f">pin</span>(1), motor.<span class="f">pin</span>(1), { gauge: <span class="s">"18AWG"</span>, color: <span class="s">"red"</span>, length: 420 })],
+})</div>
+    </section>
+
+    <div class="divider"><span>Validate // 03</span><div class="line"></div></div>
+    <section>
+      <div class="diag-sample"><span class="err">HK-WIRE-004 Error</span>  <span class="dim">wire:W17</span>
+  Wire W17 uses 24AWG but its 5A estimate requires at least 18AWG.
+<span class="err">HK-CONN-011 Error</span>  <span class="dim">connector:P1.pin:1</span>
+  Wire W2 carries V5 but pin P1.1 is assigned V9.
+<span class="wrn">HK-ELEC-001 Error</span>  <span class="dim">wire:W3</span>
+  Differential pair CAN_H/CAN_L (wire W3) must share a twist group.</div>
+      <p class="sub" style="margin-top:18px">Swapped pins, undersized gauge, untwisted CAN pairs, missing seals — caught before a technician cuts wire, not after. Releases fail closed.</p>
+    </section>
+
+    <div class="divider"><span>Manufacture // 04</span><div class="line"></div></div>
+    <section>
+      <div class="sheet">
+        <img src="schematic.svg" alt="Generated wiring schematic: J1 controller to M1 motor with colored, gauge-annotated wires" loading="lazy" />
+      </div>
+      <div class="sheet-caption">
+        <span class="spec-label">Drawing generated from HIR — deterministic, diffable, never hand-edited</span>
+        <span class="spec-label">SHT 1 · REV A</span>
+      </div>
+    </section>
+
+    <div class="divider"><span>Capability // 05</span><div class="line"></div></div>
+    <section class="last">
+      <div class="grid3">
+        <div class="cell"><span class="idx">// 01</span><h3>Git-native hardware</h3><p>Harnesses live next to firmware. Reviewable diffs, CI validation with exit codes, revision diffing down to a single pin swap.</p></div>
+        <div class="cell"><span class="idx">// 02</span><h3>Manufacturing packet</h3><p>One command emits the PDF build book: schematic, nailboard, BOM, cut list, label schedule, assembly steps, continuity tests.</p></div>
+        <div class="cell"><span class="idx">// 03</span><h3>Deterministic compiler</h3><p>Same input, byte-identical output — drawings, CSVs, even the zip. The renderer never owns truth; the typed graph does.</p></div>
+        <div class="cell"><span class="idx">// 04</span><h3>Splices &amp; cables</h3><p>Splice taps and multi-conductor cables are first-class: nets computed across them, splice-verification tests generated.</p></div>
+        <div class="cell"><span class="idx">// 05</span><h3>WireViz migration</h3><p>Import existing WireViz YAML and instantly gain validation, cut lists, and test plans. Export back when you need to.</p></div>
+        <div class="cell"><span class="idx">// 06</span><h3>Open core</h3><p>Apache-2.0. Seven typed packages on npm. The compiler runs locally, in CI, and in your browser.</p></div>
+      </div>
+      <div class="cta-row" style="margin-top:40px">
+        <a class="btn solid" href="https://nerve-demo.vercel.app/projects/robot-platform/diagram">Explore the robot-platform demo</a>
+        <a class="btn ghost" href="https://github.com/tylergibbs1/nerve#quick-start-npm">Quickstart</a>
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <span>Grayhaven Industries · Interconnect Systems</span>
+    <span class="live">● SYSTEM NOMINAL</span>
+    <span>Nerve v0.1.0 · Apache-2.0</span>
+  </footer>
+</body>
+</html>

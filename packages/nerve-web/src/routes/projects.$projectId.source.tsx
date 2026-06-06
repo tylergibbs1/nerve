@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import CodeMirror from "@uiw/react-codemirror"
 import { javascript } from "@codemirror/lang-javascript"
+import { oneDark } from "@codemirror/theme-one-dark"
 import { compileSource } from "../lib/compile-client.js"
 import { getSource, setSource } from "../lib/sources.js"
 
@@ -53,6 +54,7 @@ function SourceView() {
         value={source}
         height="100%"
         extensions={[javascript({ typescript: true })]}
+        theme={oneDark}
         onChange={onChange}
         style={{ flex: 1, minHeight: 0, overflow: "auto", fontSize: 13 }}
       />

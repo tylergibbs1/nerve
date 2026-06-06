@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/theme-one-dark": "^6.1.3",
     "@grayhaven/example-motor-controller": "workspace:*",
     "@grayhaven/example-robot-platform": "workspace:*",
     "@grayhaven/example-sensor-splice": "workspace:*",

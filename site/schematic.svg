@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="836" height="368" viewBox="0 0 836 368" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">
+<rect width="836" height="368" fill="#fafafa"/>
+<text x="48" y="28" font-size="18" font-weight="bold" fill="#111">motor-controller-harness</text>
+<text x="48" y="48" fill="#555">rev A · units mm · HIR 0.1.0</text>
+<path d="M 228 162 C 354.6666666666667 162, 481.3333333333333 162, 608 162" fill="none" stroke="red" stroke-width="2"/>
+<text x="418" y="156" fill="#333" text-anchor="middle">W1 · 18AWG</text>
+<path d="M 228 182 C 354.6666666666667 182, 481.3333333333333 182, 608 182" fill="none" stroke="#222222" stroke-width="2"/>
+<text x="418" y="176" fill="#333" text-anchor="middle">W2 · 18AWG</text>
+<path d="M 228 202 C 354.6666666666667 202, 481.3333333333333 202, 608 202" fill="none" stroke="#b8b8b8" stroke-width="2"/>
+<text x="418" y="196" fill="#333" text-anchor="middle">W3 · 24AWG · twisted</text>
+<path d="M 228 222 C 354.6666666666667 222, 481.3333333333333 222, 608 222" fill="none" stroke="blue" stroke-width="2"/>
+<text x="418" y="216" fill="#333" text-anchor="middle">W4 · 24AWG · twisted</text>
+<rect x="48" y="112" width="180" height="208" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+<text x="58" y="130" font-weight="bold" fill="#111">J1</text>
+<text x="58" y="145" font-size="10" fill="#777">43025-0800 · receptacle</text>
+<line x1="48" y1="150" x2="228" y2="150" stroke="#ddd" stroke-width="1"/>
+<circle cx="228" cy="162" r="3" fill="#333"/>
+<text x="58" y="166" fill="#111">1</text>
+<text x="82" y="166" fill="#555">VBAT_24V</text>
+<circle cx="228" cy="182" r="3" fill="#333"/>
+<text x="58" y="186" fill="#111">2</text>
+<text x="82" y="186" fill="#555">GND</text>
+<circle cx="228" cy="202" r="3" fill="#333"/>
+<text x="58" y="206" fill="#111">3</text>
+<text x="82" y="206" fill="#555">CAN_H</text>
+<circle cx="228" cy="222" r="3" fill="#333"/>
+<text x="58" y="226" fill="#111">4</text>
+<text x="82" y="226" fill="#555">CAN_L</text>
+<circle cx="228" cy="242" r="3" fill="#333"/>
+<text x="58" y="246" fill="#111">5</text>
+<text x="82" y="246" fill="#555">ENC_A</text>
+<circle cx="228" cy="262" r="3" fill="#333"/>
+<text x="58" y="266" fill="#111">6</text>
+<text x="82" y="266" fill="#555">ENC_B</text>
+<circle cx="228" cy="282" r="3" fill="#333"/>
+<text x="58" y="286" fill="#111">7</text>
+<text x="82" y="286" fill="#555">MOTOR_TEMP</text>
+<circle cx="228" cy="302" r="3" fill="#333"/>
+<text x="58" y="306" fill="#111">8</text>
+<text x="82" y="306" fill="#555">SHIELD_DRAIN</text>
+<rect x="608" y="112" width="180" height="208" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+<text x="618" y="130" font-weight="bold" fill="#111">M1</text>
+<text x="618" y="145" font-size="10" fill="#777">43020-0800 · plug</text>
+<line x1="608" y1="150" x2="788" y2="150" stroke="#ddd" stroke-width="1"/>
+<circle cx="608" cy="162" r="3" fill="#333"/>
+<text x="618" y="166" fill="#111">1</text>
+<text x="642" y="166" fill="#555">VBAT_24V</text>
+<circle cx="608" cy="182" r="3" fill="#333"/>
+<text x="618" y="186" fill="#111">2</text>
+<text x="642" y="186" fill="#555">GND</text>
+<circle cx="608" cy="202" r="3" fill="#333"/>
+<text x="618" y="206" fill="#111">3</text>
+<text x="642" y="206" fill="#555">CAN_H</text>
+<circle cx="608" cy="222" r="3" fill="#333"/>
+<text x="618" y="226" fill="#111">4</text>
+<text x="642" y="226" fill="#555">CAN_L</text>
+<circle cx="608" cy="242" r="3" fill="#333"/>
+<text x="618" y="246" fill="#111">5</text>
+<text x="642" y="246" fill="#555">ENC_A</text>
+<circle cx="608" cy="262" r="3" fill="#333"/>
+<text x="618" y="266" fill="#111">6</text>
+<text x="642" y="266" fill="#555">ENC_B</text>
+<circle cx="608" cy="282" r="3" fill="#333"/>
+<text x="618" y="286" fill="#111">7</text>
+<text x="642" y="286" fill="#555">MOTOR_TEMP</text>
+<circle cx="608" cy="302" r="3" fill="#333"/>
+<text x="618" y="306" fill="#111">8</text>
+<text x="642" y="306" fill="#555">SHIELD_DRAIN</text>
+</svg>
