@@ -1,19 +1,20 @@
-/* Grayhaven Industries brand — WHITE-dominant monochrome (matches the
-   grayhavenindustries.com console): white chrome, black ink, mono spec
-   labels, sharp edges. Severity colors are functional only. */
+/* Grayhaven Industries brand — Mach monochrome, exact tokens from
+   /Users/tylergibbs/grayhavenindustries/app/globals.css: true-black
+   ground, panels step up, white signal, #767676-class signature gray,
+   14%-white hairlines. No brand hues; severity colors are functional. */
 :root {
-  --bg: #ffffff;
-  --panel: #fafafa;
-  --muted-bg: #f0f0f0;
-  --border: #e2e2e2;
-  --text: #0a0a0a;
-  --muted: #6b6b6b;
-  --accent: #0a0a0a;
-  --accent-hover: #333333;
-  --error: #c00f0f;
-  --warning: #8a5a00;
-  --info: #1d4ed8;
-  --ok: #146c2e;
+  --bg: #000000;
+  --panel: #0a0a0a;
+  --muted-bg: #161616;
+  --border: hsl(0 0% 14%);
+  --text: #ffffff;
+  --muted: hsl(0 0% 53%);
+  --accent: #ffffff;
+  --accent-hover: #bfbfbf;
+  --error: #f87171;
+  --warning: #d4a017;
+  --info: #3b82f6;
+  --ok: #4ade80;
   --mono: "Geist Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
   --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -43,7 +44,7 @@ a { color: var(--accent); text-decoration: none; }
   gap: 12px;
   padding: 10px 20px;
   background: var(--bg);
-  border-bottom: 1px solid var(--text);
+  border-bottom: 1px solid var(--border);
   color: var(--text);
 }
 .topbar .brand {
@@ -118,9 +119,41 @@ a { color: var(--accent); text-decoration: none; }
   border: 1px solid transparent;
 }
 .tabs a:hover { color: var(--text); border-color: var(--border); }
-.tabs a.active { color: var(--text); border-color: var(--text); background: var(--bg); }
+.tabs a.active { color: var(--accent); border-color: var(--border); background: var(--panel); }
 
 .workspace-body { flex: 1; min-height: 0; overflow: auto; padding: 16px 20px; }
+
+/* PRD §11.1 split workspace (datum layout): editor left, render right,
+   draggable divider, sizes persisted by react-resizable-panels. */
+.workspace-split { flex: 1; min-height: 0; }
+.workspace-split .source-pane { height: 100%; border: none; }
+.render-pane { height: 100%; min-width: 0; overflow: auto; padding: 16px 20px; }
+.pane-handle {
+  width: 7px;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  position: relative;
+  transition-property: background-color, border-color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+.pane-handle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 2px;
+  height: 28px;
+  transform: translateY(-50%);
+  background: var(--border);
+}
+.pane-handle:hover, .pane-handle[data-separator][aria-grabbed="true"], .pane-handle[data-state="drag"] {
+  background: var(--muted-bg);
+  border-color: var(--muted);
+}
+.pane-handle:hover::after, .pane-handle[data-state="drag"]::after {
+  background: var(--muted);
+}
 
 /* Drawings render as light "drawing sheets" on the dark workspace. */
 .diagram-pane { background: #fafafa; border: 1px solid var(--border); overflow: auto; }
@@ -140,7 +173,7 @@ table.data th, table.data td {
   white-space: nowrap;
 }
 table.data th {
-  background: var(--panel);
+  background: var(--bg);
   font-family: var(--mono);
   font-size: 10px;
   text-transform: uppercase;
@@ -212,8 +245,8 @@ table.data td.mono, table.data th.mono { font-family: var(--mono); }
 }
 .compile-button {
   padding: 6px 14px;
-  border: 1px solid var(--text);
-  background: var(--text);
+  border: 1px solid var(--accent);
+  background: var(--accent);
   color: var(--bg);
   font-family: var(--mono);
   font-size: 11px;

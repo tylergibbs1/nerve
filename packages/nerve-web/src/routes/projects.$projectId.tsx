@@ -1,7 +1,9 @@
 import { createFileRoute, Link, notFound, Outlet } from "@tanstack/react-router"
+import { Group, Panel, Separator, useDefaultLayout } from "react-resizable-panels"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { compileQueryOptions, countDiagnostics } from "../lib/compile-client.js"
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js"
+import { SourcePane } from "../components/SourcePane.js"
 import { isDirty } from "../lib/sources.js"
 import { PROJECTS } from "../lib/projects.js"
 
@@ -25,8 +27,9 @@ export const Route = createFileRoute("/projects/$projectId")({
   component: ProjectWorkspace
 })
 
+// PRD §11.1 split workspace: source on the left, the selected render view
+// on the right. Tabs switch only the right pane.
 const TABS = [
-  { to: "/projects/$projectId/source", label: "Source" },
   { to: "/projects/$projectId/diagram", label: "Diagram" },
   { to: "/projects/$projectId/board", label: "Board" },
   { to: "/projects/$projectId/bom", label: "BOM" },
@@ -37,13 +40,17 @@ const TABS = [
 
 function ProjectWorkspace() {
   const { projectId } = Route.useParams()
+  const workspaceLayout = useDefaultLayout({ id: "nerve-workspace", panelIds: ["source", "render"] })
   const { data } = useSuspenseQuery(compileQueryOptions(projectId))
   const { errors, warnings } = countDiagnostics(data.hir.diagnostics)
 
   return (
     <div className="workspace">
       <div className="workspace-header">
-        <h2>{data.hir.harness.id}</h2>
+        <h2>
+          {data.hir.harness.id}
+          {isDirty(projectId) ? " •" : ""}
+        </h2>
         <span className="meta">
           rev {data.hir.harness.revision} · {data.hir.connectors.length} connectors ·{" "}
           {data.hir.wires.length} wires
@@ -63,14 +70,27 @@ function ProjectWorkspace() {
               params={{ projectId }}
               activeProps={{ className: "active" }}
             >
-              {tab.label === "Source" && isDirty(projectId) ? "Source •" : tab.label}
+              {tab.label}
             </Link>
           ))}
         </nav>
       </div>
-      <div className="workspace-body">
-        <Outlet />
-      </div>
+      {/* Datum-style resizable split; layout persisted to localStorage. */}
+      <Group
+        orientation="horizontal"
+        className="workspace-split"
+        {...workspaceLayout}
+      >
+        <Panel id="source" defaultSize="42%" minSize="320px" maxSize="65%" collapsible>
+          <SourcePane projectId={projectId} />
+        </Panel>
+        <Separator className="pane-handle" />
+        <Panel id="render" minSize="30%">
+          <div className="render-pane">
+            <Outlet />
+          </div>
+        </Panel>
+      </Group>
       <DiagnosticsPanel diagnostics={data.hir.diagnostics} />
     </div>
   )

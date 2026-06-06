@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-import { createFileRoute } from "@tanstack/react-router"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useDebouncedValue } from "@tanstack/react-pacer"
 import CodeMirror from "@uiw/react-codemirror"
@@ -13,16 +12,22 @@ import {
 } from "../lib/compile-client.js"
 import { getSource, isDirty, resetSource, setSource } from "../lib/sources.js"
 
-export const Route = createFileRoute("/projects/$projectId/source")({
-  component: SourceView
-})
-
-function SourceView() {
-  const { projectId } = Route.useParams()
+/**
+ * Persistent source editor (PRD §11.1 left pane). Auto-compiles on type;
+ * successful compiles write through the query cache so the render pane on
+ * the right updates live.
+ */
+export function SourcePane({ projectId }: { projectId: string }) {
   const queryClient = useQueryClient()
   const [source, setLocalSource] = useState(() => getSource(projectId))
   const [autoCompile, setAutoCompile] = useState(true)
   const lastCompiled = useRef<string | undefined>(undefined)
+
+  // Re-seed when switching projects (the pane persists across them).
+  useEffect(() => {
+    setLocalSource(getSource(projectId))
+    lastCompiled.current = undefined
+  }, [projectId])
 
   const compile = useMutation({
     mutationFn: (text: string) => compileSource(projectId, text),
@@ -30,7 +35,6 @@ function SourceView() {
       // Supersession guard: a newer edit exists — drop this stale result.
       if (compiledText !== getSource(projectId)) return
       lastCompiled.current = compiledText
-      // Every other tab (diagram, board, tables, diagnostics) reads this key.
       setCompileResult(queryClient, projectId, result)
     }
   })
@@ -40,14 +44,14 @@ function SourceView() {
   useEffect(() => {
     if (!autoCompile) return
     if (debouncedSource === lastCompiled.current) return
+    if (debouncedSource !== getSource(projectId)) return // project just switched
     compile.mutate(debouncedSource)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSource, autoCompile])
 
   // Close the stale window (tanstack-query qk-include-dependencies): if the
-  // editor unmounts with uncompiled edits — tab switch inside the debounce
-  // window, or auto turned off — invalidate so other tabs recompile the
-  // current source (the queryFn always reads getSource).
+  // pane unmounts or switches projects with uncompiled edits, invalidate so
+  // the render pane recompiles the current source.
   useEffect(() => {
     return () => {
       if (getSource(projectId) !== lastCompiled.current) {
@@ -68,7 +72,7 @@ function SourceView() {
     setSource(projectId, text)
   }
 
-  // Keep the status span mounted; animate visibility (make-interfaces rule 4).
+  // Keep the status span mounted; animate visibility.
   const status = compile.isError
     ? { kind: "error" as const, text: String(compile.error.message) }
     : compile.isSuccess
@@ -111,7 +115,7 @@ function SourceView() {
               compile.mutate(text)
             }}
           >
-            Reset to example
+            Reset
           </button>
         )}
         <span
