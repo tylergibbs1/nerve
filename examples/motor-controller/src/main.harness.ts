@@ -1,5 +1,9 @@
-// Golden fixture: PRD §9.1 example authoring style, verbatim.
+// Golden fixture: PRD §9.1 example authoring style.
 // If this file needs edits to compile, the DSL is wrong — not the fixture.
+// ONE sanctioned deviation from the PRD text: W1/W2 are 20AWG, not 18AWG.
+// Verified Molex data (2026-06-06) shows Micro-Fit 3.0 accepts 20-30 AWG
+// only — the PRD's 18AWG is a part-selection error Nerve now catches
+// (HK-MFG-004), which is the product doing its job.
 import { harness, connector, wire, branch, label } from "@grayhaven/nerve"
 import { MolexMicroFit } from "@grayhaven/nerve-connectors"
 
@@ -35,13 +39,13 @@ export default harness("motor-controller-harness", {
   connectors: [controller, motor],
   wires: [
     wire("W1", controller.pin(1), motor.pin(1), {
-      gauge: "18AWG",
+      gauge: "20AWG",
       color: "red",
       length: 420,
       signal: "VBAT_24V",
     }),
     wire("W2", controller.pin(2), motor.pin(2), {
-      gauge: "18AWG",
+      gauge: "20AWG",
       color: "black",
       length: 420,
       signal: "GND",

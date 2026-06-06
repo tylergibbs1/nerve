@@ -13,7 +13,7 @@ const model: CostModel = {
     "43025-0800": { unitCost: 0.68, supplier: "Molex" },
     "43020-0800": { unitCost: 0.72, supplier: "Molex", leadTimeDays: 90, lifecycle: "nrnd" }
   },
-  wireCostPerMeter: { "18AWG": 0.34, "24AWG": 0.14 },
+  wireCostPerMeter: { "20AWG": 0.25, "24AWG": 0.14 },
   sleeveCostPerMeter: 1.4,
   labelUnitCost: 0.35
 }
@@ -25,8 +25,8 @@ describe("quote generation (PRD §29)", () => {
   it("rolls up material: parts, wire by gauge/length, sleeve, labels", () => {
     const byItem = Object.fromEntries(quote.lines.map((l) => [l.item, l]))
     expect(byItem["43025-0800"]).toMatchObject({ qty: 1, extendedCost: 0.68 })
-    // W1+W2 = 840mm of 18AWG → 0.84m × 0.34
-    expect(byItem["wire 18AWG"]).toMatchObject({ qty: 0.84, extendedCost: 0.29 })
+    // W1+W2 = 840mm of 20AWG → 0.84m × 0.25
+    expect(byItem["wire 20AWG"]).toMatchObject({ qty: 0.84, extendedCost: 0.21 })
     expect(byItem["sleeving"]).toMatchObject({ qty: 0.42 })
     expect(byItem["labels"]).toMatchObject({ qty: 1, extendedCost: 0.35 })
   })
@@ -76,7 +76,7 @@ describe("quote diff between revisions (PRD §29)", () => {
     // Longer wires + longer sleeve cost more.
     expect(d.materialDelta).toBeGreaterThan(0)
     expect(d.perUnitDelta).toBeGreaterThan(0)
-    expect(d.lineChanges.some((c) => c.item === "wire:wire 18AWG")).toBe(true)
+    expect(d.lineChanges.some((c) => c.item === "wire:wire 20AWG")).toBe(true)
     expect(d.from.revision).toBe("A")
     expect(d.to.revision).toBe("B")
   })

@@ -187,7 +187,7 @@ describe("nerve diff", () => {
     const text = io.stdout.join("\n")
     expect(text).toContain("revision: A -> B")
     expect(text).toContain("~ wire:W1")
-    expect(text).toContain("gauge: 18AWG -> 16AWG")
+    expect(text).toContain("gauge: 20AWG -> 16AWG")
   })
 
   it("exits 0 for identical revisions and supports --json", async () => {

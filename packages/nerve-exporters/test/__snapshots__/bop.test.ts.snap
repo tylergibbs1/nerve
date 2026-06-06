@@ -2,8 +2,8 @@
 
 exports[`Bill of Process (PRD §28) > estimates labor time and is deterministic 1`] = `
 "Seq,Operation,Workstation,Description,Targets,Tools,Est. sec
-10,cut-strip,wire-prep,"Cut and strip W1 (18AWG red, 420 mm).",wire:W1,wire cutter; wire stripper,25
-20,cut-strip,wire-prep,"Cut and strip W2 (18AWG black, 420 mm).",wire:W2,wire cutter; wire stripper,25
+10,cut-strip,wire-prep,"Cut and strip W1 (20AWG red, 420 mm).",wire:W1,wire cutter; wire stripper,25
+20,cut-strip,wire-prep,"Cut and strip W2 (20AWG black, 420 mm).",wire:W2,wire cutter; wire stripper,25
 30,cut-strip,wire-prep,Cut and strip W3 (24AWG white).,wire:W3,wire cutter; wire stripper,25
 40,cut-strip,wire-prep,Cut and strip W4 (24AWG blue).,wire:W4,wire cutter; wire stripper,25
 50,twist,wire-prep,Twist W3 + W4 (CAN_PAIR).,wire:W3; wire:W4,twisting fixture,40

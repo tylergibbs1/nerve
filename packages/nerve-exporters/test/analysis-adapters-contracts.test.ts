@@ -42,8 +42,8 @@ describe("engineering analysis (PRD §34)", () => {
     })
     const r = analyzeHarness(withCurrent)
     const w1 = r.wires.find((x) => x.id === "W1")!
-    // 18AWG 0.42m → 0.00882 Ω; ×4A ≈ 0.035V
-    expect(w1.voltageDropV).toBeCloseTo(0.035, 2)
+    // 20AWG 0.42m → 0.014 Ω; ×4A ≈ 0.056V
+    expect(w1.voltageDropV).toBeCloseTo(0.056, 2)
   })
 
   it("is deterministic and exports CSV", () => {

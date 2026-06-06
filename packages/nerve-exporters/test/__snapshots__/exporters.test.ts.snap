@@ -9,8 +9,8 @@ exports[`CSV exporters (PRD §20) > BOM has the §20.1 columns and connector rol
 
 exports[`CSV exporters (PRD §20) > cut list has the §20.2 columns, with default tolerance applied 1`] = `
 "Wire ID,Signal,Gauge,Color,Stripe,Cut length,Finished length,Tolerance,From connector,From pin,To connector,To pin,Terminal A,Terminal B,Branch,Notes
-W1,VBAT_24V,18AWG,red,,420,420,10,J1,1,M1,1,,,,
-W2,GND,18AWG,black,,420,420,10,J1,2,M1,2,,,,
+W1,VBAT_24V,20AWG,red,,420,420,10,J1,1,M1,1,,,,
+W2,GND,20AWG,black,,420,420,10,J1,2,M1,2,,,,
 W3,CAN_H,24AWG,white,,,,10,J1,3,M1,3,,,,
 W4,CAN_L,24AWG,blue,,,,10,J1,4,M1,4,,,,
 "
@@ -28,9 +28,9 @@ exports[`SVG schematic (PRD §9.5.1) > renders title block, connectors, pins, an
 <text x="48" y="28" font-size="18" font-weight="bold" fill="#111">motor-controller-harness</text>
 <text x="48" y="48" fill="#555">rev A · units mm · HIR 0.1.0</text>
 <path d="M 228 162 C 354.6666666666667 162, 481.3333333333333 162, 608 162" fill="none" stroke="red" stroke-width="2"/>
-<text x="418" y="156" fill="#333" text-anchor="middle">W1 · 18AWG</text>
+<text x="418" y="156" fill="#333" text-anchor="middle">W1 · 20AWG</text>
 <path d="M 228 182 C 354.6666666666667 182, 481.3333333333333 182, 608 182" fill="none" stroke="#222222" stroke-width="2"/>
-<text x="418" y="176" fill="#333" text-anchor="middle">W2 · 18AWG</text>
+<text x="418" y="176" fill="#333" text-anchor="middle">W2 · 20AWG</text>
 <path d="M 228 202 C 354.6666666666667 202, 481.3333333333333 202, 608 202" fill="none" stroke="#b8b8b8" stroke-width="2"/>
 <text x="418" y="196" fill="#333" text-anchor="middle">W3 · 24AWG · twisted</text>
 <path d="M 228 222 C 354.6666666666667 222, 481.3333333333333 222, 608 222" fill="none" stroke="blue" stroke-width="2"/>
@@ -106,8 +106,8 @@ Materials
 
 Cut wires
 ---------
- 3. Cut W1: 18AWG red, 420 mm [VBAT_24V].
- 4. Cut W2: 18AWG black, 420 mm [GND].
+ 3. Cut W1: 20AWG red, 420 mm [VBAT_24V].
+ 4. Cut W2: 20AWG black, 420 mm [GND].
  5. Cut W3: 24AWG white, length per board [CAN_H].
  6. Cut W4: 24AWG blue, length per board [CAN_L].
 

@@ -103,6 +103,13 @@ accepted → variant()-shaped structured patch; `nerve redline add/resolve`), **
 SDK** (`definePlugin` rule packs loaded from config.plugins with HIR schema-version
 gating, HK-PLUGIN-001 on mismatch).
 
+Verification pass (2026-06-06): Micro-Fit 3.0 library data verified against Molex
+catalog sources and stamped `verified` — and the verification caught that **the PRD's own
+§9.1 example specifies 18AWG into a housing whose contact series max out at 20AWG**
+(43030-0007: 20–24, 43030-0010: 26–30, RMF 46235: 20–24; 8.5A/600V). The golden fixture
+carries one sanctioned deviation (20AWG) documenting this. A real-Grayhaven-harness
+pipeline run still needs actual hardware specs from the team — none exist in local repos.
+
 PRD coverage is now effectively complete (§32 label depth and §42 part-data providers
 remain as data-model deepening). Remaining ideas:
 Registry + verified component data (§30), shop-floor adapters (§31), formboard 1:1 printing (§33),

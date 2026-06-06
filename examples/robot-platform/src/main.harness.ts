@@ -121,11 +121,12 @@ const drive = (n: 1 | 2 | 3 | 4, feedLength: number, encLength: number): Drive =
     driver,
     motor,
     wires: [
+      // 20AWG: Micro-Fit 3.0 max (verified); drives are sized accordingly.
       wire(`W_VBAT_MD${n}`, pdbOut.pin(feedPin), driver.pin(1), {
-        gauge: "18AWG", color: "red", length: feedLength, signal: `VBAT_MD${n}`
+        gauge: "20AWG", color: "red", length: feedLength, signal: `VBAT_MD${n}`, currentEstimate: 3
       }),
       wire(`W_GND_MD${n}`, pdbOut.pin(feedPin + 1), driver.pin(2), {
-        gauge: "18AWG", color: "black", length: feedLength, signal: `GND_MD${n}`
+        gauge: "20AWG", color: "black", length: feedLength, signal: `GND_MD${n}`, currentEstimate: 3
       }),
       ...canDrop(`MD${n}`, driver, feedLength + 60),
       wire(`W_ENCA_M${n}`, motor.pin(1), driver.pin(5), {

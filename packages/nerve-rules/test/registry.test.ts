@@ -111,7 +111,7 @@ describe("approvals and provenance (PRD §30 acceptance)", () => {
         wires: [wire("W1", j1.pin(1), j2.pin(1), { gauge: "20AWG", color: "red", length: 50, signal: "SIG" })]
       })
     )
-    expect(hir.connectors[0]?.provenance).toMatchObject({ verification: "inspired-by" })
+    expect(hir.connectors[0]?.provenance).toMatchObject({ verification: "verified", lastVerified: "2026-06-06" })
     expect(hir.connectors[0]?.crimpTool).toBe("63819-0000")
   })
 })

@@ -34,14 +34,14 @@ describe("diffHir (PRD §21)", () => {
       {
         id: "W1",
         changes: [
-          { field: "gauge", from: "18AWG", to: "16AWG" },
+          { field: "gauge", from: "20AWG", to: "16AWG" },
           { field: "length", from: "420", to: "450" }
         ]
       }
     ])
     const text = formatDiff(d)
     expect(text).toContain("~ wire:W1")
-    expect(text).toContain("gauge: 18AWG -> 16AWG")
+    expect(text).toContain("gauge: 20AWG -> 16AWG")
   })
 
   it("detects added/removed wires and labels", () => {

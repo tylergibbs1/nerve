@@ -38,7 +38,7 @@ describe("CSV exporters (PRD §20)", () => {
     expect(lines[0]).toBe(
       "Wire ID,Signal,Gauge,Color,Stripe,Cut length,Finished length,Tolerance,From connector,From pin,To connector,To pin,Terminal A,Terminal B,Branch,Notes"
     )
-    expect(lines[1]).toBe("W1,VBAT_24V,18AWG,red,,420,420,10,J1,1,M1,1,,,,")
+    expect(lines[1]).toBe("W1,VBAT_24V,20AWG,red,,420,420,10,J1,1,M1,1,,,,")
     expect(csv).toMatchSnapshot()
   })
 
@@ -109,7 +109,7 @@ describe("SVG schematic (PRD §9.5.1)", () => {
     expect(svg).toContain(">J1<")
     expect(svg).toContain(">M1<")
     expect(svg).toContain("43025-0800")
-    expect(svg).toContain("W1 · 18AWG")
+    expect(svg).toContain("W1 · 20AWG")
     expect(svg).toContain("W3 · 24AWG · twisted")
     expect(svg).toMatchSnapshot()
   })
@@ -157,7 +157,7 @@ describe("harness board view (PRD §9.5.3)", () => {
 describe("assembly instructions (PRD §20.4)", () => {
   it("covers materials, cut, twist, populate, branch, label, inspect, test", () => {
     const text = assemblyInstructions(hir)
-    expect(text).toContain("Cut W1: 18AWG red, 420 mm [VBAT_24V]")
+    expect(text).toContain("Cut W1: 20AWG red, 420 mm [VBAT_24V]")
     expect(text).toContain("Twist W3 + W4 together (CAN_PAIR)")
     expect(text).toContain("Populate J1 (43025-0800, receptacle)")
     expect(text).toContain("Route branch main (J1 → M1); 420 mm nominal; sleeve with braided-pet")
