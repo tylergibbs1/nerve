@@ -24,16 +24,33 @@ See [`GOAL.md`](./GOAL.md) for the current milestone and [`docs/prd.md`](./docs/
 | [`@grayhaven/nerve-connectors`](./packages/nerve-connectors) | Verified connector library (Molex Micro-Fit 3.0 seed data) |
 | [`examples/`](./examples) | Golden fixtures: PRD §9.1 motor-controller (verbatim) + variant, sensor-splice (splices/cables) |
 
-## Quick start
+## Quick start (npm)
+
+```bash
+npm install @grayhaven/nerve @grayhaven/nerve-connectors @grayhaven/nerve-cli
+
+npx --package=@grayhaven/nerve-cli nerve init .
+npx --package=@grayhaven/nerve-cli nerve compile ./src/main.harness.ts
+npx --package=@grayhaven/nerve-cli nerve export  ./src/main.harness.ts
+# dist/ → harness.json, schematic.svg, board.svg, BOM/cut-list/label/test CSVs,
+#         assembly instructions, manufacturing-packet.pdf + .zip
+```
+
+All packages: [`@grayhaven/nerve`](https://www.npmjs.com/package/@grayhaven/nerve) ·
+[`nerve-rules`](https://www.npmjs.com/package/@grayhaven/nerve-rules) ·
+[`nerve-compiler`](https://www.npmjs.com/package/@grayhaven/nerve-compiler) ·
+[`nerve-exporters`](https://www.npmjs.com/package/@grayhaven/nerve-exporters) ·
+[`nerve-wireviz`](https://www.npmjs.com/package/@grayhaven/nerve-wireviz) ·
+[`nerve-connectors`](https://www.npmjs.com/package/@grayhaven/nerve-connectors) ·
+[`nerve-cli`](https://www.npmjs.com/package/@grayhaven/nerve-cli)
+
+## Developing this repo
 
 ```bash
 pnpm install
-pnpm test        # 57 tests: golden corpus, rules, compiler, exporters, CLI
+pnpm test        # 98 tests: golden corpus, rules, compiler, exporters, wireviz, CLI
 pnpm typecheck   # strict TS across all packages
-
-# CLI (from examples/motor-controller):
-node ../../packages/nerve-cli/bin/nerve.js compile ./src/main.harness.ts
-node ../../packages/nerve-cli/bin/nerve.js export  ./src/main.harness.ts   # full packet → dist/
+pnpm build       # dist builds for every package
 
 # Web editor:
 pnpm --filter @grayhaven/nerve-web dev
