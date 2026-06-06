@@ -4,6 +4,8 @@ import type { TestPlan } from "@grayhaven/nerve-exporters"
 export interface CompileRequest {
   readonly id: number
   readonly projectId: string
+  /** When present, compile this TypeScript source instead of the bundled design (§9.6). */
+  readonly source?: string
 }
 
 export interface CompileResult {

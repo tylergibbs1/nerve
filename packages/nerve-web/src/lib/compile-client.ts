@@ -36,6 +36,14 @@ export const compileProject = (projectId: string): Promise<CompileResult> =>
     getWorker().postMessage({ id, projectId } satisfies CompileRequest)
   })
 
+/** Compile editor-authored TypeScript source (§9.6). */
+export const compileSource = (projectId: string, source: string): Promise<CompileResult> =>
+  new Promise((resolve, reject) => {
+    const id = ++nextId
+    pending.set(id, { resolve, reject })
+    getWorker().postMessage({ id, projectId, source } satisfies CompileRequest)
+  })
+
 export const compileQueryOptions = (projectId: string) => ({
   queryKey: ["compile", projectId] as const,
   queryFn: () => compileProject(projectId)

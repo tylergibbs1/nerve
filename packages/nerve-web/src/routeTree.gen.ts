@@ -14,6 +14,7 @@ import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
 import { Route as ProjectsProjectIdIndexRouteImport } from './routes/projects.$projectId.index'
 import { Route as ProjectsProjectIdTestsRouteImport } from './routes/projects.$projectId.tests'
+import { Route as ProjectsProjectIdSourceRouteImport } from './routes/projects.$projectId.source'
 import { Route as ProjectsProjectIdLabelsRouteImport } from './routes/projects.$projectId.labels'
 import { Route as ProjectsProjectIdDiagramRouteImport } from './routes/projects.$projectId.diagram'
 import { Route as ProjectsProjectIdCutListRouteImport } from './routes/projects.$projectId.cut-list'
@@ -43,6 +44,11 @@ const ProjectsProjectIdIndexRoute = ProjectsProjectIdIndexRouteImport.update({
 const ProjectsProjectIdTestsRoute = ProjectsProjectIdTestsRouteImport.update({
   id: '/tests',
   path: '/tests',
+  getParentRoute: () => ProjectsProjectIdRoute,
+} as any)
+const ProjectsProjectIdSourceRoute = ProjectsProjectIdSourceRouteImport.update({
+  id: '/source',
+  path: '/source',
   getParentRoute: () => ProjectsProjectIdRoute,
 } as any)
 const ProjectsProjectIdLabelsRoute = ProjectsProjectIdLabelsRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/cut-list': typeof ProjectsProjectIdCutListRoute
   '/projects/$projectId/diagram': typeof ProjectsProjectIdDiagramRoute
   '/projects/$projectId/labels': typeof ProjectsProjectIdLabelsRoute
+  '/projects/$projectId/source': typeof ProjectsProjectIdSourceRoute
   '/projects/$projectId/tests': typeof ProjectsProjectIdTestsRoute
   '/projects/$projectId/': typeof ProjectsProjectIdIndexRoute
 }
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/projects/$projectId/cut-list': typeof ProjectsProjectIdCutListRoute
   '/projects/$projectId/diagram': typeof ProjectsProjectIdDiagramRoute
   '/projects/$projectId/labels': typeof ProjectsProjectIdLabelsRoute
+  '/projects/$projectId/source': typeof ProjectsProjectIdSourceRoute
   '/projects/$projectId/tests': typeof ProjectsProjectIdTestsRoute
   '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
 }
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/projects/$projectId/cut-list': typeof ProjectsProjectIdCutListRoute
   '/projects/$projectId/diagram': typeof ProjectsProjectIdDiagramRoute
   '/projects/$projectId/labels': typeof ProjectsProjectIdLabelsRoute
+  '/projects/$projectId/source': typeof ProjectsProjectIdSourceRoute
   '/projects/$projectId/tests': typeof ProjectsProjectIdTestsRoute
   '/projects/$projectId/': typeof ProjectsProjectIdIndexRoute
 }
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/cut-list'
     | '/projects/$projectId/diagram'
     | '/projects/$projectId/labels'
+    | '/projects/$projectId/source'
     | '/projects/$projectId/tests'
     | '/projects/$projectId/'
   fileRoutesByTo: FileRoutesByTo
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/cut-list'
     | '/projects/$projectId/diagram'
     | '/projects/$projectId/labels'
+    | '/projects/$projectId/source'
     | '/projects/$projectId/tests'
     | '/projects/$projectId'
   id:
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/projects/$projectId/cut-list'
     | '/projects/$projectId/diagram'
     | '/projects/$projectId/labels'
+    | '/projects/$projectId/source'
     | '/projects/$projectId/tests'
     | '/projects/$projectId/'
   fileRoutesById: FileRoutesById
@@ -190,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsProjectIdTestsRouteImport
       parentRoute: typeof ProjectsProjectIdRoute
     }
+    '/projects/$projectId/source': {
+      id: '/projects/$projectId/source'
+      path: '/source'
+      fullPath: '/projects/$projectId/source'
+      preLoaderRoute: typeof ProjectsProjectIdSourceRouteImport
+      parentRoute: typeof ProjectsProjectIdRoute
+    }
     '/projects/$projectId/labels': {
       id: '/projects/$projectId/labels'
       path: '/labels'
@@ -234,6 +253,7 @@ interface ProjectsProjectIdRouteChildren {
   ProjectsProjectIdCutListRoute: typeof ProjectsProjectIdCutListRoute
   ProjectsProjectIdDiagramRoute: typeof ProjectsProjectIdDiagramRoute
   ProjectsProjectIdLabelsRoute: typeof ProjectsProjectIdLabelsRoute
+  ProjectsProjectIdSourceRoute: typeof ProjectsProjectIdSourceRoute
   ProjectsProjectIdTestsRoute: typeof ProjectsProjectIdTestsRoute
   ProjectsProjectIdIndexRoute: typeof ProjectsProjectIdIndexRoute
 }
@@ -244,6 +264,7 @@ const ProjectsProjectIdRouteChildren: ProjectsProjectIdRouteChildren = {
   ProjectsProjectIdCutListRoute: ProjectsProjectIdCutListRoute,
   ProjectsProjectIdDiagramRoute: ProjectsProjectIdDiagramRoute,
   ProjectsProjectIdLabelsRoute: ProjectsProjectIdLabelsRoute,
+  ProjectsProjectIdSourceRoute: ProjectsProjectIdSourceRoute,
   ProjectsProjectIdTestsRoute: ProjectsProjectIdTestsRoute,
   ProjectsProjectIdIndexRoute: ProjectsProjectIdIndexRoute,
 }
