@@ -10,9 +10,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700;800&family=Geist+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0a0a0a; --card: #141414; --muted-bg: #292929; --border: #2e2e2e;
-      --fg: #f5f5f5; --muted: #a6a6a6;
-      --accent: #ffffff; --accent-hover: #d4d4d4; --ok: #f5f5f5;
+      --bg: #ffffff; --card: #fafafa; --muted-bg: #f0f0f0; --border: #e2e2e2;
+      --fg: #0a0a0a; --muted: #6b6b6b;
+      --accent: #0a0a0a; --accent-hover: #333333; --ok: #0a0a0a;
       --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
       --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
@@ -38,9 +38,9 @@
     .sub { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); max-width: 540px; line-height: 1.8; }
     .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
     .btn { display: inline-block; padding: 12px 22px; font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid var(--fg); color: var(--fg); transition: all .15s; }
-    .btn:hover { background: var(--fg); color: #0a0a0a; }
-    .btn.solid { background: var(--fg); color: #0a0a0a; border-color: var(--fg); }
-    .btn.solid:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #0a0a0a; }
+    .btn:hover { background: var(--fg); color: #ffffff; }
+    .btn.solid { background: var(--fg); color: #ffffff; border-color: var(--fg); }
+    .btn.solid:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #ffffff; }
     .btn.ghost { border-color: var(--border); color: var(--muted); }
     .btn.ghost:hover { background: transparent; border-color: var(--fg); color: var(--fg); }
 
@@ -61,7 +61,7 @@
     .divider span { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; color: var(--muted); text-transform: uppercase; }
 
     .pipeline { font-family: var(--mono); font-size: clamp(10px, 1.5vw, 13px); color: var(--muted); background: var(--card); border: 1px solid var(--border); padding: 26px; overflow-x: auto; white-space: pre; line-height: 1.9; }
-    .pipeline b { color: var(--fg); font-weight: 600; }
+    .pipeline b { color: var(--fg); font-weight: 700; }
     .pipeline em { color: var(--accent); font-style: normal; }
 
     .grid3 { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); grid-template-columns: 1fr; }
@@ -73,11 +73,11 @@
 
     .code { background: var(--card); border: 1px solid var(--border); padding: 24px; font-family: var(--mono); font-size: 12.5px; line-height: 1.75; overflow-x: auto; white-space: pre; }
     .code .k { color: var(--fg); font-weight: 700; }
-    .code .s { color: #c9c9c9; }
+    .code .s { color: #555555; }
     .code .c { color: #6b6b6b; }
     .code .f { color: var(--fg); }
 
-    .sheet { background: #fafafa; border: 1px solid var(--border); padding: 8px; }
+    .sheet { background: #ffffff; border: 1px solid var(--border); padding: 8px; }
     .sheet img { display: block; width: 100%; height: auto; }
     .sheet-caption { display: flex; justify-content: space-between; padding-top: 10px; }
 
@@ -119,12 +119,12 @@
           <span class="spec-label">REV A</span>
         </div>
         <dl>
-          <div class="kv"><dt>Release</dt><dd class="ok">v0.1.0 · Live</dd></div>
+          <div class="kv"><dt>Release</dt><dd class="ok">v0.2.0 · Live</dd></div>
           <div class="kv"><dt>Packages</dt><dd>7 on npm</dd></div>
           <div class="kv"><dt>License</dt><dd>Apache-2.0</dd></div>
-          <div class="kv"><dt>Validation rules</dt><dd>14 built-in · HK-* codes</dd></div>
+          <div class="kv"><dt>Validation rules</dt><dd>17 built-in · HK-* codes</dd></div>
           <div class="kv"><dt>Determinism</dt><dd class="accent">Byte-identical</dd></div>
-          <div class="kv"><dt>Test corpus</dt><dd>102 passing</dd></div>
+          <div class="kv"><dt>Test corpus</dt><dd>142 passing</dd></div>
         </dl>
       </div>
     </section>
@@ -133,7 +133,7 @@
     <section>
       <div class="pipeline"><b>typed harness spec</b> ──▶ <b>compiler</b> ──▶ <em>validation</em> ──▶ <b>HIR</b> ──▶ schematic · board · <b>BOM</b> · cut list · labels · <em>continuity tests</em> · <b>PDF packet</b>
 
-  <span style="color:#6b6b6b">one source of truth. every artifact reproducible. every line traceable to a design object.</span></div>
+  <span style="color:#8a8a8a">one source of truth. every artifact reproducible. every line traceable to a design object.</span></div>
     </section>
 
     <div class="divider"><span>Author // 02</span><div class="line"></div></div>
@@ -195,7 +195,7 @@
   <footer class="footer">
     <span>Grayhaven Industries · Interconnect Systems</span>
     <span class="live">● SYSTEM NOMINAL</span>
-    <span>Nerve v0.1.0 · Apache-2.0</span>
+    <span>Nerve v0.2.0 · Apache-2.0</span>
   </footer>
 </body>
 </html>
