@@ -65,6 +65,13 @@ Registry, Build Record, AI features, plugin SDK. (PRD §7.2, §25 — wedge firs
    - `nerve diff` (DoD #9, §21): connectors/pinouts/wires/branches/labels/BOM changes across harness.json, `.harness.ts`, or revision dirs; git-style exit codes; `--json`.
    - DrawingIR (§27.4): one deterministic layout feeding both SVG and PDF renderers.
 
-Candidate next milestones (from the PRD, in wedge order): WireViz import (§27.2) ·
-in-browser TS authoring with Monaco + compile worker (§9.6) · variants (§8.4) ·
-splice/cable modeling depth (§9.2) · build pipeline + npm publish prep.
+6. ✅ **M5 — Splice + cable depth** (§9.2): SpliceRef endpoints, cable grouping, HK-SPLICE/HK-CABLE checks, splice symbols in schematic/board, splice-verification tests, net computation across splices; `examples/sensor-splice` fixture.
+7. ✅ **M6 — Variants** (§8.4): `variant(base, mods)` with add/remove/override, lineage metadata, diff-visible differences, consistent validation; `variants/long.ts` example.
+8. ✅ **M7 — WireViz adapter** (§27.2): YAML subset import with diagnostics for unmapped concepts, export with round-trip test, fixture corpus, `nerve import` / `nerve export --target wireviz`.
+9. ✅ **M8 — In-browser authoring** (§9.6): Source tab (CodeMirror), sucrase TS compile in the worker sandbox, edits update every tab live.
+10. ✅ **M9 — Publish prep**: tsup `dist` builds with types for all 7 library packages, GitHub Actions CI, MIT license (**flagged for review — license choice is a business decision**), `publishConfig` ready (packages stay `private: true` until a deliberate publish).
+
+**Roadmap complete (2026-06-06).** Future direction lives in the PRD: BOP/costing (§28–29),
+Registry + verified component data (§30), shop-floor adapters (§31), formboard 1:1 printing (§33),
+engineering analysis (§34), ECO/release workflow (§35), Build Record (§36), interface contracts (§37),
+redlines (§39), plugin SDK (§40).

@@ -10,18 +10,19 @@ TypeScript DSL → compiler → HIR → validation → rendering → manufacturi
 
 See [`GOAL.md`](./GOAL.md) for the current milestone and [`docs/prd.md`](./docs/prd.md) for the full PRD.
 
-## Status: M0–M3 complete ✅ (first milestone shipped)
+## Status: roadmap complete ✅ — PRD §26 Definition of Done met, M0–M9 shipped
 
 | Package | What it is |
 | --- | --- |
-| [`@grayhaven/nerve`](./packages/nerve) | Domain model, DSL builders (`harness`, `connector`, `wire`, `branch`, `label`), versioned HIR schema (Effect Schema), deterministic `compileDesign`, diagnostics + `rule()` API, `defineConfig` |
-| [`@grayhaven/nerve-rules`](./packages/nerve-rules) | 13 built-in validation rules with stable `HK-*` codes (electrical, manufacturing, connectivity, documentation) |
+| [`@grayhaven/nerve`](./packages/nerve) | Domain model, DSL (`harness`/`connector`/`wire`/`branch`/`label`/`splice`/`cable`/`variant`), versioned HIR schema (Effect Schema), deterministic `compileDesign`, diagnostics + `rule()` API, `diffHir`, `defineConfig` |
+| [`@grayhaven/nerve-rules`](./packages/nerve-rules) | 14 built-in validation rules with stable `HK-*` codes (electrical, manufacturing, connectivity, documentation) |
 | [`@grayhaven/nerve-compiler`](./packages/nerve-compiler) | `.harness.ts` loading, config discovery, Effect `CompilerService` + tagged errors, fail-closed gate |
-| [`@grayhaven/nerve-exporters`](./packages/nerve-exporters) | BOM / cut-list / label CSVs (PRD §20), continuity + no-short test plan (§9.9), deterministic SVG schematic, byte-deterministic zip packet |
-| [`@grayhaven/nerve-cli`](./packages/nerve-cli) | `nerve init/compile/validate/render/export/inspect` — deterministic, CI-ready exit codes |
-| [`@grayhaven/nerve-web`](./packages/nerve-web) | Vite/React/TanStack editor: diagram + data tables + diagnostics, compile in a Web Worker |
+| [`@grayhaven/nerve-exporters`](./packages/nerve-exporters) | DrawingIR → SVG/PDF; BOM / cut-list / label CSVs (§20), continuity + splice + no-short test plan (§9.9), schematic + harness-board views, assembly instructions, byte-deterministic PDF packet + zip |
+| [`@grayhaven/nerve-wireviz`](./packages/nerve-wireviz) | WireViz YAML import/export adapter with fixture corpus (§27.2) |
+| [`@grayhaven/nerve-cli`](./packages/nerve-cli) | `nerve init/compile/validate/render/export/import/diff/inspect` — deterministic, CI-ready exit codes |
+| [`@grayhaven/nerve-web`](./packages/nerve-web) | Vite/React/TanStack editor: in-browser source authoring, diagram + board + data tables + diagnostics, compile in a Web Worker |
 | [`@grayhaven/nerve-connectors`](./packages/nerve-connectors) | Verified connector library (Molex Micro-Fit 3.0 seed data) |
-| [`examples/motor-controller`](./examples/motor-controller) | Golden fixture: the PRD §9.1 example harness, verbatim |
+| [`examples/`](./examples) | Golden fixtures: PRD §9.1 motor-controller (verbatim) + variant, sensor-splice (splices/cables) |
 
 ## Quick start
 
@@ -53,8 +54,16 @@ const j1 = connector("J1", MolexMicroFit["43025-0800"], {
 ## Roadmap
 
 - **M0 — Skeleton** ✅ monorepo, DSL, HIR schema, golden fixture
-- **M1 — Compiler + rules** ✅ TypeScript loading, 13 validation rules, CLI `compile`/`validate`
+- **M1 — Compiler + rules** ✅ TypeScript loading, validation rules, CLI `compile`/`validate`
 - **M2 — Exports** ✅ CSV BOM/cut-list/labels/test-plan, SVG schematic, zip packet
 - **M3 — Web editor** ✅ Vite/React/TanStack, worker-based compile, diagnostics panel
-- **M4 — DoD sprint** ✅ PDF manufacturing packet, harness-board view, `nerve diff` — **all PRD §26 Definition-of-Done items met**
-- **Next** (see [`GOAL.md`](./GOAL.md)): WireViz import, in-browser authoring, variants, splice/cable depth, publish prep
+- **M4 — DoD sprint** ✅ PDF manufacturing packet, harness-board view, `nerve diff` — **all PRD §26 items met**
+- **M5 — Splices + cables** ✅ splice endpoints, cable grouping, splice-verification tests
+- **M6 — Variants** ✅ `variant()` with lineage and diff-visible changes
+- **M7 — WireViz** ✅ YAML import/export adapter, `nerve import`
+- **M8 — In-browser authoring** ✅ Source tab, worker-sandboxed TS compile
+- **M9 — Publish prep** ✅ tsup `dist` builds, CI workflow, MIT license, `publishConfig`
+- **Future** (PRD §28–40): BOP/costing, Registry, shop-floor adapters, 1:1 formboard, analysis, ECO/release, Build Record, interface contracts, plugin SDK
+
+> Publishing note: packages carry `publishConfig` but remain `private: true` —
+> flip deliberately when ready to publish. License is MIT (review before release).
