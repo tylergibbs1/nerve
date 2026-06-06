@@ -8,7 +8,7 @@
  */
 import { compileDesign, runRules, type HarnessDesign } from "@grayhaven/nerve"
 import { builtinRules } from "@grayhaven/nerve-rules"
-import { generateTestPlan, schematicSvg } from "@grayhaven/nerve-exporters"
+import { boardSvg, generateTestPlan, schematicSvg } from "@grayhaven/nerve-exporters"
 import motorController from "@grayhaven/example-motor-controller"
 import type { CompileRequest, CompileResponse } from "../lib/compile-types.js"
 
@@ -35,6 +35,7 @@ self.onmessage = (event: MessageEvent<CompileRequest>) => {
     result: {
       hir: fullHir,
       svg: schematicSvg(fullHir),
+      boardSvg: boardSvg(fullHir),
       testPlan: generateTestPlan(fullHir)
     }
   } satisfies CompileResponse)

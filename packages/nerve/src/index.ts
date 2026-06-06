@@ -50,6 +50,17 @@ export { compileDesign, type CompileResult } from "./compile.js"
 export { defineConfig, type NerveConfig } from "./config.js"
 
 export {
+  diffHir,
+  formatDiff,
+  isEmptyDiff,
+  type EntityChange,
+  type FieldChange,
+  type HirDiff,
+  type PinoutChange,
+  type SectionDiff
+} from "./diff.js"
+
+export {
   rule,
   runRules,
   type Rule,

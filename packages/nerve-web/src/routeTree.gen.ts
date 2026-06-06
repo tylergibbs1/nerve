@@ -18,6 +18,7 @@ import { Route as ProjectsProjectIdLabelsRouteImport } from './routes/projects.$
 import { Route as ProjectsProjectIdDiagramRouteImport } from './routes/projects.$projectId.diagram'
 import { Route as ProjectsProjectIdCutListRouteImport } from './routes/projects.$projectId.cut-list'
 import { Route as ProjectsProjectIdBomRouteImport } from './routes/projects.$projectId.bom'
+import { Route as ProjectsProjectIdBoardRouteImport } from './routes/projects.$projectId.board'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -66,11 +67,17 @@ const ProjectsProjectIdBomRoute = ProjectsProjectIdBomRouteImport.update({
   path: '/bom',
   getParentRoute: () => ProjectsProjectIdRoute,
 } as any)
+const ProjectsProjectIdBoardRoute = ProjectsProjectIdBoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => ProjectsProjectIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/projects/$projectId': typeof ProjectsProjectIdRouteWithChildren
   '/projects/': typeof ProjectsIndexRoute
+  '/projects/$projectId/board': typeof ProjectsProjectIdBoardRoute
   '/projects/$projectId/bom': typeof ProjectsProjectIdBomRoute
   '/projects/$projectId/cut-list': typeof ProjectsProjectIdCutListRoute
   '/projects/$projectId/diagram': typeof ProjectsProjectIdDiagramRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/projects': typeof ProjectsIndexRoute
+  '/projects/$projectId/board': typeof ProjectsProjectIdBoardRoute
   '/projects/$projectId/bom': typeof ProjectsProjectIdBomRoute
   '/projects/$projectId/cut-list': typeof ProjectsProjectIdCutListRoute
   '/projects/$projectId/diagram': typeof ProjectsProjectIdDiagramRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/projects/$projectId': typeof ProjectsProjectIdRouteWithChildren
   '/projects/': typeof ProjectsIndexRoute
+  '/projects/$projectId/board': typeof ProjectsProjectIdBoardRoute
   '/projects/$projectId/bom': typeof ProjectsProjectIdBomRoute
   '/projects/$projectId/cut-list': typeof ProjectsProjectIdCutListRoute
   '/projects/$projectId/diagram': typeof ProjectsProjectIdDiagramRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/'
     | '/projects/$projectId'
     | '/projects/'
+    | '/projects/$projectId/board'
     | '/projects/$projectId/bom'
     | '/projects/$projectId/cut-list'
     | '/projects/$projectId/diagram'
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/projects'
+    | '/projects/$projectId/board'
     | '/projects/$projectId/bom'
     | '/projects/$projectId/cut-list'
     | '/projects/$projectId/diagram'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/projects/$projectId'
     | '/projects/'
+    | '/projects/$projectId/board'
     | '/projects/$projectId/bom'
     | '/projects/$projectId/cut-list'
     | '/projects/$projectId/diagram'
@@ -206,10 +218,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsProjectIdBomRouteImport
       parentRoute: typeof ProjectsProjectIdRoute
     }
+    '/projects/$projectId/board': {
+      id: '/projects/$projectId/board'
+      path: '/board'
+      fullPath: '/projects/$projectId/board'
+      preLoaderRoute: typeof ProjectsProjectIdBoardRouteImport
+      parentRoute: typeof ProjectsProjectIdRoute
+    }
   }
 }
 
 interface ProjectsProjectIdRouteChildren {
+  ProjectsProjectIdBoardRoute: typeof ProjectsProjectIdBoardRoute
   ProjectsProjectIdBomRoute: typeof ProjectsProjectIdBomRoute
   ProjectsProjectIdCutListRoute: typeof ProjectsProjectIdCutListRoute
   ProjectsProjectIdDiagramRoute: typeof ProjectsProjectIdDiagramRoute
@@ -219,6 +239,7 @@ interface ProjectsProjectIdRouteChildren {
 }
 
 const ProjectsProjectIdRouteChildren: ProjectsProjectIdRouteChildren = {
+  ProjectsProjectIdBoardRoute: ProjectsProjectIdBoardRoute,
   ProjectsProjectIdBomRoute: ProjectsProjectIdBomRoute,
   ProjectsProjectIdCutListRoute: ProjectsProjectIdCutListRoute,
   ProjectsProjectIdDiagramRoute: ProjectsProjectIdDiagramRoute,

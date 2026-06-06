@@ -10,7 +10,8 @@
   "dependencies": {
     "@grayhaven/nerve": "workspace:*",
     "effect": "^3.16.0",
-    "fflate": "^0.8.2"
+    "fflate": "^0.8.2",
+    "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
     "@grayhaven/nerve-compiler": "workspace:*",

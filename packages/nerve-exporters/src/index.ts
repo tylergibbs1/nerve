@@ -1,4 +1,17 @@
-export { bomCsv, cutListCsv, labelScheduleCsv, testPlanCsv, toCsv, type CutListOptions } from "./csv.js"
+export {
+  bomCsv,
+  bomTable,
+  cutListCsv,
+  cutListTable,
+  labelScheduleCsv,
+  labelScheduleTable,
+  testPlanCsv,
+  testPlanTable,
+  toCsv,
+  type Cell,
+  type CutListOptions,
+  type TableData
+} from "./csv.js"
 export {
   coverage,
   generateTestPlan,
@@ -9,5 +22,14 @@ export {
   type TestPlan,
   type TestPoint
 } from "./test-plan.js"
-export { schematicSvg } from "./svg.js"
+export {
+  renderSvg,
+  scaleDrawing,
+  type DrawItem,
+  type Drawing
+} from "./drawing.js"
+export { schematicDrawing, schematicSvg } from "./svg.js"
+export { boardDrawing, boardSvg } from "./board.js"
+export { assemblyInstructions } from "./instructions.js"
+export { manufacturingPacketPdf } from "./pdf.js"
 export { buildPacket, canRelease, type Packet, type PacketOptions } from "./packet.js"

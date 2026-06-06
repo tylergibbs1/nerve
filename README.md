@@ -56,4 +56,5 @@ const j1 = connector("J1", MolexMicroFit["43025-0800"], {
 - **M1 — Compiler + rules** ✅ TypeScript loading, 13 validation rules, CLI `compile`/`validate`
 - **M2 — Exports** ✅ CSV BOM/cut-list/labels/test-plan, SVG schematic, zip packet
 - **M3 — Web editor** ✅ Vite/React/TanStack, worker-based compile, diagnostics panel
-- **Next** (see [`GOAL.md`](./GOAL.md)): harness-board view, `nerve diff`, PDF packet, WireViz import, in-browser authoring, variants
+- **M4 — DoD sprint** ✅ PDF manufacturing packet, harness-board view, `nerve diff` — **all PRD §26 Definition-of-Done items met**
+- **Next** (see [`GOAL.md`](./GOAL.md)): WireViz import, in-browser authoring, variants, splice/cable depth, publish prep

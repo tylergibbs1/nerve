@@ -57,7 +57,14 @@ Registry, Build Record, AI features, plugin SDK. (PRD §7.2, §25 — wedge firs
 3. ✅ **M2 — Exports**: CSV BOM/cut-list/labels/test-plan, SVG schematic, zip packet, CLI `render`/`export`/`inspect`/`init`.
 4. ✅ **M3 — Web editor**: project view, schematic canvas, data tables, diagnostics panel, worker-based compile.
 
-**First milestone complete (2026-06-06).** Candidate next milestones (from the PRD, in wedge order):
-harness-board/nailboard view (§9.5.3) · `nerve diff` for revisions (§21) · PDF manufacturing
-packet (§9.8) · WireViz import (§27.2) · in-browser TS authoring with Monaco + compile worker
-(§9.6) · variants (§8.4).
+**First milestone complete (2026-06-06).**
+
+5. ✅ **M4 — Definition-of-Done sprint** (2026-06-06): every PRD §26 item now met.
+   - PDF manufacturing packet (DoD #6, §9.8): cover, schematic + board pages, BOM/cut-list/labels/tests tables, assembly instructions (§20.4) — byte-deterministic via pdf-lib with pinned metadata.
+   - Harness-board/nailboard view (DoD #3, §9.5.3): branch trunks, endpoints, sleeve/length callouts, label flags — in SVG, PDF, web Board tab, and `nerve render --view board`.
+   - `nerve diff` (DoD #9, §21): connectors/pinouts/wires/branches/labels/BOM changes across harness.json, `.harness.ts`, or revision dirs; git-style exit codes; `--json`.
+   - DrawingIR (§27.4): one deterministic layout feeding both SVG and PDF renderers.
+
+Candidate next milestones (from the PRD, in wedge order): WireViz import (§27.2) ·
+in-browser TS authoring with Monaco + compile worker (§9.6) · variants (§8.4) ·
+splice/cable modeling depth (§9.2) · build pipeline + npm publish prep.

@@ -93,6 +93,12 @@ describe("nerve render / export", () => {
     expect(await run(["render", FIXTURE, "--format", "dxf"], io)).toBe(2)
   })
 
+  it("renders board.svg with --view board", async () => {
+    const out = tmp()
+    expect(await run(["render", FIXTURE, "--view", "board", "--out", out], capture())).toBe(0)
+    expect(readFileSync(join(out, "board.svg"), "utf8")).toContain("harness board")
+  })
+
   it("exports the full manufacturing packet", async () => {
     const out = tmp()
     const io = capture()
@@ -100,15 +106,19 @@ describe("nerve render / export", () => {
     for (const f of [
       "harness.json",
       "schematic.svg",
+      "board.svg",
       "bom.csv",
       "cut-list.csv",
       "labels.csv",
       "tests.csv",
       "test-plan.json",
+      "assembly-instructions.txt",
+      "manufacturing-packet.pdf",
       "manufacturing-packet.zip"
     ]) {
       expect(existsSync(join(out, f)), f).toBe(true)
     }
+    expect(readFileSync(join(out, "manufacturing-packet.pdf")).subarray(0, 5).toString()).toBe("%PDF-")
   })
 
   it("fails closed: blocks export when errors exist", async () => {
@@ -132,6 +142,35 @@ export default harness("bad", {
     expect(await run(["export", bad, "--out", dir], io)).toBe(1)
     expect(io.stderr.join("\n")).toContain("Export blocked")
     expect(existsSync(join(dir, "manufacturing-packet.zip"))).toBe(false)
+  })
+})
+
+describe("nerve diff", () => {
+  it("diffs two compiled revisions and exits 1 on differences", async () => {
+    const dirA = tmp()
+    const dirB = tmp()
+    await run(["compile", FIXTURE, "--out", dirA], capture())
+    // Rev B: bump revision and change W1 gauge in a copy of the HIR.
+    const hir = JSON.parse(readFileSync(join(dirA, "harness.json"), "utf8"))
+    hir.harness.revision = "B"
+    hir.wires[0].gauge = "16AWG"
+    mkdirSync(dirB, { recursive: true })
+    writeFileSync(join(dirB, "harness.json"), JSON.stringify(hir))
+
+    const io = capture()
+    expect(await run(["diff", dirA, dirB], io)).toBe(1)
+    const text = io.stdout.join("\n")
+    expect(text).toContain("revision: A -> B")
+    expect(text).toContain("~ wire:W1")
+    expect(text).toContain("gauge: 18AWG -> 16AWG")
+  })
+
+  it("exits 0 for identical revisions and supports --json", async () => {
+    const dir = tmp()
+    await run(["compile", FIXTURE, "--out", dir], capture())
+    const io = capture()
+    expect(await run(["diff", join(dir, "harness.json"), join(dir, "harness.json"), "--json"], io)).toBe(0)
+    expect(JSON.parse(io.stdout.join("\n")).pinouts).toEqual([])
   })
 })
 

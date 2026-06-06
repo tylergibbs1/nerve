@@ -9,7 +9,12 @@
 import type { Hir } from "@grayhaven/nerve"
 import type { TestPlan } from "./test-plan.js"
 
-type Cell = string | number | undefined
+export type Cell = string | number | undefined
+
+export interface TableData {
+  readonly headers: ReadonlyArray<string>
+  readonly rows: ReadonlyArray<ReadonlyArray<Cell>>
+}
 
 const escapeCell = (cell: Cell): string => {
   if (cell === undefined) return ""
@@ -20,135 +25,146 @@ const escapeCell = (cell: Cell): string => {
 export const toCsv = (rows: ReadonlyArray<ReadonlyArray<Cell>>): string =>
   rows.map((row) => row.map(escapeCell).join(",")).join("\n") + "\n"
 
-/** BOM CSV (PRD §20.1). */
-export const bomCsv = (hir: Hir): string =>
-  toCsv([
-    [
-      "Item number",
-      "Quantity",
-      "Unit of measure",
-      "Internal part number",
-      "Manufacturer",
-      "Manufacturer part number",
-      "Description",
-      "Category",
-      "Used by",
-      "Approved alternates",
-      "Notes"
-    ],
-    ...hir.bom.map((item, i) => [
-      i + 1,
-      item.quantity,
-      item.unitOfMeasure,
-      item.internalPartId,
-      item.manufacturer,
-      item.mpn,
-      item.description,
-      item.category,
-      item.usedBy.join("; "),
-      "",
-      item.notes
-    ])
+const tableCsv = (table: TableData): string => toCsv([table.headers, ...table.rows])
+
+/** BOM table data (PRD §20.1 columns) — shared by CSV and PDF exporters. */
+export const bomTable = (hir: Hir): TableData => ({
+  headers: [
+    "Item number",
+    "Quantity",
+    "Unit of measure",
+    "Internal part number",
+    "Manufacturer",
+    "Manufacturer part number",
+    "Description",
+    "Category",
+    "Used by",
+    "Approved alternates",
+    "Notes"
+  ],
+  rows: hir.bom.map((item, i) => [
+    i + 1,
+    item.quantity,
+    item.unitOfMeasure,
+    item.internalPartId,
+    item.manufacturer,
+    item.mpn,
+    item.description,
+    item.category,
+    item.usedBy.join("; "),
+    "",
+    item.notes
   ])
+})
+
+/** BOM CSV (PRD §20.1). */
+export const bomCsv = (hir: Hir): string => tableCsv(bomTable(hir))
 
 export interface CutListOptions {
   /** Default length tolerance when a wire does not specify one (PRD §10.5). */
   readonly defaultWireTolerance?: number
 }
 
+/** Wire cut list table data (PRD §20.2 columns). */
+export const cutListTable = (hir: Hir, options: CutListOptions = {}): TableData => ({
+  headers: [
+    "Wire ID",
+    "Signal",
+    "Gauge",
+    "Color",
+    "Stripe",
+    "Cut length",
+    "Finished length",
+    "Tolerance",
+    "From connector",
+    "From pin",
+    "To connector",
+    "To pin",
+    "Terminal A",
+    "Terminal B",
+    "Branch",
+    "Notes"
+  ],
+  rows: hir.wires.map((w) => [
+    w.id,
+    w.signal,
+    w.gauge,
+    w.color,
+    w.stripe,
+    w.length,
+    w.length,
+    w.lengthTolerance ?? options.defaultWireTolerance,
+    w.from.connector,
+    w.from.pin,
+    w.to.connector,
+    w.to.pin,
+    "", // terminal assignment lands with process data (PRD §28)
+    "",
+    w.branch,
+    w.notes
+  ])
+})
+
 /** Wire cut list CSV (PRD §20.2). */
 export const cutListCsv = (hir: Hir, options: CutListOptions = {}): string =>
-  toCsv([
-    [
-      "Wire ID",
-      "Signal",
-      "Gauge",
-      "Color",
-      "Stripe",
-      "Cut length",
-      "Finished length",
-      "Tolerance",
-      "From connector",
-      "From pin",
-      "To connector",
-      "To pin",
-      "Terminal A",
-      "Terminal B",
-      "Branch",
-      "Notes"
-    ],
-    ...hir.wires.map((w) => [
-      w.id,
-      w.signal,
-      w.gauge,
-      w.color,
-      w.stripe,
-      w.length,
-      w.length,
-      w.lengthTolerance ?? options.defaultWireTolerance,
-      w.from.connector,
-      w.from.pin,
-      w.to.connector,
-      w.to.pin,
-      "", // terminal assignment lands with process data (PRD §28)
-      "",
-      w.branch,
-      w.notes
-    ])
+  tableCsv(cutListTable(hir, options))
+
+/** Label schedule table data (PRD §20.3 columns). */
+export const labelScheduleTable = (hir: Hir): TableData => ({
+  headers: [
+    "Label ID",
+    "Text",
+    "Quantity",
+    "Material",
+    "Printer profile",
+    "Target object",
+    "Placement offset",
+    "Orientation",
+    "Notes"
+  ],
+  rows: hir.labels.map((l) => [
+    l.id,
+    l.text,
+    l.quantity ?? 1,
+    l.material,
+    "",
+    l.attachTo,
+    l.offsetFrom !== undefined && l.distance !== undefined
+      ? `${l.distance} from ${l.offsetFrom}`
+      : l.distance,
+    "",
+    ""
   ])
+})
 
 /** Label schedule CSV (PRD §20.3). */
-export const labelScheduleCsv = (hir: Hir): string =>
-  toCsv([
-    [
-      "Label ID",
-      "Text",
-      "Quantity",
-      "Material",
-      "Printer profile",
-      "Target object",
-      "Placement offset",
-      "Orientation",
-      "Notes"
-    ],
-    ...hir.labels.map((l) => [
-      l.id,
-      l.text,
-      l.quantity ?? 1,
-      l.material,
-      "",
-      l.attachTo,
-      l.offsetFrom !== undefined && l.distance !== undefined
-        ? `${l.distance} from ${l.offsetFrom}`
-        : l.distance,
-      "",
-      ""
-    ])
+export const labelScheduleCsv = (hir: Hir): string => tableCsv(labelScheduleTable(hir))
+
+/** Test plan table data (PRD §9.9). */
+export const testPlanTable = (plan: TestPlan): TableData => ({
+  headers: [
+    "Test ID",
+    "Type",
+    "From connector",
+    "From pin",
+    "To connector",
+    "To pin",
+    "Expected",
+    "Net",
+    "Wire"
+  ],
+  rows: plan.tests.map((t) => [
+    t.id,
+    t.type,
+    t.from.connector,
+    t.from.pin,
+    t.to.connector,
+    t.to.pin,
+    t.expected,
+    t.net,
+    t.wire
   ])
+})
 
 /** Test plan CSV (PRD §9.9: human-trackable form of the JSON plan). */
-export const testPlanCsv = (plan: TestPlan): string =>
-  toCsv([
-    [
-      "Test ID",
-      "Type",
-      "From connector",
-      "From pin",
-      "To connector",
-      "To pin",
-      "Expected",
-      "Net",
-      "Wire"
-    ],
-    ...plan.tests.map((t) => [
-      t.id,
-      t.type,
-      t.from.connector,
-      t.from.pin,
-      t.to.connector,
-      t.to.pin,
-      t.expected,
-      t.net,
-      t.wire
-    ])
-  ])
+export const testPlanCsv = (plan: TestPlan): string => tableCsv(testPlanTable(plan))

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest"
+import { PDFDocument } from "pdf-lib"
 import { compileDesign } from "@grayhaven/nerve"
 import {
+  assemblyInstructions,
+  boardSvg,
   bomCsv,
   buildPacket,
   canRelease,
@@ -8,6 +11,7 @@ import {
   cutListCsv,
   generateTestPlan,
   labelScheduleCsv,
+  manufacturingPacketPdf,
   schematicSvg,
   testPlanCsv
 } from "@grayhaven/nerve-exporters"
@@ -130,26 +134,77 @@ describe("SVG schematic (PRD §9.5.1)", () => {
   })
 })
 
+describe("harness board view (PRD §9.5.3)", () => {
+  const svg = boardSvg(hir)
+
+  it("renders branch trunk, endpoints, sleeve, length, and label callouts", () => {
+    expect(svg).toContain("harness board")
+    expect(svg).toContain(">J1<")
+    expect(svg).toContain(">M1<")
+    expect(svg).toContain("main · sleeve: braided-pet")
+    expect(svg).toContain("420 mm nominal")
+    expect(svg).toContain("L1: MOTOR CTRL A")
+    expect(svg).toMatchSnapshot()
+  })
+
+  it("is deterministic and handles branch-less harnesses", () => {
+    expect(boardSvg(hir)).toBe(svg)
+    const { hir: bare } = compileDesign({ ...design, branches: [], labels: [] })
+    expect(boardSvg(bare)).toContain("No branches defined")
+  })
+})
+
+describe("assembly instructions (PRD §20.4)", () => {
+  it("covers materials, cut, twist, populate, branch, label, inspect, test", () => {
+    const text = assemblyInstructions(hir)
+    expect(text).toContain("Cut W1: 18AWG red, 420 mm [VBAT_24V]")
+    expect(text).toContain("Twist W3 + W4 together (CAN_PAIR)")
+    expect(text).toContain("Populate J1 (43025-0800, receptacle)")
+    expect(text).toContain("Route branch main (J1 → M1); 420 mm nominal; sleeve with braided-pet")
+    expect(text).toContain('Apply L1 "MOTOR CTRL A" on main 50 mm from J1')
+    expect(text).toContain("continuity-test procedure")
+    expect(text).toMatchSnapshot()
+  })
+})
+
+describe("PDF manufacturing packet (PRD §9.8, DoD #6)", () => {
+  it("produces a valid, deterministic PDF", async () => {
+    const a = await manufacturingPacketPdf(hir, { defaultWireTolerance: 10 })
+    const b = await manufacturingPacketPdf(hir, { defaultWireTolerance: 10 })
+    expect(Buffer.from(a.slice(0, 5)).toString()).toBe("%PDF-")
+    expect(Buffer.from(a).equals(Buffer.from(b))).toBe(true)
+    // Cover + schematic + board + 4 tables + instructions ≥ 8 pages.
+    const doc = await PDFDocument.load(a)
+    expect(doc.getPageCount()).toBeGreaterThanOrEqual(8)
+    expect(doc.getTitle()).toBe(
+      "motor-controller-harness rev A — manufacturing packet"
+    )
+  })
+})
+
 describe("manufacturing packet (PRD §9.8)", () => {
-  it("contains all artifacts and is byte-deterministic", () => {
-    const a = buildPacket(hir, { defaultWireTolerance: 10 })
-    const b = buildPacket(hir, { defaultWireTolerance: 10 })
+  it("contains all artifacts and is byte-deterministic", async () => {
+    const a = await buildPacket(hir, { defaultWireTolerance: 10 })
+    const b = await buildPacket(hir, { defaultWireTolerance: 10 })
     expect([...a.files.keys()]).toEqual([
       "COVER.txt",
+      "manufacturing-packet.pdf",
       "harness.json",
       "schematic.svg",
+      "board.svg",
       "bom.csv",
       "cut-list.csv",
       "labels.csv",
       "tests.csv",
-      "test-plan.json"
+      "test-plan.json",
+      "assembly-instructions.txt"
     ])
     expect(Buffer.from(a.zip).equals(Buffer.from(b.zip))).toBe(true)
   })
 
-  it("cover sheet carries revision metadata, not timestamps", () => {
-    const { files } = buildPacket(hir)
-    const cover = files.get("COVER.txt")!
+  it("cover sheet carries revision metadata, not timestamps", async () => {
+    const { files } = await buildPacket(hir)
+    const cover = files.get("COVER.txt") as string
     expect(cover).toContain("Revision:     A")
     expect(cover).not.toMatch(/\d{4}-\d{2}-\d{2}/)
   })

@@ -9,6 +9,7 @@ export interface CompileRequest {
 export interface CompileResult {
   readonly hir: Hir
   readonly svg: string
+  readonly boardSvg: string
   readonly testPlan: TestPlan
 }
 

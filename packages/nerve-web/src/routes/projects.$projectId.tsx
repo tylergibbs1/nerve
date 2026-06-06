@@ -9,6 +9,7 @@ export const Route = createFileRoute("/projects/$projectId")({
 
 const TABS = [
   { to: "/projects/$projectId/diagram", label: "Diagram" },
+  { to: "/projects/$projectId/board", label: "Board" },
   { to: "/projects/$projectId/bom", label: "BOM" },
   { to: "/projects/$projectId/cut-list", label: "Cut list" },
   { to: "/projects/$projectId/labels", label: "Labels" },

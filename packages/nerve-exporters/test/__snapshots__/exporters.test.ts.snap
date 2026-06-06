@@ -28,17 +28,17 @@ exports[`SVG schematic (PRD §9.5.1) > renders title block, connectors, pins, an
 <text x="48" y="28" font-size="18" font-weight="bold" fill="#111">motor-controller-harness</text>
 <text x="48" y="48" fill="#555">rev A · units mm · HIR 0.1.0</text>
 <path d="M 228 162 C 354.6666666666667 162, 481.3333333333333 162, 608 162" fill="none" stroke="red" stroke-width="2"/>
-<text x="418" y="156" text-anchor="middle" fill="#333">W1 · 18AWG</text>
+<text x="418" y="156" fill="#333" text-anchor="middle">W1 · 18AWG</text>
 <path d="M 228 182 C 354.6666666666667 182, 481.3333333333333 182, 608 182" fill="none" stroke="#222222" stroke-width="2"/>
-<text x="418" y="176" text-anchor="middle" fill="#333">W2 · 18AWG</text>
+<text x="418" y="176" fill="#333" text-anchor="middle">W2 · 18AWG</text>
 <path d="M 228 202 C 354.6666666666667 202, 481.3333333333333 202, 608 202" fill="none" stroke="#b8b8b8" stroke-width="2"/>
-<text x="418" y="196" text-anchor="middle" fill="#333">W3 · 24AWG · twisted</text>
+<text x="418" y="196" fill="#333" text-anchor="middle">W3 · 24AWG · twisted</text>
 <path d="M 228 222 C 354.6666666666667 222, 481.3333333333333 222, 608 222" fill="none" stroke="blue" stroke-width="2"/>
-<text x="418" y="216" text-anchor="middle" fill="#333">W4 · 24AWG · twisted</text>
+<text x="418" y="216" fill="#333" text-anchor="middle">W4 · 24AWG · twisted</text>
 <rect x="48" y="112" width="180" height="208" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
 <text x="58" y="130" font-weight="bold" fill="#111">J1</text>
-<text x="58" y="145" fill="#777" font-size="10">43025-0800 · receptacle</text>
-<line x1="48" y1="150" x2="228" y2="150" stroke="#ddd"/>
+<text x="58" y="145" font-size="10" fill="#777">43025-0800 · receptacle</text>
+<line x1="48" y1="150" x2="228" y2="150" stroke="#ddd" stroke-width="1"/>
 <circle cx="228" cy="162" r="3" fill="#333"/>
 <text x="58" y="166" fill="#111">1</text>
 <text x="82" y="166" fill="#555">VBAT_24V</text>
@@ -65,8 +65,8 @@ exports[`SVG schematic (PRD §9.5.1) > renders title block, connectors, pins, an
 <text x="82" y="306" fill="#555">SHIELD_DRAIN</text>
 <rect x="608" y="112" width="180" height="208" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
 <text x="618" y="130" font-weight="bold" fill="#111">M1</text>
-<text x="618" y="145" fill="#777" font-size="10">43020-0800 · plug</text>
-<line x1="608" y1="150" x2="788" y2="150" stroke="#ddd"/>
+<text x="618" y="145" font-size="10" fill="#777">43020-0800 · plug</text>
+<line x1="608" y1="150" x2="788" y2="150" stroke="#ddd" stroke-width="1"/>
 <circle cx="608" cy="162" r="3" fill="#333"/>
 <text x="618" y="166" fill="#111">1</text>
 <text x="642" y="166" fill="#555">VBAT_24V</text>
@@ -91,6 +91,81 @@ exports[`SVG schematic (PRD §9.5.1) > renders title block, connectors, pins, an
 <circle cx="608" cy="302" r="3" fill="#333"/>
 <text x="618" y="306" fill="#111">8</text>
 <text x="642" y="306" fill="#555">SHIELD_DRAIN</text>
+</svg>
+"
+`;
+
+exports[`assembly instructions (PRD §20.4) > covers materials, cut, twist, populate, branch, label, inspect, test 1`] = `
+"ASSEMBLY INSTRUCTIONS — motor-controller-harness rev A
+Units: mm. Generated from HIR 0.1.0; every step references design object IDs.
+
+Materials
+---------
+ 1. Gather 1x 43020-0800 (Micro-Fit 3.0 plug housing, dual row, 8 circuits) — used by connector:M1.
+ 2. Gather 1x 43025-0800 (Micro-Fit 3.0 receptacle housing, dual row, 8 circuits) — used by connector:J1.
+
+Cut wires
+---------
+ 3. Cut W1: 18AWG red, 420 mm [VBAT_24V].
+ 4. Cut W2: 18AWG black, 420 mm [GND].
+ 5. Cut W3: 24AWG white, length per board [CAN_H].
+ 6. Cut W4: 24AWG blue, length per board [CAN_L].
+
+Twist pairs
+-----------
+ 7. Twist W3 + W4 together (CAN_PAIR).
+
+Populate connectors
+-------------------
+ 8. Populate J1 (43025-0800, receptacle):
+      cavity 1: W1 (VBAT_24V)
+      cavity 2: W2 (GND)
+      cavity 3: W3 (CAN_H)
+      cavity 4: W4 (CAN_L)
+ 9. Populate M1 (43020-0800, plug):
+      cavity 1: W1 (VBAT_24V)
+      cavity 2: W2 (GND)
+      cavity 3: W3 (CAN_H)
+      cavity 4: W4 (CAN_L)
+
+Branch assembly
+---------------
+10. Route branch main (J1 → M1); 420 mm nominal; sleeve with braided-pet.
+
+Apply labels
+------------
+11. Apply L1 "MOTOR CTRL A" on main 50 mm from J1.
+
+Inspection
+----------
+12. Verify every cavity against the pinout table; check seating/lock engagement.
+13. Verify wire colors and labels against the schedule.
+14. Verify branch lengths and sleeve coverage against the board drawing.
+
+Test
+----
+15. Run the continuity-test procedure (tests.csv / test-plan.json); record results per test ID.
+"
+`;
+
+exports[`harness board view (PRD §9.5.3) > renders branch trunk, endpoints, sleeve, length, and label callouts 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" width="528" height="366" viewBox="0 0 528 366" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">
+<rect width="528" height="366" fill="#fafafa"/>
+<text x="48" y="28" font-size="18" font-weight="bold" fill="#111">motor-controller-harness — harness board</text>
+<text x="48" y="48" fill="#555">rev A · units mm · scale 0.8 px/mm</text>
+<line x1="80" y1="168" x2="416" y2="168" stroke="#444" stroke-width="5"/>
+<rect x="48" y="155" width="64" height="26" rx="4" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+<text x="80" y="172" font-weight="bold" fill="#111" text-anchor="middle">J1</text>
+<rect x="384" y="155" width="64" height="26" rx="4" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+<text x="416" y="172" font-weight="bold" fill="#111" text-anchor="middle">M1</text>
+<text x="248" y="147" fill="#333" text-anchor="middle">main · sleeve: braided-pet</text>
+<line x1="80" y1="197" x2="416" y2="197" stroke="#999" stroke-width="1"/>
+<line x1="80" y1="193" x2="80" y2="201" stroke="#999" stroke-width="1"/>
+<line x1="416" y1="193" x2="416" y2="201" stroke="#999" stroke-width="1"/>
+<text x="248" y="211" font-size="11" fill="#777" text-anchor="middle">420 mm nominal</text>
+<line x1="120" y1="168" x2="120" y2="134" stroke="#b07a00" stroke-width="1"/>
+<rect x="120" y="118" width="123.2" height="16" fill="#fff3d6" stroke="#b07a00" stroke-width="1"/>
+<text x="128" y="130" font-size="11" fill="#8a5a00">L1: MOTOR CTRL A</text>
 </svg>
 "
 `;

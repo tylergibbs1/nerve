@@ -11,21 +11,32 @@
  * Exit codes: 0 success · 1 validation errors · 2 usage/compile failure.
  * All file output is deterministic and CI-suitable.
  */
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs"
+import { mkdirSync, readFileSync, writeFileSync, existsSync, statSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { Effect, Exit, Cause } from "effect"
-import { decodeHir, hasErrors, type Diagnostic, type Hir } from "@grayhaven/nerve"
+import {
+  decodeHir,
+  diffHir,
+  formatDiff,
+  hasErrors,
+  isEmptyDiff,
+  type Diagnostic,
+  type Hir
+} from "@grayhaven/nerve"
 import {
   compileFile,
   type CompileFileResult
 } from "@grayhaven/nerve-compiler"
 import {
+  assemblyInstructions,
+  boardSvg,
   bomCsv,
   buildPacket,
   canRelease,
   cutListCsv,
   labelScheduleCsv,
   generateTestPlan,
+  manufacturingPacketPdf,
   schematicSvg,
   testPlanCsv,
   testPlanJson
@@ -118,9 +129,32 @@ Usage:
   nerve init [dir]
   nerve compile  <file.harness.ts> [--out dir]
   nerve validate <file.harness.ts>
-  nerve render   <file.harness.ts> [--format svg] [--out dir]
+  nerve render   <file.harness.ts> [--format svg] [--view schematic|board] [--out dir]
   nerve export   <file.harness.ts> [--target manufacturing-packet] [--out dir]
+  nerve diff     <revA> <revB> [--json]   (each: harness.json, .harness.ts, or revision dir)
   nerve inspect  <harness.json>`
+
+/** Resolve a diff argument to HIR: a harness.json, a .harness.ts, or a directory. */
+const loadHirForDiff = async (path: string, io: Io): Promise<Hir | number> => {
+  const p = resolve(path)
+  if (existsSync(p) && statSync(p).isDirectory()) {
+    for (const candidate of [join(p, "harness.json"), join(p, "dist", "harness.json")]) {
+      if (existsSync(candidate)) return loadHirForDiff(candidate, io)
+    }
+    io.err(`No harness.json found in ${path} (looked in ./ and ./dist).`)
+    return 2
+  }
+  if (p.endsWith(".json")) {
+    try {
+      return decodeHir(JSON.parse(readFileSync(p, "utf8")))
+    } catch (cause) {
+      io.err(`Failed to load ${path}: ${cause instanceof Error ? cause.message : String(cause)}`)
+      return 2
+    }
+  }
+  const result = await compileOrExit(p, io)
+  return typeof result === "number" ? result : result.hir
+}
 
 export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise<number> => {
   const { command, positional, flags } = parseArgs(argv)
@@ -157,10 +191,19 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
         io.err(`Unsupported render format: ${format} (supported: svg)`)
         return 2
       }
+      const view = flags["view"] ?? "schematic"
+      if (view !== "schematic" && view !== "board") {
+        io.err(`Unsupported render view: ${view} (supported: schematic, board)`)
+        return 2
+      }
       const result = await compileOrExit(file, io)
       if (typeof result === "number") return result
       const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
-      writeOut(outDir, "schematic.svg", schematicSvg(result.hir), io)
+      if (view === "board") {
+        writeOut(outDir, "board.svg", boardSvg(result.hir), io)
+      } else {
+        writeOut(outDir, "schematic.svg", schematicSvg(result.hir), io)
+      }
       return 0
     }
 
@@ -187,14 +230,34 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       const plan = generateTestPlan(result.hir)
       writeOut(outDir, "harness.json", JSON.stringify(result.hir, null, 2) + "\n", io)
       writeOut(outDir, "schematic.svg", schematicSvg(result.hir), io)
+      writeOut(outDir, "board.svg", boardSvg(result.hir), io)
       writeOut(outDir, "bom.csv", bomCsv(result.hir), io)
       writeOut(outDir, "cut-list.csv", cutListCsv(result.hir, options), io)
       writeOut(outDir, "labels.csv", labelScheduleCsv(result.hir), io)
       writeOut(outDir, "tests.csv", testPlanCsv(plan), io)
       writeOut(outDir, "test-plan.json", testPlanJson(result.hir), io)
-      writeOut(outDir, "manufacturing-packet.zip", buildPacket(result.hir, options).zip, io)
+      writeOut(outDir, "assembly-instructions.txt", assemblyInstructions(result.hir), io)
+      writeOut(outDir, "manufacturing-packet.pdf", await manufacturingPacketPdf(result.hir, options), io)
+      writeOut(outDir, "manufacturing-packet.zip", (await buildPacket(result.hir, options)).zip, io)
       io.out(summarize(result.hir))
       return 0
+    }
+
+    case "diff": {
+      const [pathA, pathB] = positional
+      if (pathA === undefined || pathB === undefined) return usage(io)
+      const a = await loadHirForDiff(pathA, io)
+      if (typeof a === "number") return a
+      const b = await loadHirForDiff(pathB, io)
+      if (typeof b === "number") return b
+      const d = diffHir(a, b)
+      if (flags["json"] === "true") {
+        io.out(JSON.stringify(d, null, 2))
+      } else {
+        io.out(formatDiff(d).trimEnd())
+      }
+      // git-diff convention: exit 1 when differences exist.
+      return isEmptyDiff(d) ? 0 : 1
     }
 
     case "inspect": {
