@@ -50,6 +50,9 @@ importers:
         specifier: ^3.16.0
         version: 3.21.3
     devDependencies:
+      '@grayhaven/nerve-rules':
+        specifier: workspace:*
+        version: link:../nerve-rules
       typescript:
         specifier: ^5.8.3
         version: 5.9.3

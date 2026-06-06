@@ -11,6 +11,7 @@
     "effect": "^3.16.0"
   },
   "devDependencies": {
+    "@grayhaven/nerve-rules": "workspace:*",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }

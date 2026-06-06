@@ -70,6 +70,8 @@ export { compileDesign, type CompileResult } from "./compile.js"
 
 export { defineConfig, type NerveConfig } from "./config.js"
 
+export { variant, type VariantOptions } from "./variant.js"
+
 export {
   diffHir,
   formatDiff,
