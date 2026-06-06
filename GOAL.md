@@ -74,7 +74,7 @@ Registry, Build Record, AI features, plugin SDK. (PRD §7.2, §25 — wedge firs
 **Roadmap complete (2026-06-06).** Post-roadmap shipped same day: dogfood example
 (`examples/robot-platform`, 22 connectors / 65 wires, validates clean), TensorPoint Spec
 brand applied to the web editor, live deploys (demo: nerve-demo.vercel.app, landing:
-nerve-site.vercel.app), and the first expansion wedge — **§28 Bill of Process**
+nerve-demo.vercel.app, with nerve-site aliasing the same app), and the first expansion wedge — **§28 Bill of Process**
 (Manufacturing Operations IR: sequenced cut/twist/crimp/populate/splice/sleeve/label/
 inspect/test operations with workstations, tooling, labor estimates, HIR-linked targets;
 bop.csv/bop.json in every packet + PDF page).

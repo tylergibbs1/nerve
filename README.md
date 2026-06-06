@@ -82,4 +82,4 @@ const j1 = connector("J1", MolexMicroFit["43025-0800"], {
 - **M9 — Publish prep** ✅ tsup `dist` builds, CI workflow, Apache-2.0, published to npm
 - **Expansion tier** ✅ (v0.2.0, see [CHANGELOG](./CHANGELOG.md)): Bill of Process (§28), costing/quotes (§29), verified component registry (§30), shop-floor adapters (§31), formboard 1:1 tiling (§33), engineering analysis (§34), ECO/releases (§35), Build Records (§36), interface contracts (§37), redlines (§39), plugin SDK (§40)
 
-**Live**: [landing](https://nerve-site.vercel.app) · [demo editor](https://nerve-demo.vercel.app). Licensed under Apache-2.0.
+**Live**: [nerve-demo.vercel.app](https://nerve-demo.vercel.app) — landing and editor in one app (nerve-site.vercel.app aliases the same deployment). Licensed under Apache-2.0.

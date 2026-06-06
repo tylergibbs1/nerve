@@ -35,7 +35,7 @@ function RootLayout() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <Link to="/projects" className="brand">
+        <Link to="/" className="brand">
           GRAYHAVEN NERVE
         </Link>
         <span className="tagline">harnesses as code</span>
