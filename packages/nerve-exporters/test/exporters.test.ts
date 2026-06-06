@@ -195,6 +195,8 @@ describe("manufacturing packet (PRD §9.8)", () => {
       "bom.csv",
       "cut-list.csv",
       "labels.csv",
+      "bop.csv",
+      "bop.json",
       "tests.csv",
       "test-plan.json",
       "assembly-instructions.txt"

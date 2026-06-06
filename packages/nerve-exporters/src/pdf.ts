@@ -22,6 +22,7 @@ import { schematicDrawing } from "./svg.js"
 import { boardDrawing } from "./board.js"
 import { scaleDrawing, type Drawing } from "./drawing.js"
 import { assemblyInstructions } from "./instructions.js"
+import { bopTable, generateBop } from "./bop.js"
 
 // Letter landscape for everything: drawings need the width, and a single
 // orientation keeps the packet printable as one document.
@@ -316,6 +317,7 @@ export const manufacturingPacketPdf = async (
   // --- Tables ----------------------------------------------------------------
   drawTablePages(doc, fonts, hir, "Bill of Materials", bomTable(hir))
   drawTablePages(doc, fonts, hir, "Wire Cut List", cutListTable(hir, options))
+  drawTablePages(doc, fonts, hir, "Bill of Process", bopTable(generateBop(hir)))
   drawTablePages(doc, fonts, hir, "Label Schedule", labelScheduleTable(hir))
   drawTablePages(doc, fonts, hir, "Continuity Test Procedure", testPlanTable(generateTestPlan(hir)))
 

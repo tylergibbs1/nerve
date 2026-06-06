@@ -1,0 +1,20 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Bill of Process (PRD §28) > estimates labor time and is deterministic 1`] = `
+"Seq,Operation,Workstation,Description,Targets,Tools,Est. sec
+10,cut-strip,wire-prep,"Cut and strip W1 (18AWG red, 420 mm).",wire:W1,wire cutter; wire stripper,25
+20,cut-strip,wire-prep,"Cut and strip W2 (18AWG black, 420 mm).",wire:W2,wire cutter; wire stripper,25
+30,cut-strip,wire-prep,Cut and strip W3 (24AWG white).,wire:W3,wire cutter; wire stripper,25
+40,cut-strip,wire-prep,Cut and strip W4 (24AWG blue).,wire:W4,wire cutter; wire stripper,25
+50,twist,wire-prep,Twist W3 + W4 (CAN_PAIR).,wire:W3; wire:W4,twisting fixture,40
+60,crimp,assembly,Crimp 4 termination(s) for J1 (43025-0800).,connector:J1,crimp tool (Micro-Fit 3.0),120
+70,populate,assembly,"Populate J1: seat 4 terminal(s), verify lock engagement.",connector:J1,insertion tool,32
+80,crimp,assembly,Crimp 4 termination(s) for M1 (43020-0800).,connector:M1,crimp tool (Micro-Fit 3.0),120
+90,populate,assembly,"Populate M1: seat 4 terminal(s), verify lock engagement.",connector:M1,insertion tool,32
+100,sleeve,finishing,Sleeve branch main with braided-pet (420 mm).,branch:main,sleeving tool; heat gun,51
+110,label,finishing,"Print and apply L1 ""MOTOR CTRL A"" on main 50 mm from J1.",label:L1,label printer,20
+120,inspect,qa,"Visual inspection: 2 connector(s) against pinout tables, labels against schedule, sleeve coverage against board drawing.",connector:J1; connector:M1,inspection checklist,30
+130,test,qa,Run continuity-test procedure: 16 step(s); record results per test ID.,test-plan,continuity tester,128
+,,,TOTAL — estimated labor 11.2 min,,,673
+"
+`;

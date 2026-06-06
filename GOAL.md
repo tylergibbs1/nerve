@@ -71,7 +71,15 @@ Registry, Build Record, AI features, plugin SDK. (PRD §7.2, §25 — wedge firs
 9. ✅ **M8 — In-browser authoring** (§9.6): Source tab (CodeMirror), sucrase TS compile in the worker sandbox, edits update every tab live.
 10. ✅ **M9 — Publish prep**: tsup `dist` builds with types for all 7 library packages, GitHub Actions CI, Apache-2.0 license (user-confirmed 2026-06-06) + NOTICE, `publishConfig` ready (packages stay `private: true` until a deliberate publish).
 
-**Roadmap complete (2026-06-06).** Future direction lives in the PRD: BOP/costing (§28–29),
+**Roadmap complete (2026-06-06).** Post-roadmap shipped same day: dogfood example
+(`examples/robot-platform`, 22 connectors / 65 wires, validates clean), TensorPoint Spec
+brand applied to the web editor, live deploys (demo: nerve-demo.vercel.app, landing:
+nerve-site.vercel.app), and the first expansion wedge — **§28 Bill of Process**
+(Manufacturing Operations IR: sequenced cut/twist/crimp/populate/splice/sleeve/label/
+inspect/test operations with workstations, tooling, labor estimates, HIR-linked targets;
+bop.csv/bop.json in every packet + PDF page).
+
+Remaining future direction in the PRD: costing (§29),
 Registry + verified component data (§30), shop-floor adapters (§31), formboard 1:1 printing (§33),
 engineering analysis (§34), ECO/release workflow (§35), Build Record (§36), interface contracts (§37),
 redlines (§39), plugin SDK (§40).

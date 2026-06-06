@@ -33,6 +33,8 @@ import {
   assemblyInstructions,
   boardSvg,
   bomCsv,
+  bopCsv,
+  bopJson,
   buildPacket,
   canRelease,
   cutListCsv,
@@ -246,6 +248,8 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       writeOut(outDir, "bom.csv", bomCsv(result.hir), io)
       writeOut(outDir, "cut-list.csv", cutListCsv(result.hir, options), io)
       writeOut(outDir, "labels.csv", labelScheduleCsv(result.hir), io)
+      writeOut(outDir, "bop.csv", bopCsv(result.hir), io)
+      writeOut(outDir, "bop.json", bopJson(result.hir), io)
       writeOut(outDir, "tests.csv", testPlanCsv(plan), io)
       writeOut(outDir, "test-plan.json", testPlanJson(result.hir), io)
       writeOut(outDir, "assembly-instructions.txt", assemblyInstructions(result.hir), io)

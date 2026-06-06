@@ -31,5 +31,6 @@ export {
 export { schematicDrawing, schematicSvg } from "./svg.js"
 export { boardDrawing, boardSvg } from "./board.js"
 export { assemblyInstructions } from "./instructions.js"
+export { bopCsv, bopJson, bopTable, generateBop, type BillOfProcess, type Operation, type Workstation } from "./bop.js"
 export { manufacturingPacketPdf } from "./pdf.js"
 export { buildPacket, canRelease, type Packet, type PacketOptions } from "./packet.js"
