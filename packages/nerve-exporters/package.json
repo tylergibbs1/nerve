@@ -1,7 +1,6 @@
 {
   "name": "@grayhaven/nerve-exporters",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Grayhaven Nerve exporters: CSV, SVG, JSON, and zip manufacturing outputs generated from HIR.",
   "exports": {
@@ -38,5 +37,11 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylergibbs1/nerve.git",
+    "directory": "packages/nerve-exporters"
+  },
+  "homepage": "https://github.com/tylergibbs1/nerve#readme"
 }

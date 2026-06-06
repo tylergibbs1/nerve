@@ -1,7 +1,6 @@
 {
   "name": "@grayhaven/nerve",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Grayhaven Nerve core: domain model, DSL builders, HIR types and schema, compiler interface, validation primitives.",
   "exports": {
@@ -32,5 +31,11 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylergibbs1/nerve.git",
+    "directory": "packages/nerve"
+  },
+  "homepage": "https://github.com/tylergibbs1/nerve#readme"
 }

@@ -1,7 +1,6 @@
 {
   "name": "@grayhaven/nerve-connectors",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Verified connector library for Grayhaven Nerve.",
   "exports": {
@@ -30,5 +29,11 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylergibbs1/nerve.git",
+    "directory": "packages/nerve-connectors"
+  },
+  "homepage": "https://github.com/tylergibbs1/nerve#readme"
 }

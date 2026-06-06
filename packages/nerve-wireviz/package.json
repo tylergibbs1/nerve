@@ -1,7 +1,6 @@
 {
   "name": "@grayhaven/nerve-wireviz",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "WireViz YAML import/export adapter for Grayhaven Nerve (PRD §27.2).",
   "exports": {
@@ -32,5 +31,11 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylergibbs1/nerve.git",
+    "directory": "packages/nerve-wireviz"
+  },
+  "homepage": "https://github.com/tylergibbs1/nerve#readme"
 }

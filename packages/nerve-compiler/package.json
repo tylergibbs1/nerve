@@ -1,7 +1,6 @@
 {
   "name": "@grayhaven/nerve-compiler",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Grayhaven Nerve compiler: TypeScript loading, normalization, HIR generation, validation orchestration.",
   "exports": {
@@ -36,5 +35,11 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylergibbs1/nerve.git",
+    "directory": "packages/nerve-compiler"
+  },
+  "homepage": "https://github.com/tylergibbs1/nerve#readme"
 }

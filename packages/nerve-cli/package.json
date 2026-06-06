@@ -1,7 +1,6 @@
 {
   "name": "@grayhaven/nerve-cli",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Grayhaven Nerve CLI: compile, validate, render, and export harnesses locally and in CI.",
   "bin": {
@@ -41,5 +40,11 @@
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylergibbs1/nerve.git",
+    "directory": "packages/nerve-cli"
+  },
+  "homepage": "https://github.com/tylergibbs1/nerve#readme"
 }
