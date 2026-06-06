@@ -3,7 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useDebouncedValue } from "@tanstack/react-pacer"
 import CodeMirror from "@uiw/react-codemirror"
 import { javascript } from "@codemirror/lang-javascript"
-import { oneDark } from "@codemirror/theme-one-dark"
+import { grayscaleTheme } from "../lib/cm-theme.js"
+import { useMinimumLoading } from "../lib/useMinimumLoading.js"
 import {
   compileKeys,
   compileSource,
@@ -77,6 +78,10 @@ export function SourcePane({ projectId }: { projectId: string }) {
     }
   }, [projectId, queryClient])
 
+  // Busy cue: 150ms delay before showing, 300ms minimum once shown —
+  // fast compiles never flash the label.
+  const showBusy = useMinimumLoading(compile.isPending)
+
   const onToggleAuto = (enabled: boolean) => {
     setAutoCompile(enabled)
     if (!enabled && getSource(projectId) !== lastCompiled.current) {
@@ -113,7 +118,7 @@ export function SourcePane({ projectId }: { projectId: string }) {
           disabled={compile.isPending}
           onClick={() => compile.mutate(source)}
         >
-          {compile.isPending ? "Compiling…" : "Compile"}
+          {showBusy ? "Compiling…" : "Compile"}
         </button>
         <label className="auto-toggle">
           <input
@@ -145,7 +150,7 @@ export function SourcePane({ projectId }: { projectId: string }) {
         value={source}
         height="100%"
         extensions={[javascript({ typescript: true })]}
-        theme={oneDark}
+        theme={grayscaleTheme}
         onChange={onChange}
         style={{ flex: 1, minHeight: 0, overflow: "auto", fontSize: 13 }}
       />

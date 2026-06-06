@@ -206,9 +206,15 @@ importers:
       '@codemirror/lang-javascript':
         specifier: ^6.2.5
         version: 6.2.5
+      '@codemirror/language':
+        specifier: ^6.12.3
+        version: 6.12.3
       '@codemirror/theme-one-dark':
         specifier: ^6.1.3
         version: 6.1.3
+      '@codemirror/view':
+        specifier: ^6.43.0
+        version: 6.43.0
       '@grayhaven/example-motor-controller':
         specifier: workspace:*
         version: link:../../examples/motor-controller
@@ -230,6 +236,9 @@ importers:
       '@grayhaven/nerve-rules':
         specifier: workspace:*
         version: link:../nerve-rules
+      '@lezer/highlight':
+        specifier: ^1.2.3
+        version: 1.2.3
       '@tanstack/pacer':
         specifier: ^0.21.1
         version: 0.21.1

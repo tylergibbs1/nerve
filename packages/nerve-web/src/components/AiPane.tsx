@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { setCompileResult } from "../lib/compile-client.js"
 import { getApiKey, runAgentTurn, setApiKey, type AgentEvent, type ChatTurn } from "../lib/ai.js"
+import { useMinimumLoading } from "../lib/useMinimumLoading.js"
 
 interface ToolPill {
   readonly name: string
@@ -25,6 +26,7 @@ export function AiPane({ projectId }: { projectId: string }) {
   const [input, setInput] = useState("")
   const [busy, setBusy] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
+  const showBusy = useMinimumLoading(busy)
   const threadRef = useRef<HTMLDivElement>(null)
 
   // Reset the thread when switching projects.
@@ -84,7 +86,7 @@ export function AiPane({ projectId }: { projectId: string }) {
     return (
       <div className="ai-pane">
         <div className="ai-setup">
-          <span className="spec-tag">[AI COPILOT]</span>
+          <span className="spec-tag">AI Copilot</span>
           <p>
             Edits your harness through compile-verified patches. Calls go directly from your
             browser to Anthropic — the key is stored locally and sent nowhere else.
@@ -119,7 +121,7 @@ export function AiPane({ projectId }: { projectId: string }) {
   return (
     <div className="ai-pane">
       <div className="ai-header">
-        <span className="spec-tag">[AI COPILOT]</span>
+        <span className="spec-tag">AI Copilot</span>
         <button
           className="ai-key-clear"
           title="Forget API key"
@@ -152,7 +154,7 @@ export function AiPane({ projectId }: { projectId: string }) {
               </div>
             )}
             {m.text !== "" && <div className="ai-text">{m.text}</div>}
-            {m.role === "assistant" && m.text === "" && (m.pills === undefined || m.pills.length === 0) && busy && i === messages.length - 1 && (
+            {m.role === "assistant" && m.text === "" && (m.pills === undefined || m.pills.length === 0) && showBusy && i === messages.length - 1 && (
               <div className="ai-text thinking">thinking…</div>
             )}
           </div>

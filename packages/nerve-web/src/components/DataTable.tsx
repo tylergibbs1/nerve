@@ -34,6 +34,10 @@ export function DataTable<T>({
     getCoreRowModel: getCoreRowModel()
   })
 
+  if (table.getRowModel().rows.length === 0) {
+    return <div className="table-empty">No rows — compile a harness that produces this artifact.</div>
+  }
+
   return (
     <table className="data">
       <thead>

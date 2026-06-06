@@ -8,7 +8,10 @@ export const Route = createFileRoute("/projects/")({
 function ProjectList() {
   return (
     <div className="page">
-      <h1>Projects</h1>
+      <div className="page-header">
+        <span className="spec-tag">Projects</span>
+        <h1>Projects</h1>
+      </div>
       {PROJECTS.map((p) => (
         <Link
           key={p.id}

@@ -1,7 +1,10 @@
-/* Grayhaven Industries brand — Mach monochrome, exact tokens from
-   /Users/tylergibbs/grayhavenindustries/app/globals.css: true-black
-   ground, panels step up, white signal, #767676-class signature gray,
-   14%-white hairlines. No brand hues; severity colors are functional. */
+/* Grayhaven Industries brand — Mach monochrome, exact tokens + doctrine from
+   /Users/tylergibbs/grayhavenindustries/app/globals.css: true-black ground,
+   panels step up, white signal, signature gray, 14%-white hairlines.
+   No brand hues; severity colors are functional only.
+   Bracket doctrine: ONE CSS-generated spec-tag eyebrow per screen (accent
+   brackets, muted label). Nav brands, panel headings, buttons, telemetry
+   are deliberately unbracketed. */
 :root {
   --bg: #000000;
   --panel: #0a0a0a;
@@ -15,8 +18,14 @@
   --warning: #d4a017;
   --info: #3b82f6;
   --ok: #4ade80;
-  --mono: "Geist Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
-  --sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  --sans: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --display: "Chakra Petch", "Archivo", sans-serif;
+  /* Reference easing tokens (globals.css:630-633). */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 * { box-sizing: border-box; }
@@ -35,34 +44,70 @@ body {
 }
 
 a { color: var(--accent); text-decoration: none; }
+/* Prose links get the link-accessible recipe; chrome links stay bare. */
+.status a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.status a:hover { color: var(--accent-hover); text-decoration-thickness: 2px; }
+
+/* Focus doctrine (reference globals.css): visible ring on keyboard focus. */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgb(255 255 255 / 0.2);
+}
+a:focus-visible, button:focus-visible, input:focus-visible,
+textarea:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 4px rgb(255 255 255 / 0.2);
+}
+::selection { background: rgb(255 255 255 / 0.3); }
+
+/* The one sanctioned eyebrow: CSS-generated accent brackets, muted label. */
+.spec-tag {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.spec-tag::before { content: "["; color: var(--accent); }
+.spec-tag::after { content: "]"; color: var(--accent); }
 
 .app-shell { display: flex; flex-direction: column; height: 100vh; }
 
 .topbar {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
-  padding: 10px 20px;
+  height: 56px;
+  padding: 0 24px;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
   color: var(--text);
 }
+/* Brand wordmark: bare mono uppercase tracked — the reference nav voice,
+   never bracketed (components/logo.tsx). */
 .topbar .brand {
   font-family: var(--mono);
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  font-size: 14px;
   color: var(--text);
   text-transform: uppercase;
+  transition: color 200ms var(--ease-default);
 }
-.topbar .brand::before { content: "["; color: var(--accent); margin-right: 2px; }
-.topbar .brand::after { content: "]"; color: var(--accent); margin-left: 2px; }
+.topbar .brand:hover { color: var(--accent-hover); }
 .topbar .tagline {
   font-family: var(--mono);
   color: var(--muted);
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.04em;
 }
 
 .app-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
@@ -71,23 +116,33 @@ a { color: var(--accent); text-decoration: none; }
 .page h1 {
   font-family: var(--sans);
   text-transform: uppercase;
-  letter-spacing: -0.01em;
-  font-size: 26px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  font-size: 30px;
+  margin: 8px 0 0;
 }
+.page-header { margin-bottom: 32px; }
 
 .project-card {
   display: block;
   max-width: 520px;
-  padding: 16px;
+  padding: 24px;
   margin-top: 12px;
   background: var(--panel);
   border: 1px solid var(--border);
   color: inherit;
-  transition: border-color 0.15s;
+  transition: border-color 200ms var(--ease-default);
 }
-.project-card:hover { border-color: var(--accent); }
-.project-card h3 { margin: 0 0 4px; font-size: 15px; }
-.project-card p { margin: 0; color: var(--muted); font-family: var(--mono); font-size: 11px; }
+.project-card:hover { border-color: var(--muted); }
+.project-card h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  text-wrap: balance;
+}
+.project-card p { margin: 0; color: var(--muted); font-family: var(--sans); font-size: 14px; line-height: 1.5; }
 
 .workspace { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 
@@ -99,13 +154,20 @@ a { color: var(--accent); text-decoration: none; }
   background: var(--panel);
   border-bottom: 1px solid var(--border);
 }
-.workspace-header h2 { margin: 0; font-size: 14px; font-family: var(--mono); letter-spacing: 0.02em; }
+.workspace-header h2 {
+  margin: 0;
+  font-size: 14px;
+  font-family: var(--mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
 .workspace-header .meta {
   color: var(--muted);
   font-size: 10px;
   font-family: var(--mono);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
 }
 
 .tabs { display: flex; gap: 2px; margin-left: auto; }
@@ -113,12 +175,15 @@ a { color: var(--accent); text-decoration: none; }
   padding: 6px 12px;
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   border: 1px solid transparent;
+  transition: color 200ms var(--ease-default), border-color 200ms var(--ease-default),
+    background-color 200ms var(--ease-default), scale 200ms var(--ease-default);
 }
 .tabs a:hover { color: var(--text); border-color: var(--border); }
+.tabs a:active { scale: 0.96; }
 .tabs a.active { color: var(--accent); border-color: var(--border); background: var(--panel); }
 
 .workspace-body { flex: 1; min-height: 0; overflow: auto; padding: 16px 20px; }
@@ -144,6 +209,8 @@ a { color: var(--accent); text-decoration: none; }
   color: var(--muted);
   font-family: var(--mono);
   font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   cursor: pointer;
 }
 .ai-key-clear:hover { color: var(--text); }
@@ -157,30 +224,42 @@ a { color: var(--accent); text-decoration: none; }
   font-size: 12px;
   padding: 7px 9px;
 }
-.ai-setup input:focus { outline: none; border-color: var(--muted); }
+.ai-setup input:hover, .ai-input textarea:hover { border-color: var(--muted); }
+.ai-setup input:focus-visible, .ai-input textarea:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border-color: var(--accent);
+}
+.ai-setup input::placeholder, .ai-input textarea::placeholder {
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
 .ai-thread { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 .ai-hint { font-size: 12px; color: var(--muted); line-height: 1.6; text-wrap: pretty; }
 .ai-msg.user .ai-text {
   background: var(--muted-bg);
   border: 1px solid var(--border);
   padding: 7px 10px;
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.5;
   white-space: pre-wrap;
 }
-.ai-msg.assistant .ai-text { font-size: 12.5px; line-height: 1.6; white-space: pre-wrap; color: var(--text); }
+.ai-msg.assistant .ai-text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: var(--text); }
 .ai-text.thinking { color: var(--muted); font-family: var(--mono); font-size: 11px; }
 .ai-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
 .ai-pill {
   font-family: var(--mono);
   font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   padding: 2px 7px;
   border: 1px solid var(--border);
   color: var(--muted);
 }
-.ai-pill.ok { color: var(--ok); border-color: var(--ok); }
-.ai-pill.failed { color: var(--error); border-color: var(--error); }
-.ai-pill.running { animation: ai-pulse 1.2s ease-in-out infinite; }
+.ai-pill.ok { color: var(--text); border-color: rgb(255 255 255 / 0.5); }
+.ai-pill.failed { color: var(--error); border-color: color-mix(in srgb, var(--error) 50%, transparent); }
+.ai-pill.running { animation: ai-pulse 1.2s var(--ease-smooth) infinite; }
 @keyframes ai-pulse { 50% { opacity: 0.45; } }
 .ai-input { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border); }
 .ai-input textarea {
@@ -190,11 +269,10 @@ a { color: var(--accent); text-decoration: none; }
   border: 1px solid var(--border);
   color: var(--text);
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.45;
   padding: 7px 9px;
 }
-.ai-input textarea:focus { outline: none; border-color: var(--muted); }
 
 /* PRD §11.1 split workspace (datum layout): editor left, render right,
    draggable divider, sizes persisted by react-resizable-panels. */
@@ -207,8 +285,8 @@ a { color: var(--accent); text-decoration: none; }
   border-left: 1px solid var(--border);
   position: relative;
   transition-property: background-color, border-color;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-default);
 }
 .pane-handle::after {
   content: "";
@@ -232,31 +310,45 @@ a { color: var(--accent); text-decoration: none; }
 .diagram-pane { background: #fafafa; border: 1px solid var(--border); overflow: auto; }
 .diagram-pane svg { display: block; }
 
+/* Tables render plain on the workspace surface (reference admin tables):
+   no panel fill, no outer border, half-opacity row hairlines. */
 table.data {
   width: 100%;
   border-collapse: collapse;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  font-size: 12px;
+  font-size: 13px;
 }
 table.data th, table.data td {
-  padding: 7px 10px;
-  border-bottom: 1px solid var(--border);
   text-align: left;
   white-space: nowrap;
 }
 table.data th {
+  padding: 8px 16px 8px 0;
   background: var(--bg);
+  border-bottom: 1px solid var(--border);
   font-family: var(--mono);
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 400;
   position: sticky;
   top: 0;
 }
+table.data td {
+  padding: 10px 16px 10px 0;
+  border-bottom: 1px solid hsl(0 0% 14% / 0.6);
+  font-variant-numeric: tabular-nums;
+}
 table.data td.mono, table.data th.mono { font-family: var(--mono); }
+.table-empty {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  padding: 32px 16px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
 
 .diagnostics-panel {
   border-top: 1px solid var(--border);
@@ -265,21 +357,32 @@ table.data td.mono, table.data th.mono { font-family: var(--mono); }
   overflow: auto;
   padding: 8px 20px;
 }
+/* Panel heading: bare mono uppercase muted — the reference table-header
+   voice. Never bracketed (one spec-tag per screen). */
 .diagnostics-panel h3 {
   margin: 4px 0 8px;
   font-family: var(--mono);
   font-size: 10px;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.04em;
   color: var(--muted);
 }
-.diagnostics-panel h3::before { content: "["; color: var(--accent); }
-.diagnostics-panel h3::after { content: "]"; color: var(--accent); }
-.diag { display: flex; gap: 10px; padding: 3px 0; font-family: var(--mono); font-size: 11px; }
+.diag {
+  display: flex;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid hsl(0 0% 14% / 0.5);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.diag:last-child { border-bottom: 0; }
 .diag .code { min-width: 110px; font-weight: 600; }
+/* Errors are the one licensed alarm hue; warnings = white "needs your
+   action", info descends to muted (monochrome doctrine). */
 .diag.error .code { color: var(--error); }
-.diag.warning .code { color: var(--warning); }
-.diag.info .code { color: var(--info); }
+.diag.warning .code { color: var(--accent); }
+.diag.info .code { color: var(--muted); }
 .diag .target { min-width: 180px; color: var(--muted); }
 
 .status { padding: 24px; color: var(--muted); font-family: var(--mono); font-size: 12px; }
@@ -290,14 +393,16 @@ table.data td.mono, table.data th.mono { font-family: var(--mono); }
   padding: 2px 8px;
   font-family: var(--mono);
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   border: 1px solid var(--border);
 }
-.badge.ok { color: var(--ok); }
-.badge.warn { color: var(--warning); }
-.badge.err { color: var(--error); }
+/* Doctrine badge ladder: ok = default (white/50 border), warn = accent
+   white ("needs your action"), err = destructive red at half border. */
+.badge.ok { color: var(--text); border-color: rgb(255 255 255 / 0.5); }
+.badge.warn { color: var(--accent); border-color: var(--accent); }
+.badge.err { color: var(--error); border-color: color-mix(in srgb, var(--error) 50%, transparent); }
 
 .source-pane {
   display: flex;
@@ -322,14 +427,14 @@ table.data td.mono, table.data th.mono { font-family: var(--mono); }
   background: var(--accent);
   color: var(--bg);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 600;
+  letter-spacing: 0.04em;
+  font-weight: 400;
   cursor: pointer;
   transition-property: background-color, color, border-color, opacity, scale;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-default);
 }
 .compile-button:active:not(:disabled) { scale: 0.96; }
 .compile-button:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); color: var(--bg); }
@@ -341,9 +446,10 @@ table.data td.mono, table.data th.mono { font-family: var(--mono); }
   align-items: center;
   gap: 6px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   color: var(--muted);
   cursor: pointer;
 }
@@ -353,25 +459,39 @@ table.data th.sortable { cursor: pointer; user-select: none; }
   display: inline-block;
   opacity: 0;
   scale: 0.25;
-  transition-property: opacity, scale;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
+  filter: blur(4px);
+  transition-property: opacity, scale, filter;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
 }
 .sort-icon.abs { position: absolute; left: 0; top: 0; }
-.sort-icon.on { opacity: 1; scale: 1; }
+.sort-icon.on { opacity: 1; scale: 1; filter: blur(0); }
 table.data th.sortable:hover { color: var(--text); }
 .toolbar-status {
   opacity: 0;
   transform: translateY(-3px);
   transition-property: opacity, transform;
   transition-duration: 150ms;
-  transition-timing-function: ease-in;
+  transition-timing-function: var(--ease-in);
 }
 .toolbar-status.visible {
   opacity: 1;
   transform: translateY(0);
   transition-duration: 300ms;
-  transition-timing-function: ease-out;
+  transition-timing-function: var(--ease-out);
 }
 .compile-error { color: var(--error); font-family: var(--mono); font-size: 11px; }
 .compile-ok { color: var(--ok); font-family: var(--mono); font-size: 11px; }
+
+/* Motion kill switch (reference globals.css pattern). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ai-pill.running { animation: none; opacity: 0.7; }
+  .compile-button:active:not(:disabled) { scale: none; }
+  .tabs a:active { scale: none; }
+}
