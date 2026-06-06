@@ -3,7 +3,7 @@
 # vite build wipes dist/, so the project link is restored every run.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-pnpm build
+bun run build
 cat > dist/vercel.json <<'JSON'
 { "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
 JSON

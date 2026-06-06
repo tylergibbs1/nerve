@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "typecheck": "pnpm -r exec tsc -p . --noEmit",
-    "build": "pnpm -r --filter './packages/*' run build"
+    "typecheck": "for p in packages/* examples/*; do (cd $p && bunx tsc -p . --noEmit) || exit 1; done",
+    "build": "bun run --filter './packages/*' build"
   },
   "devDependencies": {
     "@types/node": "^25.9.2",
@@ -13,5 +13,8 @@
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   },
-  "packageManager": "pnpm@10.18.3"
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ]
 }

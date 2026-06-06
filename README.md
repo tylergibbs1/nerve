@@ -47,13 +47,13 @@ All packages: [`@grayhaven/nerve`](https://www.npmjs.com/package/@grayhaven/nerv
 ## Developing this repo
 
 ```bash
-pnpm install
-pnpm test        # 142 tests: golden corpus, rules, compiler, exporters, wireviz, CLI, workflow
-pnpm typecheck   # strict TS across all packages
-pnpm build       # dist builds for every package
+bun install
+bun run test        # 142 tests: golden corpus, rules, compiler, exporters, wireviz, CLI, workflow
+bun run typecheck   # strict TS across all packages
+bun run build       # dist builds for every package
 
 # Web editor:
-pnpm --filter @grayhaven/nerve-web dev
+bun run --filter @grayhaven/nerve-web dev
 ```
 
 ## Authoring style
