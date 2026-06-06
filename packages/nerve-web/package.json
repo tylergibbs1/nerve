@@ -19,6 +19,8 @@
     "@grayhaven/nerve-connectors": "workspace:*",
     "@grayhaven/nerve-exporters": "workspace:*",
     "@grayhaven/nerve-rules": "workspace:*",
+    "@tanstack/pacer": "^0.21.1",
+    "@tanstack/react-pacer": "^0.22.1",
     "@tanstack/react-query": "^5.90.3",
     "@tanstack/react-router": "^1.132.0",
     "@tanstack/react-table": "^8.21.3",

@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { HarnessTest } from "@grayhaven/nerve-exporters"
 import { DataTable } from "../components/DataTable.js"
-import { useCompile } from "../lib/compile-client.js"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { compileQueryOptions } from "../lib/compile-client.js"
 
 export const Route = createFileRoute("/projects/$projectId/tests")({
   component: TestsView
@@ -20,7 +21,6 @@ const columns: ColumnDef<HarnessTest, string | number>[] = [
 
 function TestsView() {
   const { projectId } = Route.useParams()
-  const { data } = useCompile(projectId)
-  if (data === undefined) return null
+  const { data } = useSuspenseQuery(compileQueryOptions(projectId))
   return <DataTable data={data.testPlan.tests} columns={columns} />
 }

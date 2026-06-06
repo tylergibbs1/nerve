@@ -11,8 +11,9 @@ const router = createRouter({
   routeTree,
   context: { queryClient },
   defaultPreload: "intent",
-  // Loader data comes from TanStack Query; never serve stale loaders.
-  defaultPreloadStaleTime: 0,
+  // Compiles are deterministic; don't re-run the loader on every hover —
+  // the query's own staleTime governs freshness via ensureQueryData.
+  defaultPreloadStaleTime: 30_000,
   scrollRestoration: true
 })
 

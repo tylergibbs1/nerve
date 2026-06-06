@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router"
 import type { ColumnDef } from "@tanstack/react-table"
 import type { HirLabel } from "@grayhaven/nerve"
 import { DataTable } from "../components/DataTable.js"
-import { useCompile } from "../lib/compile-client.js"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { compileQueryOptions } from "../lib/compile-client.js"
 
 export const Route = createFileRoute("/projects/$projectId/labels")({
   component: LabelsView
@@ -24,7 +25,6 @@ const columns: ColumnDef<HirLabel, string | number>[] = [
 
 function LabelsView() {
   const { projectId } = Route.useParams()
-  const { data } = useCompile(projectId)
-  if (data === undefined) return null
+  const { data } = useSuspenseQuery(compileQueryOptions(projectId))
   return <DataTable data={data.hir.labels} columns={columns} />
 }

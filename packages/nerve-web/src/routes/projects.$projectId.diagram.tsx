@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { useCompile } from "../lib/compile-client.js"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { compileQueryOptions } from "../lib/compile-client.js"
 
 export const Route = createFileRoute("/projects/$projectId/diagram")({
   component: DiagramView
@@ -7,8 +8,7 @@ export const Route = createFileRoute("/projects/$projectId/diagram")({
 
 function DiagramView() {
   const { projectId } = Route.useParams()
-  const { data } = useCompile(projectId)
-  if (data === undefined) return null
+  const { data } = useSuspenseQuery(compileQueryOptions(projectId))
   return (
     <div
       className="diagram-pane"

@@ -219,5 +219,20 @@ table.data td.mono, table.data th.mono { font-family: var(--mono); }
 }
 .compile-button:hover:not(:disabled) { background: var(--text); color: var(--bg); }
 .compile-button:disabled { opacity: 0.5; cursor: default; }
+.compile-button.ghost { border-color: var(--border); color: var(--muted); }
+.compile-button.ghost:hover { border-color: var(--text); color: var(--text); background: transparent; }
+.auto-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  cursor: pointer;
+}
+table.data th.sortable { cursor: pointer; user-select: none; }
+table.data th.sortable:hover { color: var(--text); }
 .compile-error { color: var(--error); font-family: var(--mono); font-size: 11px; }
 .compile-ok { color: var(--ok); font-family: var(--mono); font-size: 11px; }

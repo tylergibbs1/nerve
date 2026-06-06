@@ -1,8 +1,23 @@
 /**
- * Main-thread client for the compile worker, exposed as a TanStack Query
- * hook. One worker instance, request/response correlation by id.
+ * Main-thread client for the compile worker, exposed through a
+ * `queryOptions()` factory (the t3code pattern) so the router loader, route
+ * components, and the source editor all share one cache entry.
+ *
+ * Key decisions:
+ * - The queryFn compiles whatever `getSource(projectId)` currently returns —
+ *   edited and bundled state unify, so a background refetch can never revert
+ *   an editor compile.
+ * - Compiles are deterministic per source, so `staleTime: Infinity` is the
+ *   honest model; the editor writes results through `setCompileResult`.
+ * - The worker RPC honors Query's abort signal, and a worker crash rejects
+ *   every pending request instead of stranding queries in `pending` forever.
  */
-import { useQuery } from "@tanstack/react-query"
+import {
+  queryOptions,
+  useQuery,
+  type QueryClient
+} from "@tanstack/react-query"
+import { getSource } from "./sources.js"
 import type { CompileRequest, CompileResponse, CompileResult } from "./compile-types.js"
 
 let worker: Worker | undefined
@@ -25,29 +40,75 @@ const getWorker = (): Worker => {
       if (result !== undefined) entry.resolve(result)
       else entry.reject(new Error(error ?? "Compile failed"))
     }
+    worker.onerror = () => {
+      for (const [, entry] of pending) {
+        entry.reject(new Error("Compile worker crashed; it will be respawned."))
+      }
+      pending.clear()
+      worker?.terminate()
+      worker = undefined
+    }
   }
   return worker
 }
 
-export const compileProject = (projectId: string): Promise<CompileResult> =>
+/** Compile TypeScript source in the worker (§9.6). Abortable. */
+export const compileSource = (
+  projectId: string,
+  source: string,
+  signal?: AbortSignal
+): Promise<CompileResult> =>
   new Promise((resolve, reject) => {
     const id = ++nextId
     pending.set(id, { resolve, reject })
-    getWorker().postMessage({ id, projectId } satisfies CompileRequest)
-  })
-
-/** Compile editor-authored TypeScript source (§9.6). */
-export const compileSource = (projectId: string, source: string): Promise<CompileResult> =>
-  new Promise((resolve, reject) => {
-    const id = ++nextId
-    pending.set(id, { resolve, reject })
+    signal?.addEventListener("abort", () => {
+      if (pending.delete(id)) {
+        reject(
+          signal.reason instanceof Error ? signal.reason : new Error("Compile aborted")
+        )
+      }
+    })
     getWorker().postMessage({ id, projectId, source } satisfies CompileRequest)
   })
 
-export const compileQueryOptions = (projectId: string) => ({
-  queryKey: ["compile", projectId] as const,
-  queryFn: () => compileProject(projectId)
-})
+export const compileKeys = {
+  all: ["compile"] as const,
+  project: (projectId: string) => ["compile", projectId] as const
+}
+
+export const compileQueryOptions = (projectId: string) =>
+  queryOptions({
+    queryKey: compileKeys.project(projectId),
+    // Always compiles the *current* source — edited or bundled.
+    queryFn: ({ signal }) => compileSource(projectId, getSource(projectId), signal),
+    staleTime: Infinity
+  })
+
+/** Editor → cache writer: a successful editor compile becomes the truth everywhere. */
+export const setCompileResult = (
+  queryClient: QueryClient,
+  projectId: string,
+  result: CompileResult
+): void => {
+  queryClient.setQueryData(compileQueryOptions(projectId).queryKey, result)
+}
 
 export const useCompile = (projectId: string) =>
   useQuery(compileQueryOptions(projectId))
+
+export interface DiagnosticCounts {
+  readonly errors: number
+  readonly warnings: number
+  readonly total: number
+}
+
+/** Selector-based subscription: re-renders only when the counts change. */
+export const useDiagnosticCounts = (projectId: string) =>
+  useQuery({
+    ...compileQueryOptions(projectId),
+    select: (r): DiagnosticCounts => ({
+      errors: r.hir.diagnostics.filter((d) => d.severity === "error").length,
+      warnings: r.hir.diagnostics.filter((d) => d.severity === "warning").length,
+      total: r.hir.diagnostics.length
+    })
+  })
