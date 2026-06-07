@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.3.0 — 2026-06-07
+### Rules
+- HK-ELEC-001 now recognizes bus-indexed differential pairs: `CAN1_H`/`CAN1_L`,
+  `MOTOR_CAN2_H` pair correctly (previously skipped silently — untwisted
+  multi-bus CAN shipped without a diagnostic).
+- Ground classification is token-aware: `AGND`, `DGND`, `PGND`, `MOTOR_GND`
+  classify as grounds, eliminating false HK-ELEC-003 errors. Power matching
+  deliberately stays anchored so enable/sense lines (`EN_5V`) are not
+  misclassified as rails.
+- New numeric code API: `ruleCodeNumber` / `ruleCodeFromNumber` /
+  `ruleCategory` / `codesToNumbers` / `RULE_CATEGORY_BANDS` — a derived
+  (zero-maintenance) numeric view of `HK-*` codes for sorting, bitsets, and
+  compact storage. String codes remain the public contract.
+- Test suite: 22 -> 96 rule tests including property-based invariants
+  (~1,750 generated designs per run via fast-check).
+
+### Exporters
+- Schematic and board SVGs carry deterministic, sorted `data-*` attributes
+  (`data-wire`, `data-connector`, `data-pin`, `data-splice`): artifacts are
+  now machine-addressable for tooling and interactive viewers. `DrawItem`
+  types gain an optional `data` record.
+
 ## 0.2.1 — 2026-06-06
 ### Tree-shaking
 - `@grayhaven/nerve` and `@grayhaven/nerve-exporters` declare `sideEffects: false`:
