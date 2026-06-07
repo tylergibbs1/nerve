@@ -130,6 +130,18 @@
         "vitest": "^3.2.4",
       },
     },
+    "packages/nerve-react": {
+      "name": "@grayhaven/nerve-react",
+      "version": "0.4.0",
+      "dependencies": {
+        "@grayhaven/nerve": "workspace:*",
+      },
+      "devDependencies": {
+        "@grayhaven/nerve-connectors": "workspace:*",
+        "tsup": "^8.5.0",
+        "typescript": "^5.8.3",
+      },
+    },
     "packages/nerve-rules": {
       "name": "@grayhaven/nerve-rules",
       "version": "0.4.0",
@@ -395,6 +407,8 @@
     "@grayhaven/nerve-connectors": ["@grayhaven/nerve-connectors@workspace:packages/nerve-connectors"],
 
     "@grayhaven/nerve-exporters": ["@grayhaven/nerve-exporters@workspace:packages/nerve-exporters"],
+
+    "@grayhaven/nerve-react": ["@grayhaven/nerve-react@workspace:packages/nerve-react"],
 
     "@grayhaven/nerve-rules": ["@grayhaven/nerve-rules@workspace:packages/nerve-rules"],
 

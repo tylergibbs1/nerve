@@ -70,7 +70,8 @@ Full guides: [quickstart](https://nerve-demo.vercel.app/docs) · [DSL reference]
 | [`@grayhaven/nerve-wireviz`](./packages/nerve-wireviz) | WireViz YAML import/export adapter with fixture corpus |
 | [`@grayhaven/nerve-cli`](./packages/nerve-cli) | `nerve init/compile/validate/render/export/import/diff/inspect/quote/analyze/machine/contract/release/record/redline` — deterministic, CI-ready exit codes |
 | [`@grayhaven/nerve-web`](./packages/nerve-web) | The web workspace: worker-sandboxed compile, interactive schematics, AI copilot, in-browser packet export, docs |
-| [`@grayhaven/nerve-connectors`](./packages/nerve-connectors) | Verified connector library (Molex Micro-Fit 3.0 seed data) |
+| [`@grayhaven/nerve-connectors`](./packages/nerve-connectors) | Verified connector library: 5 families / 21 parts with cavity layouts, mating pairs, provenance + compact `part("microfit-2x8")` specs + the bundled `PartProvider` |
+| [`@grayhaven/nerve-react`](./packages/nerve-react) | Experimental JSX authoring (`<Harness>`, `<Wire from="J1.1">`) — a 2KB custom JSX runtime, no React; compiles to byte-identical HIR vs the function DSL |
 | [`examples/`](./examples) | Golden fixtures: motor-controller (PRD §9.1 verbatim) + variant, sensor-splice (splices/cables), robot-platform (22 connectors, 65 wires, 3-level branch tree) |
 
 ## Testing

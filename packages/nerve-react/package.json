@@ -1,0 +1,40 @@
+{
+  "name": "@grayhaven/nerve-react",
+  "version": "0.4.0",
+  "description": "JSX authoring for Grayhaven Nerve harnesses (experimental). No React runtime \u2014 a 2KB custom JSX factory over the same typed DSL.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./jsx-runtime": "./src/jsx-runtime.ts",
+    "./jsx-dev-runtime": "./src/jsx-runtime.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./jsx-runtime": {
+        "types": "./dist/jsx-runtime.d.ts",
+        "default": "./dist/jsx-runtime.js"
+      },
+      "./jsx-dev-runtime": {
+        "types": "./dist/jsx-runtime.d.ts",
+        "default": "./dist/jsx-runtime.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/jsx-runtime.ts --format esm --dts --sourcemap --clean",
+    "typecheck": "tsc -p . --noEmit"
+  },
+  "dependencies": {
+    "@grayhaven/nerve": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "@grayhaven/nerve-connectors": "workspace:*"
+  },
+  "license": "Apache-2.0"
+}
