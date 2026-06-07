@@ -84,6 +84,14 @@ export {
 
 export { variant, type VariantOptions } from "./variant.js"
 
+export {
+  harnessTemplate,
+  mergeFragments,
+  prefixRefs,
+  type HarnessFragment,
+  type HarnessTemplate
+} from "./template.js"
+
 export { definePlugin, isNervePlugin, type NervePlugin } from "./plugin.js"
 
 export {
