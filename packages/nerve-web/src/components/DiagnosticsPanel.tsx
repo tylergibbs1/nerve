@@ -6,7 +6,13 @@ export function DiagnosticsPanel({
   diagnostics: ReadonlyArray<Diagnostic>
 }) {
   return (
-    <div className="diagnostics-panel">
+    <div
+      className="diagnostics-panel"
+      // axe scrollable-region-focusable: keyboard users scroll the list.
+      tabIndex={0}
+      role="region"
+      aria-label="Diagnostics"
+    >
       <h3>Diagnostics ({diagnostics.length})</h3>
       {diagnostics.length === 0 && <div className="diag">No issues found.</div>}
       {diagnostics.map((d, i) => (

@@ -38,3 +38,26 @@ jobs:
           node ../../packages/nerve-cli/bin/nerve.js validate ./src/main.harness.ts
           node ../../packages/nerve-cli/bin/nerve.js export ./src/main.harness.ts --out /tmp/packet
           test -f /tmp/packet/manufacturing-packet.pdf
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright chromium
+        run: cd packages/nerve-web && bunx playwright install --with-deps chromium
+
+      - name: Build web app
+        run: cd packages/nerve-web && bun run build
+
+      - name: E2E + a11y (Playwright + axe)
+        run: cd packages/nerve-web && bun run e2e

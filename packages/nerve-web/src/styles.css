@@ -255,7 +255,9 @@ textarea:focus-visible, select:focus-visible {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: color-mix(in srgb, var(--muted) 60%, transparent);
+  /* WCAG AA: was muted@60% (~2.8:1 on black, axe-serious); hsl 58% ≈ 5:1
+     keeps the quiet-gray doctrine while passing. */
+  color: hsl(0 0% 58%);
 }
 .docs-llms {
   margin-top: auto;
@@ -264,7 +266,8 @@ textarea:focus-visible, select:focus-visible {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: color-mix(in srgb, var(--muted) 70%, transparent);
+  /* WCAG AA on true black (axe-serious at muted@70%). */
+  color: hsl(0 0% 58%);
 }
 .docs-llms:hover { color: var(--muted); }
 .docs-md-actions {
@@ -632,7 +635,8 @@ textarea:focus-visible, select:focus-visible {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: color-mix(in srgb, var(--muted) 70%, transparent);
+  /* WCAG AA on true black (axe: 3.28:1 at muted@70%). */
+  color: hsl(0 0% 58%);
 }
 .diagram-pane { background: #fafafa; border: 1px solid var(--border); overflow: auto; }
 .diagram-pane svg { display: block; }

@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent, useRef, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useDebouncedValue } from "@tanstack/react-pacer"
 import CodeMirror from "@uiw/react-codemirror"
-import type { EditorView } from "@codemirror/view"
+import { EditorView } from "@codemirror/view"
 import { javascript } from "@codemirror/lang-javascript"
 import { lintGutter, setDiagnostics } from "@codemirror/lint"
 import { autocompletion } from "@codemirror/autocomplete"
@@ -168,11 +168,16 @@ export function SourcePane({ projectId }: { projectId: string }) {
         extensions={[
           javascript({ typescript: true }),
           lintGutter(),
-          autocompletion({ override: [dslCompletions] })
+          autocompletion({ override: [dslCompletions] }),
+          // axe: role=textbox needs an accessible name.
+          EditorView.contentAttributes.of({ "aria-label": "Harness source editor" })
         ]}
         theme={grayscaleTheme}
         onCreateEditor={(view) => {
           viewRef.current = view
+          // Automation hook: e2e tests and agent tooling drive real editor
+          // transactions through this instead of poking minified internals.
+          ;(window as unknown as { __nerveEditor?: EditorView }).__nerveEditor = view
         }}
         onChange={onChange}
         style={{ flex: 1, minHeight: 0, overflow: "auto", fontSize: 13 }}

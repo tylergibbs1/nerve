@@ -7,3 +7,7 @@ coverage/
 # mutation testing
 .stryker-tmp/
 reports/mutation/
+
+# playwright
+test-results/
+playwright-report/
