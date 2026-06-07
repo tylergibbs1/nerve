@@ -1,0 +1,168 @@
+/**
+ * Pack-and-install smoke test: exercises the PUBLISHED tarball shape, not
+ * the source workspace. Three consecutive releases (≤ v0.5.1) shipped
+ * consumer-breaking artifact bugs that the source-tree CI could never see:
+ * src-pointing exports, phantom internal dep pins from a stale bun.lock,
+ * and missing dist files. Each class is caught mechanically here:
+ *
+ *   1. Pack every public package (scripts/publish-all.ts --pack).
+ *   2. Tarball integrity: every @grayhaven/* dep inside each tarball must
+ *      pin the exact workspace version (no phantom pins, no workspace:
+ *      protocol leakage), and every file referenced by exports/main/types/
+ *      bin must exist in the tarball listing.
+ *   3. Consumer install: npm-install the tarballs (overrides force every
+ *      internal dep to the local artifact) in a temp dir, then run
+ *      `nerve init/validate/export` and import every package from dist.
+ *
+ *   bun run build && bun scripts/smoke-tarballs.ts
+ */
+import { execFileSync, spawnSync } from "node:child_process"
+import { globSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+
+const ROOT = join(import.meta.dirname, "..")
+
+const run = (cmd: string, args: string[], cwd: string, env?: Record<string, string>): void => {
+  const r = spawnSync(cmd, args, { cwd, stdio: "inherit", env: { ...process.env, ...env } })
+  if (r.status !== 0) throw new Error(`${cmd} ${args.join(" ")} exited ${r.status}`)
+}
+
+// ---------------------------------------------------------------- 1. pack
+const packsFrom = mkdtempSync(join(tmpdir(), "nerve-packs-"))
+run("bun", ["scripts/publish-all.ts", "--pack"], ROOT, { PACK_DEST: packsFrom })
+
+// Map tarball -> its embedded package.json (never trust filename parsing).
+interface PackedPkg {
+  readonly tgz: string
+  readonly pkg: Record<string, unknown>
+  readonly entries: ReadonlySet<string>
+}
+const packed = new Map<string, PackedPkg>()
+for (const f of readdirSync(packsFrom).filter((f) => f.endsWith(".tgz"))) {
+  const tgz = join(packsFrom, f)
+  const pkg = JSON.parse(
+    execFileSync("tar", ["-xzOf", tgz, "package/package.json"], { encoding: "utf8" })
+  ) as Record<string, unknown>
+  const entries = new Set(
+    execFileSync("tar", ["-tzf", tgz], { encoding: "utf8" }).trim().split("\n")
+  )
+  packed.set(pkg["name"] as string, { tgz, pkg, entries })
+}
+
+// Workspace truth: name -> version from packages/*/package.json.
+const workspaceVersions = new Map<string, string>()
+for (const rel of globSync("packages/*/package.json", { cwd: ROOT })) {
+  const pkg = JSON.parse(readFileSync(join(ROOT, rel), "utf8")) as {
+    name: string
+    version?: string
+  }
+  if (pkg.version !== undefined) workspaceVersions.set(pkg.name, pkg.version)
+}
+
+// ----------------------------------------------- 2. tarball integrity
+const collectPaths = (value: unknown, out: string[]): void => {
+  if (typeof value === "string") {
+    if (value.startsWith("./")) out.push(value.slice(2))
+  } else if (value !== null && typeof value === "object") {
+    for (const v of Object.values(value)) collectPaths(v, out)
+  }
+}
+
+const problems: string[] = []
+for (const [name, { pkg, entries }] of packed) {
+  // 2a. internal dep pins match the workspace exactly
+  const deps = (pkg["dependencies"] ?? {}) as Record<string, string>
+  for (const [dep, spec] of Object.entries(deps)) {
+    if (!dep.startsWith("@grayhaven/")) continue
+    if (spec.startsWith("workspace:")) {
+      problems.push(`${name}: ${dep} still uses workspace protocol (${spec})`)
+      continue
+    }
+    const expected = workspaceVersions.get(dep)
+    const pinned = spec.replace(/^[\^~]/, "")
+    if (pinned !== expected) {
+      problems.push(
+        `${name}: ${dep} pinned to ${spec} but workspace has ${expected} — stale bun.lock? Run bun install and re-pack.`
+      )
+    }
+  }
+  // 2b. every referenced artifact exists in the tarball
+  const referenced: string[] = []
+  for (const key of ["exports", "main", "types", "bin"]) collectPaths(pkg[key], referenced)
+  for (const rel of referenced) {
+    if (!entries.has(`package/${rel}`)) {
+      problems.push(`${name}: package.json references ./${rel} but the tarball does not contain it`)
+    }
+  }
+  if (referenced.length === 0) problems.push(`${name}: no exports/main/bin paths found to verify`)
+}
+if (problems.length > 0) {
+  console.error("✗ tarball integrity failures:")
+  for (const p of problems) console.error(`  - ${p}`)
+  process.exit(1)
+}
+console.log(`✓ tarball integrity: ${packed.size} packages, pins + artifact paths verified`)
+
+// ----------------------------------------------- 3. consumer install + CLI
+const consumer = mkdtempSync(join(tmpdir(), "nerve-smoke-"))
+const fileSpec = (name: string): string => `file:${packed.get(name)!.tgz}`
+const directDeps = ["@grayhaven/nerve", "@grayhaven/nerve-cli", "@grayhaven/nerve-connectors", "@grayhaven/nerve-react"]
+for (const d of directDeps) {
+  if (!packed.has(d)) {
+    console.error(`✗ expected tarball for ${d} was not produced`)
+    process.exit(1)
+  }
+}
+writeFileSync(
+  join(consumer, "package.json"),
+  JSON.stringify(
+    {
+      name: "nerve-smoke-consumer",
+      private: true,
+      type: "module",
+      dependencies: Object.fromEntries(directDeps.map((d) => [d, fileSpec(d)])),
+      // Force every transitive @grayhaven/* resolution to the local tarball:
+      // the registry must never satisfy an internal dep during this test.
+      overrides: Object.fromEntries([...packed.keys()].map((d) => [d, fileSpec(d)]))
+    },
+    null,
+    2
+  )
+)
+run("npm", ["install", "--no-audit", "--no-fund"], consumer)
+
+// The published bin, against the published dist, compiling a scaffolded
+// project whose imports resolve from the installed tarballs.
+run("npx", ["nerve", "init", "."], consumer)
+run("npx", ["nerve", "validate", "./src/main.harness.ts"], consumer)
+run("npx", ["nerve", "export", "./src/main.harness.ts", "--out", "./packet"], consumer)
+const packet = readdirSync(join(consumer, "packet"))
+if (!packet.includes("manufacturing-packet.pdf")) {
+  console.error(`✗ export packet missing manufacturing-packet.pdf (got: ${packet.join(", ")})`)
+  process.exit(1)
+}
+
+// Dist exports resolve for every consumer-facing package (would have
+// caught the src-pointing exports shipped through v0.5.0).
+const importCheck = `
+const checks = [
+  ["@grayhaven/nerve", ["harness", "connector", "wire", "defineConfig"]],
+  ["@grayhaven/nerve-connectors", ["part", "allParts", "partSpecs"]],
+  ["@grayhaven/nerve-react", ["Harness", "Connector", "Wire"]],
+  ["@grayhaven/nerve-react/jsx-runtime", ["jsx"]]
+]
+for (const [mod, names] of checks) {
+  const m = await import(mod)
+  for (const n of names) {
+    if (m[n] === undefined) throw new Error(mod + " is missing export " + n)
+  }
+}
+console.log("✓ dist exports resolve: " + checks.map(c => c[0]).join(", "))
+`
+writeFileSync(join(consumer, "import-check.mjs"), importCheck)
+run("node", ["import-check.mjs"], consumer)
+
+rmSync(consumer, { recursive: true, force: true })
+rmSync(packsFrom, { recursive: true, force: true })
+console.log("✓ pack-and-install smoke test passed")

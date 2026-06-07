@@ -39,6 +39,29 @@ jobs:
           node ../../packages/nerve-cli/bin/nerve.js export ./src/main.harness.ts --out /tmp/packet
           test -f /tmp/packet/manufacturing-packet.pdf
 
+  # Tests the PUBLISHED tarball shape, not the source workspace — the test
+  # class that would have caught the three consecutive broken releases
+  # (src-pointing exports, phantom dep pins, missing dist).
+  tarball-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Build packages
+        run: bun run build
+
+      - name: Pack, install, and exercise tarballs
+        run: bun scripts/smoke-tarballs.ts
+
   e2e:
     runs-on: ubuntu-latest
     steps:

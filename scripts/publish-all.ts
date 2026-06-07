@@ -10,10 +10,10 @@
  * dev resolution (exports -> src) stays untouched.
  *
  *   bun scripts/publish-all.ts          # publish (interactive npm auth)
- *   bun scripts/publish-all.ts --pack   # dry: write tarballs to /tmp/packs
+ *   bun scripts/publish-all.ts --pack   # dry: write tarballs to $PACK_DEST (default /tmp/packs)
  */
 import { spawnSync } from "node:child_process"
-import { copyFileSync, readFileSync, renameSync, writeFileSync } from "node:fs"
+import { copyFileSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
 // Dependency order: dependencies publish before dependents.
@@ -32,6 +32,12 @@ const PACKAGES = [
 const NPM_KEYS = new Set(["access", "registry", "tag", "provenance"])
 
 const packOnly = process.argv.includes("--pack")
+const packDest = process.env["PACK_DEST"] ?? "/tmp/packs"
+if (packOnly) {
+  // Stale tarballs from a previous run must never satisfy a smoke test.
+  rmSync(packDest, { recursive: true, force: true })
+  mkdirSync(packDest, { recursive: true })
+}
 let failed = false
 
 for (const name of PACKAGES) {
@@ -58,7 +64,7 @@ for (const name of PACKAGES) {
   writeFileSync(pkgPath, JSON.stringify(transformed, null, 2) + "\n")
   try {
     const args = packOnly
-      ? ["pm", "pack", "--destination", "/tmp/packs"]
+      ? ["pm", "pack", "--destination", packDest]
       : ["publish", "--access", "public"]
     const r = spawnSync("bun", args, { cwd: dir, stdio: "inherit" })
     if (r.status !== 0) {
