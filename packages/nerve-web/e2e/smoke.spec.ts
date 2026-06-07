@@ -40,6 +40,26 @@ test("a broken harness surfaces HK diagnostics + lint gutter", async ({ page }) 
   await expect(page.locator(".cm-lint-marker").first()).toBeVisible()
 })
 
+test("multi-file project: variants tab compiles the long SKU (§9.6 fsMap)", async ({ page }) => {
+  await page.goto("/projects/motor-controller/diagram")
+  await expect(page.locator(".diagram-pane svg")).toBeVisible({ timeout: 15_000 })
+  // The bundled variants/long.ts ships as a real second file.
+  const tab = page.locator(".source-tab", { hasText: "variants/long.ts" })
+  await expect(tab).toBeVisible()
+  await tab.click()
+  // Compile-what-you-look-at: the variant becomes the entrypoint — its
+  // import of ../main.harness.js resolves INSIDE the worker's fsMap.
+  await expect(page.locator(".toolbar-status")).toContainText(/0 error/i, { timeout: 20_000 })
+  await expect(page.locator(".diagram-pane svg")).toContainText("motor-controller-harness-long", {
+    timeout: 20_000
+  })
+  // Back to the entry file: the base harness renders again.
+  await page.locator(".source-tab", { hasText: "main.harness.ts" }).first().click()
+  await expect(page.locator(".diagram-pane svg")).not.toContainText("motor-controller-harness-long", {
+    timeout: 20_000
+  })
+})
+
 test("diagram sheet actions exist and Copy SVG puts markup on the clipboard", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"])
   await page.goto("/projects/motor-controller/diagram")

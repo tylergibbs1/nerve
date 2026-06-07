@@ -85,39 +85,33 @@ const SANDBOX_MODULES: Readonly<Record<string, unknown>> = {
   "@grayhaven/nerve-connectors": connectorsModule
 }
 
-const isHarnessDesign = (value: unknown): value is HarnessDesign =>
-  typeof value === "object" &&
-  value !== null &&
-  (value as { kind?: unknown }).kind === "harness"
-
-const evaluateSource = async (source: string): Promise<HarnessDesign> => {
+/** Multi-file evaluation (PRD §9.6): fsMap + entrypoint via fs-eval. */
+const evaluateProject = async (
+  fsMap: Readonly<Record<string, string>>,
+  entrypoint: string
+): Promise<HarnessDesign> => {
   const { transform } = await import("sucrase")
-  const { code } = transform(source, { transforms: ["typescript", "imports"] })
-  const mod = { exports: {} as Record<string, unknown> }
-  const sandboxRequire = (name: string): unknown => {
-    const m = SANDBOX_MODULES[name]
-    if (m === undefined) {
-      throw new Error(
-        `Module "${name}" is not available in the editor sandbox. Available: ${Object.keys(SANDBOX_MODULES).join(", ")}`
-      )
-    }
-    return m
-  }
-  new Function("require", "module", "exports", code)(sandboxRequire, mod, mod.exports)
-  const design = mod.exports["default"]
-  if (!isHarnessDesign(design)) {
-    throw new Error("The source must default-export harness(...).")
-  }
-  return design
+  const { evaluateFsMap } = await import("../lib/fs-eval.js")
+  return evaluateFsMap(fsMap, entrypoint, {
+    modules: SANDBOX_MODULES,
+    transform: (source) =>
+      transform(source, { transforms: ["typescript", "imports"] }).code
+  })
 }
 
 // Async handler: overlapping requests may complete out of order, which is
 // safe because compile-client matches responses by id.
 self.onmessage = async (event: MessageEvent<CompileRequest>) => {
-  const { id, kind, projectId, source } = event.data
+  const { id, kind, projectId, source, fsMap, entrypoint } = event.data
   let design: HarnessDesign | undefined
   try {
-    design = source !== undefined ? await evaluateSource(source) : designs[projectId]
+    design =
+      fsMap !== undefined
+        ? await evaluateProject(fsMap, entrypoint ?? "/main.harness.ts")
+        : source !== undefined
+          ? // Single-string compat: callers that predate fsMap.
+            await evaluateProject({ "/main.harness.ts": source }, "/main.harness.ts")
+          : designs[projectId]
   } catch (cause) {
     self.postMessage({
       id,

@@ -7,6 +7,10 @@ export interface CompileRequest {
   readonly projectId: string
   /** When present, compile this TypeScript source instead of the bundled design (§9.6). */
   readonly source?: string
+  /** Multi-file project (§9.6 explorer): path → source. Wins over `source`. */
+  readonly fsMap?: Readonly<Record<string, string>>
+  /** Entry module within fsMap (default "/main.harness.ts"). */
+  readonly entrypoint?: string
 }
 
 export interface CompileResult {

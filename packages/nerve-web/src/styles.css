@@ -705,6 +705,21 @@ textarea:focus-visible, select:focus-visible {
 .search-results button:hover { background: var(--muted-bg); }
 .search-results .hit-detail { color: var(--muted); }
 
+/* Project file tabs (§9.6 multi-file). */
+.source-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); background: var(--muted-bg); }
+.source-tab {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+.source-tab:hover { color: var(--text); }
+.source-tab.active { color: var(--text); border-bottom-color: var(--text); }
+
 /* Clickable diagnostics. */
 .diagnostics-panel .diag.selectable { cursor: pointer; }
 .diagnostics-panel .diag.selectable:hover { background: var(--muted-bg); }

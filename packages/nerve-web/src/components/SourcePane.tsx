@@ -12,11 +12,19 @@ import { grayscaleTheme } from "../lib/cm-theme.js"
 import { useMinimumLoading } from "../lib/useMinimumLoading.js"
 import {
   compileKeys,
-  compileSource,
+  compileProjectFile,
   countDiagnostics,
   setCompileResult
 } from "../lib/compile-client.js"
-import { getSource, isDirty, resetSource, setSource, subscribeSource } from "../lib/sources.js"
+import {
+  ENTRY_FILE,
+  getFileSource,
+  isDirty,
+  listFiles,
+  resetSource,
+  setFileSource,
+  subscribeSource
+} from "../lib/sources.js"
 import { Button } from "../ui/button.js"
 
 /**
@@ -26,7 +34,11 @@ import { Button } from "../ui/button.js"
  */
 export function SourcePane({ projectId }: { projectId: string }) {
   const queryClient = useQueryClient()
-  const [source, setLocalSource] = useState(() => getSource(projectId))
+  // Multi-file projects (§9.6): tabs per file; the active file is also the
+  // compile ENTRYPOINT — opening variants/long.ts renders the long SKU.
+  const [activeFile, setActiveFile] = useState(ENTRY_FILE)
+  const files = listFiles(projectId)
+  const [source, setLocalSource] = useState(() => getFileSource(projectId, ENTRY_FILE))
   const [autoCompile, setAutoCompile] = useState(true)
   const lastCompiled = useRef<string | undefined>(undefined)
   const viewRef = useRef<EditorView | null>(null)
@@ -40,7 +52,8 @@ export function SourcePane({ projectId }: { projectId: string }) {
 
   // Re-seed when switching projects (the pane persists across them).
   useEffect(() => {
-    setLocalSource(getSource(projectId))
+    setActiveFile(ENTRY_FILE)
+    setLocalSource(getFileSource(projectId, ENTRY_FILE))
     lastCompiled.current = undefined
   }, [projectId])
 
@@ -51,7 +64,7 @@ export function SourcePane({ projectId }: { projectId: string }) {
     () =>
       subscribeSource((changed, origin) => {
         if (changed !== projectId) return
-        const text = getSource(projectId)
+        const text = getFileSource(projectId, activeFile)
         setLocalSource((local) => {
           if (local === text) return local
           // Same-tab external writes (AI pane) arrive compile-verified;
@@ -60,16 +73,19 @@ export function SourcePane({ projectId }: { projectId: string }) {
           return text
         })
       }),
-    [projectId]
+    [projectId, activeFile]
   )
 
+  // The path rides in the mutation variables: mutate() during a tab switch
+  // must compile against the NEW path, not this render's closure.
   const compile = useMutation({
-    mutationFn: (text: string) => compileSource(projectId, text),
-    onSuccess: (result, compiledText) => {
+    mutationFn: ({ path, text }: { path: string; text: string }) =>
+      compileProjectFile(projectId, path, text),
+    onSuccess: (result, { path, text }) => {
       // Supersession guard: a newer edit exists — drop this stale result.
-      if (compiledText !== getSource(projectId)) return
-      lastCompiled.current = compiledText
-      publishDiagnostics(compiledText, result.hir.diagnostics)
+      if (text !== getFileSource(projectId, path)) return
+      lastCompiled.current = text
+      publishDiagnostics(text, result.hir.diagnostics)
       setCompileResult(queryClient, projectId, result)
     }
   })
@@ -77,21 +93,21 @@ export function SourcePane({ projectId }: { projectId: string }) {
   // Compile-on-type: debounce the editor text, feed the existing mutation.
   // useEffectEvent reads the latest mutation without being a reactive dep —
   // the effect re-runs only on the values that should trigger a compile.
-  const runCompile = useEffectEvent((text: string) => compile.mutate(text))
+  const runCompile = useEffectEvent((text: string) => compile.mutate({ path: activeFile, text }))
   const [debouncedSource] = useDebouncedValue(source, { wait: 600 })
   useEffect(() => {
     if (!autoCompile) return
     if (debouncedSource === lastCompiled.current) return
-    if (debouncedSource !== getSource(projectId)) return // project just switched
+    if (debouncedSource !== getFileSource(projectId, activeFile)) return // project/tab just switched
     runCompile(debouncedSource)
-  }, [debouncedSource, autoCompile, projectId])
+  }, [debouncedSource, autoCompile, projectId, activeFile])
 
   // Close the stale window (tanstack-query qk-include-dependencies): if the
   // pane unmounts or switches projects with uncompiled edits, invalidate so
   // the render pane recompiles the current source.
   useEffect(() => {
     return () => {
-      if (getSource(projectId) !== lastCompiled.current) {
+      if (getFileSource(projectId, ENTRY_FILE) !== lastCompiled.current) {
         void queryClient.invalidateQueries({ queryKey: compileKeys.project(projectId) })
       }
     }
@@ -103,14 +119,24 @@ export function SourcePane({ projectId }: { projectId: string }) {
 
   const onToggleAuto = (enabled: boolean) => {
     setAutoCompile(enabled)
-    if (!enabled && getSource(projectId) !== lastCompiled.current) {
+    if (!enabled && getFileSource(projectId, activeFile) !== lastCompiled.current) {
       void queryClient.invalidateQueries({ queryKey: compileKeys.project(projectId) })
     }
   }
 
   const onChange = (text: string) => {
     setLocalSource(text)
-    setSource(projectId, text)
+    setFileSource(projectId, activeFile, text)
+  }
+
+  const onSelectFile = (path: string) => {
+    if (path === activeFile) return
+    setActiveFile(path)
+    const text = getFileSource(projectId, path)
+    setLocalSource(text)
+    lastCompiled.current = undefined
+    // Compile what you look at: the new tab becomes the entrypoint.
+    compile.mutate({ path, text })
   }
 
   // Keep the status span mounted; animate visibility.
@@ -131,8 +157,24 @@ export function SourcePane({ projectId }: { projectId: string }) {
 
   return (
     <div className="source-pane">
+      {files.length > 1 && (
+        <div className="source-tabs" role="tablist" aria-label="Project files">
+          {files.map((path) => (
+            <button
+              key={path}
+              type="button"
+              role="tab"
+              aria-selected={path === activeFile}
+              className={`source-tab${path === activeFile ? " active" : ""}`}
+              onClick={() => onSelectFile(path)}
+            >
+              {path.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="source-toolbar">
-        <Button size="xs" disabled={compile.isPending} onClick={() => compile.mutate(source)}>
+        <Button size="xs" disabled={compile.isPending} onClick={() => compile.mutate({ path: activeFile, text: source })}>
           {showBusy ? "Compiling…" : "Compile"}
         </Button>
         <label className="auto-toggle">
@@ -149,8 +191,9 @@ export function SourcePane({ projectId }: { projectId: string }) {
             size="xs"
             onClick={() => {
               const text = resetSource(projectId)
+              setActiveFile(ENTRY_FILE)
               setLocalSource(text)
-              compile.mutate(text)
+              compile.mutate({ path: ENTRY_FILE, text })
             }}
           >
             Reset

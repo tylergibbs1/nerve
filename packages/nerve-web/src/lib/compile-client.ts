@@ -17,7 +17,7 @@ import {
   useQuery,
   type QueryClient
 } from "@tanstack/react-query"
-import { getSource, isDirty } from "./sources.js"
+import { ENTRY_FILE, getFiles, getSource, isDirty, listFiles } from "./sources.js"
 import type { CompileRequest, CompileResponse, CompileResult } from "./compile-types.js"
 
 let worker: Worker | undefined
@@ -63,10 +63,9 @@ const getWorker = (): Worker => {
   return worker
 }
 
-/** Compile TypeScript source in the worker (§9.6). Abortable. */
-export const compileSource = (
+const requestCompile = (
   projectId: string,
-  source: string | undefined,
+  payload: Pick<CompileRequest, "source" | "fsMap" | "entrypoint">,
   signal?: AbortSignal
 ): Promise<CompileResult> =>
   new Promise((resolve, reject) => {
@@ -79,12 +78,50 @@ export const compileSource = (
         )
       }
     })
-    getWorker().postMessage({
-      id,
-      projectId,
-      ...(source !== undefined ? { source } : {})
-    } satisfies CompileRequest)
+    getWorker().postMessage({ id, projectId, ...payload } satisfies CompileRequest)
   })
+
+/**
+ * Compile the project's ENTRY file (§9.6). `source` overrides the entry
+ * text (the editor compiles what it sees before sources.ts settles); the
+ * full fsMap rides along so cross-file imports resolve. With no override
+ * and no edits, the worker uses its bundled design and never loads the
+ * transform.
+ */
+export const compileSource = (
+  projectId: string,
+  source: string | undefined,
+  signal?: AbortSignal
+): Promise<CompileResult> => {
+  if (source === undefined && !isDirty(projectId)) {
+    return requestCompile(projectId, {}, signal)
+  }
+  const fsMap = {
+    ...getFiles(projectId),
+    ...(source !== undefined ? { [ENTRY_FILE]: source } : {})
+  }
+  return requestCompile(projectId, { fsMap, entrypoint: ENTRY_FILE }, signal)
+}
+
+/**
+ * Compile a specific project file as the ENTRYPOINT — "compile what I'm
+ * looking at": opening variants/long.ts renders the long SKU. `text`
+ * overrides that file's source.
+ */
+export const compileProjectFile = (
+  projectId: string,
+  path: string,
+  text: string,
+  signal?: AbortSignal
+): Promise<CompileResult> =>
+  requestCompile(
+    projectId,
+    { fsMap: { ...getFiles(projectId), [path]: text }, entrypoint: path },
+    signal
+  )
+
+/** Whether the project carries more than one source file. */
+export const isMultiFile = (projectId: string): boolean => listFiles(projectId).length > 1
 
 /** Build the full manufacturing packet (zip) in the worker. Byte-identical
  * to `nerve export` because it runs the same pure exporters on the same HIR. */
@@ -96,7 +133,8 @@ export const exportPacket = (projectId: string): Promise<Uint8Array> =>
       id,
       kind: "export",
       projectId,
-      ...(isDirty(projectId) ? { source: getSource(projectId) } : {})
+      // Exports are entry-based; the fsMap rides along for cross-file imports.
+      ...(isDirty(projectId) ? { fsMap: getFiles(projectId), entrypoint: ENTRY_FILE } : {})
     } satisfies CompileRequest)
   })
 
