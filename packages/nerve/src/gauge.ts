@@ -40,3 +40,10 @@ export const canonicalGauge = (gauge: string): string => {
   const awg = parseAwg(gauge)
   return awg !== undefined ? `${awg}AWG` : gauge
 }
+
+/**
+ * Gauges the rule data tables cover (ampacity, insulated OD). Authoring
+ * surfaces use `AutocompleteString<KnownGauge>` so editors suggest these
+ * while any string still passes through (raw catalogs, metric).
+ */
+export type KnownGauge = `${10 | 12 | 14 | 16 | 18 | 20 | 22 | 24 | 26 | 28 | 30}AWG`

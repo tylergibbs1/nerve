@@ -42,6 +42,17 @@ describe("canonicalGauge", () => {
   })
 })
 
+describe("AutocompleteString surfaces", () => {
+  it("known unions autocomplete; raw strings still pass (type-level)", () => {
+    // Compile-time check: all of these must typecheck without casts.
+    const knownGauge: import("@grayhaven/nerve").WireProps["gauge"] = "20AWG"
+    const rawGauge: import("@grayhaven/nerve").WireProps["gauge"] = "0.5mm2"
+    const knownColor: import("@grayhaven/nerve").WireProps["color"] = "turquoise"
+    const rawColor: import("@grayhaven/nerve").WireProps["color"] = "panther-pink"
+    expect([knownGauge, rawGauge, knownColor, rawColor]).toHaveLength(4)
+  })
+})
+
 describe("compileDesign gauge canonicalization", () => {
   const part: ConnectorPart = { mpn: "TEST-2", pinCount: 2 }
   const j1 = connector("J1", part, { pins: { 1: "PWR", 2: "GND" } })

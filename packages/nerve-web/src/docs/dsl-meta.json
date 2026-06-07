@@ -247,19 +247,19 @@
       "props": [
         {
           "name": "gauge",
-          "type": "string",
+          "type": "AutocompleteString<KnownGauge>",
           "optional": true,
           "doc": ""
         },
         {
           "name": "color",
-          "type": "string",
+          "type": "AutocompleteString<KnownWireColor>",
           "optional": true,
           "doc": ""
         },
         {
           "name": "stripe",
-          "type": "string",
+          "type": "AutocompleteString<KnownWireColor>",
           "optional": true,
           "doc": ""
         },

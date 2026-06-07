@@ -5,10 +5,25 @@
  * The compiler normalizes a `HarnessDesign` into the HIR (see ./hir/schema.ts),
  * which is what renderers, validators, and exporters consume.
  */
+import type { KnownGauge } from "./gauge.js"
 
 export type Units = "mm" | "in"
 
 export type ConnectorGender = "plug" | "receptacle" | "hermaphroditic"
+
+/**
+ * Literal-union autocomplete that still accepts any string: editors
+ * suggest the known values of `T`, raw strings pass through unchanged
+ * (the tscircuit props pattern — `string & {}` keeps the union from
+ * collapsing to `string`).
+ */
+export type AutocompleteString<T extends string> = T | (string & {})
+
+/** Wire color names the renderers and WireViz interop know by name. */
+export type KnownWireColor =
+  | "black" | "white" | "gray" | "pink" | "red" | "orange" | "yellow"
+  | "olive" | "green" | "turquoise" | "blue" | "violet" | "brown"
+  | "beige" | "ivory" | "slate" | "copper" | "tin" | "silver" | "gold"
 
 /** Datasheet/source provenance and verification state (PRD §30, §38). */
 export interface PartProvenance {
@@ -85,9 +100,9 @@ export interface ConnectorInstance {
 }
 
 export interface WireProps {
-  readonly gauge?: string
-  readonly color?: string
-  readonly stripe?: string
+  readonly gauge?: AutocompleteString<KnownGauge>
+  readonly color?: AutocompleteString<KnownWireColor>
+  readonly stripe?: AutocompleteString<KnownWireColor>
   readonly length?: number
   readonly lengthTolerance?: number
   readonly signal?: string

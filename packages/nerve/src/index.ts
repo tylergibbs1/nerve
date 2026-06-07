@@ -5,6 +5,7 @@
  * validation primitives (PRD §10.1).
  */
 export type {
+  AutocompleteString,
   BranchDef,
   BranchProps,
   CableDef,
@@ -14,6 +15,7 @@ export type {
   ConnectorPart,
   HarnessDesign,
   HarnessProps,
+  KnownWireColor,
   LabelDef,
   LabelProps,
   PartProvenance,
@@ -68,7 +70,7 @@ export {
 
 export { compileDesign, type CompileResult } from "./compile.js"
 
-export { canonicalGauge, parseAwg } from "./gauge.js"
+export { canonicalGauge, parseAwg, type KnownGauge } from "./gauge.js"
 
 export {
   defineConfig,

@@ -149,9 +149,9 @@ defineConfig(config: NerveConfig)
 
 | Prop | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `gauge` | `string` | no |  |
-| `color` | `string` | no |  |
-| `stripe` | `string` | no |  |
+| `gauge` | `AutocompleteString<KnownGauge>` | no |  |
+| `color` | `AutocompleteString<KnownWireColor>` | no |  |
+| `stripe` | `AutocompleteString<KnownWireColor>` | no |  |
 | `length` | `number` | no |  |
 | `lengthTolerance` | `number` | no |  |
 | `signal` | `string` | no |  |
