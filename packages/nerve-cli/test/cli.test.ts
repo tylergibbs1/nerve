@@ -295,6 +295,63 @@ describe("config-driven entrypoint + exports toggles", () => {
   })
 })
 
+describe("nerve snapshot", () => {
+  const project = (): { dir: string; harness: string } => {
+    const dir = mkdtempSync(join(import.meta.dirname, "tmp-snap-"))
+    mkdirSync(join(dir, "src"), { recursive: true })
+    const harness = join(dir, "src", "main.harness.ts")
+    writeFileSync(harness, readFileSync(FIXTURE, "utf8"))
+    return { dir, harness }
+  }
+
+  it("writes snapshots on first run, matches on second, drifts on change, --update fixes", async () => {
+    const { dir, harness } = project()
+    try {
+      // First run: writes all four views.
+      let io = capture()
+      expect(await run(["snapshot", harness], io)).toBe(0)
+      const snapDir = join(dir, "src", "__snapshots__")
+      for (const view of ["schematic", "board", "faces", "pinout"]) {
+        expect(existsSync(join(snapDir, `main-${view}.snap.svg`)), view).toBe(true)
+      }
+      // Second run: byte-exact match.
+      io = capture()
+      expect(await run(["snapshot", harness], io)).toBe(0)
+      expect(io.stdout.join("\n")).toContain("4 snapshot(s) match")
+      // Change the design: drift, exit 1, message points at --update.
+      writeFileSync(
+        harness,
+        readFileSync(harness, "utf8").replace('revision: "A"', 'revision: "B"')
+      )
+      io = capture()
+      expect(await run(["snapshot", harness], io)).toBe(1)
+      expect(io.stderr.join("\n")).toContain("--update to fix")
+      // --update: rewrites, next run clean.
+      expect(await run(["snapshot", harness, "--update"], capture())).toBe(0)
+      expect(await run(["snapshot", harness], capture())).toBe(0)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  }, 60000)
+
+  it("--ci writes a pixel-diff artifact on drift", async () => {
+    const { dir, harness } = project()
+    try {
+      expect(await run(["snapshot", harness], capture())).toBe(0)
+      writeFileSync(
+        harness,
+        readFileSync(harness, "utf8").replace('revision: "A"', 'revision: "B"')
+      )
+      const io = capture()
+      expect(await run(["snapshot", harness, "--ci"], io)).toBe(1)
+      expect(existsSync(join(dir, "src", "__snapshots__", "main-schematic.diff.png"))).toBe(true)
+      expect(io.stderr.join("\n")).toContain("pixels differ")
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  }, 60000)
+})
+
 describe("nerve parts", () => {
   it("lists the bundled library with specs", async () => {
     const io = capture()

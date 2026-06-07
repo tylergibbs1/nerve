@@ -31,6 +31,7 @@ import {
 } from "@grayhaven/nerve-compiler"
 import { exportWireViz, importWireViz } from "@grayhaven/nerve-wireviz"
 import { startDev } from "./dev.js"
+import { runSnapshot } from "./snapshot.js"
 import {
   connectorFacesSvg,
   assemblyInstructions,
@@ -182,6 +183,7 @@ Usage:
   nerve init [dir]
   nerve compile  <file.harness.ts> [--out dir]
   nerve dev      [file.harness.ts] [--port 4477]   (watch + live browser preview)
+  nerve snapshot [files...] [--update] [--ci]   (committed visual snapshots, byte-exact)
   nerve validate <file.harness.ts>
   nerve render   <file.harness.ts> [--format svg] [--view schematic|board|faces|pinout|formboard] [--paper letter|a4] [--out dir]
   nerve export   <file.harness.ts> [--target manufacturing-packet|wireviz] [--out dir]
@@ -251,6 +253,21 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
         io.err(`Failed to start dev server: ${cause instanceof Error ? cause.message : String(cause)}`)
         return 2
       }
+    }
+
+    case "snapshot": {
+      // Files: explicit positionals, else config.harnessFiles, else entry.
+      let files: ReadonlyArray<string> = positional
+      if (files.length === 0) {
+        const exit = await Effect.runPromiseExit(findConfig(process.cwd()))
+        if (Exit.isSuccess(exit)) {
+          const { config, dir } = exit.value
+          const fromConfig = config.harnessFiles ?? (config.entry !== undefined ? [config.entry] : [])
+          files = fromConfig.map((f) => join(dir, f))
+        }
+      }
+      if (files.length === 0) return usage(io)
+      return runSnapshot(files, flags, io)
     }
 
     case "validate": {

@@ -635,6 +635,7 @@ Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exit
 | `nerve init` | Scaffold a harness project (nerve.config.ts, src/main.harness.ts). |
 | `nerve compile` | Compile to HIR; print diagnostics; nonzero exit on errors. |
 | `nerve dev` | Watch + recompile + live browser preview (schematic/board/faces/pinout). |
+| `nerve snapshot` | Committed visual snapshots, byte-exact; `--update` to accept, `--ci` for pixel diffs. |
 | `nerve validate` | Compile + rules only, the CI gate. Exit code mirrors severity. |
 | `nerve render` | Schematic / board / faces / pinout SVG (or PNG) from the HIR. |
 | `nerve export` | Everything: HIR, drawings, CSVs, test plan, assembly steps, PDF packet + zip. |
