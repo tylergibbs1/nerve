@@ -147,52 +147,58 @@ export const renderSvg = (drawing: Drawing): string => {
   return parts.join("\n") + "\n"
 }
 
-/** Uniformly scale a drawing (used to fit PDF pages). */
-export const scaleDrawing = (drawing: Drawing, s: number): Drawing => ({
-  width: drawing.width * s,
-  height: drawing.height * s,
-  ...(drawing.background !== undefined ? { background: drawing.background } : {}),
-  items: drawing.items.map((item): DrawItem => {
-    switch (item.kind) {
-      case "rect":
-        return {
-          ...item,
-          x: item.x * s,
-          y: item.y * s,
-          w: item.w * s,
-          h: item.h * s,
-          ...(item.rx !== undefined ? { rx: item.rx * s } : {}),
-          ...(item.strokeWidth !== undefined ? { strokeWidth: item.strokeWidth * s } : {})
-        }
-      case "line":
-        return {
-          ...item,
-          x1: item.x1 * s,
-          y1: item.y1 * s,
-          x2: item.x2 * s,
-          y2: item.y2 * s,
-          ...(item.strokeWidth !== undefined ? { strokeWidth: item.strokeWidth * s } : {}),
-          ...(item.dash !== undefined ? { dash: item.dash.map((d) => d * s) } : {})
-        }
-      case "path":
-        return {
-          ...item,
-          d: scalePathData(item.d, s),
-          ...(item.strokeWidth !== undefined ? { strokeWidth: item.strokeWidth * s } : {}),
-          ...(item.dash !== undefined ? { dash: item.dash.map((d) => d * s) } : {})
-        }
-      case "text":
-        return {
-          ...item,
-          x: item.x * s,
-          y: item.y * s,
-          size: (item.size ?? 12) * s
-        }
-      case "circle":
-        return { ...item, cx: item.cx * s, cy: item.cy * s, r: item.r * s }
-    }
-  })
-})
+/** Uniformly scale a drawing (PDF page fitting, board display scale).
+ * Every value rounds to 2 decimals — scaled output stays clean and
+ * deterministic instead of leaking float artifacts (48×0.8 must
+ * serialize as 38.4, not 38.400000000000006). */
+export const scaleDrawing = (drawing: Drawing, s: number): Drawing => {
+  const n = (v: number): number => round2(v * s)
+  return {
+    width: n(drawing.width),
+    height: n(drawing.height),
+    ...(drawing.background !== undefined ? { background: drawing.background } : {}),
+    items: drawing.items.map((item): DrawItem => {
+      switch (item.kind) {
+        case "rect":
+          return {
+            ...item,
+            x: n(item.x),
+            y: n(item.y),
+            w: n(item.w),
+            h: n(item.h),
+            ...(item.rx !== undefined ? { rx: n(item.rx) } : {}),
+            ...(item.strokeWidth !== undefined ? { strokeWidth: n(item.strokeWidth) } : {})
+          }
+        case "line":
+          return {
+            ...item,
+            x1: n(item.x1),
+            y1: n(item.y1),
+            x2: n(item.x2),
+            y2: n(item.y2),
+            ...(item.strokeWidth !== undefined ? { strokeWidth: n(item.strokeWidth) } : {}),
+            ...(item.dash !== undefined ? { dash: item.dash.map(n) } : {})
+          }
+        case "path":
+          return {
+            ...item,
+            d: scalePathData(item.d, s),
+            ...(item.strokeWidth !== undefined ? { strokeWidth: n(item.strokeWidth) } : {}),
+            ...(item.dash !== undefined ? { dash: item.dash.map(n) } : {})
+          }
+        case "text":
+          return {
+            ...item,
+            x: n(item.x),
+            y: n(item.y),
+            size: n(item.size ?? 12)
+          }
+        case "circle":
+          return { ...item, cx: n(item.cx), cy: n(item.cy), r: n(item.r) }
+      }
+    })
+  }
+}
 
 /** Scale every numeric token in an M/C/L path string. */
 const scalePathData = (d: string, s: number): string =>

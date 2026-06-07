@@ -9,18 +9,20 @@
  */
 import type { Hir, HirBranch } from "@grayhaven/nerve"
 import { diagnosticBadges } from "./badges.js"
-import { renderSvg, textWidth, type DrawItem, type Drawing } from "./drawing.js"
+import { renderSvg, scaleDrawing, textWidth, type DrawItem, type Drawing } from "./drawing.js"
 
-const SCALE = 0.8 // px per mm
+// The board lays out in REAL MILLIMETERS (1 unit = 1 mm): the formboard
+// windows it 1:1 with no rescale (calibration stays exact, no lossy
+// round-trip), and boardSvg applies a display scale for screens.
 const MARGIN = 48
 const TITLE_H = 64
 const TRUNK_GAP = 150
-const DEFAULT_LEN_PX = 240
+const DEFAULT_LEN_MM = 240
 const NODE_W = 64
 const NODE_H = 26
 
-const lengthPx = (mm: number | undefined): number =>
-  mm !== undefined ? Math.max(120, mm * SCALE) : DEFAULT_LEN_PX
+const lengthMm = (mm: number | undefined): number =>
+  mm !== undefined ? Math.max(120, mm) : DEFAULT_LEN_MM
 
 export const boardDrawing = (hir: Hir): Drawing => {
   const items: Array<DrawItem> = [
@@ -37,7 +39,7 @@ export const boardDrawing = (hir: Hir): Drawing => {
       kind: "text",
       x: MARGIN,
       y: 48,
-      text: `rev ${hir.harness.revision} · units ${hir.harness.units} · scale ${SCALE} px/${hir.harness.units}`,
+      text: `rev ${hir.harness.revision} · units ${hir.harness.units} · 1 unit = 1 ${hir.harness.units} (1:1)`,
       fill: "#555"
     }
   ]
@@ -81,7 +83,7 @@ export const boardDrawing = (hir: Hir): Drawing => {
   }
 
   const drawBranch = (branch: HirBranch, x0: number, cy: number, depth: number): number => {
-    const len = lengthPx(branch.nominalLength)
+    const len = lengthMm(branch.nominalLength)
     const x1 = x0 + len
     maxX = Math.max(maxX, x1 + NODE_W)
     branchAt.set(branch.id, { x: x0 + len / 2, y: cy })
@@ -141,7 +143,7 @@ export const boardDrawing = (hir: Hir): Drawing => {
     // Labels attached to this branch (offset measured from offsetFrom end).
     for (const label of hir.labels.filter((l) => l.attachTo === branch.id)) {
       const fromEnd = label.offsetFrom !== undefined && label.offsetFrom === path[path.length - 1]
-      const off = (label.distance ?? 0) * SCALE
+      const off = label.distance ?? 0
       const lx = fromEnd ? x1 - off : x0 + off
       const flagText = `${label.id}: ${label.text}`
       items.push(
@@ -170,7 +172,7 @@ export const boardDrawing = (hir: Hir): Drawing => {
 
     // Splices located on this branch.
     for (const s of hir.splices.filter((sp) => sp.branch === branch.id)) {
-      const sx = x0 + Math.min((s.location ?? 0) * SCALE, len)
+      const sx = x0 + Math.min(s.location ?? 0, len)
       spliceAt.set(s.id, { x: sx, y: cy })
       items.push(
         { kind: "circle", cx: sx, cy: cy, r: 6, fill: "#333" },
@@ -189,7 +191,7 @@ export const boardDrawing = (hir: Hir): Drawing => {
     // Breakout children: drop down-right from the breakout point.
     let childY = cy
     for (const child of children(branch.id)) {
-      const bx = x0 + Math.min((child.breakoutDistance ?? 0) * SCALE, len)
+      const bx = x0 + Math.min(child.breakoutDistance ?? 0, len)
       childY += TRUNK_GAP * 0.7
       items.push({
         kind: "line",
@@ -259,4 +261,8 @@ export const boardDrawing = (hir: Hir): Drawing => {
   }
 }
 
-export const boardSvg = (hir: Hir): string => renderSvg(boardDrawing(hir))
+/** Screen rendering: the mm-native layout at a comfortable display scale. */
+const BOARD_DISPLAY_SCALE = 0.8
+
+export const boardSvg = (hir: Hir): string =>
+  renderSvg(scaleDrawing(boardDrawing(hir), BOARD_DISPLAY_SCALE))

@@ -11,10 +11,7 @@
  */
 import type { Hir } from "@grayhaven/nerve"
 import { boardDrawing } from "./board.js"
-import { renderItems, scaleDrawing } from "./drawing.js"
-
-/** boardDrawing uses 0.8 px/mm; rescale so 1 unit = 1 mm. */
-const BOARD_PX_PER_MM = 0.8
+import { renderItems } from "./drawing.js"
 
 const PAPERS = {
   // Landscape, mm.
@@ -61,8 +58,10 @@ export const formboardSheets = (
   const tileW = paper.w - 2 * margin
   const tileH = paper.h - 2 * margin
 
-  // 1 unit = 1 mm, true scale.
-  const drawing = scaleDrawing(boardDrawing(hir), 1 / BOARD_PX_PER_MM)
+  // boardDrawing is mm-native (1 unit = 1 mm): windowed as-is, no
+  // rescale and no lossy path round-trip — calibration is exact by
+  // construction.
+  const drawing = boardDrawing(hir)
   const cols = Math.max(1, Math.ceil(drawing.width / tileW))
   const rows = Math.max(1, Math.ceil(drawing.height / tileH))
   const body = renderItems(drawing.items)
