@@ -8,7 +8,12 @@
  * renderer flips.
  */
 
-export interface DrawRect {
+/** Optional data-* attributes (sorted at render time — deterministic). */
+export interface DrawData {
+  readonly data?: Readonly<Record<string, string>>
+}
+
+export interface DrawRect extends DrawData {
   readonly kind: "rect"
   readonly x: number
   readonly y: number
@@ -20,7 +25,7 @@ export interface DrawRect {
   readonly strokeWidth?: number
 }
 
-export interface DrawLine {
+export interface DrawLine extends DrawData {
   readonly kind: "line"
   readonly x1: number
   readonly y1: number
@@ -32,7 +37,7 @@ export interface DrawLine {
 }
 
 /** Cubic-bezier path expressed as an SVG `d` string (M/C/L commands only). */
-export interface DrawPath {
+export interface DrawPath extends DrawData {
   readonly kind: "path"
   readonly d: string
   readonly stroke: string
@@ -40,7 +45,7 @@ export interface DrawPath {
   readonly dash?: ReadonlyArray<number>
 }
 
-export interface DrawText {
+export interface DrawText extends DrawData {
   readonly kind: "text"
   readonly x: number
   readonly y: number
@@ -51,7 +56,7 @@ export interface DrawText {
   readonly anchor?: "start" | "middle" | "end"
 }
 
-export interface DrawCircle {
+export interface DrawCircle extends DrawData {
   readonly kind: "circle"
   readonly cx: number
   readonly cy: number
@@ -68,6 +73,14 @@ export interface Drawing {
   readonly items: ReadonlyArray<DrawItem>
 }
 
+const dataAttrs = (item: DrawData): string => {
+  if (item.data === undefined) return ""
+  return Object.entries(item.data)
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .map(([k, v]) => ` data-${k}="${esc(v)}"`)
+    .join("")
+}
+
 const esc = (s: string): string =>
   s
     .replace(/&/g, "&amp;")
@@ -82,27 +95,27 @@ export const renderItems = (items: ReadonlyArray<DrawItem>): string => {
     switch (item.kind) {
       case "rect":
         parts.push(
-          `<rect x="${item.x}" y="${item.y}" width="${item.w}" height="${item.h}"${item.rx !== undefined ? ` rx="${item.rx}"` : ""} fill="${esc(item.fill ?? "none")}"${item.stroke !== undefined ? ` stroke="${esc(item.stroke)}" stroke-width="${item.strokeWidth ?? 1}"` : ""}/>`
+          `<rect${dataAttrs(item)} x="${item.x}" y="${item.y}" width="${item.w}" height="${item.h}"${item.rx !== undefined ? ` rx="${item.rx}"` : ""} fill="${esc(item.fill ?? "none")}"${item.stroke !== undefined ? ` stroke="${esc(item.stroke)}" stroke-width="${item.strokeWidth ?? 1}"` : ""}/>`
         )
         break
       case "line":
         parts.push(
-          `<line x1="${item.x1}" y1="${item.y1}" x2="${item.x2}" y2="${item.y2}" stroke="${esc(item.stroke)}" stroke-width="${item.strokeWidth ?? 1}"${item.dash !== undefined ? ` stroke-dasharray="${item.dash.join(" ")}"` : ""}/>`
+          `<line${dataAttrs(item)} x1="${item.x1}" y1="${item.y1}" x2="${item.x2}" y2="${item.y2}" stroke="${esc(item.stroke)}" stroke-width="${item.strokeWidth ?? 1}"${item.dash !== undefined ? ` stroke-dasharray="${item.dash.join(" ")}"` : ""}/>`
         )
         break
       case "path":
         parts.push(
-          `<path d="${esc(item.d)}" fill="none" stroke="${esc(item.stroke)}" stroke-width="${item.strokeWidth ?? 1}"${item.dash !== undefined ? ` stroke-dasharray="${item.dash.join(" ")}"` : ""}/>`
+          `<path${dataAttrs(item)} d="${esc(item.d)}" fill="none" stroke="${esc(item.stroke)}" stroke-width="${item.strokeWidth ?? 1}"${item.dash !== undefined ? ` stroke-dasharray="${item.dash.join(" ")}"` : ""}/>`
         )
         break
       case "text":
         parts.push(
-          `<text x="${item.x}" y="${item.y}"${item.size !== undefined ? ` font-size="${item.size}"` : ""}${item.weight === "bold" ? ` font-weight="bold"` : ""} fill="${esc(item.fill ?? "#111")}"${item.anchor !== undefined && item.anchor !== "start" ? ` text-anchor="${item.anchor}"` : ""}>${esc(item.text)}</text>`
+          `<text${dataAttrs(item)} x="${item.x}" y="${item.y}"${item.size !== undefined ? ` font-size="${item.size}"` : ""}${item.weight === "bold" ? ` font-weight="bold"` : ""} fill="${esc(item.fill ?? "#111")}"${item.anchor !== undefined && item.anchor !== "start" ? ` text-anchor="${item.anchor}"` : ""}>${esc(item.text)}</text>`
         )
         break
       case "circle":
         parts.push(
-          `<circle cx="${item.cx}" cy="${item.cy}" r="${item.r}" fill="${esc(item.fill)}"/>`
+          `<circle${dataAttrs(item)} cx="${item.cx}" cy="${item.cy}" r="${item.r}" fill="${esc(item.fill)}"/>`
         )
         break
     }

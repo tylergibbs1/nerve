@@ -115,6 +115,8 @@ export default defineConfig({
         splitBehavior: ({ routeId }: { routeId: string }) => (routeId === "/" ? [] : undefined)
       }
     }),
-    react()
+    react({
+      babel: { plugins: [["babel-plugin-react-compiler", {}]] }
+    })
   ]
 })

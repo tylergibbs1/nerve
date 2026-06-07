@@ -26,6 +26,10 @@ const pending = new Map<
   number,
   { resolve: (r: CompileResult) => void; reject: (e: Error) => void }
 >()
+const pendingExports = new Map<
+  number,
+  { resolve: (zip: Uint8Array) => void; reject: (e: Error) => void }
+>()
 
 const getWorker = (): Worker => {
   if (worker === undefined) {
@@ -33,7 +37,14 @@ const getWorker = (): Worker => {
       type: "module"
     })
     worker.onmessage = (event: MessageEvent<CompileResponse>) => {
-      const { id, result, error } = event.data
+      const { id, result, zip, error } = event.data
+      const exportEntry = pendingExports.get(id)
+      if (exportEntry !== undefined) {
+        pendingExports.delete(id)
+        if (zip !== undefined) exportEntry.resolve(zip)
+        else exportEntry.reject(new Error(error ?? "Export failed"))
+        return
+      }
       const entry = pending.get(id)
       if (entry === undefined) return
       pending.delete(id)
@@ -72,6 +83,20 @@ export const compileSource = (
       id,
       projectId,
       ...(source !== undefined ? { source } : {})
+    } satisfies CompileRequest)
+  })
+
+/** Build the full manufacturing packet (zip) in the worker. Byte-identical
+ * to `nerve export` because it runs the same pure exporters on the same HIR. */
+export const exportPacket = (projectId: string): Promise<Uint8Array> =>
+  new Promise((resolve, reject) => {
+    const id = ++nextId
+    pendingExports.set(id, { resolve, reject })
+    getWorker().postMessage({
+      id,
+      kind: "export",
+      projectId,
+      ...(isDirty(projectId) ? { source: getSource(projectId) } : {})
     } satisfies CompileRequest)
   })
 

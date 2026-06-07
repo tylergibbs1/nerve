@@ -147,6 +147,7 @@ export const schematicDrawing = (hir: Hir): Drawing => {
       d: `M ${x1} ${y1} C ${c1} ${y1}, ${c2} ${y2}, ${x2} ${y2}`,
       stroke: isError ? "#d11" : strokeFor(w.color),
       strokeWidth: 2,
+      data: { wire: w.id },
       ...(isError ? { dash: [6, 3] } : {})
     })
     const annotation = [w.id, w.gauge, w.twistGroup !== undefined ? "twisted" : undefined]
@@ -158,7 +159,8 @@ export const schematicDrawing = (hir: Hir): Drawing => {
       y: (y1 + y2) / 2 - 6,
       text: annotation,
       fill: isError ? "#d11" : "#333",
-      anchor: "middle"
+      anchor: "middle",
+      data: { wire: w.id }
     })
   }
 
@@ -176,7 +178,8 @@ export const schematicDrawing = (hir: Hir): Drawing => {
         rx: 6,
         fill: "#ffffff",
         stroke: "#333",
-        strokeWidth: 1.5
+        strokeWidth: 1.5,
+        data: { connector: c.ref }
       },
       { kind: "text", x: p.x + 10, y: p.y + 18, text: c.ref, weight: "bold", fill: "#111" },
       {
@@ -200,7 +203,7 @@ export const schematicDrawing = (hir: Hir): Drawing => {
       const y = p.pinY.get(pin.pin)!
       const anchorX = p.side === "left" ? p.x + BOX_W : p.x
       items.push(
-        { kind: "circle", cx: anchorX, cy: y, r: 3, fill: "#333" },
+        { kind: "circle", cx: anchorX, cy: y, r: 3, fill: "#333", data: { connector: c.ref, pin: pin.pin } },
         { kind: "text", x: p.x + 10, y: y + 4, text: pin.pin, fill: "#111" },
         { kind: "text", x: p.x + 34, y: y + 4, text: pin.signal ?? "", fill: "#555" }
       )
@@ -212,7 +215,7 @@ export const schematicDrawing = (hir: Hir): Drawing => {
     const pos = splicePos.get(s.id)
     if (pos === undefined) continue
     items.push(
-      { kind: "circle", cx: pos.x, cy: pos.y, r: 6, fill: "#333" },
+      { kind: "circle", cx: pos.x, cy: pos.y, r: 6, fill: "#333", data: { splice: s.id } },
       {
         kind: "text",
         x: pos.x,

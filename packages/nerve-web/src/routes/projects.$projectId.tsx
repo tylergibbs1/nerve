@@ -1,15 +1,21 @@
-import { createFileRoute, Link, notFound, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Link, notFound, Outlet, retainSearchParams } from "@tanstack/react-router"
 import { Group, Panel, Separator, useDefaultLayout } from "react-resizable-panels"
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { compileQueryOptions, countDiagnostics } from "../lib/compile-client.js"
+import { compileQueryOptions, countDiagnostics, exportPacket } from "../lib/compile-client.js"
+import { useState } from "react"
+import { Button } from "../ui/button.js"
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js"
 import { SourcePane } from "../components/SourcePane.js"
 import { AiPane } from "../components/AiPane.js"
-import { isDirty } from "../lib/sources.js"
+import { useIsDirty } from "../lib/useSources.js"
 import { PROJECTS } from "../lib/projects.js"
 import { Badge } from "../ui/badge.js"
 
 export const Route = createFileRoute("/projects/$projectId")({
+  search: {
+    // Sorting a table then visiting Diagram and back keeps the sort.
+    middlewares: [retainSearchParams(["sortBy", "desc"])]
+  },
   beforeLoad: ({ params }) => {
     if (!PROJECTS.some((p) => p.id === params.projectId)) throw notFound()
   },
@@ -40,10 +46,34 @@ const TABS = [
   { to: "/projects/$projectId/tests", label: "Tests" }
 ] as const
 
+function ExportButton({ projectId }: { projectId: string }) {
+  const [busy, setBusy] = useState(false)
+  const run = async () => {
+    setBusy(true)
+    try {
+      const zip = await exportPacket(projectId)
+      const url = URL.createObjectURL(new Blob([zip as BlobPart], { type: "application/zip" }))
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${projectId}-packet.zip`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <Button variant="secondary" size="xs" disabled={busy} onClick={() => void run()}>
+      {busy ? "Exporting…" : "Export packet"}
+    </Button>
+  )
+}
+
 function ProjectWorkspace() {
   const { projectId } = Route.useParams()
   const workspaceLayout = useDefaultLayout({ id: "nerve-workspace-3", panelIds: ["ai", "source", "render"] })
   const { data } = useSuspenseQuery(compileQueryOptions(projectId))
+  const dirty = useIsDirty(projectId)
   const { errors, warnings } = countDiagnostics(data.hir.diagnostics)
 
   return (
@@ -51,7 +81,7 @@ function ProjectWorkspace() {
       <div className="workspace-header">
         <h2>
           {data.hir.harness.id}
-          {isDirty(projectId) ? " •" : ""}
+          {dirty ? " •" : ""}
         </h2>
         <span className="meta">
           rev {data.hir.harness.revision} · {data.hir.connectors.length} connectors ·{" "}
@@ -64,6 +94,7 @@ function ProjectWorkspace() {
               ? `${warnings} warning${warnings === 1 ? "" : "s"}`
               : "valid"}
         </Badge>
+        <ExportButton projectId={projectId} />
         <nav className="tabs">
           {TABS.map((tab) => (
             <Link

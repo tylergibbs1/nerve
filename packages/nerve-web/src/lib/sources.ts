@@ -43,18 +43,36 @@ export const getSource = (projectId: string): string =>
   edited.get(projectId) ?? fromStorage(projectId) ?? initial[projectId] ?? ""
 
 // Change subscription: lets the editor reflect writes made elsewhere
-// (e.g. the AI pane applying a patch).
-const listeners = new Set<(projectId: string) => void>()
+// (the AI pane applying a patch, or another tab via BroadcastChannel).
+export type SourceOrigin = "local" | "remote"
+const listeners = new Set<(projectId: string, origin: SourceOrigin) => void>()
 
-export const subscribeSource = (listener: (projectId: string) => void): (() => void) => {
+export const subscribeSource = (
+  listener: (projectId: string, origin: SourceOrigin) => void
+): (() => void) => {
   listeners.add(listener)
   return () => listeners.delete(listener)
+}
+
+const notify = (projectId: string, origin: SourceOrigin): void => {
+  for (const listener of listeners) listener(projectId, origin)
+}
+
+// Multi-tab sync: without this, two tabs on one project silently clobber
+// each other through the debounced localStorage writer (last writer wins).
+const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("nerve-sources") : undefined
+if (channel !== undefined) {
+  channel.onmessage = (e: MessageEvent<{ projectId: string; source: string }>) => {
+    edited.set(e.data.projectId, e.data.source)
+    notify(e.data.projectId, "remote")
+  }
 }
 
 export const setSource = (projectId: string, source: string): void => {
   edited.set(projectId, source)
   persist.maybeExecute(projectId, source)
-  for (const listener of listeners) listener(projectId)
+  channel?.postMessage({ projectId, source })
+  notify(projectId, "local")
 }
 
 /** True when the working source differs from the bundled example. */

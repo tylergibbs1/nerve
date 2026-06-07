@@ -37,7 +37,7 @@
 /* Tailwind theme bridge: the reference repo's shadcn-style semantic tokens
    (globals.css + tailwind.config.ts) mapped onto Tailwind v4. The ported
    ui/ components consume these via bg-foreground, tracking-spec-wide, etc. */
-@theme {
+@theme static {
   --color-background: #000000;
   --color-foreground: #ffffff;
   --color-card: #0a0a0a;
@@ -56,6 +56,10 @@
   --tracking-spec-wide: 0.04em;
   --tracking-spec-wider: 0.05em;
   --tracking-spec-widest: 0.08em;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 /* Grayhaven Industries brand — Mach monochrome, exact tokens + doctrine from
@@ -66,26 +70,23 @@
    brackets, muted label). Nav brands, panel headings, buttons, telemetry
    are deliberately unbracketed. */
 :root {
-  --bg: #000000;
-  --panel: #0a0a0a;
-  --muted-bg: #161616;
-  --border: hsl(0 0% 14%);
-  --text: #ffffff;
-  --muted: hsl(0 0% 53%);
-  --accent: #ffffff;
-  --accent-hover: #bfbfbf;
-  --error: #f87171;
+  /* Legacy aliases — single source of truth is the @theme block above
+     (Tailwind v4 emits @theme static tokens as runtime custom properties). */
+  --bg: var(--color-background);
+  --panel: var(--color-card);
+  --muted-bg: var(--color-muted);
+  --border: var(--color-border);
+  --text: var(--color-foreground);
+  --muted: var(--color-muted-foreground);
+  --accent: var(--color-accent);
+  --accent-hover: var(--color-accent-hover);
+  --error: var(--color-destructive);
   --warning: #d4a017;
   --info: #3b82f6;
   --ok: #4ade80;
-  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
-  --sans: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --display: "Chakra Petch", "Archivo", sans-serif;
-  /* Reference easing tokens (globals.css:630-633). */
-  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.6, 1);
+  --mono: var(--font-mono);
+  --sans: var(--font-sans);
+  --display: var(--font-display);
 }
 
 * { box-sizing: border-box; }
@@ -298,6 +299,14 @@ textarea:focus-visible, select:focus-visible {
   color: var(--text);
 }
 .docs-body pre code { background: none; padding: 0; font-size: inherit; }
+/* lezer classHighlighter tokens, grayscale doctrine (mirrors cm-theme). */
+.docs-body .tok-keyword, .docs-body .tok-moduleKeyword { color: #ffffff; font-weight: 600; }
+.docs-body .tok-string, .docs-body .tok-string2 { color: #bfbfbf; }
+.docs-body .tok-comment, .docs-body .tok-lineComment { color: hsl(0 0% 53%); }
+.docs-body .tok-number, .docs-body .tok-bool { color: #d9d9d9; }
+.docs-body .tok-typeName, .docs-body .tok-className { color: #d9d9d9; }
+.docs-body .tok-propertyName, .docs-body .tok-variableName, .docs-body .tok-function { color: #ffffff; }
+.docs-body .tok-punctuation, .docs-body .tok-operator { color: hsl(0 0% 60%); }
 .docs-body table {
   width: 100%;
   border-collapse: collapse;
@@ -537,6 +546,11 @@ textarea:focus-visible, select:focus-visible {
   flex-direction: column;
   background: var(--panel);
   border-right: 1px solid var(--border);
+  container-type: inline-size;
+}
+/* Stack the composer when the panel is dragged near its floor. */
+@container (max-width: 260px) {
+  .ai-input { flex-direction: column; align-items: stretch; }
 }
 .ai-header {
   display: flex;
@@ -568,7 +582,19 @@ textarea:focus-visible, select:focus-visible {
    draggable divider, sizes persisted by react-resizable-panels. */
 .workspace-split { flex: 1; min-height: 0; }
 .workspace-split .source-pane { height: 100%; border: none; }
-.render-pane { height: 100%; min-width: 0; overflow: auto; padding: 16px 20px; }
+.render-pane {
+  height: 100%;
+  min-width: 0;
+  overflow: auto;
+  padding: 16px 20px;
+  container-type: inline-size;
+}
+/* Tables respond to the panel divider, not the viewport. */
+@container (max-width: 700px) {
+  table.data { font-size: 12px; }
+  table.data th, table.data td { padding-right: 10px; }
+  table.data td.cell-text { white-space: normal; }
+}
 .pane-handle {
   width: 7px;
   background: var(--bg);
@@ -597,8 +623,32 @@ textarea:focus-visible, select:focus-visible {
 }
 
 /* Drawings render as light "drawing sheets" on the dark workspace. */
+.sheet-wrap { display: flex; flex-direction: column; gap: 8px; }
+.sheet-actions { display: flex; align-items: center; gap: 12px; }
+.sheet-actions .docs-action { border-bottom: none; }
+.sheet-hint {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--muted) 70%, transparent);
+}
 .diagram-pane { background: #fafafa; border: 1px solid var(--border); overflow: auto; }
 .diagram-pane svg { display: block; }
+/* Label halos: paint the sheet background behind annotation glyphs so
+   labels stay legible where wires cross (paint-order, view-layer only). */
+.diagram-pane svg text {
+  paint-order: stroke;
+  stroke: #fafafa;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+/* Net hover-highlighting (delegated; .hl set by SchematicSheet). */
+.diagram-pane svg [data-wire] { transition: opacity 150ms var(--ease-out); }
+.diagram-pane.net-hover svg [data-wire]:not(.hl) { opacity: 0.18; }
+.diagram-pane.net-hover svg [data-wire].hl { opacity: 1; }
+.diagram-pane.net-hover svg path[data-wire].hl { stroke-width: 3; }
 
 /* Tables render plain on the workspace surface (reference admin tables):
    no panel fill, no outer border, half-opacity row hairlines. */
@@ -753,12 +803,15 @@ table.data th.sortable:hover { color: var(--text); }
 .compile-error { color: var(--error); font-family: var(--mono); font-size: 11px; }
 .compile-ok { color: var(--ok); font-family: var(--mono); font-size: 11px; }
 
-/* Route view transitions: reference vt timings — exit 150ms fade+blur
-   ease-in, enter 210ms delayed ease-out. Subtle, never sliding. */
+/* Scoped view transitions (reference vt timings): tab clicks animate ONLY
+   the render pane — the editor, AI pane, and chrome stay still. The root
+   group snaps (no full-screen blur). */
 @keyframes vt-out { to { opacity: 0; filter: blur(3px); } }
 @keyframes vt-in { from { opacity: 0; filter: blur(3px); } }
-::view-transition-old(root) { animation: vt-out 150ms var(--ease-in) both; }
-::view-transition-new(root) { animation: vt-in 210ms var(--ease-out) 150ms both; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+.render-pane { view-transition-name: render-pane; }
+::view-transition-old(render-pane) { animation: vt-out 150ms var(--ease-in) both; }
+::view-transition-new(render-pane) { animation: vt-in 210ms var(--ease-out) 150ms both; }
 
 /* Motion kill switch (reference globals.css pattern). */
 @media (prefers-reduced-motion: reduce) {

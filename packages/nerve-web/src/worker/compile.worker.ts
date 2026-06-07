@@ -114,7 +114,7 @@ const evaluateSource = async (source: string): Promise<HarnessDesign> => {
 // Async handler: overlapping requests may complete out of order, which is
 // safe because compile-client matches responses by id.
 self.onmessage = async (event: MessageEvent<CompileRequest>) => {
-  const { id, projectId, source } = event.data
+  const { id, kind, projectId, source } = event.data
   let design: HarnessDesign | undefined
   try {
     design = source !== undefined ? await evaluateSource(source) : designs[projectId]
@@ -136,6 +136,21 @@ self.onmessage = async (event: MessageEvent<CompileRequest>) => {
   const ruleDiagnostics = runRules(hir, builtinRules)
   const diagnostics = [...structural, ...ruleDiagnostics]
   const fullHir = { ...hir, diagnostics }
+  if (kind === "export") {
+    try {
+      // Lazy: pdf-lib + zip machinery (~450KB) load only when someone
+      // actually exports — the compile path stays at 41KB.
+      const { buildPacket } = await import("@grayhaven/nerve-exporters")
+      const packet = await buildPacket(fullHir)
+      self.postMessage({ id, zip: packet.zip } satisfies CompileResponse)
+    } catch (cause) {
+      self.postMessage({
+        id,
+        error: cause instanceof Error ? cause.message : String(cause)
+      } satisfies CompileResponse)
+    }
+    return
+  }
   self.postMessage({
     id,
     result: {

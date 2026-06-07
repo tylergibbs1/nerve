@@ -1,8 +1,13 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useEffectEvent, useRef, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useDebouncedValue } from "@tanstack/react-pacer"
 import CodeMirror from "@uiw/react-codemirror"
+import type { EditorView } from "@codemirror/view"
 import { javascript } from "@codemirror/lang-javascript"
+import { lintGutter, setDiagnostics } from "@codemirror/lint"
+import { autocompletion } from "@codemirror/autocomplete"
+import { dslCompletions } from "../lib/dsl-completions.js"
+import { toEditorDiagnostics } from "../lib/editor-lint.js"
 import { grayscaleTheme } from "../lib/cm-theme.js"
 import { useMinimumLoading } from "../lib/useMinimumLoading.js"
 import {
@@ -24,6 +29,14 @@ export function SourcePane({ projectId }: { projectId: string }) {
   const [source, setLocalSource] = useState(() => getSource(projectId))
   const [autoCompile, setAutoCompile] = useState(true)
   const lastCompiled = useRef<string | undefined>(undefined)
+  const viewRef = useRef<EditorView | null>(null)
+
+  // Push HK diagnostics into the lint gutter whenever a compile lands.
+  const publishDiagnostics = (text: string, diags: ReadonlyArray<{ readonly code: string; readonly severity: string; readonly message: string; readonly target?: string | undefined }>) => {
+    const view = viewRef.current
+    if (view === null) return
+    view.dispatch(setDiagnostics(view.state, toEditorDiagnostics(text, diags)))
+  }
 
   // Re-seed when switching projects (the pane persists across them).
   useEffect(() => {
@@ -36,12 +49,14 @@ export function SourcePane({ projectId }: { projectId: string }) {
   // the auto-compile effect from re-running the same text.
   useEffect(
     () =>
-      subscribeSource((changed) => {
+      subscribeSource((changed, origin) => {
         if (changed !== projectId) return
         const text = getSource(projectId)
         setLocalSource((local) => {
           if (local === text) return local
-          lastCompiled.current = text
+          // Same-tab external writes (AI pane) arrive compile-verified;
+          // remote-tab keystrokes do not — let auto-compile pick them up.
+          if (origin === "local") lastCompiled.current = text
           return text
         })
       }),
@@ -54,19 +69,22 @@ export function SourcePane({ projectId }: { projectId: string }) {
       // Supersession guard: a newer edit exists — drop this stale result.
       if (compiledText !== getSource(projectId)) return
       lastCompiled.current = compiledText
+      publishDiagnostics(compiledText, result.hir.diagnostics)
       setCompileResult(queryClient, projectId, result)
     }
   })
 
   // Compile-on-type: debounce the editor text, feed the existing mutation.
+  // useEffectEvent reads the latest mutation without being a reactive dep —
+  // the effect re-runs only on the values that should trigger a compile.
+  const runCompile = useEffectEvent((text: string) => compile.mutate(text))
   const [debouncedSource] = useDebouncedValue(source, { wait: 600 })
   useEffect(() => {
     if (!autoCompile) return
     if (debouncedSource === lastCompiled.current) return
     if (debouncedSource !== getSource(projectId)) return // project just switched
-    compile.mutate(debouncedSource)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSource, autoCompile])
+    runCompile(debouncedSource)
+  }, [debouncedSource, autoCompile, projectId])
 
   // Close the stale window (tanstack-query qk-include-dependencies): if the
   // pane unmounts or switches projects with uncompiled edits, invalidate so
@@ -147,8 +165,15 @@ export function SourcePane({ projectId }: { projectId: string }) {
       <CodeMirror
         value={source}
         height="100%"
-        extensions={[javascript({ typescript: true })]}
+        extensions={[
+          javascript({ typescript: true }),
+          lintGutter(),
+          autocompletion({ override: [dslCompletions] })
+        ]}
         theme={grayscaleTheme}
+        onCreateEditor={(view) => {
+          viewRef.current = view
+        }}
         onChange={onChange}
         style={{ flex: 1, minHeight: 0, overflow: "auto", fontSize: 13 }}
       />

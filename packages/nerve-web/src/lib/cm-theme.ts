@@ -35,7 +35,19 @@ const grayscaleEditor = EditorView.theme(
       borderRight: "1px solid hsl(0 0% 14%)"
     },
     ".cm-activeLineGutter": { backgroundColor: "#161616", color: "#ffffff" },
-    ".cm-matchingBracket": { backgroundColor: "rgb(255 255 255 / 0.15)", outline: "none" }
+    ".cm-matchingBracket": { backgroundColor: "rgb(255 255 255 / 0.15)", outline: "none" },
+    // basicSetup's selection-match highlight defaults to light green;
+    // grayscale doctrine: a quiet white step.
+    ".cm-selectionMatch": { backgroundColor: "rgb(255 255 255 / 0.12)" },
+    ".cm-tooltip": {
+      backgroundColor: "#161616",
+      border: "1px solid hsl(0 0% 14%)",
+      color: "#ffffff",
+      fontFamily: '"IBM Plex Mono", monospace',
+      fontSize: "11px"
+    },
+    ".cm-lintRange-error": { textDecoration: "underline wavy #f87171 1px" },
+    ".cm-lintRange-warning": { textDecoration: "underline wavy #d4a017 1px" }
   },
   { dark: true }
 )
