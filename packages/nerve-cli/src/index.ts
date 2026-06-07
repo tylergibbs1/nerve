@@ -32,6 +32,7 @@ import {
 import { exportWireViz, importWireViz } from "@grayhaven/nerve-wireviz"
 import { startDev } from "./dev.js"
 import { runSnapshot } from "./snapshot.js"
+import { cliVersion, initFiles, setupFiles, writeScaffold } from "./scaffold.js"
 import {
   connectorFacesSvg,
   assemblyInstructions,
@@ -181,6 +182,7 @@ const USAGE = `nerve — harnesses as code (Grayhaven Nerve)
 
 Usage:
   nerve init [dir]
+  nerve setup [dir]   (write CI workflows: validate, snapshot, reproduce)
   nerve compile  <file.harness.ts> [--out dir]
   nerve dev      [file.harness.ts] [--port 4477]   (watch + live browser preview)
   nerve snapshot [files...] [--update] [--ci]   (committed visual snapshots, byte-exact)
@@ -773,20 +775,23 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
 
     case "init": {
       const dir = resolve(positional[0] ?? ".")
-      const srcDir = join(dir, "src")
       const configPath = join(dir, "nerve.config.ts")
-      const harnessPath = join(srcDir, "main.harness.ts")
-      if (existsSync(configPath) || existsSync(harnessPath)) {
+      const harnessPath = join(dir, "src", "main.harness.ts")
+      if (existsSync(configPath) && existsSync(harnessPath)) {
         io.err(`Refusing to overwrite an existing Nerve project in ${dir}.`)
         return 2
       }
-      mkdirSync(srcDir, { recursive: true })
-      writeFileSync(configPath, INIT_CONFIG)
-      writeFileSync(harnessPath, INIT_HARNESS)
       io.out(`Initialized Nerve project in ${dir}`)
-      io.out("  nerve.config.ts")
-      io.out("  src/main.harness.ts")
-      io.out("Next: nerve compile ./src/main.harness.ts")
+      writeScaffold(dir, initFiles(cliVersion()), io)
+      io.out("Next: npm install && nerve compile")
+      return 0
+    }
+
+    case "setup": {
+      const dir = resolve(positional[0] ?? ".")
+      io.out(`Nerve CI workflows in ${dir}`)
+      const { wrote } = writeScaffold(dir, setupFiles(), io)
+      if (wrote > 0) io.out("Commit the workflows; validation, snapshots, and byte-reproducibility now gate every PR.")
       return 0
     }
 
@@ -809,44 +814,7 @@ const usage = (io: Io): number => {
   return 2
 }
 
-const INIT_CONFIG = `import { defineConfig } from "@grayhaven/nerve"
-
-export default defineConfig({
-  units: "mm",
-  defaultWireTolerance: 10,
-  outputDir: "dist",
-  rules: {
-    missingWireColor: "error",
-    missingWireLength: "warning"
-  },
-  exports: { csv: true, svg: true }
-})
-`
-
-const INIT_HARNESS = `import { harness, connector, wire, type ConnectorPart } from "@grayhaven/nerve"
-
-// Replace with parts from @grayhaven/nerve-connectors as the library grows.
-const genericPart: ConnectorPart = { mpn: "GENERIC-2", pinCount: 2 }
-
-const j1 = connector("J1", genericPart, {
-  pins: { 1: "PWR_12V", 2: "GND" },
-})
-
-const j2 = connector("J2", genericPart, {
-  pins: { 1: "PWR_12V", 2: "GND" },
-})
-
-export default harness("my-first-harness", {
-  revision: "A",
-  units: "mm",
-  connectors: [j1, j2],
-  wires: [
-    wire("W1", j1.pin(1), j2.pin(1), { gauge: "20AWG", color: "red", length: 250, signal: "PWR_12V" }),
-    wire("W2", j1.pin(2), j2.pin(2), { gauge: "20AWG", color: "black", length: 250, signal: "GND" }),
-  ],
-})
-`
-
+/** bin/nerve.js entrypoint. */
 export const main = (): Promise<number> => run(process.argv.slice(2))
 
 export { startDev, type DevServer, type DevIo } from "./dev.js"

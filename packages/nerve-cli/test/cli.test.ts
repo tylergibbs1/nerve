@@ -218,13 +218,54 @@ describe("nerve inspect / init / help", () => {
     expect(await run(["inspect", file], io)).toBe(2)
   })
 
-  it("init scaffolds a project and refuses to overwrite", async () => {
+  it("init scaffolds a complete project and refuses to overwrite", async () => {
     const dir = tmp()
     const io = capture()
     expect(await run(["init", dir], io)).toBe(0)
-    expect(existsSync(join(dir, "nerve.config.ts"))).toBe(true)
-    expect(existsSync(join(dir, "src/main.harness.ts"))).toBe(true)
+    // A project that can resolve its own imports — not just two files.
+    for (const f of [
+      "nerve.config.ts",
+      "src/main.harness.ts",
+      "package.json",
+      "tsconfig.json",
+      ".gitignore"
+    ]) {
+      expect(existsSync(join(dir, f)), f).toBe(true)
+    }
+    // Dependencies pin the CLI's own version line; entry is configured.
+    const pkg = JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as {
+      dependencies: Record<string, string>
+    }
+    expect(pkg.dependencies["@grayhaven/nerve"]).toMatch(/^\^\d+\.\d+\.\d+$/)
+    expect(readFileSync(join(dir, "nerve.config.ts"), "utf8")).toContain('entry: "./src/main.harness.ts"')
     expect(await run(["init", dir], capture())).toBe(2)
+  })
+
+  it("init is per-file refuse-to-overwrite: fills gaps, never clobbers", async () => {
+    const dir = tmp()
+    writeFileSync(join(dir, "nerve.config.ts"), "// mine\n")
+    const io = capture()
+    expect(await run(["init", dir], io)).toBe(0)
+    expect(readFileSync(join(dir, "nerve.config.ts"), "utf8")).toBe("// mine\n")
+    expect(existsSync(join(dir, "src/main.harness.ts"))).toBe(true)
+    expect(io.stdout.join("\n")).toContain("nerve.config.ts (exists, skipped)")
+  })
+
+  it("setup writes the three CI workflows idempotently", async () => {
+    const dir = tmp()
+    const io = capture()
+    expect(await run(["setup", dir], io)).toBe(0)
+    for (const wf of ["nerve-validate.yml", "nerve-snapshot.yml", "nerve-reproduce.yml"]) {
+      expect(existsSync(join(dir, ".github", "workflows", wf)), wf).toBe(true)
+    }
+    // Reproducibility is the differentiator: diff committed dist vs fresh.
+    expect(
+      readFileSync(join(dir, ".github", "workflows", "nerve-reproduce.yml"), "utf8")
+    ).toContain("nerve diff dist/harness.json")
+    // Idempotent: second run skips everything.
+    const io2 = capture()
+    expect(await run(["setup", dir], io2)).toBe(0)
+    expect(io2.stdout.join("\n")).toContain("(exists, skipped)")
   })
 
   it("prints usage and exits 2 with no command", async () => {
