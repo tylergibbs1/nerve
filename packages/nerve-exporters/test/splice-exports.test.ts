@@ -57,7 +57,8 @@ describe("splice rendering and outputs", () => {
     // BOM); the symbol itself still renders with its data-splice tag.
     expect(svg).toContain('data-splice="S1"')
     expect(svg).toContain(">S1</text>")
-    expect(svg).toContain("S2 · crimp")
+    expect(svg).toContain('data-splice="S2"')
+    expect(svg).toContain(">S2</text>")
   })
 
   it("board shows splices at their branch locations", () => {
