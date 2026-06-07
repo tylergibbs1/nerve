@@ -29,3 +29,12 @@ export {
   parseAwg,
   requiredAwgForCurrent
 } from "./wire-data.js"
+
+export {
+  codesToNumbers,
+  RULE_CATEGORY_BANDS,
+  ruleCategory,
+  ruleCodeFromNumber,
+  ruleCodeNumber,
+  type RuleCategory
+} from "./code-numbers.js"
