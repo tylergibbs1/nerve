@@ -1,6 +1,6 @@
 {
   "name": "@grayhaven/nerve-rules",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "module",
   "description": "Built-in validation and linting rules for Grayhaven Nerve.",
   "exports": {

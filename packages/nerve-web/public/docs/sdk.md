@@ -104,6 +104,22 @@ const { part, provider, diagnostics } = resolvePart([plm, nerveConnectorsProvide
 
 The bundled library ships verified families with cavity layouts, gauge ranges, mating pairs, crimp tooling, and dated provenance: Molex Micro-Fit 3.0 and Mega-Fit, JST PH and XH, TE Deutsch DT, AMASS XT60.
 
+## JSX authoring (experimental)
+
+`@grayhaven/nerve-react` is a 2KB custom JSX runtime (no React): elements are plain functions over the same DSL, so the JSX form compiles to byte-identical HIR. Purely a style choice.
+
+```tsx
+/** @jsxImportSource @grayhaven/nerve-react */
+import { Connector, Harness, Wire } from "@grayhaven/nerve-react"
+
+export default (
+  <Harness id="drop" revision="A" units="mm">
+    <Connector ref="J1" part={part("ph-4")} pins={{ 1: "V5", 2: "GND" }} />
+    <Wire id="W1" from="J1.1" to="M1.1" gauge="24AWG" color="red" length={120} />
+  </Harness>
+)
+```
+
 ## tscircuit interop
 
 Harness and PCB check each other across ecosystems (PRD §37):

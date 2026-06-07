@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.5.0 — 2026-06-07
+(Supersedes the unpublished 0.4.0 tag; both changelogs ship together.)
+
+### tscircuit interop (PRD §37, both directions)
+- `importTscircuitPinout`: validate the harness against a tscircuit
+  board's Circuit JSON (`nerve contract --against board.circuit.json`) —
+  catches swapped pins across the PCB/harness seam.
+- `exportTscircuitCircuitJson` + `nerve contract --format circuit-json`:
+  hand tscircuit the harness side. Round-trip proven in tests.
+- `validateContract` is mating-aware: a contract naming the harness
+  part's `matingMpn` (what a board file contains) is correct, not a
+  mismatch. `matingMpn` now flows into HIR.
+
+### New package: @grayhaven/nerve-react (experimental)
+- JSX authoring with a 2KB custom runtime (no React): `<Harness>`,
+  `<Connector>`, `<Wire from="J1.1">` are pure function application over
+  the typed DSL. Compiles to byte-identical HIR vs the function style.
+
+### Library ergonomics
+- Compact part specs: `part("microfit-2x8")`, `part("dt-4s")`,
+  `part("xt60-f")` — 26 specs across all families, raw-MPN passthrough,
+  unknown specs fail with the full menu.
+
 ## 0.4.0 — 2026-06-07
 ### Connector face views (PRD §9.5.2)
 - New deterministic exporter: per connector, FRONT (mating side, mirrored) and
