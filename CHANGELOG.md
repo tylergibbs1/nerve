@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.1 — 2026-06-06
+### Tree-shaking
+- `@grayhaven/nerve` and `@grayhaven/nerve-exporters` declare `sideEffects: false`:
+  bundlers now drop unused exporters (notably the pdf-lib manufacturing-packet
+  machinery, ~418KB) from consumer bundles when only SVG/CSV/test-plan paths
+  are imported. Verified: a worker importing only `schematicSvg`/`boardSvg`/
+  `generateTestPlan` shrinks from 842KB to 41KB.
+- Effect-free HIR values (`endpointLabel`, `isPinEndpoint`, `refs`,
+  `HIR_SCHEMA_VERSION`) moved to a pure internal module so consumers that never
+  decode/encode HIR no longer retain the Effect Schema runtime. Public API
+  unchanged — everything still exports from the package root.
+
 ## 0.2.0 — 2026-06-06
 
 The expansion release: from manufacturing packets to the full engineering →
