@@ -65,4 +65,32 @@ describe("compact part specs (footprinter-style)", () => {
     const { part } = await import("../src/part-spec.js")
     expect(() => part("nonexistent-99")).toThrow(/Compact specs:/)
   })
+
+  it("normalizes real-world spellings: prefixes, separators, case", async () => {
+    const { part } = await import("../src/part-spec.js")
+    // Vendor-prefixed and re-hyphenated spellings.
+    expect(part("JST PH-3").mpn).toBe("PHR-3")
+    expect(part("jst_ph 3").mpn).toBe("PHR-3")
+    expect(part("Micro-Fit-8").mpn).toBe("43025-0800")
+    expect(part("XT-60-m").mpn).toBe("XT60PW-M")
+    expect(part("Deutsch DT-4S").mpn).toBe("DT06-4S")
+    // Raw MPN, any case.
+    expect(part("phr-3").mpn).toBe("PHR-3")
+    expect(part("dt06-4s").mpn).toBe("DT06-4S")
+  })
+
+  it("pins the full error contract: verbatim input + complete menu", async () => {
+    const { part, partSpecs } = await import("../src/part-spec.js")
+    try {
+      part("DT06 4X")
+      expect.fail("should throw")
+    } catch (e) {
+      const msg = (e as Error).message
+      // The user's input is quoted verbatim (not the normalized form)…
+      expect(msg).toContain('Unknown part spec "DT06 4X"')
+      // …and every compact spec is in the menu.
+      for (const spec of Object.keys(partSpecs)) expect(msg).toContain(spec)
+      expect(msg).toContain("or any library MPN")
+    }
+  })
 })

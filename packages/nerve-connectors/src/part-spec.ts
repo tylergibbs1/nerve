@@ -48,11 +48,44 @@ const SPECS = {
 /** Every compact spec name, as a literal union (drives autocomplete). */
 export type PartSpecName = keyof typeof SPECS
 
+/**
+ * Real-world spellings → canonical spec tokens (footprinter's
+ * normalizeDefinition move). Applied AFTER separator cleanup, so
+ * "JST PH-3", "jst_ph 3", and "ph-3" all resolve the same part.
+ */
+const REWRITES: ReadonlyArray<readonly [RegExp, string]> = [
+  [/^jst-(ph|xh)-/, "$1-"], // JST prefix is implied
+  [/^micro-fit-/, "microfit-"],
+  [/^mega-fit-/, "megafit-"],
+  [/^xt-60/, "xt60"],
+  [/^deutsch-dt-/, "dt-"]
+]
+
+/** Trim, lowercase, collapse whitespace/underscores to the canonical dash. */
+const normalizeSpec = (spec: string): string => {
+  let s = spec.trim().toLowerCase().replace(/[\s_]+/g, "-")
+  for (const [pattern, replacement] of REWRITES) s = s.replace(pattern, replacement)
+  return s
+}
+
+// Raw-MPN passthrough is case-insensitive: part("dt06-4s") works without
+// memorizing the catalog's capitalization. Built lazily — this module and
+// index.js import each other, so allParts is not populated at init time.
+let mpnIndexCache: ReadonlyMap<string, string> | undefined
+const mpnIndex = (): ReadonlyMap<string, string> =>
+  (mpnIndexCache ??= new Map(Object.keys(allParts).map((mpn) => [mpn.toLowerCase(), mpn])))
+
 /** Resolve a compact spec or a raw MPN to a library part. Throws with the menu on a miss. */
 export const part = (spec: AutocompleteString<PartSpecName>): ConnectorPart => {
-  const mpn = (SPECS as Readonly<Record<string, string>>)[spec.toLowerCase()] ?? spec
+  const normalized = normalizeSpec(spec)
+  const mpn =
+    (SPECS as Readonly<Record<string, string>>)[normalized] ??
+    mpnIndex().get(normalized) ??
+    spec
   const found = allParts[mpn]
   if (found === undefined) {
+    // The full menu + the verbatim input is a TESTED error contract —
+    // agents and humans recover from it without reading source.
     throw new Error(
       `Unknown part spec "${spec}". Compact specs: ${Object.keys(SPECS).join(", ")} — or any library MPN.`
     )
