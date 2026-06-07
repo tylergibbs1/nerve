@@ -1,5 +1,75 @@
 # Changelog
 
+## Unreleased
+
+The tscircuit ecosystem deep-dive, implemented end to end (24 items,
+one commit each — see `git log` for the per-item rationale).
+
+### Release safety
+- Pack-and-install tarball smoke test in CI (`scripts/smoke-tarballs.ts`):
+  pins, artifact paths, and a real npm-install consumer run. Caught two
+  consumer-breaking bugs the day it landed.
+- Tag-triggered `release.yml`: publishing happens from a frozen-lockfile
+  CI build, never a laptop (requires `NPM_TOKEN` secret).
+- Renovate: weekly grouped bumps auto-merged only when the determinism
+  suite stays green; bun.lock regenerates in the same PR.
+
+### Validation
+- Gauge canonicalization: every AWG spelling compiles to `"20AWG"` in
+  HIR; `gauge: "20"` no longer silently disables three safety rules.
+  New HK-MFG-007 flags unparseable gauges.
+- Diagnostics are renderable data: optional `targets` + `data` on every
+  diagnostic; badges on schematic/board/faces anchored at pins, splices,
+  branches, and cards; DiagnosticsPanel ref/data chips; error-state
+  pixel baselines.
+- Connector electrical limits activated: `currentLimitA`/`voltageLimitV`
+  now land in HIR and gate wires (HK-CONN-016/017).
+- ShopProfile in config: ampacity/OD tables, sleeve capacities, packing
+  factor, default bend radius — capability-parameterized HK-MFG rules.
+- `computeNets()` in core + lazy `ctx.nets` for custom rules; test plan
+  and graph.json share one connectivity computation.
+- HIR shape-snapshot guard: additive-optional changes need a deliberate
+  refresh; anything else needs a schemaVersion bump. `hirJsonSchema()`
+  exported.
+
+### Authoring & docs
+- `harnessTemplate` + `prefixRefs` + `mergeFragments`: the PRD §18
+  parametric composition surface, collision-free by construction.
+- Generated DSL + HIR reference: docs tables, copilot prompt, and editor
+  completions all extract from source (the old dsl.md documented three
+  props that never existed); drift fails CI.
+- `AutocompleteString<T>` for gauges, colors, part specs; lenient
+  `part()` normalization ("JST PH-3", "dt06-4s") with a pinned error
+  contract; `partInfo()` + generated Part Library docs page +
+  `nerve parts [--json]`.
+
+### Views
+- New pinout-card view: per-cavity elbow leaders (crossing-free, tested)
+  with wire/gauge/terminal/seal rows — `nerve render --view pinout`,
+  packet `pinout.svg`, html viewer.
+- Deterministic `textWidth()`: boxes/legends/flags size to measured
+  text; the faces legend no longer silently truncates past 8 rows.
+- Board lays out mm-native (1 unit = 1 mm); formboard windows it with
+  no rescale; `scaleDrawing` output is float-artifact-free.
+
+### DX
+- `nerve dev`: watch → fresh recompile → live browser preview at
+  / /board /faces /pinout with fingerprint-poll reload and fail-soft
+  errors. (compileFile gains `fresh` — the jiti cache trap.)
+- `nerve snapshot [--update] [--ci]`: committed byte-exact visual
+  snapshots per harness file, pixel-diff artifacts in CI.
+- `nerve init` scaffolds a complete runnable project; `nerve setup`
+  writes validate/snapshot/byte-reproducibility CI workflows.
+- `config.entry`/`config.harnessFiles`: bare `nerve compile` works;
+  `config.exports` toggles are real now.
+
+### Web
+- Multi-file projects: fsMap evaluation in the worker (NodeNext-style
+  resolution, cycle chains), file tabs with compile-what-you-look-at —
+  motor-controller's variants/long.ts opens and renders the long SKU.
+- Zero-backend share links: source gzipped into the URL fragment,
+  decoded client-side; a share link is a bug report.
+
 ## 0.5.2 — 2026-06-07
 - `nerve export` loose files now derive from the packet itself — the
   hand-maintained list had silently drifted (no connector faces, HTML
