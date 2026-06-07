@@ -1,6 +1,6 @@
 {
   "name": "@grayhaven/nerve-cli",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "type": "module",
   "description": "Grayhaven Nerve CLI: compile, validate, render, and export harnesses locally and in CI.",
   "bin": {

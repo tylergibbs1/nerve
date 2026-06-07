@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.1 — 2026-06-07
+**Fixes a broken install for every 0.5.0 package with internal deps.**
+`bun publish` rewrites `workspace:*` from bun.lock, and the 0.5.0 bump
+shipped with a stale lockfile — so every internal dependency was pinned
+to an unpublished `0.4.0` (only `@grayhaven/nerve` itself installed).
+0.5.1 republishes everything with correct pins, adds a release-integrity
+test (lockfile workspace versions must match package.json versions), and
+ships the new per-package READMEs. Found by dress-rehearsing the full
+production lifecycle against the published registry. No code changes.
+
 ## 0.5.0 — 2026-06-07
 (Supersedes the unpublished 0.4.0 tag; both changelogs ship together.)
 
