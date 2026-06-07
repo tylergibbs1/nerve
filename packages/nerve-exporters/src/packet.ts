@@ -22,6 +22,7 @@ import { generateTestPlan, testPlanJson } from "./test-plan.js"
 import { schematicSvg } from "./svg.js"
 import { boardSvg } from "./board.js"
 import { connectorFacesSvg } from "./faces.js"
+import { pinoutSvg } from "./pinout.js"
 import { assemblyInstructions } from "./instructions.js"
 import { bopCsv, bopJson } from "./bop.js"
 import { quoteCsv, quoteJson } from "./cost.js"
@@ -58,6 +59,7 @@ const coverSheet = (hir: Hir): string => {
     "  schematic.svg               wiring diagram",
     "  board.svg                   harness board / nailboard view",
     "  connector-faces.svg         cavity layouts, population, orientation",
+    "  pinout.svg                  per-cavity pinout cards with terminals/seals",
     "  bom.csv                     bill of materials",
     "  cut-list.csv                wire cut list",
     "  labels.csv                  label schedule",
@@ -84,6 +86,7 @@ export const buildPacket = async (
     ["schematic.html", schematicHtml(hir)],
     ["board.svg", boardSvg(hir)],
     ["connector-faces.svg", connectorFacesSvg(hir)],
+    ["pinout.svg", pinoutSvg(hir)],
     ["bom.csv", bomCsv(hir)],
     ["cut-list.csv", cutListCsv(hir, options)],
     ["labels.csv", labelScheduleCsv(hir)],

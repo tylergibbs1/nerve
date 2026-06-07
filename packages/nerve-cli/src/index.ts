@@ -66,6 +66,7 @@ import {
   labelScheduleCsv,
   generateTestPlan,
   manufacturingPacketPdf,
+  pinoutSvg,
   schematicSvg,
   testPlanCsv,
   testPlanJson
@@ -164,7 +165,7 @@ Usage:
   nerve init [dir]
   nerve compile  <file.harness.ts> [--out dir]
   nerve validate <file.harness.ts>
-  nerve render   <file.harness.ts> [--format svg] [--view schematic|board|formboard] [--paper letter|a4] [--out dir]
+  nerve render   <file.harness.ts> [--format svg] [--view schematic|board|faces|pinout|formboard] [--paper letter|a4] [--out dir]
   nerve export   <file.harness.ts> [--target manufacturing-packet|wireviz] [--out dir]
   nerve import   <file.yml> [--id harness-id] [--out dir]   (WireViz YAML → HIR)
   nerve quote    <file.harness.ts> [--out dir]   (requires costing in nerve.config.ts)
@@ -237,8 +238,8 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
         return 2
       }
       const view = flags["view"] ?? "schematic"
-      if (view !== "schematic" && view !== "board" && view !== "faces" && view !== "formboard") {
-        io.err(`Unsupported render view: ${view} (supported: schematic, board, faces, formboard)`)
+      if (view !== "schematic" && view !== "board" && view !== "faces" && view !== "pinout" && view !== "formboard") {
+        io.err(`Unsupported render view: ${view} (supported: schematic, board, faces, pinout, formboard)`)
         return 2
       }
       const result = await compileOrExit(file, io)
@@ -258,8 +259,11 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
           ? boardSvg(result.hir)
           : view === "faces"
             ? connectorFacesSvg(result.hir)
-            : schematicSvg(result.hir)
-      const base = view === "schematic" ? "schematic" : view === "faces" ? "connector-faces" : "board"
+            : view === "pinout"
+              ? pinoutSvg(result.hir)
+              : schematicSvg(result.hir)
+      const base =
+        view === "schematic" ? "schematic" : view === "faces" ? "connector-faces" : view
       if (format === "png") {
         // PNG preview (PRD §9.8): native resvg lives in the CLI only — the
         // exporters package stays browser-clean.

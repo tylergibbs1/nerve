@@ -197,6 +197,7 @@ describe("manufacturing packet (PRD §9.8)", () => {
       "schematic.html",
       "board.svg",
       "connector-faces.svg",
+      "pinout.svg",
       "bom.csv",
       "cut-list.csv",
       "labels.csv",

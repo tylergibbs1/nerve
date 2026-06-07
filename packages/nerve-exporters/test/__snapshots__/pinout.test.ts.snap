@@ -1,0 +1,56 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`pinout cards (PRD §9.5.2) > is deterministic and renders the golden fixture 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" width="513.2" height="520" viewBox="0 0 513.2 520" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">
+<rect width="513.2" height="520" fill="#fafafa"/>
+<text x="40" y="28" font-size="18" font-weight="bold" fill="#111">pinout-fixture — pinout</text>
+<text x="40" y="48" fill="#555">rev A · wire side · HIR 0.1.0</text>
+<rect data-connector="J1" x="40" y="72" width="433.2" height="188" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+<text data-connector="J1" x="52" y="92" font-weight="bold" fill="#111">J1</text>
+<text x="52" y="108" font-size="10" fill="#777">DT06-4S · wire side</text>
+<path data-connector="J1" data-pin="1" data-wire="W1" d="M 407.2 167 A 9 9 0 1 0 425.2 167 A 9 9 0 1 0 407.2 167 Z" fill="none" stroke="#333" stroke-width="1.6"/>
+<text data-connector="J1" data-pin="1" data-wire="W1" x="416.2" y="170.5" font-size="9" font-weight="bold" fill="#111" text-anchor="middle">1</text>
+<path data-connector="J1" data-pin="2" data-wire="W2" d="M 433.2 167 A 9 9 0 1 0 451.2 167 A 9 9 0 1 0 433.2 167 Z" fill="none" stroke="#333" stroke-width="1.6"/>
+<text data-connector="J1" data-pin="2" data-wire="W2" x="442.2" y="170.5" font-size="9" font-weight="bold" fill="#111" text-anchor="middle">2</text>
+<path data-connector="J1" data-pin="3" data-wire="W3" d="M 407.2 193 A 9 9 0 1 0 425.2 193 A 9 9 0 1 0 407.2 193 Z" fill="none" stroke="#333" stroke-width="1.6"/>
+<text data-connector="J1" data-pin="3" data-wire="W3" x="416.2" y="196.5" font-size="9" font-weight="bold" fill="#111" text-anchor="middle">3</text>
+<path data-connector="J1" data-pin="4" data-wire="W4" d="M 433.2 193 A 9 9 0 1 0 451.2 193 A 9 9 0 1 0 433.2 193 Z" fill="none" stroke="#333" stroke-width="1.6"/>
+<text data-connector="J1" data-pin="4" data-wire="W4" x="442.2" y="196.5" font-size="9" font-weight="bold" fill="#111" text-anchor="middle">4</text>
+<line data-connector="J1" data-pin="1" data-wire="W1" x1="416.2" y1="158" x2="416.2" y2="144" stroke="#b0aca2" stroke-width="1"/>
+<line data-connector="J1" data-pin="1" data-wire="W1" x1="383.2" y1="144" x2="416.2" y2="144" stroke="#b0aca2" stroke-width="1"/>
+<text data-connector="J1" data-pin="1" data-wire="W1" x="379.2" y="147" font-size="9" fill="#333" text-anchor="end">1 · CAN_H · W1 · 24AWG · t:0462-201-16141 · s:0281-934-9PK</text>
+<line data-connector="J1" data-pin="2" data-wire="W2" x1="442.2" y1="158" x2="442.2" y2="131" stroke="#b0aca2" stroke-width="1"/>
+<line data-connector="J1" data-pin="2" data-wire="W2" x1="383.2" y1="131" x2="442.2" y2="131" stroke="#b0aca2" stroke-width="1"/>
+<text data-connector="J1" data-pin="2" data-wire="W2" x="379.2" y="134" font-size="9" fill="#333" text-anchor="end">2 · CAN_L · W2 · 24AWG · t:0462-201-16141</text>
+<line data-connector="J1" data-pin="3" data-wire="W3" x1="416.2" y1="202" x2="416.2" y2="216" stroke="#b0aca2" stroke-width="1"/>
+<line data-connector="J1" data-pin="3" data-wire="W3" x1="383.2" y1="216" x2="416.2" y2="216" stroke="#b0aca2" stroke-width="1"/>
+<text data-connector="J1" data-pin="3" data-wire="W3" x="379.2" y="219" font-size="9" fill="#333" text-anchor="end">3 · PWR · W3 · 18AWG · t:0462-201-16141</text>
+<line data-connector="J1" data-pin="4" data-wire="W4" x1="442.2" y1="202" x2="442.2" y2="229" stroke="#b0aca2" stroke-width="1"/>
+<line data-connector="J1" data-pin="4" data-wire="W4" x1="383.2" y1="229" x2="442.2" y2="229" stroke="#b0aca2" stroke-width="1"/>
+<text data-connector="J1" data-pin="4" data-wire="W4" x="379.2" y="232" font-size="9" fill="#333" text-anchor="end">4 · GND · W4 · 18AWG · t:0462-201-16141</text>
+<rect data-connector="J2" x="40" y="276" width="238.8" height="188" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+<text data-connector="J2" x="52" y="296" font-weight="bold" fill="#111">J2</text>
+<text x="52" y="312" font-size="10" fill="#777">DT06-4S · wire side</text>
+<path data-connector="J2" data-pin="1" data-wire="W1" d="M 212.8 371 A 9 9 0 1 0 230.8 371 A 9 9 0 1 0 212.8 371 Z" fill="none" stroke="#333" stroke-width="1.6"/>
+<text data-connector="J2" data-pin="1" data-wire="W1" x="221.8" y="374.5" font-size="9" font-weight="bold" fill="#111" text-anchor="middle">1</text>
+<path data-connector="J2" data-pin="2" data-wire="W2" d="M 238.8 371 A 9 9 0 1 0 256.8 371 A 9 9 0 1 0 238.8 371 Z" fill="none" stroke="#333" stroke-width="1.6"/>
+<text data-connector="J2" data-pin="2" data-wire="W2" x="247.8" y="374.5" font-size="9" font-weight="bold" fill="#111" text-anchor="middle">2</text>
+<path data-connector="J2" data-pin="3" data-wire="W3" d="M 212.8 397 A 9 9 0 1 0 230.8 397 A 9 9 0 1 0 212.8 397 Z" fill="none" stroke="#333" stroke-width="1.6"/>
+<text data-connector="J2" data-pin="3" data-wire="W3" x="221.8" y="400.5" font-size="9" font-weight="bold" fill="#111" text-anchor="middle">3</text>
+<path data-connector="J2" data-pin="4" data-wire="W4" d="M 238.8 397 A 9 9 0 1 0 256.8 397 A 9 9 0 1 0 238.8 397 Z" fill="none" stroke="#333" stroke-width="1.6"/>
+<text data-connector="J2" data-pin="4" data-wire="W4" x="247.8" y="400.5" font-size="9" font-weight="bold" fill="#111" text-anchor="middle">4</text>
+<line data-connector="J2" data-pin="1" data-wire="W1" x1="221.8" y1="362" x2="221.8" y2="348" stroke="#b0aca2" stroke-width="1"/>
+<line data-connector="J2" data-pin="1" data-wire="W1" x1="188.8" y1="348" x2="221.8" y2="348" stroke="#b0aca2" stroke-width="1"/>
+<text data-connector="J2" data-pin="1" data-wire="W1" x="184.8" y="351" font-size="9" fill="#333" text-anchor="end">1 · CAN_H · W1 · 24AWG</text>
+<line data-connector="J2" data-pin="2" data-wire="W2" x1="247.8" y1="362" x2="247.8" y2="335" stroke="#b0aca2" stroke-width="1"/>
+<line data-connector="J2" data-pin="2" data-wire="W2" x1="188.8" y1="335" x2="247.8" y2="335" stroke="#b0aca2" stroke-width="1"/>
+<text data-connector="J2" data-pin="2" data-wire="W2" x="184.8" y="338" font-size="9" fill="#333" text-anchor="end">2 · CAN_L · W2 · 24AWG</text>
+<line data-connector="J2" data-pin="3" data-wire="W3" x1="221.8" y1="406" x2="221.8" y2="420" stroke="#b0aca2" stroke-width="1"/>
+<line data-connector="J2" data-pin="3" data-wire="W3" x1="188.8" y1="420" x2="221.8" y2="420" stroke="#b0aca2" stroke-width="1"/>
+<text data-connector="J2" data-pin="3" data-wire="W3" x="184.8" y="423" font-size="9" fill="#333" text-anchor="end">3 · PWR · W3 · 18AWG</text>
+<line data-connector="J2" data-pin="4" data-wire="W4" x1="247.8" y1="406" x2="247.8" y2="433" stroke="#b0aca2" stroke-width="1"/>
+<line data-connector="J2" data-pin="4" data-wire="W4" x1="188.8" y1="433" x2="247.8" y2="433" stroke="#b0aca2" stroke-width="1"/>
+<text data-connector="J2" data-pin="4" data-wire="W4" x="184.8" y="436" font-size="9" fill="#333" text-anchor="end">4 · GND · W4 · 18AWG</text>
+</svg>
+"
+`;
