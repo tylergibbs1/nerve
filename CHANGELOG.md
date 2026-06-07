@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.2 — 2026-06-07
+- `nerve export` loose files now derive from the packet itself — the
+  hand-maintained list had silently drifted (no connector faces, HTML
+  viewers, or JSON satellites in loose output; the zip was complete).
+  One source of truth; loose output now matches the zip exactly.
+- Caught by the registry smoke test after the 0.5.1 publish.
+
 ## 0.5.1 — 2026-06-07
 **Fixes a broken install for every 0.5.0 package with internal deps.**
 `bun publish` rewrites `workspace:*` from bun.lock, and the 0.5.0 bump

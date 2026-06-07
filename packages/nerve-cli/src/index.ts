@@ -303,24 +303,15 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
         ...(tolerance !== undefined ? { defaultWireTolerance: tolerance } : {}),
         ...(result.config.costing !== undefined ? { costing: result.config.costing } : {})
       }
-      const plan = generateTestPlan(result.hir)
-      writeOut(outDir, "harness.json", JSON.stringify(result.hir, null, 2) + "\n", io)
-      writeOut(outDir, "schematic.svg", schematicSvg(result.hir), io)
-      writeOut(outDir, "board.svg", boardSvg(result.hir), io)
-      writeOut(outDir, "bom.csv", bomCsv(result.hir), io)
-      writeOut(outDir, "cut-list.csv", cutListCsv(result.hir, options), io)
-      writeOut(outDir, "labels.csv", labelScheduleCsv(result.hir), io)
-      writeOut(outDir, "bop.csv", bopCsv(result.hir), io)
-      writeOut(outDir, "bop.json", bopJson(result.hir), io)
-      writeOut(outDir, "tests.csv", testPlanCsv(plan), io)
-      writeOut(outDir, "test-plan.json", testPlanJson(result.hir), io)
-      writeOut(outDir, "assembly-instructions.txt", assemblyInstructions(result.hir), io)
-      if (result.config.costing !== undefined) {
-        writeOut(outDir, "quote.csv", quoteCsv(result.hir, result.config.costing), io)
-        writeOut(outDir, "quote.json", quoteJson(result.hir, result.config.costing), io)
+      // The packet IS the artifact list (PRD §9.8): write every file it
+      // contains as loose output too — one source of truth, no second
+      // hand-maintained list to drift (the pre-0.5.2 list silently lacked
+      // connector faces, the HTML viewer, and the JSON satellites).
+      const packet = await buildPacket(result.hir, options)
+      for (const [name, contents] of packet.files) {
+        writeOut(outDir, name, contents, io)
       }
-      writeOut(outDir, "manufacturing-packet.pdf", await manufacturingPacketPdf(result.hir, options), io)
-      writeOut(outDir, "manufacturing-packet.zip", (await buildPacket(result.hir, options)).zip, io)
+      writeOut(outDir, "manufacturing-packet.zip", packet.zip, io)
       io.out(summarize(result.hir))
       return 0
     }
