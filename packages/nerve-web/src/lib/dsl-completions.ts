@@ -7,6 +7,7 @@
  */
 import type { Completion, CompletionContext, CompletionResult } from "@codemirror/autocomplete"
 import dslMeta from "../docs/dsl-meta.json"
+import partsMeta from "../docs/parts-meta.json"
 
 const fn = (label: string, detail: string, info: string): Completion => ({
   label,
@@ -53,7 +54,37 @@ const OPTIONS: ReadonlyArray<Completion> = (() => {
   return [...seen.values()]
 })()
 
+// Inside part("…"): complete the spec menu (generated from the shipped
+// library). label=spec, detail=MPN, info=description — the editor teaches
+// the catalog.
+const PART_SPECS: ReadonlyArray<Completion> = (
+  partsMeta as ReadonlyArray<{
+    spec?: string
+    mpn: string
+    family?: string
+    description?: string
+    verification?: string
+  }>
+)
+  .filter((p): p is typeof p & { spec: string } => p.spec !== undefined)
+  .map((p) => ({
+    label: p.spec,
+    type: "constant",
+    detail: p.mpn,
+    info: [p.description, p.family, p.verification].filter(Boolean).join(" · ")
+  }))
+
 export const dslCompletions = (ctx: CompletionContext): CompletionResult | null => {
+  // String position inside part("…") gets the spec menu.
+  const inPart = ctx.matchBefore(/part\(\s*["'][\w-]*/)
+  if (inPart !== null) {
+    const quote = inPart.text.search(/["']/)
+    return {
+      from: inPart.from + quote + 1,
+      options: PART_SPECS,
+      validFor: /^[\w-]*$/
+    }
+  }
   const word = ctx.matchBefore(/[A-Za-z_]\w*/)
   if (word === null || (word.from === word.to && !ctx.explicit)) return null
   return {

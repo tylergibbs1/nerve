@@ -71,6 +71,7 @@
       "dependencies": {
         "@grayhaven/nerve": "workspace:*",
         "@grayhaven/nerve-compiler": "workspace:*",
+        "@grayhaven/nerve-connectors": "workspace:*",
         "@grayhaven/nerve-exporters": "workspace:*",
         "@grayhaven/nerve-wireviz": "workspace:*",
         "@resvg/resvg-js": "^2.6.2",
@@ -78,7 +79,6 @@
         "jiti": "^2.4.2",
       },
       "devDependencies": {
-        "@grayhaven/nerve-connectors": "workspace:*",
         "@types/node": "^25.9.2",
         "typescript": "^5.8.3",
         "vitest": "^3.2.4",

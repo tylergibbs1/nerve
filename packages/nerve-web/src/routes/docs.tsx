@@ -7,7 +7,7 @@ export const Route = createFileRoute("/docs")({
   component: DocsLayout
 })
 
-type DocPath = "/docs" | "/docs/dsl" | "/docs/sdk" | "/docs/rules" | "/docs/cli" | "/docs/artifacts" | "/docs/ai" | "/docs/lifecycle"
+type DocPath = "/docs" | "/docs/dsl" | "/docs/sdk" | "/docs/rules" | "/docs/library" | "/docs/cli" | "/docs/artifacts" | "/docs/ai" | "/docs/lifecycle"
 interface DocItem {
   readonly to: DocPath
   readonly label: string
@@ -28,6 +28,7 @@ const GROUPS: ReadonlyArray<DocGroup> = [
       { to: "/docs/dsl", label: "DSL" },
       { to: "/docs/sdk", label: "TypeScript SDK" },
       { to: "/docs/rules", label: "Validation Rules" },
+      { to: "/docs/library", label: "Part Library" },
       { to: "/docs/cli", label: "CLI" },
       { to: "/docs/artifacts", label: "Artifacts" }
     ]
@@ -49,6 +50,7 @@ const MD_SLUGS: Record<string, string> = {
   "/docs/dsl": "dsl",
   "/docs/sdk": "sdk",
   "/docs/rules": "rules",
+  "/docs/library": "library",
   "/docs/cli": "cli",
   "/docs/artifacts": "artifacts",
   "/docs/ai": "ai",

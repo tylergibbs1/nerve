@@ -1,0 +1,190 @@
+[
+  {
+    "spec": "microfit-8-plug",
+    "mpn": "43020-0800",
+    "family": "Micro-Fit 3.0",
+    "description": "Micro-Fit 3.0 plug housing, dual row, 8 circuits",
+    "pinCount": 8,
+    "gender": "plug",
+    "verification": "verified"
+  },
+  {
+    "spec": "microfit-16-plug",
+    "mpn": "43020-1600",
+    "family": "Micro-Fit 3.0",
+    "description": "Micro-Fit 3.0 plug housing, dual row, 16 circuits",
+    "pinCount": 16,
+    "gender": "plug",
+    "verification": "verified"
+  },
+  {
+    "spec": "microfit-8",
+    "mpn": "43025-0800",
+    "family": "Micro-Fit 3.0",
+    "description": "Micro-Fit 3.0 receptacle housing, dual row, 8 circuits",
+    "pinCount": 8,
+    "gender": "receptacle",
+    "verification": "verified"
+  },
+  {
+    "spec": "microfit-16",
+    "mpn": "43025-1600",
+    "family": "Micro-Fit 3.0",
+    "description": "Micro-Fit 3.0 receptacle housing, dual row, 16 circuits",
+    "pinCount": 16,
+    "gender": "receptacle",
+    "verification": "verified"
+  },
+  {
+    "spec": "megafit-8-plug",
+    "mpn": "76825-0008",
+    "family": "Mega-Fit",
+    "description": "Mega-Fit dual-row plug, 8 circuits",
+    "pinCount": 8,
+    "gender": "plug",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "megafit-8",
+    "mpn": "76829-0008",
+    "family": "Mega-Fit",
+    "description": "Mega-Fit dual-row receptacle, 8 circuits",
+    "pinCount": 8,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "dt-2p",
+    "mpn": "DT04-2P",
+    "family": "DT",
+    "description": "Deutsch DT receptacle, 2 pins, integrally sealed",
+    "pinCount": 2,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "dt-3p",
+    "mpn": "DT04-3P",
+    "family": "DT",
+    "description": "Deutsch DT receptacle, 3 pins, integrally sealed",
+    "pinCount": 3,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "dt-4p",
+    "mpn": "DT04-4P",
+    "family": "DT",
+    "description": "Deutsch DT receptacle, 4 pins, integrally sealed",
+    "pinCount": 4,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "dt-2s",
+    "mpn": "DT06-2S",
+    "family": "DT",
+    "description": "Deutsch DT plug, 2 sockets, integrally sealed",
+    "pinCount": 2,
+    "gender": "plug",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "dt-3s",
+    "mpn": "DT06-3S",
+    "family": "DT",
+    "description": "Deutsch DT plug, 3 sockets, integrally sealed",
+    "pinCount": 3,
+    "gender": "plug",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "dt-4s",
+    "mpn": "DT06-4S",
+    "family": "DT",
+    "description": "Deutsch DT plug, 4 sockets, integrally sealed",
+    "pinCount": 4,
+    "gender": "plug",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "ph-2",
+    "mpn": "PHR-2",
+    "family": "PH",
+    "description": "JST PH housing, 2 circuits",
+    "pinCount": 2,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "ph-3",
+    "mpn": "PHR-3",
+    "family": "PH",
+    "description": "JST PH housing, 3 circuits",
+    "pinCount": 3,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "ph-4",
+    "mpn": "PHR-4",
+    "family": "PH",
+    "description": "JST PH housing, 4 circuits",
+    "pinCount": 4,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "ph-6",
+    "mpn": "PHR-6",
+    "family": "PH",
+    "description": "JST PH housing, 6 circuits",
+    "pinCount": 6,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "xh-2",
+    "mpn": "XHP-2",
+    "family": "XH",
+    "description": "JST XH housing, 2 circuits",
+    "pinCount": 2,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "xh-3",
+    "mpn": "XHP-3",
+    "family": "XH",
+    "description": "JST XH housing, 3 circuits",
+    "pinCount": 3,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "xh-4",
+    "mpn": "XHP-4",
+    "family": "XH",
+    "description": "JST XH housing, 4 circuits",
+    "pinCount": 4,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "xt60-f",
+    "mpn": "XT60PW-F",
+    "family": "XT60",
+    "description": "XT60 power connector",
+    "pinCount": 2,
+    "gender": "receptacle",
+    "verification": "inspired-by"
+  },
+  {
+    "spec": "xt60-m",
+    "mpn": "XT60PW-M",
+    "family": "XT60",
+    "description": "XT60 power connector",
+    "pinCount": 2,
+    "verification": "inspired-by"
+  }
+]

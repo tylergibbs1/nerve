@@ -176,7 +176,8 @@ Usage:
   nerve redline  add <file.harness.ts> --target <hir-ref> --type <type> --description <text> [--value v] [--release id] [--serial sn]
   nerve redline  resolve <redlines.json> --id <id> --accept|--reject --reason <text> --date <iso>
   nerve diff     <revA> <revB> [--json]   (each: harness.json, .harness.ts, or revision dir)
-  nerve inspect  <harness.json>`
+  nerve inspect  <harness.json>
+  nerve parts    [spec-or-mpn] [--json]   (bundled connector library)`
 
 /** Resolve a diff argument to HIR: a harness.json, a .harness.ts, or a directory. */
 const loadHirForDiff = async (path: string, io: Io): Promise<Hir | number> => {
@@ -647,6 +648,63 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
         )
         return 2
       }
+    }
+
+    case "parts": {
+      // Bundled library introspection for humans and agents: the same data
+      // behind editor completions and the generated docs page.
+      const { allParts, partInfo, partSpecs } = await import("@grayhaven/nerve-connectors")
+      const query = positional[0]
+      if (query !== undefined) {
+        const info = partInfo(query)
+        if (info === undefined) {
+          io.err(`Unknown part "${query}". Try: nerve parts`)
+          return 2
+        }
+        if (flags["json"] !== undefined) {
+          io.out(JSON.stringify(info, null, 2))
+        } else {
+          const p = info.part
+          io.out(`mpn        ${info.mpn}`)
+          if (info.specs.length > 0) io.out(`specs      ${info.specs.join(", ")}`)
+          if (p.family !== undefined) io.out(`family     ${p.family}`)
+          if (p.description !== undefined) io.out(`desc       ${p.description}`)
+          io.out(`pins       ${p.pinCount}`)
+          if (p.gender !== undefined) io.out(`gender     ${p.gender}`)
+          if (p.wireGaugeRange !== undefined) io.out(`gauge      ${p.wireGaugeRange.max} to ${p.wireGaugeRange.min}`)
+          if (p.currentLimitA !== undefined) io.out(`current    ${p.currentLimitA}A`)
+          if (p.voltageLimitV !== undefined) io.out(`voltage    ${p.voltageLimitV}V`)
+          if (p.matingMpn !== undefined) io.out(`mates with ${p.matingMpn}`)
+          if (p.provenance !== undefined) io.out(`verified   ${p.provenance.verification}`)
+        }
+        return 0
+      }
+      const rows = Object.keys(allParts)
+        .sort()
+        .map((mpn) => partInfo(mpn)!)
+      if (flags["json"] !== undefined) {
+        io.out(
+          JSON.stringify(
+            rows.map((r) => ({
+              mpn: r.mpn,
+              specs: r.specs,
+              family: r.part.family,
+              pinCount: r.part.pinCount,
+              gender: r.part.gender,
+              verification: r.part.provenance?.verification
+            })),
+            null,
+            2
+          )
+        )
+      } else {
+        io.out(`${rows.length} parts, ${Object.keys(partSpecs).length} compact specs:`)
+        for (const r of rows) {
+          const spec = r.specs[0] !== undefined ? ` (${r.specs[0]})` : ""
+          io.out(`  ${r.mpn}${spec} — ${r.part.family ?? "?"} · ${r.part.pinCount} pins`)
+        }
+      }
+      return 0
     }
 
     case "init": {

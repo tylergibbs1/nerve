@@ -95,3 +95,28 @@ export const part = (spec: AutocompleteString<PartSpecName>): ConnectorPart => {
 
 /** Every compact spec and its MPN, for docs and tooling. */
 export const partSpecs: Readonly<Record<string, string>> = SPECS
+
+export interface PartInfo {
+  /** Compact spec(s) that resolve to this part, shortest first. */
+  readonly specs: ReadonlyArray<string>
+  readonly mpn: string
+  readonly part: ConnectorPart
+}
+
+/**
+ * Introspect a spec or MPN without throwing: the data behind editor
+ * completions, `nerve parts`, and the generated library docs page.
+ */
+export const partInfo = (specOrMpn: string): PartInfo | undefined => {
+  let resolved: ConnectorPart
+  try {
+    resolved = part(specOrMpn)
+  } catch {
+    return undefined
+  }
+  const specs = Object.entries(SPECS)
+    .filter(([, mpn]) => mpn === resolved.mpn)
+    .map(([spec]) => spec)
+    .sort((a, b) => a.length - b.length || (a < b ? -1 : 1))
+  return { specs, mpn: resolved.mpn, part: resolved }
+}

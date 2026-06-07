@@ -9,6 +9,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { builtinRules } from "../../nerve-rules/src/index.ts"
+import { allParts, partSpecs } from "../../nerve-connectors/src/index.ts"
 import { hirJsonSchema, HIR_SCHEMA_VERSION } from "../../nerve/src/index.ts"
 import { RULE_SUMMARIES } from "../src/docs/rule-summaries.ts"
 import { dslReferenceMd, extractDslMeta } from "./extract-dsl.ts"
@@ -103,7 +104,82 @@ ${sections}
 `
 }
 
+/** Part-library metadata: specs first (the way users should reach parts),
+ * then the remaining MPNs. Effect-free JSON for the client + the page. */
+interface PartMetaRow {
+  readonly spec?: string
+  readonly mpn: string
+  readonly family?: string
+  readonly description?: string
+  readonly pinCount: number
+  readonly gender?: string
+  readonly verification?: string
+}
+const partsMeta = (): Array<PartMetaRow> => {
+  const rows: Array<PartMetaRow> = []
+  const bySpec = new Map<string, string>()
+  for (const [spec, mpn] of Object.entries(partSpecs)) {
+    // First spec for an MPN wins the row; aliases noted by their own rows.
+    if (!bySpec.has(mpn)) bySpec.set(mpn, spec)
+  }
+  const speced = new Set(bySpec.keys())
+  for (const [mpn, spec] of [...bySpec.entries()].sort(([a], [b]) => (a < b ? -1 : 1))) {
+    const p = allParts[mpn]!
+    rows.push({
+      spec,
+      mpn,
+      family: p.family,
+      description: p.description,
+      pinCount: p.pinCount,
+      gender: p.gender,
+      verification: p.provenance?.verification
+    })
+  }
+  for (const mpn of Object.keys(allParts).sort()) {
+    if (speced.has(mpn)) continue
+    const p = allParts[mpn]!
+    rows.push({
+      mpn,
+      family: p.family,
+      description: p.description,
+      pinCount: p.pinCount,
+      gender: p.gender,
+      verification: p.provenance?.verification
+    })
+  }
+  return rows.map((r) => JSON.parse(JSON.stringify(r)) as PartMetaRow) // strip undefined
+}
+
+const libraryMd = (rows: ReadonlyArray<PartMetaRow>): string => {
+  const table = rows
+    .map(
+      (r) =>
+        `| ${r.spec !== undefined ? `\`${r.spec}\`` : ""} | \`${r.mpn}\` | ${r.family ?? ""} | ${r.pinCount} | ${r.gender ?? ""} | ${r.verification ?? ""} | ${r.description ?? ""} |`
+    )
+    .join("\n")
+  return `# Part library — ${Object.keys(allParts).length} connectors, ${Object.keys(partSpecs).length} compact specs.
+
+Generated from \`@grayhaven/nerve-connectors\` at build time; it cannot drift from the shipped library. Reach parts with \`part("spec")\` — compact specs beat memorizing MPNs — or any raw MPN (case-insensitive, common vendor spellings normalize).
+
+| Spec | MPN | Family | Pins | Gender | Verification | Description |
+| --- | --- | --- | --- | --- | --- | --- |
+${table}
+
+Aliases: ${Object.entries(partSpecs)
+    .filter(([s], i, all) => all.findIndex(([, m]) => m === partSpecs[s as keyof typeof partSpecs]) !== i)
+    .map(([s]) => `\`${s}\``)
+    .join(", ")} resolve to the same housings as their primary specs.
+`
+}
+
 mkdirSync(join(OUT, "docs"), { recursive: true })
+
+// ── Part library: emit client JSON + generated page ─────────────────────
+const parts = partsMeta()
+writeFileSync(
+  join(ROOT, "src", "docs", "parts-meta.json"),
+  JSON.stringify(parts, null, 2) + "\n"
+)
 
 // ── DSL surface: extract from source, inject into the authored page ──────
 const dslMeta = extractDslMeta()
@@ -143,6 +219,12 @@ const hir = hirMd()
 writeFileSync(join(OUT, "docs", "hir.md"), indexNote + hir)
 sections.splice(4, 0, `- [HIR Schema](${SITE}/docs/hir.md) (generated from the live Effect schema)`)
 fullParts.splice(4, 0, hir)
+
+// Part library page is generated from the shipped library, not authored.
+const library = libraryMd(parts)
+writeFileSync(join(OUT, "docs", "library.md"), indexNote + library)
+sections.splice(5, 0, `- [Part Library](${SITE}/docs/library.md) (generated from the shipped connector library)`)
+fullParts.splice(5, 0, library)
 
 const llms = `# Grayhaven Nerve
 

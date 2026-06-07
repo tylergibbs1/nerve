@@ -234,6 +234,39 @@ describe("nerve inspect / init / help", () => {
   })
 })
 
+describe("nerve parts", () => {
+  it("lists the bundled library with specs", async () => {
+    const io = capture()
+    expect(await run(["parts"], io)).toBe(0)
+    const text = io.stdout.join("\n")
+    expect(text).toContain("compact specs:")
+    expect(text).toContain("PHR-3 (ph-3)")
+    expect(text).toContain("DT06-4S (dt-4s)")
+  })
+
+  it("describes one part by spec or MPN, including limits", async () => {
+    const io = capture()
+    expect(await run(["parts", "ph-3"], io)).toBe(0)
+    const text = io.stdout.join("\n")
+    expect(text).toContain("mpn        PHR-3")
+    expect(text).toContain("current    2A")
+  })
+
+  it("emits JSON for agents/CI", async () => {
+    const io = capture()
+    expect(await run(["parts", "--json"], io)).toBe(0)
+    const rows = JSON.parse(io.stdout.join("\n")) as Array<{ mpn: string; specs: string[] }>
+    expect(rows.length).toBeGreaterThanOrEqual(21)
+    expect(rows.find((r) => r.mpn === "PHR-3")?.specs).toContain("ph-3")
+  })
+
+  it("exits 2 on unknown parts", async () => {
+    const io = capture()
+    expect(await run(["parts", "nope-99"], io)).toBe(2)
+    expect(io.stderr.join("\n")).toContain('Unknown part "nope-99"')
+  })
+})
+
 const ROBOT = resolve(import.meta.dirname, "../../../examples/robot-platform/src/main.harness.ts")
 
 describe("nerve analyze / quote", () => {
