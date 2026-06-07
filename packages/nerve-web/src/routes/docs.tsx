@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router"
+import { Button } from "../ui/button.js"
 
 export const Route = createFileRoute("/docs")({
   component: DocsLayout
@@ -62,9 +63,9 @@ function CopyMarkdown({ slug }: { slug: string }) {
   }
 
   return (
-    <button className="docs-md-link" onClick={() => void copy()}>
+    <Button variant="ghost" size="xs" className="docs-action" onClick={() => void copy()}>
       {copied ? "Copied ✓" : "Copy Markdown"}
-    </button>
+    </Button>
   )
 }
 
@@ -74,13 +75,17 @@ function AiActions({ slug }: { slug: string }) {
   const q = encodeURIComponent(`Read ${mdUrl} so I can ask questions about it.`)
   return (
     <>
-      <a className="docs-md-link" href={`https://claude.ai/new?q=${q}`} target="_blank" rel="noreferrer">
-        Open in Claude
-      </a>
+      <Button variant="ghost" size="xs" className="docs-action" asChild>
+        <a href={`https://claude.ai/new?q=${q}`} target="_blank" rel="noreferrer">
+          Open in Claude
+        </a>
+      </Button>
       <span className="sep">/</span>
-      <a className="docs-md-link" href={`https://chatgpt.com/?hints=search&q=${q}`} target="_blank" rel="noreferrer">
-        Open in ChatGPT
-      </a>
+      <Button variant="ghost" size="xs" className="docs-action" asChild>
+        <a href={`https://chatgpt.com/?hints=search&q=${q}`} target="_blank" rel="noreferrer">
+          Open in ChatGPT
+        </a>
+      </Button>
     </>
   )
 }
@@ -142,9 +147,9 @@ function DocsLayout() {
           <div className="docs-md-actions">
             <CopyMarkdown slug={slug} />
             <span className="sep">/</span>
-            <a className="docs-md-link" href={`/docs/${slug}.md`}>
-              View Markdown
-            </a>
+            <Button variant="ghost" size="xs" className="docs-action" asChild>
+              <a href={`/docs/${slug}.md`}>View Markdown</a>
+            </Button>
             <span className="sep">/</span>
             <AiActions slug={slug} />
           </div>

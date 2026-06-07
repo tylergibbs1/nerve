@@ -12,6 +12,7 @@ import {
   setCompileResult
 } from "../lib/compile-client.js"
 import { getSource, isDirty, resetSource, setSource, subscribeSource } from "../lib/sources.js"
+import { Button } from "../ui/button.js"
 
 /**
  * Persistent source editor (PRD §11.1 left pane). Auto-compiles on type;
@@ -113,13 +114,9 @@ export function SourcePane({ projectId }: { projectId: string }) {
   return (
     <div className="source-pane">
       <div className="source-toolbar">
-        <button
-          className="compile-button"
-          disabled={compile.isPending}
-          onClick={() => compile.mutate(source)}
-        >
+        <Button size="xs" disabled={compile.isPending} onClick={() => compile.mutate(source)}>
           {showBusy ? "Compiling…" : "Compile"}
-        </button>
+        </Button>
         <label className="auto-toggle">
           <input
             type="checkbox"
@@ -129,8 +126,9 @@ export function SourcePane({ projectId }: { projectId: string }) {
           auto
         </label>
         {isDirty(projectId) && (
-          <button
-            className="compile-button ghost"
+          <Button
+            variant="secondary"
+            size="xs"
             onClick={() => {
               const text = resetSource(projectId)
               setLocalSource(text)
@@ -138,7 +136,7 @@ export function SourcePane({ projectId }: { projectId: string }) {
             }}
           >
             Reset
-          </button>
+          </Button>
         )}
         <span
           className={`toolbar-status ${shown?.kind === "error" ? "compile-error" : "compile-ok"} ${status !== undefined ? "visible" : ""}`}

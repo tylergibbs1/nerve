@@ -7,6 +7,7 @@ import { SourcePane } from "../components/SourcePane.js"
 import { AiPane } from "../components/AiPane.js"
 import { isDirty } from "../lib/sources.js"
 import { PROJECTS } from "../lib/projects.js"
+import { Badge } from "../ui/badge.js"
 
 export const Route = createFileRoute("/projects/$projectId")({
   beforeLoad: ({ params }) => {
@@ -56,13 +57,13 @@ function ProjectWorkspace() {
           rev {data.hir.harness.revision} · {data.hir.connectors.length} connectors ·{" "}
           {data.hir.wires.length} wires
         </span>
-        <span className={`badge ${errors > 0 ? "err" : warnings > 0 ? "warn" : "ok"}`}>
+        <Badge variant={errors > 0 ? "destructive" : warnings > 0 ? "accent" : "default"}>
           {errors > 0
             ? `${errors} error${errors === 1 ? "" : "s"}`
             : warnings > 0
               ? `${warnings} warning${warnings === 1 ? "" : "s"}`
               : "valid"}
-        </span>
+        </Badge>
         <nav className="tabs">
           {TABS.map((tab) => (
             <Link

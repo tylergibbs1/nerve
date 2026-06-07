@@ -3,6 +3,10 @@ import { useQueryClient } from "@tanstack/react-query"
 import { setCompileResult } from "../lib/compile-client.js"
 import { getApiKey, runAgentTurn, setApiKey, type AgentEvent, type ChatTurn } from "../lib/ai.js"
 import { useMinimumLoading } from "../lib/useMinimumLoading.js"
+import { Button } from "../ui/button.js"
+import { Badge } from "../ui/badge.js"
+import { Input } from "../ui/input.js"
+import { Textarea } from "../ui/textarea.js"
 
 interface ToolPill {
   readonly name: string
@@ -91,9 +95,10 @@ export function AiPane({ projectId }: { projectId: string }) {
             Edits your harness through compile-verified patches. Calls go directly from your
             browser to Anthropic — the key is stored locally and sent nowhere else.
           </p>
-          <input
+          <Input
             type="password"
             placeholder="sk-ant-…"
+            className="h-9 text-sm"
             value={keyDraft}
             onChange={(e) => setKeyDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -103,8 +108,8 @@ export function AiPane({ projectId }: { projectId: string }) {
               }
             }}
           />
-          <button
-            className="compile-button"
+          <Button
+            size="xs"
             disabled={!keyDraft.startsWith("sk-ant-")}
             onClick={() => {
               setApiKey(keyDraft)
@@ -112,7 +117,7 @@ export function AiPane({ projectId }: { projectId: string }) {
             }}
           >
             Save key
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -122,8 +127,10 @@ export function AiPane({ projectId }: { projectId: string }) {
     <div className="ai-pane">
       <div className="ai-header">
         <span className="spec-tag">AI Copilot</span>
-        <button
-          className="ai-key-clear"
+        <Button
+          variant="ghost"
+          size="xs"
+          className="h-auto p-0 text-[10px]"
           title="Forget API key"
           onClick={() => {
             setApiKey("")
@@ -131,7 +138,7 @@ export function AiPane({ projectId }: { projectId: string }) {
           }}
         >
           key ✕
-        </button>
+        </Button>
       </div>
       <div className="ai-thread" ref={threadRef}>
         {messages.length === 0 && (
@@ -146,10 +153,15 @@ export function AiPane({ projectId }: { projectId: string }) {
             {m.pills !== undefined && m.pills.length > 0 && (
               <div className="ai-pills">
                 {m.pills.map((p, j) => (
-                  <span key={j} className={`ai-pill ${p.status}`} title={p.detail}>
+                  <Badge
+                    key={j}
+                    variant={p.status === "ok" ? "default" : p.status === "failed" ? "destructive" : "secondary"}
+                    className={p.status === "running" ? "ai-pill-running" : undefined}
+                    title={p.detail}
+                  >
                     {p.status === "running" ? "⋯ " : p.status === "ok" ? "✓ " : "✕ "}
                     {p.name === "edit_harness_source" ? "patch" : p.name === "rewrite_harness_source" ? "rewrite" : p.name}
-                  </span>
+                  </Badge>
                 ))}
               </div>
             )}
@@ -161,8 +173,9 @@ export function AiPane({ projectId }: { projectId: string }) {
         ))}
       </div>
       <div className="ai-input">
-        <textarea
+        <Textarea
           rows={2}
+          className="min-h-0 flex-1 resize-none px-2.5 py-1.5 text-sm leading-snug"
           placeholder={busy ? "Working…" : "Describe a change…"}
           value={input}
           disabled={busy}
@@ -174,9 +187,9 @@ export function AiPane({ projectId }: { projectId: string }) {
             }
           }}
         />
-        <button className="compile-button" disabled={busy || input.trim() === ""} onClick={send}>
+        <Button size="xs" disabled={busy || input.trim() === ""} onClick={send}>
           {busy ? "…" : "Send"}
-        </button>
+        </Button>
       </div>
     </div>
   )
