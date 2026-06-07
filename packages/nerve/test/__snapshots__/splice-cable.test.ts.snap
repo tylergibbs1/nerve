@@ -78,6 +78,7 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
       "family": "PH",
       "gender": "receptacle",
       "manufacturer": "JST",
+      "matingMpn": "B4B-PH-K-S",
       "mpn": "PHR-4",
       "pinCount": 4,
       "pins": [
@@ -123,6 +124,7 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
       "family": "PH",
       "gender": "receptacle",
       "manufacturer": "JST",
+      "matingMpn": "B3B-PH-K-S",
       "mpn": "PHR-3",
       "pinCount": 3,
       "pins": [
@@ -164,6 +166,7 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
       "family": "PH",
       "gender": "receptacle",
       "manufacturer": "JST",
+      "matingMpn": "B3B-PH-K-S",
       "mpn": "PHR-3",
       "pinCount": 3,
       "pins": [

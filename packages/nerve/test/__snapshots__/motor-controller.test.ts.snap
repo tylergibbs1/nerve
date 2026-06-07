@@ -53,6 +53,7 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
       "family": "Micro-Fit 3.0",
       "gender": "receptacle",
       "manufacturer": "Molex",
+      "matingMpn": "43020-0800",
       "mpn": "43025-0800",
       "pinCount": 8,
       "pins": [
@@ -115,6 +116,7 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
       "family": "Micro-Fit 3.0",
       "gender": "plug",
       "manufacturer": "Molex",
+      "matingMpn": "43025-0800",
       "mpn": "43020-0800",
       "pinCount": 8,
       "pins": [

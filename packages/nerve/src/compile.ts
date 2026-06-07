@@ -94,6 +94,7 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         wireGaugeRange: c.part.wireGaugeRange
           ? { min: c.part.wireGaugeRange.min, max: c.part.wireGaugeRange.max }
           : undefined,
+        matingMpn: c.part.matingMpn,
         cavityLayout: c.part.cavityLayout
           ? { rows: c.part.cavityLayout.rows, columns: c.part.cavityLayout.columns }
           : undefined,

@@ -55,6 +55,7 @@ import {
   findAdapter,
   generateQuote,
   importPinoutCsv,
+  importTscircuitPinout,
   quoteCsv,
   quoteJson,
   validateContract,
@@ -415,9 +416,21 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
         let contract
         try {
           const raw = readFileSync(resolve(against), "utf8")
-          contract = against.endsWith(".csv")
-            ? importPinoutCsv(raw, { connector: connectorRef })
-            : JSON.parse(raw)
+          if (against.endsWith(".csv")) {
+            contract = importPinoutCsv(raw, { connector: connectorRef })
+          } else if (against.endsWith(".circuit.json")) {
+            // PRD §37: validate the harness against a tscircuit board.
+            contract = importTscircuitPinout(JSON.parse(raw), {
+              connector: connectorRef,
+              ...(flags["component"] !== undefined ? { component: flags["component"] } : {})
+            })
+            if (contract === undefined) {
+              io.err(`Component ${flags["component"] ?? connectorRef} not found in ${against}.`)
+              return 2
+            }
+          } else {
+            contract = JSON.parse(raw)
+          }
         } catch (cause) {
           io.err(`Failed to load contract ${against}: ${cause instanceof Error ? cause.message : String(cause)}`)
           return 2

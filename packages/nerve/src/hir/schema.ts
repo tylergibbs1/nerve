@@ -52,6 +52,7 @@ export const HirConnector = Schema.Struct({
     Schema.Struct({ min: Schema.String, max: Schema.String })
   ),
   cavityLayout: Schema.optional(Schema.Struct({ rows: Schema.Number, columns: Schema.Number })),
+  matingMpn: Schema.optional(Schema.String),
   reservedPins: Schema.optional(Schema.Array(Schema.String)),
   sealed: Schema.optional(Schema.Boolean),
   compatibleTerminals: Schema.optional(Schema.Array(Schema.String)),

@@ -65,11 +65,14 @@ export const validateContract = (
       }
     ]
   }
-  if (c.mpn !== contract.mpn) {
+  // PRD §37: PCB connector, harness connector, and mating connector are
+  // linked but distinct — a contract naming the harness part's MATE (the
+  // PCB-side housing) is correct, not a mismatch.
+  if (c.mpn !== contract.mpn && c.matingMpn !== contract.mpn && contract.mpn !== "unknown") {
     diagnostics.push({
       code: "HK-IFC-002",
       severity: DiagnosticSeverity.Warning,
-      message: `Connector ${c.ref} is ${c.mpn} but the contract specifies ${contract.mpn}.`,
+      message: `Connector ${c.ref} is ${c.mpn} (mates ${c.matingMpn ?? "unspecified"}) but the contract specifies ${contract.mpn}.`,
       target: refs.connector(c.ref)
     })
   }
@@ -129,6 +132,54 @@ export const importPinoutCsv = (
       pin: pin ?? "",
       ...(signal !== undefined && signal !== "" ? { signal } : {})
     }))
+  }
+}
+
+/**
+ * Import a connector pinout from tscircuit Circuit JSON (PRD §37).
+ * Circuit JSON is a flat array of typed elements; we read the named
+ * `source_component` (the PCB-side connector, e.g. "J1") and its
+ * `source_port`s. Signal names come from port_hints (first hint that
+ * is not a pinN/number alias) falling back to the port name.
+ */
+export const importTscircuitPinout = (
+  circuitJson: ReadonlyArray<Record<string, unknown>>,
+  meta: { readonly connector: string; readonly component?: string }
+): ConnectorContract | undefined => {
+  const wanted = meta.component ?? meta.connector
+  const component = circuitJson.find(
+    (el) => el["type"] === "source_component" && el["name"] === wanted
+  )
+  if (component === undefined) return undefined
+  const componentId = component["source_component_id"]
+  const ports = circuitJson.filter(
+    (el) => el["type"] === "source_port" && el["source_component_id"] === componentId
+  )
+  const isAlias = (hint: string, pin: number | undefined): boolean =>
+    /^(pin)?\d+$/i.test(hint) && (pin === undefined || hint.replace(/^pin/i, "") === String(pin))
+  const pinout = ports
+    .map((port) => {
+      const pinNumber = typeof port["pin_number"] === "number" ? port["pin_number"] : undefined
+      const hints = Array.isArray(port["port_hints"]) ? (port["port_hints"] as Array<string>) : []
+      const name = typeof port["name"] === "string" ? port["name"] : undefined
+      const signal =
+        hints.find((h) => !isAlias(h, pinNumber)) ??
+        (name !== undefined && !isAlias(name, pinNumber) ? name : undefined)
+      return {
+        pin: pinNumber !== undefined ? String(pinNumber) : (name ?? ""),
+        ...(signal !== undefined ? { signal: signal.toUpperCase() } : {})
+      }
+    })
+    .filter((p) => p.pin !== "")
+    .sort((a, b) => Number(a.pin) - Number(b.pin))
+  const mpn = component["manufacturer_part_number"]
+  return {
+    contractVersion: "0.1.0",
+    harness: { id: "tscircuit", revision: "-" },
+    hirSchema: HIR_SCHEMA_VERSION,
+    connector: meta.connector,
+    mpn: typeof mpn === "string" ? mpn : "unknown",
+    pinout
   }
 }
 
