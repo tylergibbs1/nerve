@@ -10,5 +10,5 @@ export const Route = createFileRoute("/projects/$projectId/diagram")({
 function DiagramView() {
   const { projectId } = Route.useParams()
   const { data } = useSuspenseQuery(compileQueryOptions(projectId))
-  return <SchematicSheet svg={data.svg} filename={`${projectId}-schematic.svg`} />
+  return <SchematicSheet svg={data.svg} hir={data.hir} kind="schematic" filename={`${projectId}-schematic.svg`} />
 }

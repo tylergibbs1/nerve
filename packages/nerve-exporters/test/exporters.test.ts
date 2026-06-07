@@ -191,6 +191,7 @@ describe("manufacturing packet (PRD §9.8)", () => {
       "manufacturing-packet.pdf",
       "harness.json",
       "schematic.svg",
+      "schematic.html",
       "board.svg",
       "bom.csv",
       "cut-list.csv",

@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react"
+import type { Hir } from "@grayhaven/nerve"
 import { Button } from "../ui/button.js"
 
 /**
@@ -13,7 +14,17 @@ import { Button } from "../ui/button.js"
  *   adjusting the scroll container); native scrollbars keep panning calm.
  * - Copy SVG: the deterministic markup pastes into Figma/Inkscape as vectors.
  */
-export function SchematicSheet({ svg, filename }: { svg: string; filename: string }) {
+export function SchematicSheet({
+  svg,
+  filename,
+  hir,
+  kind
+}: {
+  svg: string
+  filename: string
+  hir: Hir
+  kind: "schematic" | "board"
+}) {
   const paneRef = useRef<HTMLDivElement | null>(null)
   const zoomRef = useRef(1)
   const [copied, setCopied] = useState(false)
@@ -77,13 +88,22 @@ export function SchematicSheet({ svg, filename }: { svg: string; filename: strin
       setTimeout(() => setCopied(false), 2000)
     })
   }
-  const download = () => {
-    const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }))
+  const downloadBlob = (contents: string, name: string, type: string) => {
+    const url = URL.createObjectURL(new Blob([contents], { type }))
     const a = document.createElement("a")
     a.href = url
-    a.download = filename
+    a.download = name
     a.click()
     URL.revokeObjectURL(url)
+  }
+  const download = () => downloadBlob(svg, filename, "image/svg+xml")
+  // Self-contained interactive viewer (hover nets, zoom, pan) — opens
+  // anywhere, no app needed. Lazy: shares the exporters chunk with the
+  // packet export.
+  const downloadHtml = async () => {
+    const { schematicHtml, boardHtml } = await import("@grayhaven/nerve-exporters")
+    const html = kind === "schematic" ? schematicHtml(hir) : boardHtml(hir)
+    downloadBlob(html, filename.replace(/\.svg$/, ".html"), "text/html")
   }
 
   return (
@@ -94,6 +114,9 @@ export function SchematicSheet({ svg, filename }: { svg: string; filename: strin
         </Button>
         <Button variant="ghost" size="xs" onClick={download}>
           Download SVG
+        </Button>
+        <Button variant="ghost" size="xs" onClick={() => void downloadHtml()}>
+          Download HTML
         </Button>
         <span className="sheet-hint">⌘+scroll to zoom · hover a wire</span>
       </div>

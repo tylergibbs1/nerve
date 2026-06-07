@@ -73,6 +73,62 @@ export const schematicDrawing = (hir: Hir): Drawing => {
     )
   )
 
+  // ── Branch-following bundle lanes (PRD §9.5.1 extension) ─────────────
+  // Each branch renders as a horizontal "bundle rail" in the channel;
+  // wires ride their branch's rail in per-wire slots and transfer rails
+  // at the child branch's junction x — the schematic reads like the
+  // physical harness tree.
+  const branchById = new Map(hir.branches.map((b) => [b.id, b]))
+  const branchOfNode = new Map<string, string>()
+  for (const b of hir.branches) {
+    for (const ref of b.path) {
+      if (!branchOfNode.has(ref)) branchOfNode.set(ref, b.id)
+    }
+  }
+  for (const sp of hir.splices) {
+    if (sp.branch !== undefined && branchById.has(sp.branch) && !branchOfNode.has(sp.id)) {
+      branchOfNode.set(sp.id, sp.branch)
+    }
+  }
+  const childrenOf = new Map<string, Array<string>>()
+  const laneRoots: Array<string> = []
+  for (const b of hir.branches) {
+    if (b.parent !== undefined && branchById.has(b.parent)) {
+      const list = childrenOf.get(b.parent) ?? []
+      list.push(b.id)
+      childrenOf.set(b.parent, list)
+    } else {
+      laneRoots.push(b.id)
+    }
+  }
+  const laneOrder: Array<string> = []
+  const visitLane = (id: string): void => {
+    laneOrder.push(id)
+    for (const c of childrenOf.get(id) ?? []) visitLane(c)
+  }
+  for (const r of laneRoots) visitLane(r)
+  const laneIndex = new Map(laneOrder.map((id, i) => [id, i]))
+
+  /** Branch chain from a to b through the tree (a..lca..b), or undefined. */
+  const chainOf = (brA: string, brB: string): Array<string> | undefined => {
+    const up = (id: string): Array<string> => {
+      const seq = [id]
+      let cur = branchById.get(id)
+      while (cur?.parent !== undefined && branchById.has(cur.parent)) {
+        seq.push(cur.parent)
+        cur = branchById.get(cur.parent)
+      }
+      return seq
+    }
+    const ua = up(brA)
+    const ub = up(brB)
+    const inB = new Set(ub)
+    const lcaIdx = ua.findIndex((x) => inB.has(x))
+    if (lcaIdx === -1) return undefined
+    const lca = ua[lcaIdx]!
+    return [...ua.slice(0, lcaIdx + 1), ...ub.slice(0, ub.indexOf(lca)).reverse()]
+  }
+
   // Splices live in the channel between the columns.
   const spliceCenterX = MARGIN + BOX_W + COL_GAP / 2
   const splicePos = new Map(
@@ -83,12 +139,6 @@ export const schematicDrawing = (hir: Hir): Drawing => {
   )
 
   const width = rightX + BOX_W + MARGIN
-  const height =
-    Math.max(
-      ...[...placed.values()].map((p) => p.y + p.height),
-      ...[...splicePos.values()].map((p) => p.y + 40),
-      TITLE_H + MARGIN
-    ) + MARGIN
 
   const errorWires = new Set(
     hir.diagnostics
@@ -143,6 +193,90 @@ export const schematicDrawing = (hir: Hir): Drawing => {
     [...signalCounts.entries()].filter(([, n]) => n >= NET_LABEL_FANOUT).map(([sig]) => sig)
   )
 
+  // Pre-pass: assign routed wires to lane slots (deterministic, wire order).
+  const nodeOfEnd = (e: HirEndpoint): string => (isPinEndpoint(e) ? e.connector : e.splice)
+  const wireChain = new Map<string, Array<string>>()
+  const laneSlots = new Map<string, Map<string, number>>() // branch -> wire -> slot
+  for (const w of hir.wires) {
+    if (w.signal !== undefined && labeledNets.has(w.signal)) continue
+    const brA = branchOfNode.get(nodeOfEnd(w.from))
+    const brB = branchOfNode.get(nodeOfEnd(w.to))
+    if (brA === undefined || brB === undefined) continue
+    const chain = chainOf(brA, brB)
+    if (chain === undefined) continue
+    wireChain.set(w.id, chain)
+    for (const br of chain) {
+      const slots = laneSlots.get(br) ?? new Map<string, number>()
+      if (!slots.has(w.id)) slots.set(w.id, slots.size)
+      laneSlots.set(br, slots)
+    }
+  }
+
+  // Lane geometry: stacked rails in the channel, inset past the net-flag
+  // zone and vertically centered against the connector columns.
+  const channelLeft = MARGIN + BOX_W + 150
+  const channelRight = rightX - 150
+  const SLOT_GAP = 5
+  const laneBlockH = laneOrder.reduce(
+    (h, id) => h + 16 + (laneSlots.get(id)?.size ?? 0) * SLOT_GAP + 14,
+    0
+  )
+  const colBottom = Math.max(...[...placed.values()].map((p) => p.y + p.height), TITLE_H + MARGIN)
+  const laneTopStart =
+    TITLE_H + MARGIN + Math.max(12, (colBottom - TITLE_H - MARGIN - laneBlockH) / 2)
+  const laneTop = new Map<string, number>()
+  let laneCursor = laneTopStart
+  for (const id of laneOrder) {
+    laneTop.set(id, laneCursor)
+    laneCursor += 16 + (laneSlots.get(id)?.size ?? 0) * SLOT_GAP + 14
+  }
+  const slotY = (br: string, wireId: string): number =>
+    (laneTop.get(br) ?? 0) + 14 + (laneSlots.get(br)?.get(wireId) ?? 0) * SLOT_GAP
+  const junctionX = (br: string): number =>
+    channelLeft + 30 + (laneIndex.get(br) ?? 0) * 34
+
+  // Rails + labels (under the wires).
+  for (const id of laneOrder) {
+    const top = laneTop.get(id)!
+    const used = laneSlots.get(id)?.size ?? 0
+    const railY = top + 14 + Math.max(0, used - 1) * SLOT_GAP * 0.5
+    items.push(
+      {
+        kind: "line",
+        x1: channelLeft,
+        y1: railY,
+        x2: channelRight,
+        y2: railY,
+        stroke: "#e4e0d8",
+        strokeWidth: 8 + used * 1.5
+      },
+      {
+        kind: "text",
+        x: channelLeft + 2,
+        y: top + 4,
+        text: `[ ${id} ]`,
+        size: 9,
+        weight: "bold",
+        fill: "#9a958a"
+      }
+    )
+  }
+
+  // Lane splices sit on their rail, spread by per-branch order.
+  {
+    const perBranch = new Map<string, number>()
+    for (const sp of hir.splices) {
+      const br = sp.branch
+      if (br === undefined || !laneTop.has(br)) continue
+      const i = perBranch.get(br) ?? 0
+      perBranch.set(br, i + 1)
+      splicePos.set(sp.id, {
+        x: channelLeft + 90 + i * 80,
+        y: laneTop.get(br)! + 14 + (laneSlots.get(br)?.size ?? 0) * SLOT_GAP + 6
+      })
+    }
+  }
+
   // Wires beneath connector boxes.
   for (const w of hir.wires) {
     const a = anchorOf(w.from)
@@ -195,6 +329,53 @@ export const schematicDrawing = (hir: Hir): Drawing => {
           }
         )
       }
+      continue
+    }
+    const chain = wireChain.get(w.id)
+    if (chain !== undefined) {
+      const isError = errorWires.has(w.id)
+      const stroke = isError ? "#d11" : strokeFor(w.color)
+      const pts: Array<readonly [number, number]> = []
+      const dirA = a.dir !== 0 ? a.dir : 1
+      const stagA = (laneSlots.get(chain[0]!)?.get(w.id) ?? 0) * 4
+      const dropA =
+        a.dir === 0 ? a.x + 12 : dirA === 1 ? channelLeft - 12 - stagA : channelRight + 12 + stagA
+      pts.push([a.x, a.y], [dropA, a.y], [dropA, slotY(chain[0]!, w.id)])
+      for (let i = 0; i + 1 < chain.length; i++) {
+        const cur = chain[i]!
+        const next = chain[i + 1]!
+        // Transfer at the junction of whichever branch is the child.
+        const jx = junctionX(branchById.get(next)?.parent === cur ? next : cur)
+        pts.push([jx, slotY(cur, w.id)], [jx, slotY(next, w.id)])
+      }
+      const last = chain[chain.length - 1]!
+      const dirB = b.dir !== 0 ? b.dir : 1
+      const stagB = (laneSlots.get(last)?.get(w.id) ?? 0) * 4
+      const dropB =
+        b.dir === 0 ? b.x + 12 : dirB === 1 ? channelLeft - 12 - stagB : channelRight + 12 + stagB
+      pts.push([dropB, slotY(last, w.id)], [dropB, b.y], [b.x, b.y])
+      items.push({
+        kind: "path",
+        d: pts.map(([px, py], i) => `${i === 0 ? "M" : "L"} ${px} ${py}`).join(" "),
+        stroke,
+        strokeWidth: 1.6,
+        data: { wire: w.id },
+        ...(isError ? { dash: [6, 3] } : {})
+      })
+      const annotation = [w.id, w.gauge, w.twistGroup !== undefined ? "twisted" : undefined]
+        .filter((t): t is string => t !== undefined)
+        .join(" · ")
+      // Annotation hugs the pin exit (the channel itself stays clean).
+      items.push({
+        kind: "text",
+        x: a.x + dirA * 6,
+        y: a.y - 3,
+        text: annotation,
+        size: 8,
+        fill: isError ? "#d11" : "#777",
+        anchor: dirA === 1 ? "start" : "end",
+        data: { wire: w.id }
+      })
       continue
     }
     const dx = Math.max(60, Math.abs(x2 - x1) / 3)
@@ -288,6 +469,14 @@ export const schematicDrawing = (hir: Hir): Drawing => {
       }
     )
   }
+
+  const height =
+    Math.max(
+      ...[...placed.values()].map((p) => p.y + p.height),
+      ...[...splicePos.values()].map((p) => p.y + 40),
+      laneCursor,
+      TITLE_H + MARGIN
+    ) + MARGIN
 
   return { width, height, background: "#fafafa", items }
 }

@@ -10,5 +10,5 @@ export const Route = createFileRoute("/projects/$projectId/board")({
 function BoardView() {
   const { projectId } = Route.useParams()
   const { data } = useSuspenseQuery(compileQueryOptions(projectId))
-  return <SchematicSheet svg={data.boardSvg} filename={`${projectId}-board.svg`} />
+  return <SchematicSheet svg={data.boardSvg} hir={data.hir} kind="board" filename={`${projectId}-board.svg`} />
 }

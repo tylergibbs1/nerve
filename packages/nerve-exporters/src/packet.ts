@@ -9,6 +9,7 @@
 import { zipSync, strToU8 } from "fflate"
 import { hasErrors, type Hir } from "@grayhaven/nerve"
 import { bomCsv, cutListCsv, labelScheduleCsv, testPlanCsv, type CutListOptions } from "./csv.js"
+import { schematicHtml } from "./html.js"
 import { generateTestPlan, testPlanJson } from "./test-plan.js"
 import { schematicSvg } from "./svg.js"
 import { boardSvg } from "./board.js"
@@ -67,6 +68,7 @@ export const buildPacket = async (
     ["manufacturing-packet.pdf", await manufacturingPacketPdf(hir, options)],
     ["harness.json", JSON.stringify(hir, null, 2) + "\n"],
     ["schematic.svg", schematicSvg(hir)],
+    ["schematic.html", schematicHtml(hir)],
     ["board.svg", boardSvg(hir)],
     ["bom.csv", bomCsv(hir)],
     ["cut-list.csv", cutListCsv(hir, options)],

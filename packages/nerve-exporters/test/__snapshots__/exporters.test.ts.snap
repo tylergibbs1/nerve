@@ -27,14 +27,16 @@ exports[`SVG schematic (PRD §9.5.1) > renders title block, connectors, pins, an
 <rect width="836" height="368" fill="#fafafa"/>
 <text x="48" y="28" font-size="18" font-weight="bold" fill="#111">motor-controller-harness</text>
 <text x="48" y="48" fill="#555">rev A · units mm · HIR 0.1.0</text>
-<path data-wire="W1" d="M 228 162 C 354.6666666666667 162, 481.3333333333333 162, 608 162" fill="none" stroke="red" stroke-width="2"/>
-<text data-wire="W1" x="418" y="156" fill="#333" text-anchor="middle">W1 · 20AWG</text>
-<path data-wire="W2" d="M 228 182 C 354.6666666666667 182, 481.3333333333333 182, 608 182" fill="none" stroke="#222222" stroke-width="2"/>
-<text data-wire="W2" x="418" y="176" fill="#333" text-anchor="middle">W2 · 20AWG</text>
-<path data-wire="W3" d="M 228 202 C 354.6666666666667 202, 481.3333333333333 202, 608 202" fill="none" stroke="#b8b8b8" stroke-width="2"/>
-<text data-wire="W3" x="418" y="196" fill="#333" text-anchor="middle">W3 · 24AWG · twisted</text>
-<path data-wire="W4" d="M 228 222 C 354.6666666666667 222, 481.3333333333333 222, 608 222" fill="none" stroke="blue" stroke-width="2"/>
-<text data-wire="W4" x="418" y="216" fill="#333" text-anchor="middle">W4 · 24AWG · twisted</text>
+<line x1="378" y1="212.5" x2="458" y2="212.5" stroke="#e4e0d8" stroke-width="14"/>
+<text x="380" y="195" font-size="9" font-weight="bold" fill="#9a958a">[ main ]</text>
+<path data-wire="W1" d="M 228 162 L 366 162 L 366 205 L 470 205 L 470 162 L 608 162" fill="none" stroke="red" stroke-width="1.6"/>
+<text data-wire="W1" x="234" y="159" font-size="8" fill="#777">W1 · 20AWG</text>
+<path data-wire="W2" d="M 228 182 L 362 182 L 362 210 L 474 210 L 474 182 L 608 182" fill="none" stroke="#222222" stroke-width="1.6"/>
+<text data-wire="W2" x="234" y="179" font-size="8" fill="#777">W2 · 20AWG</text>
+<path data-wire="W3" d="M 228 202 L 358 202 L 358 215 L 478 215 L 478 202 L 608 202" fill="none" stroke="#b8b8b8" stroke-width="1.6"/>
+<text data-wire="W3" x="234" y="199" font-size="8" fill="#777">W3 · 24AWG · twisted</text>
+<path data-wire="W4" d="M 228 222 L 354 222 L 354 220 L 482 220 L 482 222 L 608 222" fill="none" stroke="blue" stroke-width="1.6"/>
+<text data-wire="W4" x="234" y="219" font-size="8" fill="#777">W4 · 24AWG · twisted</text>
 <rect data-connector="J1" x="48" y="112" width="180" height="208" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
 <text x="58" y="130" font-weight="bold" fill="#111">J1</text>
 <text x="58" y="145" font-size="10" fill="#777">43025-0800 · receptacle</text>
