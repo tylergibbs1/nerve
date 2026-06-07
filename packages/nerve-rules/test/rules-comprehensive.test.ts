@@ -129,21 +129,21 @@ describe("signal classifiers", () => {
     for (const s of ["VBAT_24V", "VCC", "VDD3V3", "VIN", "VSYS", "PWR", "+5V", "5V", "3.3V", "24V_RAIL"]) {
       expect(isPowerSignal(s), s).toBe(true)
     }
-    // Documented gap: bare V-prefixed nets like V5 are NOT classified as
-    // power (anchored prefixes only). The sensor-splice example relies on
-    // this — its V5 rail pairs with GND anyway.
-    for (const s of ["V5", "CAN_H", "GND", "DATA0", "EN_5V"]) {
+    // Deliberately anchored: token-matching "5V" anywhere would classify
+    // enable/sense lines (EN_5V) as rails — a false positive with real
+    // HK-ELEC-003 consequences. Bare V-prefixed nets (V5) also stay out;
+    // the sensor-splice example relies on that.
+    for (const s of ["V5", "CAN_H", "GND", "DATA0", "EN_5V", "SENSE_24V"]) {
       expect(isPowerSignal(s), s).toBe(false)
     }
   })
 
-  it("ground: returns and 0V", () => {
-    for (const s of ["GND", "GROUND", "0V", "RTN", "RETURN", "VSS", "gnd"]) {
+  it("ground is token-aware: prefixed and suffixed grounds classify", () => {
+    for (const s of ["GND", "GROUND", "0V", "RTN", "RETURN", "VSS", "gnd",
+                     "AGND", "DGND", "PGND", "MOTOR_GND", "GND_SENSE"]) {
       expect(isGroundSignal(s), s).toBe(true)
     }
-    // Documented gap: prefixed grounds (AGND/DGND/PGND) are not matched —
-    // the regex anchors at the start. Encode so a future fix is deliberate.
-    for (const s of ["AGND", "DGND", "CHASSIS", "VBAT"]) {
+    for (const s of ["CHASSIS", "VBAT", "GROUNDED_PLANE_X"]) {
       expect(isGroundSignal(s), s).toBe(false)
     }
   })

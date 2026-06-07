@@ -39,8 +39,13 @@ export const requiredAwgForCurrent = (current: number): number | undefined => {
   return candidates.length > 0 ? Math.max(...candidates) : undefined
 }
 
+// Ground is token-aware (signal treated as _-separated tokens): prefixed
+// and suffixed grounds (AGND, DGND, PGND, MOTOR_GND) are unambiguous.
+// Power stays ANCHORED on purpose: token-matching "5V" anywhere would
+// misclassify enable/sense lines (EN_5V, SENSE_24V) as rails and fire
+// false ground-return errors.
 const POWER_SIGNAL = /^(VBAT|VCC|VDD|VIN|VSYS|PWR|\+?\d+(\.\d+)?V)/i
-const GROUND_SIGNAL = /^(GND|GROUND|0V|RTN|RETURN|VSS)/i
+const GROUND_SIGNAL = /(^|_)([ADPSC]?GND|GROUND|0V|RTN|RETURN|VSS)(_|$)/i
 const SHIELD_SIGNAL = /(SHIELD|DRAIN|SHLD)/i
 
 export const isPowerSignal = (signal: string): boolean => POWER_SIGNAL.test(signal)
