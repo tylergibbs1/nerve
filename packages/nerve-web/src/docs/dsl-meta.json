@@ -1,0 +1,499 @@
+{
+  "builders": [
+    {
+      "name": "harness",
+      "signature": "harness(id: string, props: HarnessProps)",
+      "doc": "Define a harness — the root design object and default export of a `.harness.ts` file."
+    },
+    {
+      "name": "connector",
+      "signature": "connector(ref: string, part: ConnectorPart, opts: { readonly pins: PinAssignments; readonly terminals?: PinPartAssignment; readonly seals?: PinPartAssignment })",
+      "doc": "Place a connector in the harness: `connector(\"J1\", MolexMicroFit[\"43025-0800\"], { pins: {...}, terminals: \"43030-0007\" })`."
+    },
+    {
+      "name": "wire",
+      "signature": "wire(id: string, from: EndpointInput, to: EndpointInput, props: WireProps = {})",
+      "doc": "Define a wire between two endpoints:\n`wire(\"W1\", j1.pin(1), m1.pin(1), { gauge: \"18AWG\", ... })` or\n`wire(\"W5\", j1.pin(2), s1, {...})` where `s1` is a splice."
+    },
+    {
+      "name": "splice",
+      "signature": "splice(id: string, props: SpliceProps = {})",
+      "doc": "Define a splice node: `splice(\"S1\", { type: \"crimp\", branch: \"main\", location: 120 })`."
+    },
+    {
+      "name": "cable",
+      "signature": "cable(id: string, props: CableProps = {})",
+      "doc": "Define a multi-conductor cable that wires can belong to via `cable`/`conductor` props."
+    },
+    {
+      "name": "branch",
+      "signature": "branch(id: string, props: BranchProps)",
+      "doc": "Define a physical branch through the harness: `branch(\"main\", { path: [j1, m1], ... })`."
+    },
+    {
+      "name": "label",
+      "signature": "label(id: string, props: LabelProps)",
+      "doc": "Define a label: `label(\"L1\", { text: \"MOTOR CTRL A\", attachTo: \"main\", ... })`."
+    },
+    {
+      "name": "variant",
+      "signature": "variant(base: HarnessDesign, opts: VariantOptions)",
+      "doc": "Derive a variant: `variant(base, { id: \"...-long\", wires: { override: { W1: { length: 800 } } } })`."
+    },
+    {
+      "name": "rule",
+      "signature": "rule(name: string, run: (ctx: RuleContext) => void, options: RuleOptions = {})",
+      "doc": "Define a validation rule: `rule(\"require-can-pairs-twisted\", (ctx) => {...})`."
+    },
+    {
+      "name": "defineConfig",
+      "signature": "defineConfig(config: NerveConfig)",
+      "doc": ""
+    }
+  ],
+  "interfaces": [
+    {
+      "name": "HarnessProps",
+      "props": [
+        {
+          "name": "revision",
+          "type": "string",
+          "optional": false,
+          "doc": ""
+        },
+        {
+          "name": "units",
+          "type": "Units",
+          "optional": false,
+          "doc": ""
+        },
+        {
+          "name": "metadata",
+          "type": "Readonly<Record<string, string>>",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "connectors",
+          "type": "ReadonlyArray<ConnectorInstance>",
+          "optional": false,
+          "doc": ""
+        },
+        {
+          "name": "wires",
+          "type": "ReadonlyArray<WireDef>",
+          "optional": false,
+          "doc": ""
+        },
+        {
+          "name": "branches",
+          "type": "ReadonlyArray<BranchDef>",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "labels",
+          "type": "ReadonlyArray<LabelDef>",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "splices",
+          "type": "ReadonlyArray<SpliceDef>",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "cables",
+          "type": "ReadonlyArray<CableDef>",
+          "optional": true,
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "ConnectorPart",
+      "props": [
+        {
+          "name": "mpn",
+          "type": "string",
+          "optional": false,
+          "doc": ""
+        },
+        {
+          "name": "manufacturer",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "family",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "gender",
+          "type": "ConnectorGender",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "pinCount",
+          "type": "number",
+          "optional": false,
+          "doc": ""
+        },
+        {
+          "name": "pinNumbering",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "cavityLayout",
+          "type": "{ readonly rows: number; readonly columns: number }",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "reservedPins",
+          "type": "ReadonlyArray<number | string>",
+          "optional": true,
+          "doc": "Pins that must stay unassigned (keying, future use, no-connects)."
+        },
+        {
+          "name": "matingMpn",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "compatibleTerminals",
+          "type": "ReadonlyArray<string>",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "compatibleSeals",
+          "type": "ReadonlyArray<string>",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "compatibleBackshells",
+          "type": "ReadonlyArray<string>",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "wireGaugeRange",
+          "type": "{ readonly min: string; readonly max: string }",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "sealed",
+          "type": "boolean",
+          "optional": true,
+          "doc": "Environmentally sealed housing: every populated cavity needs a seal."
+        },
+        {
+          "name": "currentLimitA",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "voltageLimitV",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "crimpTool",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "insertionTool",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "extractionTool",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "provenance",
+          "type": "PartProvenance",
+          "optional": true,
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "WireProps",
+      "props": [
+        {
+          "name": "gauge",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "stripe",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "length",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "lengthTolerance",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "signal",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "insulation",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "voltageRating",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "temperatureRating",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "currentEstimate",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "twistGroup",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "shieldGroup",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "cable",
+          "type": "string",
+          "optional": true,
+          "doc": "Cable this wire is a conductor of (see `cable()`)."
+        },
+        {
+          "name": "conductor",
+          "type": "string | number",
+          "optional": true,
+          "doc": "Conductor number/name within the cable."
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "SpliceProps",
+      "props": [
+        {
+          "name": "type",
+          "type": "string",
+          "optional": true,
+          "doc": "crimp, solder-sleeve, ultrasonic-weld, ..."
+        },
+        {
+          "name": "part",
+          "type": "string",
+          "optional": true,
+          "doc": "Crimp or solder-sleeve part number."
+        },
+        {
+          "name": "branch",
+          "type": "string",
+          "optional": true,
+          "doc": "Branch the splice sits on."
+        },
+        {
+          "name": "location",
+          "type": "number",
+          "optional": true,
+          "doc": "Distance along the branch from its start, in harness units."
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "optional": true,
+          "doc": "Seal / heat-shrink / inspection notes (PRD §9.2)."
+        }
+      ]
+    },
+    {
+      "name": "CableProps",
+      "props": [
+        {
+          "name": "type",
+          "type": "string",
+          "optional": true,
+          "doc": "Catalog type, e.g. \"2x24AWG twisted shielded\"."
+        },
+        {
+          "name": "conductors",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "shield",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "jacket",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "outerDiameter",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "BranchProps",
+      "props": [
+        {
+          "name": "path",
+          "type": "ReadonlyArray<ConnectorInstance | string>",
+          "optional": false,
+          "doc": ""
+        },
+        {
+          "name": "parent",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "sleeve",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "nominalLength",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "breakoutDistance",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "minBendRadius",
+          "type": "number",
+          "optional": true,
+          "doc": "Tightest bend the bundle tolerates (mm) — breakouts must clear it."
+        }
+      ]
+    },
+    {
+      "name": "LabelProps",
+      "props": [
+        {
+          "name": "text",
+          "type": "string",
+          "optional": false,
+          "doc": ""
+        },
+        {
+          "name": "attachTo",
+          "type": "ConnectorInstance | string",
+          "optional": false,
+          "doc": ""
+        },
+        {
+          "name": "offsetFrom",
+          "type": "ConnectorInstance | string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "distance",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "material",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "quantity",
+          "type": "number",
+          "optional": true,
+          "doc": ""
+        }
+      ]
+    }
+  ]
+}

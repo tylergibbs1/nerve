@@ -2,43 +2,35 @@
 
 Everything imports from `@grayhaven/nerve`. The DSL builds a typed design graph; `compileDesign` lowers it to the versioned HIR that every exporter and rule consumes.
 
-Recent additions: parts accept `reservedPins` (cavities that must stay empty, enforced by HK-CONN-015) and `cavityLayout` (drives the connector face views); branches accept `minBendRadius` (breakouts tighter than it fail HK-MFG-005); sleeves named with a trailing capacity (`braided-pet-12`) are checked against the estimated bundle diameter (HK-MFG-006).
+Recent additions: parts accept `reservedPins` (cavities that must stay empty, enforced by HK-CONN-015) and `cavityLayout` (drives the connector face views); branches accept `minBendRadius` (breakouts tighter than it fail HK-MFG-005); sleeves named with a trailing capacity (`braided-pet-12`) are checked against the estimated bundle diameter (HK-MFG-006); connector parts with `currentLimitA`/`voltageLimitV` gate wire current and signal voltage (HK-CONN-016/017).
 
 ## harness(id, options)
-
-```ts
-harness(id, { revision, units, connectors, wires, branches?, labels?, splices?, cables? })
-```
 
 The root design object. `revision` and `units` are required; releases fail closed without them.
 
 ## connector(id, part, { pins })
 
-Place a connector from a part definition. `pins` maps pin numbers to signal names; parts declare `pinCount`, `gender`, and `wireGaugeRange`, and the rules hold wires to them.
+Place a connector from a part definition. `pins` maps pin numbers to signal names; parts declare `pinCount`, `gender`, and `wireGaugeRange`, and the rules hold wires to them. Per-pin `terminals` and `seals` feed the compatibility rules.
 
 ## wire(id, from, to, options)
 
-```ts
-wire(id, from, to, { gauge, color, length, twistGroup?, current? })
-```
+Point-to-point conductor. Endpoints are `connector.pin(n)` references or splice ids. Gauge strings like `"20AWG"` are checked against ampacity (`currentEstimate`) and the connector range; any spelling (`"20 AWG"`, `"awg 20"`, `"20"`) canonicalizes to `"20AWG"` in HIR.
 
-Point-to-point conductor. Endpoints are `connector.pin(n)` references or splice ids. Gauge strings like `"20AWG"` are checked against ampacity and the connector range.
+## splice(id, options)
 
-## splice(id, { type, notes? })
+A junction node (`type: "crimp"`, `"solder"`, …). Wires may terminate on a splice; nets are computed across it and splice-verification tests are generated. `branch` + `location` place it physically.
 
-A junction node (`"crimp"`, `"solder"`, `"ultrasonic"`). Wires may terminate on a splice; nets are computed across it and splice-verification tests are generated.
+## cable(id, options)
 
-## cable(id, { conductors, shield? })
+Groups wires into a multi-conductor cable (wires opt in via their `cable`/`conductor` props), optionally shielded. Shield drains must land on a pin or the rules flag it.
 
-Groups wires into a multi-conductor cable, optionally shielded. Shield drains must land on a pin or the rules flag it.
+## branch(id, { path, … })
 
-## branch(id, { from, to, length })
+Physical bundle segment: `path` lists the connectors it runs between, `nominalLength` drives the board view and cut-length math, `sleeve`/`breakoutDistance`/`minBendRadius` feed the manufacturing rules.
 
-Physical bundle segment for the board view and cut-length math.
+## label(id, { text, attachTo })
 
-## label(id, { text, position })
-
-Printed label on the loom; exported to the label schedule CSV.
+Printed label on the loom, attached to a branch or connector with an optional `offsetFrom`/`distance`; exported to the label schedule CSV.
 
 ## variant(base, overrides)
 
@@ -47,3 +39,125 @@ Derive a configuration from a base harness: add/remove wires per option code wit
 ## rule(name, run, { code })
 
 Author a custom validation rule; `report()` diagnostics with a stable code. Plug in via `defineConfig({ rules })`.
+
+<!-- generated:dsl-reference:start -->
+## Reference (generated from source)
+
+This section is extracted from `@grayhaven/nerve` at build time; it cannot drift from the code.
+
+```ts
+harness(id: string, props: HarnessProps)
+connector(ref: string, part: ConnectorPart, opts: { readonly pins: PinAssignments; readonly terminals?: PinPartAssignment; readonly seals?: PinPartAssignment })
+wire(id: string, from: EndpointInput, to: EndpointInput, props: WireProps = {})
+splice(id: string, props: SpliceProps = {})
+cable(id: string, props: CableProps = {})
+branch(id: string, props: BranchProps)
+label(id: string, props: LabelProps)
+variant(base: HarnessDesign, opts: VariantOptions)
+rule(name: string, run: (ctx: RuleContext) => void, options: RuleOptions = {})
+defineConfig(config: NerveConfig)
+```
+
+### HarnessProps
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `revision` | `string` | yes |  |
+| `units` | `Units` | yes |  |
+| `metadata` | `Readonly<Record<string, string>>` | no |  |
+| `connectors` | `ReadonlyArray<ConnectorInstance>` | yes |  |
+| `wires` | `ReadonlyArray<WireDef>` | yes |  |
+| `branches` | `ReadonlyArray<BranchDef>` | no |  |
+| `labels` | `ReadonlyArray<LabelDef>` | no |  |
+| `splices` | `ReadonlyArray<SpliceDef>` | no |  |
+| `cables` | `ReadonlyArray<CableDef>` | no |  |
+
+### ConnectorPart
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `mpn` | `string` | yes |  |
+| `manufacturer` | `string` | no |  |
+| `family` | `string` | no |  |
+| `description` | `string` | no |  |
+| `gender` | `ConnectorGender` | no |  |
+| `pinCount` | `number` | yes |  |
+| `pinNumbering` | `string` | no |  |
+| `cavityLayout` | `{ readonly rows: number; readonly columns: number }` | no |  |
+| `reservedPins` | `ReadonlyArray<number \| string>` | no | Pins that must stay unassigned (keying, future use, no-connects). |
+| `matingMpn` | `string` | no |  |
+| `compatibleTerminals` | `ReadonlyArray<string>` | no |  |
+| `compatibleSeals` | `ReadonlyArray<string>` | no |  |
+| `compatibleBackshells` | `ReadonlyArray<string>` | no |  |
+| `wireGaugeRange` | `{ readonly min: string; readonly max: string }` | no |  |
+| `sealed` | `boolean` | no | Environmentally sealed housing: every populated cavity needs a seal. |
+| `currentLimitA` | `number` | no |  |
+| `voltageLimitV` | `number` | no |  |
+| `crimpTool` | `string` | no |  |
+| `insertionTool` | `string` | no |  |
+| `extractionTool` | `string` | no |  |
+| `provenance` | `PartProvenance` | no |  |
+
+### WireProps
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `gauge` | `string` | no |  |
+| `color` | `string` | no |  |
+| `stripe` | `string` | no |  |
+| `length` | `number` | no |  |
+| `lengthTolerance` | `number` | no |  |
+| `signal` | `string` | no |  |
+| `insulation` | `string` | no |  |
+| `voltageRating` | `number` | no |  |
+| `temperatureRating` | `number` | no |  |
+| `currentEstimate` | `number` | no |  |
+| `twistGroup` | `string` | no |  |
+| `shieldGroup` | `string` | no |  |
+| `cable` | `string` | no | Cable this wire is a conductor of (see `cable()`). |
+| `conductor` | `string \| number` | no | Conductor number/name within the cable. |
+| `notes` | `string` | no |  |
+
+### SpliceProps
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `type` | `string` | no | crimp, solder-sleeve, ultrasonic-weld, ... |
+| `part` | `string` | no | Crimp or solder-sleeve part number. |
+| `branch` | `string` | no | Branch the splice sits on. |
+| `location` | `number` | no | Distance along the branch from its start, in harness units. |
+| `notes` | `string` | no | Seal / heat-shrink / inspection notes (PRD §9.2). |
+
+### CableProps
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `type` | `string` | no | Catalog type, e.g. "2x24AWG twisted shielded". |
+| `conductors` | `number` | no |  |
+| `shield` | `string` | no |  |
+| `jacket` | `string` | no |  |
+| `outerDiameter` | `number` | no |  |
+| `notes` | `string` | no |  |
+
+### BranchProps
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `path` | `ReadonlyArray<ConnectorInstance \| string>` | yes |  |
+| `parent` | `string` | no |  |
+| `sleeve` | `string` | no |  |
+| `nominalLength` | `number` | no |  |
+| `breakoutDistance` | `number` | no |  |
+| `minBendRadius` | `number` | no | Tightest bend the bundle tolerates (mm) — breakouts must clear it. |
+
+### LabelProps
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `text` | `string` | yes |  |
+| `attachTo` | `ConnectorInstance \| string` | yes |  |
+| `offsetFrom` | `ConnectorInstance \| string` | no |  |
+| `distance` | `number` | no |  |
+| `material` | `string` | no |  |
+| `quantity` | `number` | no |  |
+<!-- generated:dsl-reference:end -->

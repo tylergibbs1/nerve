@@ -9,7 +9,9 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { builtinRules } from "../../nerve-rules/src/index.ts"
+import { hirJsonSchema, HIR_SCHEMA_VERSION } from "../../nerve/src/index.ts"
 import { RULE_SUMMARIES } from "../src/docs/rule-summaries.ts"
+import { dslReferenceMd, extractDslMeta } from "./extract-dsl.ts"
 
 const ROOT = join(import.meta.dir, "..")
 const OUT = join(ROOT, "public")
@@ -50,7 +52,77 @@ Severity drives exit codes: errors fail \`nerve validate\` (exit 1), warnings pa
 `
 }
 
+/** HIR contract page, generated from the live Effect schema. */
+const hirMd = (): string => {
+  const schema = hirJsonSchema() as {
+    required?: ReadonlyArray<string>
+    properties?: Record<string, unknown>
+  }
+  type Obj = Record<string, unknown>
+  const isObj = (v: unknown): v is Obj => typeof v === "object" && v !== null && !Array.isArray(v)
+  const typeOf = (s: unknown): string => {
+    if (!isObj(s)) return "unknown"
+    if (s["enum"] !== undefined) return (s["enum"] as Array<unknown>).map((e) => JSON.stringify(e)).join(" \\| ")
+    if (s["anyOf"] !== undefined) return (s["anyOf"] as Array<unknown>).map(typeOf).join(" \\| ")
+    if (s["type"] === "array") return `Array<${typeOf(s["items"])}>`
+    if (s["type"] === "object" && isObj(s["properties"])) {
+      return `{ ${Object.keys(s["properties"]).join(", ")} }`
+    }
+    if (s["type"] === "object") return "object (record)"
+    return String(s["type"] ?? "unknown")
+  }
+  const table = (name: string, s: unknown): string => {
+    if (!isObj(s)) return ""
+    // Arrays of structs document the element shape.
+    const target = s["type"] === "array" && isObj(s["items"]) ? s["items"] : s
+    if (!isObj(target) || !isObj(target["properties"])) {
+      return `## ${name}\n\nType: \`${typeOf(s)}\`\n`
+    }
+    const req = new Set(Array.isArray(target["required"]) ? (target["required"] as Array<string>) : [])
+    const rows = Object.entries(target["properties"] as Obj)
+      .map(([k, v]) => {
+        const desc = isObj(v) && typeof v["description"] === "string" ? v["description"] : ""
+        return `| \`${k}\` | \`${typeOf(v)}\` | ${req.has(k) ? "yes" : "no"} | ${desc} |`
+      })
+      .join("\n")
+    const prefix = s["type"] === "array" ? "Array of:" : ""
+    return `## ${name}\n\n${prefix}\n\n| Field | Type | Required | Notes |\n| --- | --- | --- | --- |\n${rows}\n`
+  }
+  const props = schema.properties ?? {}
+  const sections = Object.entries(props)
+    .map(([k, v]) => table(k, v))
+    .join("\n")
+  return `# HIR ${HIR_SCHEMA_VERSION} — the compiled harness contract.
+
+Generated from the live Effect schema in \`@grayhaven/nerve\` (\`hirJsonSchema()\`); it cannot drift from the code. \`harness.json\` in every exported packet validates against this. Renderers and rules consume HIR only — never user TypeScript. Optional fields are omitted when absent (never \`null\`), and all collections are canonically sorted, so output is byte-deterministic.
+
+${sections}
+## Versioning
+
+\`schemaVersion\` is \`${HIR_SCHEMA_VERSION}\`. Additive optional fields may appear without a version bump (guarded by the shape-snapshot test); removals, type changes, or new required fields bump the version.
+`
+}
+
 mkdirSync(join(OUT, "docs"), { recursive: true })
+
+// ── DSL surface: extract from source, inject into the authored page ──────
+const dslMeta = extractDslMeta()
+writeFileSync(
+  join(ROOT, "src", "docs", "dsl-meta.json"),
+  JSON.stringify(dslMeta, null, 2) + "\n"
+)
+{
+  const dslPath = join(ROOT, "docs-content", "dsl.md")
+  const dslSrc = readFileSync(dslPath, "utf8")
+  const START = "<!-- generated:dsl-reference:start -->"
+  const END = "<!-- generated:dsl-reference:end -->"
+  const s = dslSrc.indexOf(START)
+  const e = dslSrc.indexOf(END)
+  if (s === -1 || e === -1) throw new Error("dsl.md is missing the generated-reference markers")
+  const next =
+    dslSrc.slice(0, s + START.length) + "\n" + dslReferenceMd(dslMeta) + dslSrc.slice(e)
+  if (next !== dslSrc) writeFileSync(dslPath, next)
+}
 
 const sections: string[] = []
 const fullParts: string[] = []
@@ -65,6 +137,12 @@ const rules = rulesMd()
 writeFileSync(join(OUT, "docs", "rules.md"), indexNote + rules)
 sections.splice(3, 0, `- [Validation Rules](${SITE}/docs/rules.md) (generated from the shipped rule set)`)
 fullParts.splice(3, 0, rules)
+
+// HIR contract page is generated from the live schema, not authored.
+const hir = hirMd()
+writeFileSync(join(OUT, "docs", "hir.md"), indexNote + hir)
+sections.splice(4, 0, `- [HIR Schema](${SITE}/docs/hir.md) (generated from the live Effect schema)`)
+fullParts.splice(4, 0, hir)
 
 const llms = `# Grayhaven Nerve
 

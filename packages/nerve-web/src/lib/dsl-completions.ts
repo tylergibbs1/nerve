@@ -1,9 +1,12 @@
 /**
- * DSL completion source for the editor. Curated to match the worker
- * sandbox surface (compile.worker.ts SANDBOX_MODULES) — the rules-property
- * suite guards the underlying API, and the editor teaches it.
+ * DSL completion source for the editor. Function entries are curated to
+ * match the worker sandbox surface (compile.worker.ts SANDBOX_MODULES);
+ * property entries are GENERATED from @grayhaven/nerve source via
+ * dsl-meta.json (scripts/extract-dsl.ts), so they cannot drift from the
+ * shipped props.
  */
 import type { Completion, CompletionContext, CompletionResult } from "@codemirror/autocomplete"
+import dslMeta from "../docs/dsl-meta.json"
 
 const fn = (label: string, detail: string, info: string): Completion => ({
   label,
@@ -28,12 +31,27 @@ const FUNCTIONS: ReadonlyArray<Completion> = [
   fn("diffHir", "(before, after)", "Semantic diff between two revisions.")
 ]
 
-const OPTIONS: ReadonlyArray<Completion> = [
-  "gauge", "color", "length", "signal", "twistGroup", "currentEstimate",
-  "revision", "units", "connectors", "wires", "branches", "labels", "splices", "cables",
-  "pins", "mpn", "pinCount", "wireGaugeRange", "type", "notes", "shield", "conductors",
-  "path", "nominalLength", "text", "attachTo"
-].map((label) => ({ label, type: "property" as const }))
+// Every prop of every builder options interface, deduped; docs become
+// completion info. Plus `pins`/`terminals`/`seals` from connector()'s
+// inline opts object (not a named interface).
+const OPTIONS: ReadonlyArray<Completion> = (() => {
+  const seen = new Map<string, Completion>()
+  for (const i of dslMeta.interfaces) {
+    for (const p of i.props) {
+      if (!seen.has(p.name)) {
+        seen.set(p.name, {
+          label: p.name,
+          type: "property",
+          ...(p.doc !== "" ? { info: p.doc } : {})
+        })
+      }
+    }
+  }
+  for (const extra of ["pins", "terminals", "seals"]) {
+    if (!seen.has(extra)) seen.set(extra, { label: extra, type: "property" })
+  }
+  return [...seen.values()]
+})()
 
 export const dslCompletions = (ctx: CompletionContext): CompletionResult | null => {
   const word = ctx.matchBefore(/[A-Za-z_]\w*/)

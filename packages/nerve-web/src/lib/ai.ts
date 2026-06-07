@@ -18,6 +18,7 @@ import type { FunctionTool, Response, ResponseInputItem } from "openai/resources
 import { compileSource, countDiagnostics } from "./compile-client.js"
 import { getSource, setSource } from "./sources.js"
 import type { CompileResult } from "./compile-types.js"
+import dslMeta from "../docs/dsl-meta.json"
 
 const KEY_STORAGE = "nerve:openai-key"
 const MODEL = "gpt-5.5"
@@ -80,10 +81,24 @@ const TOOLS: FunctionTool[] = [
   }
 ]
 
+// Generated from @grayhaven/nerve source (scripts/extract-dsl.ts via
+// dsl-meta.json) — the copilot's view of the DSL cannot drift from the
+// shipped builders/props. The old hardcoded line omitted half of
+// WireProps (stripe, twistGroup, shieldGroup, voltageRating, …).
+const dslSurface = (): string => {
+  const sigs = dslMeta.builders.map((b) => b.signature).join("\n")
+  const props = dslMeta.interfaces
+    .map((i) => `${i.name}: ${i.props.map((p) => `${p.name}${p.optional ? "?" : ""}`).join(", ")}`)
+    .join("\n")
+  return `The DSL (imported from "@grayhaven/nerve"):\n\`\`\`\n${sigs}\n\`\`\`\nProps per options object:\n${props}`
+}
+
 const systemPrompt = (projectId: string): string =>
   `You are the Grayhaven Nerve harness agent — an AI copilot inside a wiring-harness design tool where harnesses are TypeScript programs ("harnesses as code").
 
-The DSL (imported from "@grayhaven/nerve"): harness(), connector(id, part, {pins}), wire(id, from, to, {gauge, color, length}), branch(), splice(id, {type}), cable(id, {conductors, shield}), label(). Endpoints are written "CONNECTOR.pin" (e.g. "J1.3") or "SPLICE" for splice nodes. Gauges are strings like "20AWG". Connector parts declare wireGaugeRange {min, max} — wires must fit within it.
+${dslSurface()}
+
+Endpoints are written "CONNECTOR.pin" (e.g. "J1.3") or "SPLICE" for splice nodes. Gauges are strings like "20AWG". Connector parts declare wireGaugeRange {min, max} — wires must fit within it.
 
 Rules of engagement:
 - Each turn you receive the CURRENT source and its diagnostics. Make the user's change with the smallest edit that works: prefer edit_harness_source; rewrite only for sweeping changes.
