@@ -57,6 +57,9 @@ export const HirConnector = Schema.Struct({
   sealed: Schema.optional(Schema.Boolean),
   compatibleTerminals: Schema.optional(Schema.Array(Schema.String)),
   compatibleSeals: Schema.optional(Schema.Array(Schema.String)),
+  /** Per-contact electrical limits from the part datasheet (HK-CONN-016/017). */
+  currentLimitA: Schema.optional(Schema.Number),
+  voltageLimitV: Schema.optional(Schema.Number),
   crimpTool: Schema.optional(Schema.String),
   provenance: Schema.optional(HirProvenance),
   pins: Schema.Array(HirPin)

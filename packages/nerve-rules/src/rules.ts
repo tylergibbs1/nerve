@@ -423,6 +423,58 @@ export const sealIncompatible: Rule = rule(
   { code: "HK-CONN-014" }
 )
 
+export const connectorCurrentExceeded: Rule = rule(
+  "connectorCurrentExceeded",
+  (ctx) => {
+    const byRef = new Map(ctx.hir.connectors.map((c) => [c.ref, c]))
+    for (const w of ctx.hir.wires) {
+      if (w.currentEstimate === undefined) continue
+      for (const end of [w.from, w.to]) {
+        if (!isPinEndpoint(end)) continue
+        const c = byRef.get(end.connector)
+        if (c?.currentLimitA === undefined) continue
+        if (w.currentEstimate > c.currentLimitA) {
+          ctx.report({
+            severity: Err,
+            message: `Wire ${w.id} estimates ${w.currentEstimate}A but connector ${end.connector} (${c.mpn}) contacts are rated ${c.currentLimitA}A.`,
+            target: refs.pin(end.connector, end.pin),
+            targets: [refs.wire(w.id)],
+            data: { currentEstimateA: w.currentEstimate, currentLimitA: c.currentLimitA }
+          })
+        }
+      }
+    }
+  },
+  { code: "HK-CONN-016" }
+)
+
+export const connectorVoltageExceeded: Rule = rule(
+  "connectorVoltageExceeded",
+  (ctx) => {
+    const byRef = new Map(ctx.hir.connectors.map((c) => [c.ref, c]))
+    for (const w of ctx.hir.wires) {
+      if (w.signal === undefined) continue
+      const nominal = signalNominalVolts(w.signal)
+      if (nominal === undefined) continue
+      for (const end of [w.from, w.to]) {
+        if (!isPinEndpoint(end)) continue
+        const c = byRef.get(end.connector)
+        if (c?.voltageLimitV === undefined) continue
+        if (nominal > c.voltageLimitV) {
+          ctx.report({
+            severity: Err,
+            message: `Wire ${w.id} carries ${w.signal} (nominal ${nominal}V) but connector ${end.connector} (${c.mpn}) is rated ${c.voltageLimitV}V.`,
+            target: refs.pin(end.connector, end.pin),
+            targets: [refs.wire(w.id)],
+            data: { nominalV: nominal, voltageLimitV: c.voltageLimitV }
+          })
+        }
+      }
+    }
+  },
+  { code: "HK-CONN-017" }
+)
+
 /**
  * Org approval gate (PRD §30 acceptance: organizations override approval
  * state without mutating library data). Pass the approved MPN list from
@@ -571,6 +623,8 @@ export const builtinRules: ReadonlyArray<Rule> = [
   terminalIncompatible,
   missingSeal,
   sealIncompatible,
+  connectorCurrentExceeded,
+  connectorVoltageExceeded,
   voltageRatingBelowSignal,
   reservedPinAssigned,
   breakoutTighterThanBendRadius,

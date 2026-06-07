@@ -72,6 +72,14 @@
     "name": "sealIncompatible"
   },
   {
+    "code": "HK-CONN-016",
+    "name": "connectorCurrentExceeded"
+  },
+  {
+    "code": "HK-CONN-017",
+    "name": "connectorVoltageExceeded"
+  },
+  {
     "code": "HK-ELEC-005",
     "name": "voltageRatingBelowSignal"
   },

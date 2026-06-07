@@ -49,6 +49,7 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
         "43030-0010",
       ],
       "crimpTool": "63819-0000",
+      "currentLimitA": 8.5,
       "description": "Micro-Fit 3.0 receptacle housing, dual row, 8 circuits",
       "family": "Micro-Fit 3.0",
       "gender": "receptacle",
@@ -97,6 +98,7 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
         "verification": "verified",
       },
       "ref": "J1",
+      "voltageLimitV": 600,
       "wireGaugeRange": {
         "max": "20AWG",
         "min": "30AWG",
@@ -112,6 +114,7 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
         "43031-0010",
       ],
       "crimpTool": "63819-0000",
+      "currentLimitA": 8.5,
       "description": "Micro-Fit 3.0 plug housing, dual row, 8 circuits",
       "family": "Micro-Fit 3.0",
       "gender": "plug",
@@ -160,6 +163,7 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
         "verification": "verified",
       },
       "ref": "M1",
+      "voltageLimitV": 600,
       "wireGaugeRange": {
         "max": "20AWG",
         "min": "30AWG",

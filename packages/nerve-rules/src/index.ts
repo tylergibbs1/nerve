@@ -1,6 +1,8 @@
 export {
   branchMissingLabel,
   builtinRules,
+  connectorCurrentExceeded,
+  connectorVoltageExceeded,
   differentialPairNotTwisted,
   gaugeCurrentMismatch,
   gaugeOutsideConnectorRange,

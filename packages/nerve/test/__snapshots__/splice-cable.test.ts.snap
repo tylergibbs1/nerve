@@ -74,6 +74,7 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
         "SPH-002T-P0.5S",
         "SPH-004T-P0.5S",
       ],
+      "currentLimitA": 2,
       "description": "JST PH housing, 4 circuits",
       "family": "PH",
       "gender": "receptacle",
@@ -106,6 +107,7 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
         "verification": "inspired-by",
       },
       "ref": "J1",
+      "voltageLimitV": 100,
       "wireGaugeRange": {
         "max": "24AWG",
         "min": "32AWG",
@@ -120,6 +122,7 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
         "SPH-002T-P0.5S",
         "SPH-004T-P0.5S",
       ],
+      "currentLimitA": 2,
       "description": "JST PH housing, 3 circuits",
       "family": "PH",
       "gender": "receptacle",
@@ -148,6 +151,7 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
         "verification": "inspired-by",
       },
       "ref": "P1",
+      "voltageLimitV": 100,
       "wireGaugeRange": {
         "max": "24AWG",
         "min": "32AWG",
@@ -162,6 +166,7 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
         "SPH-002T-P0.5S",
         "SPH-004T-P0.5S",
       ],
+      "currentLimitA": 2,
       "description": "JST PH housing, 3 circuits",
       "family": "PH",
       "gender": "receptacle",
@@ -190,6 +195,7 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
         "verification": "inspired-by",
       },
       "ref": "P2",
+      "voltageLimitV": 100,
       "wireGaugeRange": {
         "max": "24AWG",
         "min": "32AWG",

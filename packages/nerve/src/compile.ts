@@ -107,6 +107,8 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
           : undefined,
         reservedPins: c.part.reservedPins?.map(String),
         sealed: c.part.sealed,
+        currentLimitA: c.part.currentLimitA,
+        voltageLimitV: c.part.voltageLimitV,
         compatibleTerminals: c.part.compatibleTerminals
           ? [...c.part.compatibleTerminals]
           : undefined,

@@ -154,6 +154,50 @@ describe("electrical rules", () => {
     expect(diags[0]?.message).toContain("requires at least 18AWG")
   })
 
+  it("HK-CONN-016: wire current above connector contact rating", () => {
+    const rated: ConnectorPart = { mpn: "PH-2", pinCount: 2, currentLimitA: 2 }
+    const a = connector("J1", rated, { pins: { 1: "VBAT_24V", 2: "GND" } })
+    const b = connector("J2", part, { pins: { 1: "VBAT_24V", 2: "GND" } })
+    const hir = compile(
+      harness("overcurrent", {
+        revision: "A",
+        units: "mm",
+        connectors: [a, b],
+        wires: [
+          wire("W1", a.pin(1), b.pin(1), { signal: "VBAT_24V", currentEstimate: 5 })
+        ]
+      })
+    )
+    const diags = runRules(
+      hir,
+      builtinRules.filter((r) => r.name === "connectorCurrentExceeded")
+    )
+    // Only the rated connector end fires — J2's part declares no limit.
+    expect(diags.map((d) => d.code)).toEqual(["HK-CONN-016"])
+    expect(diags[0]?.target).toBe("connector:J1.pin:1")
+    expect(diags[0]?.data).toMatchObject({ currentEstimateA: 5, currentLimitA: 2 })
+  })
+
+  it("HK-CONN-017: signal nominal volts above connector rating", () => {
+    const rated: ConnectorPart = { mpn: "PH-2", pinCount: 2, voltageLimitV: 100 }
+    const a = connector("J1", rated, { pins: { 1: "HV_400V", 2: "GND" } })
+    const b = connector("J2", part, { pins: { 1: "HV_400V", 2: "GND" } })
+    const hir = compile(
+      harness("overvoltage", {
+        revision: "A",
+        units: "mm",
+        connectors: [a, b],
+        wires: [wire("W1", a.pin(1), b.pin(1), { signal: "HV_400V" })]
+      })
+    )
+    const diags = runRules(
+      hir,
+      builtinRules.filter((r) => r.name === "connectorVoltageExceeded")
+    )
+    expect(diags.map((d) => d.code)).toEqual(["HK-CONN-017"])
+    expect(diags[0]?.data).toMatchObject({ nominalV: 400, voltageLimitV: 100 })
+  })
+
   it("HK-ELEC-001: differential pair not twisted", () => {
     const a = connector("J1", part, { pins: { 1: "CAN_H", 2: "CAN_L" } })
     const b = connector("J2", part, { pins: { 1: "CAN_H", 2: "CAN_L" } })
