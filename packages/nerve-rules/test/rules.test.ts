@@ -11,7 +11,15 @@ import {
   type HarnessDesign,
   type Hir
 } from "@grayhaven/nerve"
-import { builtinRules, parseAwg, requiredAwgForCurrent } from "@grayhaven/nerve-rules"
+import {
+  breakoutTighterThanBendRadiusWith,
+  builtinRules,
+  builtinRulesWith,
+  bundleOverSleeveCapacityWith,
+  gaugeCurrentMismatchWith,
+  parseAwg,
+  requiredAwgForCurrent
+} from "@grayhaven/nerve-rules"
 import design from "../../../examples/motor-controller/src/main.harness.js"
 
 const part: ConnectorPart = {
@@ -134,6 +142,75 @@ describe("manufacturing rules", () => {
     expect(
       runRules(hir, builtinRules.filter((r) => r.name === "unparseableGauge"))
     ).toEqual([])
+  })
+})
+
+describe("ShopProfile-parameterized manufacturing rules", () => {
+  it("shop ampacity table overrides the bundled defaults", () => {
+    const hir = make([
+      wire("W1", j1.pin(1), j2.pin(1), { gauge: "24AWG", currentEstimate: 2, signal: "VBAT_24V" })
+    ])
+    // Bundled table: 24AWG carries 1.4A → fires.
+    expect(
+      runRules(hir, [gaugeCurrentMismatchWith()]).map((d) => d.code)
+    ).toEqual(["HK-WIRE-004"])
+    // This shop derates less: 24AWG carries 2.5A → clean.
+    expect(
+      runRules(hir, [gaugeCurrentMismatchWith({ ampacityByAwg: { 24: 2.5 } })])
+    ).toEqual([])
+  })
+
+  it("shop sleeve capacities beat name-derived capacity", () => {
+    const mk = (rulesArg: Parameters<typeof runRules>[1]) => {
+      const hir = compile(
+        harness("sleeves", {
+          revision: "A",
+          units: "mm",
+          connectors: [j1, j2],
+          wires: [
+            wire("W1", j1.pin(1), j2.pin(1), { gauge: "10AWG", signal: "VBAT_24V" }),
+            wire("W2", j1.pin(2), j2.pin(2), { gauge: "10AWG", signal: "GND" })
+          ],
+          branches: [
+            { kind: "branch", id: "B1", path: ["J1", "J2"], sleeve: "shop-loom-A" }
+          ]
+        })
+      )
+      return runRules(hir, rulesArg)
+    }
+    // Name yields no capacity → bundled rule silent.
+    expect(mk([bundleOverSleeveCapacityWith()])).toEqual([])
+    // The shop knows its loom takes 5mm; two 10AWG (~4.8mm OD each) overflow.
+    const diags = mk([bundleOverSleeveCapacityWith({ sleeveCapacityMm: { "shop-loom-A": 5 } })])
+    expect(diags.map((d) => d.code)).toEqual(["HK-MFG-006"])
+    expect(diags[0]?.data).toMatchObject({ sleeveCapacityMm: 5 })
+  })
+
+  it("shop default bend radius applies to branches that declare none", () => {
+    const hir = compile(
+      harness("bend", {
+        revision: "A",
+        units: "mm",
+        connectors: [j1, j2],
+        wires: [wire("W1", j1.pin(1), j2.pin(1), { signal: "VBAT_24V" })],
+        branches: [
+          { kind: "branch", id: "trunk", path: ["J1", "J2"] },
+          { kind: "branch", id: "drop", path: ["J2"], parent: "trunk", breakoutDistance: 10 }
+        ]
+      })
+    )
+    expect(runRules(hir, [breakoutTighterThanBendRadiusWith()])).toEqual([])
+    const diags = runRules(hir, [
+      breakoutTighterThanBendRadiusWith({ defaultMinBendRadiusMm: 25 })
+    ])
+    expect(diags.map((d) => d.code)).toEqual(["HK-MFG-005"])
+  })
+
+  it("builtinRulesWith keeps names/codes so severity overrides still apply", () => {
+    const withShop = builtinRulesWith({ ampacityByAwg: { 24: 2.5 } })
+    expect(withShop.map((r) => r.name)).toEqual(builtinRules.map((r) => r.name))
+    expect(withShop.map((r) => r.code)).toEqual(builtinRules.map((r) => r.code))
+    expect(builtinRulesWith(undefined)).toBe(builtinRules)
   })
 })
 

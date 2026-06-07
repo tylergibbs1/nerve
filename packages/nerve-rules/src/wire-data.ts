@@ -26,8 +26,11 @@ export const AMPACITY_BY_AWG: Readonly<Record<number, number>> = {
 }
 
 /** Smallest (thickest-allowed) AWG number that carries `current` amps, or undefined if off-table. */
-export const requiredAwgForCurrent = (current: number): number | undefined => {
-  const candidates = Object.entries(AMPACITY_BY_AWG)
+export const requiredAwgForCurrent = (
+  current: number,
+  table: Readonly<Record<number, number>> = AMPACITY_BY_AWG
+): number | undefined => {
+  const candidates = Object.entries(table)
     .map(([awg, amps]) => [Number(awg), amps] as const)
     .filter(([, amps]) => amps >= current)
     .map(([awg]) => awg)
@@ -87,11 +90,14 @@ export const INSULATED_OD_MM_BY_AWG: Readonly<Record<number, number>> = {
 
 /**
  * Estimated bundle diameter (mm) for a set of wire ODs: area-equivalent
- * circle with a 1.155 packing factor (hex-pack practical fill).
+ * circle with a packing factor (default 1.155, hex-pack practical fill).
  */
-export const estimateBundleDiameterMm = (odsMm: ReadonlyArray<number>): number => {
+export const estimateBundleDiameterMm = (
+  odsMm: ReadonlyArray<number>,
+  packingFactor = 1.155
+): number => {
   const area = odsMm.reduce((sum, d) => sum + d * d, 0)
-  return Math.sqrt(area) * 1.155
+  return Math.sqrt(area) * packingFactor
 }
 
 /** Sleeve capacity in mm from seed naming ("braided-pet-12" -> 12). */

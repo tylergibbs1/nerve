@@ -79,7 +79,8 @@ export {
   type CostModel,
   type NerveConfig,
   type PartCost,
-  type PartLifecycle
+  type PartLifecycle,
+  type ShopProfile
 } from "./config.js"
 
 export { variant, type VariantOptions } from "./variant.js"

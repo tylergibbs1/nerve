@@ -12,7 +12,8 @@ import {
   rule,
   type Hir,
   type HirEndpoint,
-  type Rule
+  type Rule,
+  type ShopProfile
 } from "@grayhaven/nerve"
 import {
   AMPACITY_BY_AWG,
@@ -188,17 +189,19 @@ export const unparseableGauge: Rule = rule(
 
 // --- Electrical sanity ------------------------------------------------------
 
-export const gaugeCurrentMismatch: Rule = rule(
+/** Shop-parameterized variant: the profile's ampacity table wins. */
+export const gaugeCurrentMismatchWith = (shop?: ShopProfile): Rule => rule(
   "gaugeCurrentMismatch",
   (ctx) => {
+    const table = { ...AMPACITY_BY_AWG, ...shop?.ampacityByAwg }
     for (const w of ctx.hir.wires) {
       if (w.currentEstimate === undefined || w.gauge === undefined) continue
       const awg = parseAwg(w.gauge)
       if (awg === undefined) continue
-      const ampacity = AMPACITY_BY_AWG[awg]
+      const ampacity = table[awg]
       if (ampacity === undefined) continue
       if (w.currentEstimate > ampacity) {
-        const required = requiredAwgForCurrent(w.currentEstimate)
+        const required = requiredAwgForCurrent(w.currentEstimate, table)
         const suffix =
           required !== undefined
             ? ` requires at least ${required}AWG`
@@ -219,6 +222,8 @@ export const gaugeCurrentMismatch: Rule = rule(
   },
   { code: "HK-WIRE-004" }
 )
+
+export const gaugeCurrentMismatch: Rule = gaugeCurrentMismatchWith()
 
 export const differentialPairNotTwisted: Rule = rule(
   "differentialPairNotTwisted",
@@ -540,16 +545,20 @@ export const reservedPinAssigned: Rule = rule(
   { code: "HK-CONN-015" }
 )
 
-export const breakoutTighterThanBendRadius: Rule = rule(
+/** Shop-parameterized variant: the profile's default bend radius applies
+ * to branches that declare none. */
+export const breakoutTighterThanBendRadiusWith = (shop?: ShopProfile): Rule => rule(
   "breakoutTighterThanBendRadius",
   (ctx) => {
     for (const b of ctx.hir.branches) {
-      if (b.minBendRadius === undefined || b.breakoutDistance === undefined) continue
-      if (b.breakoutDistance < b.minBendRadius) {
+      const minBend = b.minBendRadius ?? shop?.defaultMinBendRadiusMm
+      if (minBend === undefined || b.breakoutDistance === undefined) continue
+      if (b.breakoutDistance < minBend) {
         ctx.report({
           severity: Err,
-          message: `Branch ${b.id} breaks out ${b.breakoutDistance}mm from its parent but the bundle needs a ${b.minBendRadius}mm bend radius.`,
-          target: refs.branch(b.id)
+          message: `Branch ${b.id} breaks out ${b.breakoutDistance}mm from its parent but the bundle needs a ${minBend}mm bend radius.`,
+          target: refs.branch(b.id),
+          data: { breakoutDistanceMm: b.breakoutDistance, minBendRadiusMm: minBend }
         })
       }
     }
@@ -557,9 +566,14 @@ export const breakoutTighterThanBendRadius: Rule = rule(
   { code: "HK-MFG-005" }
 )
 
-export const bundleOverSleeveCapacity: Rule = rule(
+export const breakoutTighterThanBendRadius: Rule = breakoutTighterThanBendRadiusWith()
+
+/** Shop-parameterized variant: profile sleeve capacities, OD table, and
+ * packing factor win over the bundled defaults. */
+export const bundleOverSleeveCapacityWith = (shop?: ShopProfile): Rule => rule(
   "bundleOverSleeveCapacity",
   (ctx) => {
+    const odTable = { ...INSULATED_OD_MM_BY_AWG, ...shop?.insulatedOdMmByAwg }
     // Member wires: both endpoints' nodes sit on the branch path (splices
     // count via their branch assignment).
     const spliceBranch = new Map(
@@ -567,7 +581,7 @@ export const bundleOverSleeveCapacity: Rule = rule(
     )
     for (const b of ctx.hir.branches) {
       if (b.sleeve === undefined) continue
-      const capacity = sleeveCapacityMm(b.sleeve)
+      const capacity = shop?.sleeveCapacityMm?.[b.sleeve] ?? sleeveCapacityMm(b.sleeve)
       if (capacity === undefined) continue
       const onBranch = new Set(b.path)
       const nodeOnBranch = (e: (typeof ctx.hir.wires)[number]["from"]): boolean =>
@@ -577,14 +591,14 @@ export const bundleOverSleeveCapacity: Rule = rule(
       for (const w of ctx.hir.wires) {
         if (!nodeOnBranch(w.from) || !nodeOnBranch(w.to)) continue
         const awg = w.gauge !== undefined ? parseAwg(w.gauge) : undefined
-        const od = awg !== undefined ? INSULATED_OD_MM_BY_AWG[awg] : undefined
+        const od = awg !== undefined ? odTable[awg] : undefined
         if (od !== undefined) {
           ods.push(od)
           memberWires.push(w.id)
         }
       }
       if (ods.length === 0) continue
-      const estimated = estimateBundleDiameterMm(ods)
+      const estimated = estimateBundleDiameterMm(ods, shop?.bundlePackingFactor)
       if (estimated > capacity) {
         ctx.report({
           severity: Err,
@@ -603,6 +617,26 @@ export const bundleOverSleeveCapacity: Rule = rule(
   },
   { code: "HK-MFG-006" }
 )
+
+export const bundleOverSleeveCapacity: Rule = bundleOverSleeveCapacityWith()
+
+/**
+ * builtinRules with the shop-capability rules parameterized by a profile
+ * (PRD §10.5 config: `defineConfig({ shop: { … } })`). Same rule names and
+ * codes, so RuleConfig severity overrides apply unchanged.
+ */
+export const builtinRulesWith = (shop?: ShopProfile): ReadonlyArray<Rule> =>
+  shop === undefined
+    ? builtinRules
+    : builtinRules.map((r) =>
+        r.name === "gaugeCurrentMismatch"
+          ? gaugeCurrentMismatchWith(shop)
+          : r.name === "bundleOverSleeveCapacity"
+            ? bundleOverSleeveCapacityWith(shop)
+            : r.name === "breakoutTighterThanBendRadius"
+              ? breakoutTighterThanBendRadiusWith(shop)
+              : r
+      )
 
 export const builtinRules: ReadonlyArray<Rule> = [
   missingRevision,

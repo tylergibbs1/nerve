@@ -52,12 +52,34 @@ export interface CostModel {
   readonly defaultPartCost?: number
 }
 
+/**
+ * Manufacturing capability profile (PRD §38 adjacent): what THIS shop can
+ * build. Capability is organization data like prices — it lives in config,
+ * never in the HIR. Rules fall back to the conservative built-in tables
+ * for anything a profile doesn't override.
+ */
+export interface ShopProfile {
+  /** Max continuous current (A) per AWG — overrides the bundled table. */
+  readonly ampacityByAwg?: Readonly<Record<number, number>>
+  /** Typical insulated OD (mm) per AWG — overrides the bundled table. */
+  readonly insulatedOdMmByAwg?: Readonly<Record<number, number>>
+  /** Sleeve inner capacity (mm) by exact sleeve name — beats the
+   * name-derived capacity ("braided-pet-12" → 12). */
+  readonly sleeveCapacityMm?: Readonly<Record<string, number>>
+  /** Bundle packing factor (default 1.155, practical hex pack). */
+  readonly bundlePackingFactor?: number
+  /** Minimum bend radius (mm) applied when a branch declares none. */
+  readonly defaultMinBendRadiusMm?: number
+}
+
 export interface NerveConfig {
   readonly units?: Units
   readonly defaultWireTolerance?: number
   readonly outputDir?: string
   readonly rules?: RuleConfig
   readonly costing?: CostModel
+  /** Shop manufacturing capabilities; parameterizes the HK-MFG rules. */
+  readonly shop?: ShopProfile
   /** Plugin module paths (relative to the harness file) — rule packs etc. (PRD §40). */
   readonly plugins?: ReadonlyArray<string>
   readonly exports?: {

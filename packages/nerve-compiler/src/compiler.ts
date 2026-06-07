@@ -27,7 +27,7 @@ import {
   type NervePlugin,
   type Rule
 } from "@grayhaven/nerve"
-import { builtinRules } from "@grayhaven/nerve-rules"
+import { builtinRulesWith } from "@grayhaven/nerve-rules"
 import { CompileError, ValidationError } from "./errors.js"
 
 const jiti = createJiti(import.meta.url, { interopDefault: true })
@@ -169,7 +169,9 @@ export const compileFile = (
     const ruleDiagnostics = runRules(
       hir,
       [
-        ...builtinRules,
+        // Shop capability profile (config.shop) parameterizes the HK-MFG
+        // rules; same names/codes, so severity overrides apply unchanged.
+        ...builtinRulesWith(config.shop),
         ...plugins.flatMap((p) => p.rules ?? []),
         ...(options.rules ?? [])
       ],
