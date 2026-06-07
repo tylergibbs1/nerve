@@ -12,7 +12,7 @@
  * spliced power feed is one net. IDs are sequential over a canonical
  * ordering: the same HIR always yields the same plan.
  */
-import { isPinEndpoint, type Hir, type HirEndpoint } from "@grayhaven/nerve"
+import { computeNets, isPinEndpoint, type Hir, type HirEndpoint } from "@grayhaven/nerve"
 
 export interface TestPoint {
   readonly connector: string
@@ -61,51 +61,14 @@ export interface TestPlan {
 
 const cmp = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0)
 
+// Same key format the serialized test points have always used.
 const endpointKey = (e: HirEndpoint): string =>
   isPinEndpoint(e) ? `pin:${e.connector}:${e.pin}` : `splice:${e.splice}`
 
-/** Union-find over endpoint keys; nets span wires AND splices. */
-const computeNets = (hir: Hir): Map<string, string> => {
-  const parent = new Map<string, string>()
-  const find = (k: string): string => {
-    let root = parent.get(k) ?? k
-    if (root !== k) {
-      root = find(root)
-      parent.set(k, root)
-    }
-    return root
-  }
-  const union = (a: string, b: string): void => {
-    const ra = find(a)
-    const rb = find(b)
-    if (ra !== rb) parent.set(ra < rb ? rb : ra, ra < rb ? ra : rb)
-  }
-  for (const w of hir.wires) {
-    union(endpointKey(w.from), endpointKey(w.to))
-  }
-  // Resolve component → canonical net name (first sorted signal, else root key).
-  const signalsByRoot = new Map<string, Array<string>>()
-  for (const w of hir.wires) {
-    if (w.signal === undefined) continue
-    const root = find(endpointKey(w.from))
-    const list = signalsByRoot.get(root) ?? []
-    list.push(w.signal)
-    signalsByRoot.set(root, list)
-  }
-  const names = new Map<string, string>()
-  for (const w of hir.wires) {
-    for (const e of [w.from, w.to]) {
-      const key = endpointKey(e)
-      const root = find(key)
-      const signals = signalsByRoot.get(root)
-      names.set(key, signals !== undefined ? [...signals].sort(cmp)[0]! : root)
-    }
-  }
-  return names
-}
-
 export const generateTestPlan = (hir: Hir): TestPlan => {
-  const netOf = computeNets(hir)
+  // Shared union-find from core: graph.json and rule authors see the
+  // exact same connectivity (it used to be duplicated here).
+  const nets = computeNets(hir, endpointKey)
   const tests: Array<HarnessTest> = []
   let n = 0
   const nextId = () => `T-${String(++n).padStart(3, "0")}`
@@ -113,7 +76,7 @@ export const generateTestPlan = (hir: Hir): TestPlan => {
   // Continuity: one per pin-to-pin wire, in canonical wire order.
   for (const w of hir.wires) {
     if (!isPinEndpoint(w.from) || !isPinEndpoint(w.to)) continue
-    const net = netOf.get(endpointKey(w.from))
+    const net = nets.nameOf(w.from)
     tests.push({
       id: nextId(),
       type: "continuity",
@@ -138,7 +101,7 @@ export const generateTestPlan = (hir: Hir): TestPlan => {
     pins.sort((a, b) => cmp(a.connector, b.connector) || cmp(a.pin, b.pin))
     const hub = pins[0]
     if (hub === undefined) continue
-    const net = netOf.get(`splice:${s.id}`)
+    const net = nets.nameOf({ splice: s.id })
     for (const p of pins.slice(1)) {
       tests.push({
         id: nextId(),
@@ -158,7 +121,7 @@ export const generateTestPlan = (hir: Hir): TestPlan => {
   for (const w of hir.wires) {
     for (const end of [w.from, w.to]) {
       if (!isPinEndpoint(end)) continue
-      const net = netOf.get(endpointKey(end)) ?? `wire:${w.id}`
+      const net = nets.nameOf(end) ?? `wire:${w.id}`
       const pins = netToPin.get(end.connector) ?? new Map<string, string>()
       if (!pins.has(net)) pins.set(net, end.pin)
       netToPin.set(end.connector, pins)
@@ -198,9 +161,9 @@ export const coverage = (
   hir: Hir,
   plan: TestPlan
 ): { readonly nets: number; readonly covered: number } => {
-  const netOf = computeNets(hir)
+  const netOf = computeNets(hir, endpointKey)
   const nets = new Set(
-    hir.wires.map((w) => netOf.get(endpointKey(w.from)) ?? `wire:${w.id}`)
+    hir.wires.map((w) => netOf.nameOf(w.from) ?? `wire:${w.id}`)
   )
   const covered = new Set(
     plan.tests

@@ -72,6 +72,8 @@ export { compileDesign, type CompileResult } from "./compile.js"
 
 export { canonicalGauge, parseAwg, type KnownGauge } from "./gauge.js"
 
+export { computeNets, endpointRefKey, type HarnessNets, type NetSource } from "./nets.js"
+
 export {
   defineConfig,
   type CostModel,

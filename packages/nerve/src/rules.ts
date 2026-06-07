@@ -7,6 +7,7 @@
  */
 import type { Diagnostic, DiagnosticSeverity } from "./diagnostics.js"
 import type { Hir } from "./hir/schema.js"
+import { computeNets, type HarnessNets } from "./nets.js"
 
 export interface RuleReport {
   readonly severity: DiagnosticSeverity
@@ -22,6 +23,11 @@ export interface RuleReport {
 
 export interface RuleContext {
   readonly hir: Hir
+  /**
+   * Electrical nets (splice-transitive, PRD §9.4): the same union-find
+   * the test plan and graph.json use. Computed lazily, once per run.
+   */
+  readonly nets: HarnessNets
   report(report: RuleReport): void
 }
 
@@ -63,11 +69,18 @@ export const runRules = (
   config: RuleConfig = {}
 ): ReadonlyArray<Diagnostic> => {
   const diagnostics: Array<Diagnostic> = []
+  // Lazy + shared: rules that never touch nets pay nothing; rules that do
+  // all see one computation.
+  let netsCache: HarnessNets | undefined
+  const nets = (): HarnessNets => (netsCache ??= computeNets(hir))
   for (const r of rules) {
     const override = config[r.name]
     if (override === "off") continue
     r.run({
       hir,
+      get nets() {
+        return nets()
+      },
       report: ({ severity, message, target, targets, data, code }) => {
         diagnostics.push({
           code: code ?? r.code,

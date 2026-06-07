@@ -10,7 +10,7 @@
  *   diff geometry.
  * - bom/cut-list/label-schedule/diagnostics.json: JSON twins of the CSVs.
  */
-import { isPinEndpoint, type Hir, type HirEndpoint } from "@grayhaven/nerve"
+import { computeNets, isPinEndpoint, type Hir, type HirEndpoint } from "@grayhaven/nerve"
 import { schematicDrawing } from "./svg.js"
 import { boardDrawing } from "./board.js"
 import { connectorFacesDrawing } from "./faces.js"
@@ -41,32 +41,13 @@ export const graphJson = (hir: Hir): string => {
     to: endpointNode(w.to),
     ...(w.signal !== undefined ? { signal: w.signal } : {})
   }))
-  // Nets: union of endpoints connected by wires (splices merge nets).
-  const parent = new Map<string, string>()
-  const find = (x: string): string => {
-    let r = x
-    while (parent.get(r) !== undefined && parent.get(r) !== r) r = parent.get(r)!
-    parent.set(x, r)
-    return r
-  }
-  const union = (a: string, b: string): void => {
-    parent.set(find(a), find(b))
-  }
-  for (const w of hir.wires) union(endpointNode(w.from), endpointNode(w.to))
-  const members = new Map<string, Array<string>>()
-  for (const w of hir.wires) {
-    for (const e of [w.from, w.to]) {
-      const node = endpointNode(e)
-      const root = find(node)
-      const list = members.get(root) ?? []
-      if (!list.includes(node)) list.push(node)
-      members.set(root, list)
-    }
-  }
-  const nets = [...members.values()]
-    .map((m) => [...m].sort())
-    .sort((a, b) => (a[0]! < b[0]! ? -1 : 1))
-    .map((m, i) => ({ id: `net-${i + 1}`, nodes: m }))
+  // Nets: shared splice-transitive union-find from core — the test plan
+  // and rule authors see the exact same connectivity (it used to be
+  // duplicated here, with drift risk between graph.json and tests.csv).
+  const nets = computeNets(hir, endpointNode).groups.map((m, i) => ({
+    id: `net-${i + 1}`,
+    nodes: m
+  }))
   return stringify({ schemaVersion: hir.schemaVersion, harness: hir.harness, nodes, edges, nets })
 }
 
