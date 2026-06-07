@@ -11,7 +11,7 @@
  */
 import { isPinEndpoint, type Hir, type HirConnector, type HirWire } from "@grayhaven/nerve"
 import { diagnosticBadges } from "./badges.js"
-import { renderSvg, type DrawItem, type Drawing } from "./drawing.js"
+import { renderSvg, textWidth, type DrawItem, type Drawing } from "./drawing.js"
 
 const CAV_R = 9
 const PITCH = 26
@@ -20,7 +20,7 @@ const CARD_PAD = 18
 const HEADER = 46
 const MARGIN = 40
 const TITLE_H = 64
-const SIGNAL_COL = 150
+const MIN_SIGNAL_COL = 150
 
 const strokeFor = (color: string | undefined): string => {
   if (color === undefined) return "#888888"
@@ -91,8 +91,21 @@ export const connectorFacesDrawing = (hir: Hir): Drawing => {
     const gridH = rows * PITCH
     const viewW = gridW + 2 * CARD_PAD
     const viewH = gridH + 2 * CARD_PAD
-    const cardW = viewW * 2 + VIEW_GAP + SIGNAL_COL
-    const cardH = HEADER + viewH + 26
+    // Legend column sized to its longest measured row (was a fixed 150px
+    // that long signal names silently overran).
+    const legendRows = cavities
+      .filter((cv) => cv.signal !== undefined)
+      .map(
+        (cv) =>
+          `${cv.pin}  ${cv.signal ?? ""}${cv.wire?.gauge !== undefined ? ` · ${cv.wire.gauge}` : ""}`
+      )
+    const signalCol = Math.max(
+      MIN_SIGNAL_COL,
+      ...legendRows.map((t) => textWidth(t, 9) + 32)
+    )
+    const cardW = viewW * 2 + VIEW_GAP + signalCol
+    // The card must contain whichever is taller: the views or the legend.
+    const cardH = Math.max(HEADER + viewH + 26, HEADER + 10 + legendRows.length * 13 + 16)
 
     // Card frame + header.
     items.push(
@@ -165,9 +178,12 @@ export const connectorFacesDrawing = (hir: Hir): Drawing => {
     drawView(MARGIN + 12 + viewW + VIEW_GAP, false, "REAR · wire side")
 
     // Signal legend beside the rear view (rear order = harness pin order).
+    // Every assigned cavity gets a row — the old slice(0, rows*8) silently
+    // dropped legend rows on fully-populated connectors (data loss), so
+    // the card now grows instead.
     const legendX = MARGIN + 12 + viewW * 2 + VIEW_GAP + 16
     const populatedCavs = cavities.filter((cv) => cv.signal !== undefined)
-    populatedCavs.slice(0, rows * 8).forEach((cav, i) => {
+    populatedCavs.forEach((cav, i) => {
       items.push({
         kind: "text",
         x: legendX,

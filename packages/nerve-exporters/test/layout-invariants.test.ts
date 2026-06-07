@@ -12,6 +12,8 @@
 import { describe, expect, it } from "vitest"
 import fc from "fast-check"
 import { compileDesign, branch, connector, harness, wire, type HarnessDesign } from "@grayhaven/nerve"
+import { textWidth } from "../src/drawing.js"
+import { connectorFacesSvg } from "../src/faces.js"
 import { schematicSvg } from "../src/svg.js"
 import motor from "../../../examples/motor-controller/src/main.harness.js"
 import sensor from "../../../examples/sensor-splice/src/main.harness.js"
@@ -115,12 +117,80 @@ const assertInvariants = (design: HarnessDesign): void => {
   for (const r of g.rails) {
     expect(r.x2 - r.x1, `rail at y=${r.y} too narrow`).toBeGreaterThanOrEqual(120)
   }
+  // 6. Text stays on the canvas (measured with the deterministic
+  // monospace metric the layout itself uses).
+  assertTextInside(schematicSvg(hir))
+}
+
+/** Every <text> extent (anchor-adjusted, measured via textWidth) is on-canvas. */
+const assertTextInside = (svg: string): void => {
+  const dims = /<svg[^>]* width="(\d+(?:\.\d+)?)" height="(\d+(?:\.\d+)?)"/.exec(svg)!
+  const width = Number(dims[1])
+  for (const m of svg.matchAll(/<text([^>]*)>([^<]*)<\/text>/g)) {
+    const attrs = m[1]!
+    const content = m[2]!
+    const x = Number(/ x="([\d.-]+)"/.exec(attrs)?.[1])
+    const size = Number(/font-size="([\d.]+)"/.exec(attrs)?.[1] ?? 12)
+    const anchor = /text-anchor="(\w+)"/.exec(attrs)?.[1] ?? "start"
+    const w = textWidth(content, size)
+    const x0 = anchor === "middle" ? x - w / 2 : anchor === "end" ? x - w : x
+    const x1 = x0 + w
+    expect(
+      x0 >= 0 && x1 <= width,
+      `text "${content.slice(0, 40)}" spans [${x0.toFixed(0)},${x1.toFixed(0)}] outside canvas width ${width}`
+    ).toBe(true)
+  }
 }
 
 describe("layout invariants — real examples", () => {
   it("motor-controller", () => assertInvariants(motor))
   it("sensor-splice", () => assertInvariants(sensor))
   it("robot-platform", () => assertInvariants(robot))
+})
+
+describe("text overflow — long names widen layout instead of clipping", () => {
+  const longPart = { mpn: "VERY-LONG-CATALOG-NUMBER-9999-XL", pinCount: 4 }
+  const LONG = "MOTOR_CONTROLLER_PHASE_CURRENT_SENSE_POSITIVE_24V"
+  const a = connector("LEFT_SIDE_BODY_HARNESS_J100", longPart, {
+    pins: { 1: LONG, 2: `${LONG}_RETURN` }
+  })
+  const b = connector("RIGHT_SIDE_BODY_HARNESS_J200", longPart, {
+    pins: { 1: LONG, 2: `${LONG}_RETURN` }
+  })
+  const design = harness("very-long-harness-identifier-for-the-title-block", {
+    revision: "A",
+    units: "mm",
+    connectors: [a, b],
+    wires: [
+      wire("W1", a.pin(1), b.pin(1), { signal: LONG, gauge: "18AWG", color: "red", length: 100 }),
+      wire("W2", a.pin(2), b.pin(2), { signal: `${LONG}_RETURN`, gauge: "18AWG", color: "black", length: 100 })
+    ]
+  })
+
+  it("schematic", () => {
+    const { hir } = compileDesign(design)
+    assertTextInside(schematicSvg(hir))
+  })
+
+  it("faces (incl. every legend row on a fully-populated single-row part)", () => {
+    // A single-row 10-cavity part: the old slice(0, rows*8) silently
+    // dropped legend rows 9 and 10 — a data-loss bug on the wire side.
+    const full = connector(
+      "J9",
+      { mpn: "INLINE-10", pinCount: 10, cavityLayout: { rows: 1, columns: 10 } },
+      {
+        pins: Object.fromEntries(Array.from({ length: 10 }, (_, i) => [i + 1, `SIGNAL_${i + 1}X`]))
+      }
+    )
+    const { hir } = compileDesign(
+      harness("full-legend", { revision: "A", units: "mm", connectors: [full], wires: [] })
+    )
+    const svg = connectorFacesSvg(hir)
+    assertTextInside(svg)
+    for (let i = 1; i <= 10; i++) {
+      expect(svg, `legend row for SIGNAL_${i}X`).toContain(`SIGNAL_${i}X`)
+    }
+  })
 })
 
 describe("layout invariants — generated branchy designs (property)", () => {

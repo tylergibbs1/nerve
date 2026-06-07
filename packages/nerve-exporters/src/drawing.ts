@@ -73,6 +73,15 @@ export interface Drawing {
   readonly items: ReadonlyArray<DrawItem>
 }
 
+/**
+ * Deterministic text measurement: every drawing pins a MONOSPACE font
+ * stack, so width is exactly chars × size × advance-ratio — no glyph
+ * table needed (0.6 is the ui-monospace/Menlo advance). Layout that must
+ * contain text (connector boxes, legends, label flags) sizes itself with
+ * this instead of magic constants.
+ */
+export const textWidth = (text: string, size = 12): number => text.length * size * 0.6
+
 const dataAttrs = (item: DrawData): string => {
   if (item.data === undefined) return ""
   return Object.entries(item.data)

@@ -166,7 +166,7 @@ exports[`harness board view (PRD §9.5.3) > renders branch trunk, endpoints, sle
 <line x1="416" y1="193" x2="416" y2="201" stroke="#999" stroke-width="1"/>
 <text x="248" y="211" font-size="11" fill="#777" text-anchor="middle">420 mm nominal</text>
 <line x1="120" y1="168" x2="120" y2="134" stroke="#b07a00" stroke-width="1"/>
-<rect x="120" y="118" width="123.2" height="16" fill="#fff3d6" stroke="#b07a00" stroke-width="1"/>
+<rect x="120" y="118" width="121.6" height="16" fill="#fff3d6" stroke="#b07a00" stroke-width="1"/>
 <text x="128" y="130" font-size="11" fill="#8a5a00">L1: MOTOR CTRL A</text>
 </svg>
 "

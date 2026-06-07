@@ -10,9 +10,9 @@
  */
 import { isPinEndpoint, type Hir, type HirEndpoint } from "@grayhaven/nerve"
 import { diagnosticBadges } from "./badges.js"
-import { renderSvg, type DrawItem, type Drawing } from "./drawing.js"
+import { renderSvg, textWidth, type DrawItem, type Drawing } from "./drawing.js"
 
-const BOX_W = 180
+const MIN_BOX_W = 180
 const ROW_H = 20
 const HEADER_H = 40
 const MARGIN = 48
@@ -49,6 +49,16 @@ interface PlacedConnector {
 }
 
 export const schematicDrawing = (hir: Hir): Drawing => {
+  // Box width sized to the longest pin/signal row and header line — long
+  // signal names widen the boxes instead of silently overflowing them.
+  const BOX_W = Math.max(
+    MIN_BOX_W,
+    ...hir.connectors.flatMap((c) => [
+      ...c.pins.map((p) => 34 + textWidth(p.signal ?? "", 12) + 10),
+      10 + textWidth(`${c.mpn}${c.gender !== undefined ? ` · ${c.gender}` : ""}`, 10) + 10
+    ])
+  )
+
   const left: Array<(typeof hir.connectors)[number]> = []
   const right: Array<(typeof hir.connectors)[number]> = []
   hir.connectors.forEach((c, i) => (i % 2 === 0 ? left : right).push(c))
@@ -142,7 +152,10 @@ export const schematicDrawing = (hir: Hir): Drawing => {
     ])
   )
 
-  const width = rightX + BOX_W + MARGIN
+  const width = Math.max(
+    rightX + BOX_W + MARGIN,
+    MARGIN + textWidth(hir.harness.id, 18) + MARGIN
+  )
 
   const errorWires = new Set(
     hir.diagnostics

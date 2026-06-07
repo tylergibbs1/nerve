@@ -1,11 +1,11 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`connector face view > is deterministic and renders the golden example 1`] = `
-"<svg xmlns="http://www.w3.org/2000/svg" width="580" height="464" viewBox="0 0 580 464" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">
-<rect width="580" height="464" fill="#fafafa"/>
+"<svg xmlns="http://www.w3.org/2000/svg" width="580" height="496" viewBox="0 0 580 496" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">
+<rect width="580" height="496" fill="#fafafa"/>
 <text x="40" y="28" font-size="18" font-weight="bold" fill="#111">motor-controller-harness — connector faces</text>
 <text x="40" y="48" fill="#555">rev A · units mm · HIR 0.1.0</text>
-<rect data-connector="J1" x="40" y="72" width="500" height="160" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+<rect data-connector="J1" x="40" y="72" width="500" height="176" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
 <text data-connector="J1" x="52" y="92" font-weight="bold" fill="#111">J1</text>
 <text x="52" y="108" font-size="10" fill="#777">43025-0800 · receptacle</text>
 <rect x="52" y="118" width="140" height="88" rx="10" fill="#f4f2ee" stroke="#999" stroke-width="1"/>
@@ -62,63 +62,63 @@ exports[`connector face view > is deterministic and renders the golden example 1
 <text data-connector="J1" data-pin="6" x="418" y="193" font-size="9" fill="#444">6  ENC_B</text>
 <text data-connector="J1" data-pin="7" x="418" y="206" font-size="9" fill="#444">7  MOTOR_TEMP</text>
 <text data-connector="J1" data-pin="8" x="418" y="219" font-size="9" fill="#444">8  SHIELD_DRAIN</text>
-<rect data-connector="M1" x="40" y="248" width="500" height="160" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
-<text data-connector="M1" x="52" y="268" font-weight="bold" fill="#111">M1</text>
-<text x="52" y="284" font-size="10" fill="#777">43020-0800 · plug</text>
-<rect x="52" y="294" width="140" height="88" rx="10" fill="#f4f2ee" stroke="#999" stroke-width="1"/>
-<path d="M 66 294 L 78 294 L 72 302 Z" fill="none" stroke="#666" stroke-width="1"/>
-<text x="122" y="398" font-size="10" fill="#555" text-anchor="middle">FRONT · mating side</text>
-<circle data-connector="M1" data-pin="1" data-wire="W1" cx="161" cy="325" r="9" fill="red"/>
-<path data-connector="M1" data-pin="1" data-wire="W1" d="M 152 325 A 9 9 0 1 0 170 325 A 9 9 0 1 0 152 325 Z" fill="none" stroke="#333" stroke-width="1.2"/>
-<text data-connector="M1" data-pin="1" data-wire="W1" x="161" y="328.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">1</text>
-<circle data-connector="M1" data-pin="2" data-wire="W2" cx="135" cy="325" r="9" fill="#222222"/>
-<path data-connector="M1" data-pin="2" data-wire="W2" d="M 126 325 A 9 9 0 1 0 144 325 A 9 9 0 1 0 126 325 Z" fill="none" stroke="#333" stroke-width="1.2"/>
-<text data-connector="M1" data-pin="2" data-wire="W2" x="135" y="328.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">2</text>
-<circle data-connector="M1" data-pin="3" data-wire="W3" cx="109" cy="325" r="9" fill="#b8b8b8"/>
-<path data-connector="M1" data-pin="3" data-wire="W3" d="M 100 325 A 9 9 0 1 0 118 325 A 9 9 0 1 0 100 325 Z" fill="none" stroke="#333" stroke-width="1.2"/>
-<text data-connector="M1" data-pin="3" data-wire="W3" x="109" y="328.5" font-size="9" font-weight="bold" fill="#333" text-anchor="middle">3</text>
-<circle data-connector="M1" data-pin="4" data-wire="W4" cx="83" cy="325" r="9" fill="blue"/>
-<path data-connector="M1" data-pin="4" data-wire="W4" d="M 74 325 A 9 9 0 1 0 92 325 A 9 9 0 1 0 74 325 Z" fill="none" stroke="#333" stroke-width="1.2"/>
-<text data-connector="M1" data-pin="4" data-wire="W4" x="83" y="328.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">4</text>
-<path data-connector="M1" data-pin="5" d="M 152 351 A 9 9 0 1 0 170 351 A 9 9 0 1 0 152 351 Z" fill="none" stroke="#666" stroke-width="1.8"/>
-<text data-connector="M1" data-pin="5" x="161" y="354.5" font-size="9" fill="#333" text-anchor="middle">5</text>
-<path data-connector="M1" data-pin="6" d="M 126 351 A 9 9 0 1 0 144 351 A 9 9 0 1 0 126 351 Z" fill="none" stroke="#666" stroke-width="1.8"/>
-<text data-connector="M1" data-pin="6" x="135" y="354.5" font-size="9" fill="#333" text-anchor="middle">6</text>
-<path data-connector="M1" data-pin="7" d="M 100 351 A 9 9 0 1 0 118 351 A 9 9 0 1 0 100 351 Z" fill="none" stroke="#666" stroke-width="1.8"/>
-<text data-connector="M1" data-pin="7" x="109" y="354.5" font-size="9" fill="#333" text-anchor="middle">7</text>
-<path data-connector="M1" data-pin="8" d="M 74 351 A 9 9 0 1 0 92 351 A 9 9 0 1 0 74 351 Z" fill="none" stroke="#666" stroke-width="1.8"/>
-<text data-connector="M1" data-pin="8" x="83" y="354.5" font-size="9" fill="#333" text-anchor="middle">8</text>
-<rect x="262" y="294" width="140" height="88" rx="10" fill="#f4f2ee" stroke="#999" stroke-width="1"/>
-<path d="M 276 294 L 288 294 L 282 302 Z" fill="none" stroke="#666" stroke-width="1"/>
-<text x="332" y="398" font-size="10" fill="#555" text-anchor="middle">REAR · wire side</text>
-<circle data-connector="M1" data-pin="1" data-wire="W1" cx="293" cy="325" r="9" fill="red"/>
-<path data-connector="M1" data-pin="1" data-wire="W1" d="M 284 325 A 9 9 0 1 0 302 325 A 9 9 0 1 0 284 325 Z" fill="none" stroke="#333" stroke-width="1.2"/>
-<text data-connector="M1" data-pin="1" data-wire="W1" x="293" y="328.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">1</text>
-<circle data-connector="M1" data-pin="2" data-wire="W2" cx="319" cy="325" r="9" fill="#222222"/>
-<path data-connector="M1" data-pin="2" data-wire="W2" d="M 310 325 A 9 9 0 1 0 328 325 A 9 9 0 1 0 310 325 Z" fill="none" stroke="#333" stroke-width="1.2"/>
-<text data-connector="M1" data-pin="2" data-wire="W2" x="319" y="328.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">2</text>
-<circle data-connector="M1" data-pin="3" data-wire="W3" cx="345" cy="325" r="9" fill="#b8b8b8"/>
-<path data-connector="M1" data-pin="3" data-wire="W3" d="M 336 325 A 9 9 0 1 0 354 325 A 9 9 0 1 0 336 325 Z" fill="none" stroke="#333" stroke-width="1.2"/>
-<text data-connector="M1" data-pin="3" data-wire="W3" x="345" y="328.5" font-size="9" font-weight="bold" fill="#333" text-anchor="middle">3</text>
-<circle data-connector="M1" data-pin="4" data-wire="W4" cx="371" cy="325" r="9" fill="blue"/>
-<path data-connector="M1" data-pin="4" data-wire="W4" d="M 362 325 A 9 9 0 1 0 380 325 A 9 9 0 1 0 362 325 Z" fill="none" stroke="#333" stroke-width="1.2"/>
-<text data-connector="M1" data-pin="4" data-wire="W4" x="371" y="328.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">4</text>
-<path data-connector="M1" data-pin="5" d="M 284 351 A 9 9 0 1 0 302 351 A 9 9 0 1 0 284 351 Z" fill="none" stroke="#666" stroke-width="1.8"/>
-<text data-connector="M1" data-pin="5" x="293" y="354.5" font-size="9" fill="#333" text-anchor="middle">5</text>
-<path data-connector="M1" data-pin="6" d="M 310 351 A 9 9 0 1 0 328 351 A 9 9 0 1 0 310 351 Z" fill="none" stroke="#666" stroke-width="1.8"/>
-<text data-connector="M1" data-pin="6" x="319" y="354.5" font-size="9" fill="#333" text-anchor="middle">6</text>
-<path data-connector="M1" data-pin="7" d="M 336 351 A 9 9 0 1 0 354 351 A 9 9 0 1 0 336 351 Z" fill="none" stroke="#666" stroke-width="1.8"/>
-<text data-connector="M1" data-pin="7" x="345" y="354.5" font-size="9" fill="#333" text-anchor="middle">7</text>
-<path data-connector="M1" data-pin="8" d="M 362 351 A 9 9 0 1 0 380 351 A 9 9 0 1 0 362 351 Z" fill="none" stroke="#666" stroke-width="1.8"/>
-<text data-connector="M1" data-pin="8" x="371" y="354.5" font-size="9" fill="#333" text-anchor="middle">8</text>
-<text data-connector="M1" data-pin="1" data-wire="W1" x="418" y="304" font-size="9" fill="#444">1  VBAT_24V · 20AWG</text>
-<text data-connector="M1" data-pin="2" data-wire="W2" x="418" y="317" font-size="9" fill="#444">2  GND · 20AWG</text>
-<text data-connector="M1" data-pin="3" data-wire="W3" x="418" y="330" font-size="9" fill="#444">3  CAN_H · 24AWG</text>
-<text data-connector="M1" data-pin="4" data-wire="W4" x="418" y="343" font-size="9" fill="#444">4  CAN_L · 24AWG</text>
-<text data-connector="M1" data-pin="5" x="418" y="356" font-size="9" fill="#444">5  ENC_A</text>
-<text data-connector="M1" data-pin="6" x="418" y="369" font-size="9" fill="#444">6  ENC_B</text>
-<text data-connector="M1" data-pin="7" x="418" y="382" font-size="9" fill="#444">7  MOTOR_TEMP</text>
-<text data-connector="M1" data-pin="8" x="418" y="395" font-size="9" fill="#444">8  SHIELD_DRAIN</text>
+<rect data-connector="M1" x="40" y="264" width="500" height="176" rx="6" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+<text data-connector="M1" x="52" y="284" font-weight="bold" fill="#111">M1</text>
+<text x="52" y="300" font-size="10" fill="#777">43020-0800 · plug</text>
+<rect x="52" y="310" width="140" height="88" rx="10" fill="#f4f2ee" stroke="#999" stroke-width="1"/>
+<path d="M 66 310 L 78 310 L 72 318 Z" fill="none" stroke="#666" stroke-width="1"/>
+<text x="122" y="414" font-size="10" fill="#555" text-anchor="middle">FRONT · mating side</text>
+<circle data-connector="M1" data-pin="1" data-wire="W1" cx="161" cy="341" r="9" fill="red"/>
+<path data-connector="M1" data-pin="1" data-wire="W1" d="M 152 341 A 9 9 0 1 0 170 341 A 9 9 0 1 0 152 341 Z" fill="none" stroke="#333" stroke-width="1.2"/>
+<text data-connector="M1" data-pin="1" data-wire="W1" x="161" y="344.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">1</text>
+<circle data-connector="M1" data-pin="2" data-wire="W2" cx="135" cy="341" r="9" fill="#222222"/>
+<path data-connector="M1" data-pin="2" data-wire="W2" d="M 126 341 A 9 9 0 1 0 144 341 A 9 9 0 1 0 126 341 Z" fill="none" stroke="#333" stroke-width="1.2"/>
+<text data-connector="M1" data-pin="2" data-wire="W2" x="135" y="344.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">2</text>
+<circle data-connector="M1" data-pin="3" data-wire="W3" cx="109" cy="341" r="9" fill="#b8b8b8"/>
+<path data-connector="M1" data-pin="3" data-wire="W3" d="M 100 341 A 9 9 0 1 0 118 341 A 9 9 0 1 0 100 341 Z" fill="none" stroke="#333" stroke-width="1.2"/>
+<text data-connector="M1" data-pin="3" data-wire="W3" x="109" y="344.5" font-size="9" font-weight="bold" fill="#333" text-anchor="middle">3</text>
+<circle data-connector="M1" data-pin="4" data-wire="W4" cx="83" cy="341" r="9" fill="blue"/>
+<path data-connector="M1" data-pin="4" data-wire="W4" d="M 74 341 A 9 9 0 1 0 92 341 A 9 9 0 1 0 74 341 Z" fill="none" stroke="#333" stroke-width="1.2"/>
+<text data-connector="M1" data-pin="4" data-wire="W4" x="83" y="344.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">4</text>
+<path data-connector="M1" data-pin="5" d="M 152 367 A 9 9 0 1 0 170 367 A 9 9 0 1 0 152 367 Z" fill="none" stroke="#666" stroke-width="1.8"/>
+<text data-connector="M1" data-pin="5" x="161" y="370.5" font-size="9" fill="#333" text-anchor="middle">5</text>
+<path data-connector="M1" data-pin="6" d="M 126 367 A 9 9 0 1 0 144 367 A 9 9 0 1 0 126 367 Z" fill="none" stroke="#666" stroke-width="1.8"/>
+<text data-connector="M1" data-pin="6" x="135" y="370.5" font-size="9" fill="#333" text-anchor="middle">6</text>
+<path data-connector="M1" data-pin="7" d="M 100 367 A 9 9 0 1 0 118 367 A 9 9 0 1 0 100 367 Z" fill="none" stroke="#666" stroke-width="1.8"/>
+<text data-connector="M1" data-pin="7" x="109" y="370.5" font-size="9" fill="#333" text-anchor="middle">7</text>
+<path data-connector="M1" data-pin="8" d="M 74 367 A 9 9 0 1 0 92 367 A 9 9 0 1 0 74 367 Z" fill="none" stroke="#666" stroke-width="1.8"/>
+<text data-connector="M1" data-pin="8" x="83" y="370.5" font-size="9" fill="#333" text-anchor="middle">8</text>
+<rect x="262" y="310" width="140" height="88" rx="10" fill="#f4f2ee" stroke="#999" stroke-width="1"/>
+<path d="M 276 310 L 288 310 L 282 318 Z" fill="none" stroke="#666" stroke-width="1"/>
+<text x="332" y="414" font-size="10" fill="#555" text-anchor="middle">REAR · wire side</text>
+<circle data-connector="M1" data-pin="1" data-wire="W1" cx="293" cy="341" r="9" fill="red"/>
+<path data-connector="M1" data-pin="1" data-wire="W1" d="M 284 341 A 9 9 0 1 0 302 341 A 9 9 0 1 0 284 341 Z" fill="none" stroke="#333" stroke-width="1.2"/>
+<text data-connector="M1" data-pin="1" data-wire="W1" x="293" y="344.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">1</text>
+<circle data-connector="M1" data-pin="2" data-wire="W2" cx="319" cy="341" r="9" fill="#222222"/>
+<path data-connector="M1" data-pin="2" data-wire="W2" d="M 310 341 A 9 9 0 1 0 328 341 A 9 9 0 1 0 310 341 Z" fill="none" stroke="#333" stroke-width="1.2"/>
+<text data-connector="M1" data-pin="2" data-wire="W2" x="319" y="344.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">2</text>
+<circle data-connector="M1" data-pin="3" data-wire="W3" cx="345" cy="341" r="9" fill="#b8b8b8"/>
+<path data-connector="M1" data-pin="3" data-wire="W3" d="M 336 341 A 9 9 0 1 0 354 341 A 9 9 0 1 0 336 341 Z" fill="none" stroke="#333" stroke-width="1.2"/>
+<text data-connector="M1" data-pin="3" data-wire="W3" x="345" y="344.5" font-size="9" font-weight="bold" fill="#333" text-anchor="middle">3</text>
+<circle data-connector="M1" data-pin="4" data-wire="W4" cx="371" cy="341" r="9" fill="blue"/>
+<path data-connector="M1" data-pin="4" data-wire="W4" d="M 362 341 A 9 9 0 1 0 380 341 A 9 9 0 1 0 362 341 Z" fill="none" stroke="#333" stroke-width="1.2"/>
+<text data-connector="M1" data-pin="4" data-wire="W4" x="371" y="344.5" font-size="9" font-weight="bold" fill="#ffffff" text-anchor="middle">4</text>
+<path data-connector="M1" data-pin="5" d="M 284 367 A 9 9 0 1 0 302 367 A 9 9 0 1 0 284 367 Z" fill="none" stroke="#666" stroke-width="1.8"/>
+<text data-connector="M1" data-pin="5" x="293" y="370.5" font-size="9" fill="#333" text-anchor="middle">5</text>
+<path data-connector="M1" data-pin="6" d="M 310 367 A 9 9 0 1 0 328 367 A 9 9 0 1 0 310 367 Z" fill="none" stroke="#666" stroke-width="1.8"/>
+<text data-connector="M1" data-pin="6" x="319" y="370.5" font-size="9" fill="#333" text-anchor="middle">6</text>
+<path data-connector="M1" data-pin="7" d="M 336 367 A 9 9 0 1 0 354 367 A 9 9 0 1 0 336 367 Z" fill="none" stroke="#666" stroke-width="1.8"/>
+<text data-connector="M1" data-pin="7" x="345" y="370.5" font-size="9" fill="#333" text-anchor="middle">7</text>
+<path data-connector="M1" data-pin="8" d="M 362 367 A 9 9 0 1 0 380 367 A 9 9 0 1 0 362 367 Z" fill="none" stroke="#666" stroke-width="1.8"/>
+<text data-connector="M1" data-pin="8" x="371" y="370.5" font-size="9" fill="#333" text-anchor="middle">8</text>
+<text data-connector="M1" data-pin="1" data-wire="W1" x="418" y="320" font-size="9" fill="#444">1  VBAT_24V · 20AWG</text>
+<text data-connector="M1" data-pin="2" data-wire="W2" x="418" y="333" font-size="9" fill="#444">2  GND · 20AWG</text>
+<text data-connector="M1" data-pin="3" data-wire="W3" x="418" y="346" font-size="9" fill="#444">3  CAN_H · 24AWG</text>
+<text data-connector="M1" data-pin="4" data-wire="W4" x="418" y="359" font-size="9" fill="#444">4  CAN_L · 24AWG</text>
+<text data-connector="M1" data-pin="5" x="418" y="372" font-size="9" fill="#444">5  ENC_A</text>
+<text data-connector="M1" data-pin="6" x="418" y="385" font-size="9" fill="#444">6  ENC_B</text>
+<text data-connector="M1" data-pin="7" x="418" y="398" font-size="9" fill="#444">7  MOTOR_TEMP</text>
+<text data-connector="M1" data-pin="8" x="418" y="411" font-size="9" fill="#444">8  SHIELD_DRAIN</text>
 </svg>
 "
 `;

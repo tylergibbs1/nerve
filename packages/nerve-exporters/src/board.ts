@@ -9,7 +9,7 @@
  */
 import type { Hir, HirBranch } from "@grayhaven/nerve"
 import { diagnosticBadges } from "./badges.js"
-import { renderSvg, type DrawItem, type Drawing } from "./drawing.js"
+import { renderSvg, textWidth, type DrawItem, type Drawing } from "./drawing.js"
 
 const SCALE = 0.8 // px per mm
 const MARGIN = 48
@@ -150,7 +150,8 @@ export const boardDrawing = (hir: Hir): Drawing => {
           kind: "rect",
           x: lx,
           y: cy - 50,
-          w: 16 + flagText.length * 6.7,
+          // Measured, not the old hand-tuned 6.7px/char approximation.
+          w: 16 + textWidth(flagText, 11),
           h: 16,
           fill: "#fff3d6",
           stroke: "#b07a00",
