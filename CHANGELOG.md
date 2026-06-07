@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.4.0 — 2026-06-07
+### Connector face views (PRD §9.5.2)
+- New deterministic exporter: per connector, FRONT (mating side, mirrored) and
+  REAR (wire side) cavity views with population state, wire colors, reserved
+  cavities, orientation markers, and a pin/signal/gauge legend. In the packet
+  (`connector-faces.svg` + a PDF page), the web workspace (Connectors tab with
+  interactive HTML download), and `nerve render --view faces`.
+
+### Rules (17 -> 21, + provider conflicts)
+- `HK-ELEC-005` wire voltage rating below the signal's nominal volts.
+- `HK-CONN-015` signal assigned to a part-reserved cavity.
+- `HK-MFG-005` branch breakout tighter than its `minBendRadius`.
+- `HK-MFG-006` estimated bundle diameter exceeds sleeve capacity (per-AWG
+  insulated-OD table, hex-pack estimate).
+- `HK-LIB-001` part-data providers disagree on load-bearing fields.
+
+### Part-data providers + library (PRD §42/§30)
+- `PartProvider` / `staticProvider` / `resolvePart` in `@grayhaven/nerve`:
+  priority resolution with conflict diagnostics, never silent overwrites.
+- `@grayhaven/nerve-connectors`: 5 families / 21 parts (Molex Micro-Fit 3.0
+  incl. new 16-circuit housings, Mega-Fit, JST PH, JST XH, TE Deutsch DT,
+  AMASS XT60) with cavity layouts, mating pairs, gauge ranges, provenance.
+  `allParts` + `nerveConnectorsProvider` exports. Examples now import their
+  parts from the library.
+
+### HIR satellites + PNG (PRD §9.3/§9.8)
+- `graph.json` (nodes/edges/nets), `render-layout.json` (DrawingIR per
+  sheet), `diagnostics.json`, and JSON twins of the BOM/cut-list/label CSVs,
+  all in the packet. `nerve render --format png`.
+
+### Schema (additive)
+- `ConnectorPart.reservedPins`, `BranchProps.minBendRadius`; `cavityLayout`
+  now flows through to HIR connectors.
+
+### Web
+- Cross-view traceability: click any rendered object for a persistent
+  highlight + inspector (with View Source jump); diagnostics rows select
+  their target; workspace search across wires/signals/connectors/pins.
+- AI copilot now uses OpenAI (gpt-5.5, Responses API), browser-direct.
+
 ## 0.3.0 — 2026-06-07
 ### Rules
 - HK-ELEC-001 now recognizes bus-indexed differential pairs: `CAN1_H`/`CAN1_L`,

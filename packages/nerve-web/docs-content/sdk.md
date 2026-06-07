@@ -87,6 +87,21 @@ export default defineConfig({
 })
 ```
 
+## Part data through providers
+
+Part data is pluggable: the bundled library, your PLM, a distributor API, anything that answers an MPN. Providers are consulted in priority order, and disagreement on load-bearing fields is a diagnostic, never a silent overwrite.
+
+```ts
+import { resolvePart, staticProvider } from "@grayhaven/nerve"
+import { nerveConnectorsProvider } from "@grayhaven/nerve-connectors"
+
+const plm = staticProvider("acme-plm", loadFromPlm())
+const { part, provider, diagnostics } = resolvePart([plm, nerveConnectorsProvider], "PHR-4")
+// diagnostics: HK-LIB-001 warnings when providers disagree (pinCount, gender, limits)
+```
+
+The bundled library ships verified families with cavity layouts, gauge ranges, mating pairs, crimp tooling, and dated provenance: Molex Micro-Fit 3.0 and Mega-Fit, JST PH and XH, TE Deutsch DT, AMASS XT60.
+
 ## The HIR is a schema, not a guess
 
 `harness.json` round-trips through a versioned Effect Schema: decode untrusted input, encode canonically:

@@ -2,6 +2,8 @@
 
 Everything imports from `@grayhaven/nerve`. The DSL builds a typed design graph; `compileDesign` lowers it to the versioned HIR that every exporter and rule consumes.
 
+Recent additions: parts accept `reservedPins` (cavities that must stay empty, enforced by HK-CONN-015) and `cavityLayout` (drives the connector face views); branches accept `minBendRadius` (breakouts tighter than it fail HK-MFG-005); sleeves named with a trailing capacity (`braided-pet-12`) are checked against the estimated bundle diameter (HK-MFG-006).
+
 ## harness(id, options)
 
 ```ts
