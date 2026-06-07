@@ -26,7 +26,7 @@ A wiring harness is a program your machine runs on copper. Today it lives in PDF
 - **17 validation rules with stable `HK-*` codes** — missing ground returns, untwisted differential pairs (CAN/RS-485/USB, bus-indexed), ampacity vs. gauge, pin/signal mismatches, unlabeled branches… each one a potential field failure caught at compile time
 - **Deterministic artifacts** — schematic + harness-board SVGs, BOM / cut-list / label / test-plan CSVs, assembly instructions, a PDF manufacturing packet, and a zip that hashes identically for identical inputs
 - **An interactive web workspace** — compile-on-type in a Web Worker, schematics with net hover-highlighting and zoom, lint gutters that point at the offending wire, full packet export from the browser, and a self-contained interactive HTML viewer you can email to the shop floor
-- **An AI copilot** — describe the change; edits land only after they compile and pass the rules (bring your own Anthropic key)
+- **An AI copilot** — describe the change; edits land only after they compile and pass the rules (bring your own OpenAI key)
 - **Agent-ready docs** — [`/llms.txt`](https://nerve-demo.vercel.app/llms.txt), per-page markdown mirrors, copy-as-markdown everywhere
 
 The editor catches the classic mistake — a wire carrying `V5` landing on a pin assigned `V9` — as you type:

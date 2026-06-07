@@ -6,13 +6,6 @@ import react from "@vitejs/plugin-react"
 import { tanstackRouter } from "@tanstack/router-plugin/vite"
 import { SITE } from "./scripts/site.js"
 
-// @anthropic-ai/sdk's import graph reaches Node-only helper modules
-// (agent-toolset, credential chain) that never execute in the browser.
-// Shim the builtins so rollup can resolve their named exports.
-const nodeShim = fileURLToPath(new URL("./src/shims/node-empty.ts", import.meta.url))
-// The SDK's agent-toolset (15KB of Node tool plumbing) is dead weight in
-// the browser; stub the whole module rather than just its builtins.
-const toolsetStub = fileURLToPath(new URL("./src/shims/sdk-agent-toolset-stub.ts", import.meta.url))
 const genScript = fileURLToPath(new URL("./scripts/gen-llms.ts", import.meta.url))
 
 // Agent-readable docs variants regenerate on every build AND dev-server
@@ -30,18 +23,6 @@ const axHeaders = {
 }
 
 export default defineConfig({
-  resolve: {
-    alias: [
-      {
-        find: /^\.\.\/\.\.\/tools\/agent-toolset\/node\.mjs$/,
-        replacement: toolsetStub
-      },
-      {
-        find: /^node:(crypto|child_process|util|stream|stream\/promises|fs|fs\/promises|path|readline|os)$/,
-        replacement: nodeShim
-      }
-    ]
-  },
   // Tailwind v4's browser floor is Safari 16.4 / Chrome 111 / FF128 — the
   // CSS already breaks below it, so transpiling JS lower is dead weight.
   // The es-format worker needs module-worker support (Safari 15+/FF114+).

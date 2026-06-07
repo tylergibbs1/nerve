@@ -7,19 +7,20 @@
  * bypass HK-* rule failures (§12.3): it either converges to a clean compile
  * or surfaces the remaining diagnostics for review.
  *
- * No server: this is a static SPA, so calls go browser → Anthropic with a
- * user-supplied API key (kept in localStorage, sent only to Anthropic).
+ * No server: this is a static SPA, so calls go browser → OpenAI with a
+ * user-supplied API key (kept in localStorage, sent only to OpenAI).
+ * Multi-turn tool state rides on the Responses API's previous_response_id
+ * instead of client-side item replay.
  */
 // The SDK loads lazily on the first agent turn (dynamic import below), so
-// none of it ships in the route chunk. The /client entry (not the root
-// index) avoids Node-only helpers that break the browser bundle.
-import type { MessageParam, Tool, ToolResultBlockParam } from "@anthropic-ai/sdk/resources/messages"
+// none of it ships in the route chunk. Type-only imports are erased.
+import type { FunctionTool, Response, ResponseInputItem } from "openai/resources/responses/responses"
 import { compileSource, countDiagnostics } from "./compile-client.js"
 import { getSource, setSource } from "./sources.js"
 import type { CompileResult } from "./compile-types.js"
 
-const KEY_STORAGE = "nerve:anthropic-key"
-const MODEL = "claude-opus-4-8"
+const KEY_STORAGE = "nerve:openai-key"
+const MODEL = "gpt-5.2"
 const MAX_TOOL_ROUNDS = 6
 
 export const getApiKey = (): string | undefined => {
@@ -39,14 +40,16 @@ export const setApiKey = (key: string): void => {
   }
 }
 
-const TOOLS: Tool[] = [
+const TOOLS: FunctionTool[] = [
   {
+    type: "function",
     name: "edit_harness_source",
     description:
       "Apply a surgical patch to the current harness source. Use for focused changes. " +
       "old_string must appear EXACTLY ONCE in the source (include surrounding lines to disambiguate). " +
       "The result is compiled immediately; you get back the diagnostics.",
-    input_schema: {
+    strict: true,
+    parameters: {
       type: "object",
       properties: {
         old_string: {
@@ -55,20 +58,24 @@ const TOOLS: Tool[] = [
         },
         new_string: { type: "string", description: "Replacement text" }
       },
-      required: ["old_string", "new_string"]
+      required: ["old_string", "new_string"],
+      additionalProperties: false
     }
   },
   {
+    type: "function",
     name: "rewrite_harness_source",
     description:
       "Replace the entire harness source. Use only when changes are too extensive for patches " +
       "(roughly >30% of the file). The result is compiled immediately; you get back the diagnostics.",
-    input_schema: {
+    strict: true,
+    parameters: {
       type: "object",
       properties: {
         source: { type: "string", description: "The complete new TypeScript harness source" }
       },
-      required: ["source"]
+      required: ["source"],
+      additionalProperties: false
     }
   }
 ]
@@ -130,7 +137,7 @@ export const applyPatch = (
   return { ok: false, report: `Unknown tool: ${name}` }
 }
 
-/** Apply a tool call, compile-verify it, and return the tool_result text. */
+/** Apply a tool call, compile-verify it, and return the function output. */
 const applyTool = async (
   projectId: string,
   name: string,
@@ -155,7 +162,8 @@ const applyTool = async (
 
 /**
  * One user turn through the agent loop: stream text, execute tools with
- * compile verification, feed diagnostics back, repeat until end_turn.
+ * compile verification, feed diagnostics back, repeat until the model
+ * stops calling tools.
  */
 export const runAgentTurn = async (
   projectId: string,
@@ -169,45 +177,68 @@ export const runAgentTurn = async (
     onEvent({ type: "error", text: "No API key configured." })
     return
   }
-  // Lazy-load the SDK: ~100KB that only users of the AI pane ever pay for.
-  const [{ Anthropic }, { APIError, AuthenticationError }] = await Promise.all([
-    import("@anthropic-ai/sdk/client"),
-    import("@anthropic-ai/sdk/error")
-  ])
-  const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true })
+  // Lazy-load the SDK: only users of the AI pane ever pay for it.
+  const { default: OpenAI } = await import("openai")
+  const client = new OpenAI({ apiKey, dangerouslyAllowBrowser: true })
 
-  const messages: MessageParam[] = [
-    ...history.map((t): MessageParam => ({ role: t.role, content: t.text || "(applied edits)" })),
+  // First round carries the chat history + fresh source; later rounds ride
+  // previous_response_id, sending only the function outputs back.
+  let input: ResponseInputItem[] = [
+    ...history.map(
+      (t): ResponseInputItem => ({ role: t.role, content: t.text || "(applied edits)" })
+    ),
     {
       role: "user",
       content: `${userMessage}\n\n<current_source>\n${getSource(projectId)}\n</current_source>`
     }
   ]
+  let previousResponseId: string | undefined
 
   try {
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-      const stream = client.messages.stream({
+      const stream = await client.responses.create({
         model: MODEL,
-        max_tokens: 16000,
-        thinking: { type: "adaptive" },
-        system: systemPrompt(projectId),
+        instructions: systemPrompt(projectId),
+        reasoning: { effort: "medium" },
+        max_output_tokens: 16000,
         tools: TOOLS,
-        messages
+        input,
+        ...(previousResponseId !== undefined ? { previous_response_id: previousResponseId } : {}),
+        stream: true
       })
-      stream.on("text", (delta) => onEvent({ type: "text", text: delta }))
-      const message = await stream.finalMessage()
 
-      if (message.stop_reason !== "tool_use") {
+      let finalResponse: Response | undefined
+      for await (const event of stream) {
+        if (event.type === "response.output_text.delta") {
+          onEvent({ type: "text", text: event.delta })
+        } else if (event.type === "response.completed") {
+          finalResponse = event.response
+        } else if (event.type === "response.failed") {
+          throw new Error(event.response.error?.message ?? "Response failed")
+        }
+      }
+      if (finalResponse === undefined) throw new Error("Stream ended without a completed response")
+      previousResponseId = finalResponse.id
+
+      const calls = finalResponse.output.filter((item) => item.type === "function_call")
+
+      if (calls.length === 0) {
         onEvent({ type: "done" })
         return
       }
 
-      messages.push({ role: "assistant", content: message.content })
-      const toolResults: ToolResultBlockParam[] = []
-      for (const block of message.content) {
-        if (block.type !== "tool_use") continue
-        onEvent({ type: "tool", tool: { name: block.name, status: "running" } })
-        const outcome = await applyTool(projectId, block.name, block.input)
+      const outputs: ResponseInputItem[] = []
+      for (const call of calls) {
+        if (call.type !== "function_call") continue
+        const name = call.name
+        onEvent({ type: "tool", tool: { name, status: "running" } })
+        let parsed: unknown
+        try {
+          parsed = JSON.parse(call.arguments)
+        } catch {
+          parsed = {}
+        }
+        const outcome = await applyTool(projectId, name, parsed)
         if (outcome.ok && outcome.result !== undefined) {
           onSourceApplied(outcome.result)
           const counts = countDiagnostics(outcome.result.hir.diagnostics)
@@ -217,26 +248,31 @@ export const runAgentTurn = async (
         onEvent({
           type: "tool",
           tool: {
-            name: block.name,
+            name,
             status: outcome.ok ? "ok" : "failed",
             ...(detail !== undefined ? { detail } : {})
           }
         })
-        toolResults.push({
-          type: "tool_result",
-          tool_use_id: block.id,
-          content: outcome.report,
-          ...(outcome.ok ? {} : { is_error: true as const })
+        outputs.push({
+          type: "function_call_output",
+          call_id: call.call_id,
+          output: outcome.ok ? outcome.report : `ERROR: ${outcome.report}`
         })
       }
-      messages.push({ role: "user", content: toolResults })
+      input = outputs
     }
     onEvent({ type: "error", text: `Stopped after ${MAX_TOOL_ROUNDS} tool rounds without finishing.` })
   } catch (e) {
-    if (e instanceof AuthenticationError) {
+    const { default: OpenAI } = await import("openai")
+    if (e instanceof OpenAI.AuthenticationError) {
       onEvent({ type: "error", text: "Invalid API key — check it in the panel header." })
-    } else if (e instanceof APIError) {
-      onEvent({ type: "error", text: `Anthropic API error ${e.status}: ${e.message}` })
+    } else if (e instanceof OpenAI.APIConnectionError) {
+      onEvent({
+        type: "error",
+        text: "Could not reach OpenAI — check your network (or extensions blocking api.openai.com)."
+      })
+    } else if (e instanceof OpenAI.APIError) {
+      onEvent({ type: "error", text: `OpenAI API error ${e.status ?? ""}: ${e.message}` })
     } else {
       onEvent({ type: "error", text: e instanceof Error ? e.message : String(e) })
     }

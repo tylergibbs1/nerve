@@ -93,16 +93,16 @@ export function AiPane({ projectId }: { projectId: string }) {
           <span className="spec-tag">AI Copilot</span>
           <p>
             Edits your harness through compile-verified patches. Calls go directly from your
-            browser to Anthropic — the key is stored locally and sent nowhere else.
+            browser to OpenAI — the key is stored locally and sent nowhere else.
           </p>
           <Input
             type="password"
-            placeholder="sk-ant-…"
+            placeholder="sk-…"
             className="h-9 text-sm"
             value={keyDraft}
             onChange={(e) => setKeyDraft(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && keyDraft.startsWith("sk-ant-")) {
+              if (e.key === "Enter" && keyDraft.startsWith("sk-")) {
                 setApiKey(keyDraft)
                 setHasKey(true)
               }
@@ -110,7 +110,7 @@ export function AiPane({ projectId }: { projectId: string }) {
           />
           <Button
             size="xs"
-            disabled={!keyDraft.startsWith("sk-ant-")}
+            disabled={!keyDraft.startsWith("sk-")}
             onClick={() => {
               setApiKey(keyDraft)
               setHasKey(true)

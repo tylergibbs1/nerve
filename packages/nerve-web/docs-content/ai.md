@@ -8,6 +8,6 @@ Each tool call the agent makes is compiled in the local worker **before** it lan
 
 ## Keys and privacy
 
-There is no server. Your browser calls Anthropic directly with an API key you paste into the pane; the key lives in localStorage and is sent nowhere else. The "key ✕" button forgets it.
+There is no server. Your browser calls OpenAI directly with an API key you paste into the pane; the key lives in localStorage and is sent nowhere else. The "key ✕" button forgets it.
 
 Try it in [the editor](/projects): open a project and ask for a change while watching the diagram.
