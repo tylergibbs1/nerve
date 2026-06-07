@@ -53,7 +53,10 @@ describe("test plan with splices (PRD §9.9)", () => {
 describe("splice rendering and outputs", () => {
   it("schematic shows splice symbols", () => {
     const svg = schematicSvg(hir)
-    expect(svg).toContain("S1 · crimp")
+    // Rail-seated splices carry short id-only labels (type lives in the
+    // BOM); the symbol itself still renders with its data-splice tag.
+    expect(svg).toContain('data-splice="S1"')
+    expect(svg).toContain(">S1</text>")
     expect(svg).toContain("S2 · crimp")
   })
 
