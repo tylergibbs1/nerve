@@ -49,6 +49,8 @@ Or skip the install entirely: [the editor in this app](/projects) compiles in yo
 
 Everything imports from `@grayhaven/nerve`. The DSL builds a typed design graph; `compileDesign` lowers it to the versioned HIR that every exporter and rule consumes.
 
+Recent additions: parts accept `reservedPins` (cavities that must stay empty, enforced by HK-CONN-015) and `cavityLayout` (drives the connector face views); branches accept `minBendRadius` (breakouts tighter than it fail HK-MFG-005); sleeves named with a trailing capacity (`braided-pet-12`) are checked against the estimated bundle diameter (HK-MFG-006).
+
 ## harness(id, options)
 
 ```ts
@@ -185,6 +187,21 @@ export default defineConfig({
 })
 ```
 
+## Part data through providers
+
+Part data is pluggable: the bundled library, your PLM, a distributor API, anything that answers an MPN. Providers are consulted in priority order, and disagreement on load-bearing fields is a diagnostic, never a silent overwrite.
+
+```ts
+import { resolvePart, staticProvider } from "@grayhaven/nerve"
+import { nerveConnectorsProvider } from "@grayhaven/nerve-connectors"
+
+const plm = staticProvider("acme-plm", loadFromPlm())
+const { part, provider, diagnostics } = resolvePart([plm, nerveConnectorsProvider], "PHR-4")
+// diagnostics: HK-LIB-001 warnings when providers disagree (pinCount, gender, limits)
+```
+
+The bundled library ships verified families with cavity layouts, gauge ranges, mating pairs, crimp tooling, and dated provenance: Molex Micro-Fit 3.0 and Mega-Fit, JST PH and XH, TE Deutsch DT, AMASS XT60.
+
 ## The HIR is a schema, not a guess
 
 `harness.json` round-trips through a versioned Effect Schema: decode untrusted input, encode canonically:
@@ -287,13 +304,20 @@ Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exit
 | `harness.json` | Canonical HIR: versioned schema, the single source every other artifact derives from. |
 | `schematic.svg` | Connection diagram: connectors, pins, wires with gauge/color annotations. |
 | `board.svg` | Harness-board (nailboard) view at real lengths for the build fixture. |
+| `connector-faces.svg` | Cavity layouts per connector: FRONT (mating side, mirrored) and REAR views, population state, wire colors, orientation markers. |
+| `schematic.html` | Self-contained interactive viewer: hover a net to trace it, zoom, pan. Opens anywhere, no app needed. |
 | `bom.csv` | Rolled-up bill of materials with MPNs, quantities, and design-object references. |
 | `cut-list.csv` | Per-wire cut lengths, gauges, colors, strip specs. |
 | `labels.csv` | Label schedule: text, position, wire/branch reference. |
 | `test-plan.csv` | Continuity, splice-verification, and no-short tests derived from the net list. |
 | `assembly.md` | Ordered build instructions generated from the design graph. |
 | `manufacturing-packet.pdf` | The build book: every drawing and table in one reviewed, printable document. |
+| `graph.json` | Connectivity graph: nodes, edges, and computed nets for external tooling. |
+| `render-layout.json` | The exact DrawingIR each renderer consumed, so geometry is diffable and re-renderable outside Nerve. |
+| `bom.json` / `cut-list.json` / `label-schedule.json` / `diagnostics.json` | Machine-readable twins of the tables, keyed by column. |
 | `packet.zip` | Everything above, zipped byte-identically (fixed timestamps) for release archival. |
+
+PNG previews render on demand: `nerve render --format png` (views: `schematic`, `board`, `faces`).
 
 The renderer never owns truth: every line in every artifact traces back to a design object in the HIR.
 

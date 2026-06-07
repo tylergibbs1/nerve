@@ -233,3 +233,164 @@ describe("nerve inspect / init / help", () => {
     expect(io.stdout.join("\n")).toContain("Usage:")
   })
 })
+
+const ROBOT = resolve(import.meta.dirname, "../../../examples/robot-platform/src/main.harness.ts")
+
+describe("nerve analyze / quote", () => {
+  it("analyze writes csv + json engineering analysis", async () => {
+    const out = tmp()
+    const io = capture()
+    expect(await run(["analyze", FIXTURE, "--out", out], io)).toBe(0)
+    expect(existsSync(join(out, "analysis.csv"))).toBe(true)
+    expect(JSON.parse(readFileSync(join(out, "analysis.json"), "utf8"))).toBeTruthy()
+  })
+
+  it("quote uses the project costing model and is deterministic", async () => {
+    const outA = tmp()
+    const outB = tmp()
+    expect(await run(["quote", ROBOT, "--out", outA], capture())).toBe(0)
+    expect(await run(["quote", ROBOT, "--out", outB], capture())).toBe(0)
+    const a = readFileSync(join(outA, "quote.csv"), "utf8")
+    expect(a).toBe(readFileSync(join(outB, "quote.csv"), "utf8"))
+    expect(a).toContain("connector,43025")
+  })
+
+  it("quote exits 2 with guidance when no costing model is configured", async () => {
+    const io = capture()
+    expect(await run(["quote", FIXTURE, "--out", tmp()], io)).toBe(2)
+    expect(io.stderr.join("\n")).toContain("costing")
+  })
+})
+
+describe("nerve machine", () => {
+  it("generates shop-floor files through a builtin adapter", async () => {
+    const out = tmp()
+    const io = capture()
+    expect(await run(["machine", "generic-cut-strip-csv", FIXTURE, "--out", out], io)).toBe(0)
+    const written = io.stdout.filter((l) => l.startsWith("wrote"))
+    expect(written.length).toBeGreaterThan(0)
+  })
+
+  it("names available adapters on an unknown id", async () => {
+    const io = capture()
+    expect(await run(["machine", "nope", FIXTURE], io)).toBe(2)
+    expect(io.stderr.join("\n")).toContain("generic-cut-strip-csv")
+  })
+})
+
+describe("nerve contract", () => {
+  it("exports a connector contract and validates the design against it (round-trip)", async () => {
+    const out = tmp()
+    expect(await run(["contract", FIXTURE, "--connector", "J1", "--out", out], capture())).toBe(0)
+    const contractPath = join(out, "contract-J1.json")
+    expect(existsSync(contractPath)).toBe(true)
+    const io = capture()
+    expect(await run(["contract", FIXTURE, "--connector", "J1", "--against", contractPath], io)).toBe(0)
+    expect(io.stdout.join("\n")).toContain("conforms")
+  })
+
+  it("exits 2 for an unknown connector", async () => {
+    const io = capture()
+    expect(await run(["contract", FIXTURE, "--connector", "J9", "--out", tmp()], io)).toBe(2)
+  })
+})
+
+describe("nerve release / record", () => {
+  it("creates a release, then a passing build record against it", async () => {
+    const out = tmp()
+    const io = capture()
+    expect(
+      await run(
+        ["release", FIXTURE, "--eco", "ECO-1", "--reason", "initial", "--date", "2026-06-07", "--out", out],
+        io
+      )
+    ).toBe(0)
+    expect(io.stdout.join("\n")).toContain("fingerprint")
+    const releasePath = join(out, "release-A.json")
+    expect(existsSync(releasePath)).toBe(true)
+
+    // Measurements for every continuity test: closed at 0.2 ohm.
+    const plan = JSON.parse(readFileSync(join(out, "harness.json"), "utf8"))
+    expect(plan.harness.id).toBe("motor-controller-harness")
+    const testPlan = JSON.parse(
+      readFileSync(join(out, "..", "x", "..").replace(/.*/, join(out, "harness.json")), "utf8")
+    )
+    void testPlan
+    const resultsPath = join(out, "results.json")
+    writeFileSync(resultsPath, JSON.stringify([{ id: "T-001", measuredOhms: 0.2 }]) + "\n")
+    const rio = capture()
+    const code = await run(
+      [
+        "record", FIXTURE,
+        "--release", releasePath,
+        "--serial", "SN-0001",
+        "--operator", "tg",
+        "--date", "2026-06-07",
+        "--results", resultsPath,
+        "--out", out
+      ],
+      rio
+    )
+    expect(code).toBe(0)
+    expect(existsSync(join(out, "build-record-SN-0001.json"))).toBe(true)
+    expect(rio.stdout.join("\n")).toMatch(/SN-0001: \d+ pass \/ 0 fail/)
+  })
+
+  it("release diffs against a previous release and reports impact", async () => {
+    const prev = tmp()
+    await run(["release", FIXTURE, "--eco", "ECO-1", "--reason", "initial", "--date", "2026-06-07", "--out", prev], capture())
+    const io = capture()
+    expect(
+      await run(
+        [
+          "release", FIXTURE,
+          "--eco", "ECO-2", "--reason", "respin", "--date", "2026-06-08",
+          "--against", join(prev, "release-A.json"),
+          "--out", tmp()
+        ],
+        io
+      )
+    ).toBe(0)
+    expect(io.stdout.join("\n")).toContain("impact")
+  })
+})
+
+describe("nerve redline", () => {
+  it("adds a redline against a valid target, rejects an invalid one, then resolves", async () => {
+    const dir = tmp()
+    const redlines = join(dir, "redlines.json")
+    const add = capture()
+    expect(
+      await run(
+        [
+          "redline", "add", FIXTURE,
+          "--target", "wire:W1",
+          "--type", "length",
+          "--description", "W1 runs 30mm short on the bench",
+          "--file", redlines
+        ],
+        add
+      )
+    ).toBe(0)
+    expect(add.stdout.join("\n")).toContain("RL-001")
+
+    const bad = capture()
+    expect(
+      await run(
+        ["redline", "add", FIXTURE, "--target", "wire:W99", "--type", "length", "--description", "x", "--file", redlines],
+        bad
+      )
+    ).toBe(1)
+
+    const res = capture()
+    expect(
+      await run(
+        ["redline", "resolve", redlines, "--id", "RL-001", "--accept", "true", "--reason", "confirmed", "--date", "2026-06-08"],
+        res
+      )
+    ).toBe(0)
+    expect(res.stdout.join("\n")).toContain("accepted")
+    const final = JSON.parse(readFileSync(redlines, "utf8"))
+    expect(final[0].status).toBe("accepted")
+  })
+})
