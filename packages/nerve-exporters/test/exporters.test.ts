@@ -223,3 +223,36 @@ describe("manufacturing packet (PRD §9.8)", () => {
     ).toBe(false)
   })
 })
+
+describe("net-label mode (high-fanout nets)", () => {
+  it("signals on >=3 wires render as stubs + flags, not routed paths", async () => {
+    const { compileDesign, connector, harness, wire } = await import("@grayhaven/nerve")
+    const part = { mpn: "NL-8", pinCount: 8 }
+    const a = connector("J1", part, { pins: { 1: "VBAT", 2: "VBAT", 3: "VBAT", 4: "DATA" } })
+    const b = connector("J2", part, { pins: { 1: "VBAT", 2: "VBAT", 3: "VBAT", 4: "DATA" } })
+    const { hir } = compileDesign(
+      harness("netlabel", {
+        revision: "A",
+        units: "mm",
+        connectors: [a, b],
+        wires: [
+          wire("W1", a.pin(1), b.pin(1), { signal: "VBAT", gauge: "18AWG", color: "red", length: 100 }),
+          wire("W2", a.pin(2), b.pin(2), { signal: "VBAT", gauge: "18AWG", color: "red", length: 100 }),
+          wire("W3", a.pin(3), b.pin(3), { signal: "VBAT", gauge: "18AWG", color: "red", length: 100 }),
+          wire("W4", a.pin(4), b.pin(4), { signal: "DATA", gauge: "24AWG", color: "blue", length: 100 })
+        ]
+      })
+    )
+    const svg = schematicSvg(hir)
+    // Labeled net: flags at both ends, no cross-canvas curve for VBAT wires.
+    expect(svg).toContain("▸ VBAT")
+    expect(svg).toContain("VBAT ◂")
+    expect((svg.match(/▸ VBAT/g) ?? []).length).toBe(3) // one per left-side wire end
+    // Low-fanout DATA wire still routes as a path.
+    const pathCount = (svg.match(/<path data-wire="W4"/g) ?? []).length
+    expect(pathCount).toBe(1)
+    expect(svg).not.toContain('<path data-wire="W1"')
+    // Determinism.
+    expect(schematicSvg(hir)).toBe(svg)
+  })
+})

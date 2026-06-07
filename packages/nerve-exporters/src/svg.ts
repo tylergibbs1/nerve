@@ -18,6 +18,11 @@ const MARGIN = 48
 const COL_GAP = 380
 const V_GAP = 48
 const TITLE_H = 64
+/** Signals carried by at least this many wires render as net labels
+ * (pin stubs + flags) instead of routed paths — the EDA convention that
+ * keeps high-fanout power/bus nets from dominating the sheet. */
+const NET_LABEL_FANOUT = 3
+const STUB_LEN = 26
 
 /** Map authored color names to visible strokes. */
 const strokeFor = (color: string | undefined): string => {
@@ -127,6 +132,17 @@ export const schematicDrawing = (hir: Hir): Drawing => {
     return s !== undefined ? { x: s.x, y: s.y, dir: 0 } : undefined
   }
 
+  // High-fanout nets become labeled stubs rather than routed paths.
+  const signalCounts = new Map<string, number>()
+  for (const w of hir.wires) {
+    if (w.signal !== undefined) {
+      signalCounts.set(w.signal, (signalCounts.get(w.signal) ?? 0) + 1)
+    }
+  }
+  const labeledNets = new Set(
+    [...signalCounts.entries()].filter(([, n]) => n >= NET_LABEL_FANOUT).map(([sig]) => sig)
+  )
+
   // Wires beneath connector boxes.
   for (const w of hir.wires) {
     const a = anchorOf(w.from)
@@ -136,6 +152,51 @@ export const schematicDrawing = (hir: Hir): Drawing => {
     }
     const { x: x1, y: y1 } = a
     const { x: x2, y: y2 } = b
+    if (w.signal !== undefined && labeledNets.has(w.signal)) {
+      const isError = errorWires.has(w.id)
+      const stroke = isError ? "#d11" : strokeFor(w.color)
+      const flagFill = isError ? "#d11" : "#333"
+      const detail = [w.id, w.gauge].filter((t): t is string => t !== undefined).join(" · ")
+      for (const end of [a, b]) {
+        const dir = end.dir !== 0 ? end.dir : 1
+        const sx = end.x + dir * STUB_LEN
+        items.push(
+          {
+            kind: "line",
+            x1: end.x,
+            y1: end.y,
+            x2: sx,
+            y2: end.y,
+            stroke,
+            strokeWidth: 2,
+            data: { wire: w.id },
+            ...(isError ? { dash: [6, 3] } : {})
+          },
+          {
+            kind: "text",
+            x: sx + dir * 6,
+            y: end.y - 2,
+            text: dir === 1 ? `▸ ${w.signal}` : `${w.signal} ◂`,
+            size: 10,
+            weight: "bold",
+            fill: flagFill,
+            anchor: dir === 1 ? "start" : "end",
+            data: { wire: w.id }
+          },
+          {
+            kind: "text",
+            x: sx + dir * 6,
+            y: end.y + 9,
+            text: detail,
+            size: 8,
+            fill: "#888",
+            anchor: dir === 1 ? "start" : "end",
+            data: { wire: w.id }
+          }
+        )
+      }
+      continue
+    }
     const dx = Math.max(60, Math.abs(x2 - x1) / 3)
     const dir1 = a.dir !== 0 ? a.dir : x2 > x1 ? 1 : -1
     const dir2 = b.dir !== 0 ? b.dir : x1 > x2 ? 1 : -1
