@@ -54,8 +54,9 @@ export const isShieldSignal = (signal: string): boolean => SHIELD_SIGNAL.test(si
 export const differentialPartner = (signal: string): string | undefined => {
   const s = signal.toUpperCase()
   const table: ReadonlyArray<readonly [RegExp, (s: string) => string]> = [
-    [/^(.*)CAN_?H$/, (m) => m.replace(/CAN_?H$/, (h) => h.replace("H", "L"))],
-    [/^(.*)CAN_?L$/, (m) => m.replace(/CAN_?L$/, (l) => l.replace("L", "H"))],
+    // Bus index allowed: CAN_H, CANH, CAN1_H, MOTOR_CAN2_H all pair.
+    [/^(.*)CAN\d*_?H$/, (m) => m.slice(0, -1) + "L"],
+    [/^(.*)CAN\d*_?L$/, (m) => m.slice(0, -1) + "H"],
     [/^(.*)RS485_?A$/, (m) => m.slice(0, -1) + "B"],
     [/^(.*)RS485_?B$/, (m) => m.slice(0, -1) + "A"],
     [/^(.*)_P$/, (m) => m.slice(0, -2) + "_N"],
