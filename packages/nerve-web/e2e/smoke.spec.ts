@@ -67,3 +67,19 @@ test("docs render with copy-as-markdown and highlighted code", async ({ page }) 
   }).toBeGreaterThan(5)
   await expect(page.getByRole("button", { name: /copy.*markdown/i }).first()).toBeVisible()
 })
+
+test("traceability: click a wire -> inspector; search navigates and selects", async ({ page }) => {
+  await page.goto("/projects/motor-controller/diagram")
+  await expect(page.locator(".diagram-pane svg")).toBeVisible({ timeout: 15_000 })
+  // Click a rendered wire (dispatched: bent paths have empty bbox centers).
+  await page.locator("path[data-wire]").first().dispatchEvent("click")
+  await expect(page.locator(".inspector")).toBeVisible()
+  await expect(page.locator(".inspector dd").first()).toHaveText(/W\d/)
+  // Selection survives a tab switch (cross-view, §11.3).
+  await page.getByRole("link", { name: "Connectors" }).click()
+  await expect(page.locator(".diagram-pane svg .sel").first()).toBeAttached()
+  // Search: signal query finds the pin and navigates.
+  await page.getByLabel("Search the harness").fill("CAN_H")
+  await page.locator(".search-results button").first().click()
+  await expect(page.locator(".inspector")).toBeVisible()
+})

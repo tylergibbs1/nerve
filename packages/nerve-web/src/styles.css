@@ -648,6 +648,67 @@ textarea:focus-visible, select:focus-visible {
   stroke-width: 3px;
   stroke-linejoin: round;
 }
+/* Persistent selection (PRD §11.3): stronger than hover, survives tabs. */
+.diagram-pane svg .sel { opacity: 1 !important; }
+.diagram-pane svg path.sel, .diagram-pane svg line.sel { stroke-width: 3.5; }
+.diagram-pane svg circle.sel { stroke: #111; stroke-width: 2.5; }
+.diagram-pane svg text.sel { font-weight: bold; }
+.diagram-pane.has-sel svg [data-wire]:not(.sel):not(.hl) { opacity: 0.45; }
+
+/* Inspector overlay card. */
+.inspector {
+  position: absolute;
+  top: 44px;
+  right: 12px;
+  z-index: 5;
+  width: 240px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 10px 12px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.inspector-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.inspector dl { margin: 0 0 8px; display: flex; flex-direction: column; gap: 3px; }
+.inspector dl div { display: flex; gap: 8px; }
+.inspector dt { width: 64px; color: var(--muted); text-transform: uppercase; font-size: 9px; letter-spacing: 0.04em; padding-top: 1px; }
+.inspector dd { margin: 0; color: var(--text); word-break: break-all; }
+
+/* Search. */
+.searchbox { position: relative; }
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  margin: 4px 0 0;
+  padding: 4px;
+  list-style: none;
+  width: 280px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+}
+.search-results button {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 5px 8px;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+.search-results button:hover { background: var(--muted-bg); }
+.search-results .hit-detail { color: var(--muted); }
+
+/* Clickable diagnostics. */
+.diagnostics-panel .diag.selectable { cursor: pointer; }
+.diagnostics-panel .diag.selectable:hover { background: var(--muted-bg); }
+
 /* Net hover-highlighting (delegated; .hl set by SchematicSheet). */
 .diagram-pane svg [data-wire] { transition: opacity 150ms var(--ease-out); }
 .diagram-pane.net-hover svg [data-wire]:not(.hl) { opacity: 0.18; }

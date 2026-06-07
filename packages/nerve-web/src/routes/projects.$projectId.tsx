@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query"
 import { compileQueryOptions, countDiagnostics, exportPacket } from "../lib/compile-client.js"
 import { useState } from "react"
 import { Button } from "../ui/button.js"
+import { SearchBox } from "../components/SearchBox.js"
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js"
 import { SourcePane } from "../components/SourcePane.js"
 import { AiPane } from "../components/AiPane.js"
@@ -95,6 +96,7 @@ function ProjectWorkspace() {
               ? `${warnings} warning${warnings === 1 ? "" : "s"}`
               : "valid"}
         </Badge>
+        <SearchBox hir={data.hir} projectId={projectId} />
         <ExportButton projectId={projectId} />
         <nav className="tabs">
           {TABS.map((tab) => (

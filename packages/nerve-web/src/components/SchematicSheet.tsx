@@ -1,6 +1,8 @@
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import type { Hir } from "@grayhaven/nerve"
 import { Button } from "../ui/button.js"
+import { Inspector } from "./Inspector.js"
+import { selectionFromElement, selectorFor, setSelection, useSelection } from "../lib/selection.js"
 
 /**
  * Interactive sheet wrapper for exporter-generated SVG (diagram + board).
@@ -70,17 +72,37 @@ export function SchematicSheet({
       scroller.scrollLeft += px * (next / prev - 1)
       scroller.scrollTop += py * (next / prev - 1)
     }
+    const click = (e: MouseEvent) => {
+      setSelection(selectionFromElement(e.target as Element))
+    }
     pane.addEventListener("pointerover", over)
     pane.addEventListener("pointerleave", clear)
+    pane.addEventListener("click", click)
     pane.addEventListener("wheel", wheel, { passive: false })
     applyZoom(zoomRef.current)
     // React 19 ref cleanup: colocated teardown.
     return () => {
       pane.removeEventListener("pointerover", over)
       pane.removeEventListener("pointerleave", clear)
+      pane.removeEventListener("click", click)
       pane.removeEventListener("wheel", wheel)
     }
   }, [])
+
+  // Persistent cross-view selection highlight (PRD §11.3): survives both
+  // selection changes and innerHTML swaps on recompile.
+  const selection = useSelection()
+  useEffect(() => {
+    const pane = paneRef.current
+    if (pane === null) return
+    pane.classList.toggle("has-sel", selection !== undefined)
+    const marked = selection !== undefined ? [...pane.querySelectorAll(selectorFor(selection))] : []
+    for (const el of marked) el.classList.add("sel")
+    return () => {
+      pane.classList.remove("has-sel")
+      for (const el of marked) el.classList.remove("sel")
+    }
+  }, [selection, svg])
 
   const copy = () => {
     void navigator.clipboard.writeText(svg).then(() => {
@@ -108,7 +130,7 @@ export function SchematicSheet({
   }
 
   return (
-    <div className="sheet-wrap">
+    <div className="sheet-wrap" style={{ position: "relative" }}>
       <div className="sheet-actions">
         <Button variant="ghost" size="xs" onClick={copy}>
           {copied ? "Copied ✓" : "Copy SVG"}
@@ -121,6 +143,7 @@ export function SchematicSheet({
         </Button>
         <span className="sheet-hint">⌘+scroll to zoom · hover a wire</span>
       </div>
+      <Inspector hir={hir} />
       <div
         className="diagram-pane"
         ref={attach}
