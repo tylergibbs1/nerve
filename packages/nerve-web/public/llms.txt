@@ -6,6 +6,7 @@
 
 - [Quickstart](https://nerve-demo.vercel.app/docs/quickstart.md)
 - [DSL Reference](https://nerve-demo.vercel.app/docs/dsl.md)
+- [TypeScript SDK](https://nerve-demo.vercel.app/docs/sdk.md)
 - [Validation Rules](https://nerve-demo.vercel.app/docs/rules.md) — generated from the shipped rule set
 - [CLI](https://nerve-demo.vercel.app/docs/cli.md)
 - [Artifacts](https://nerve-demo.vercel.app/docs/artifacts.md)

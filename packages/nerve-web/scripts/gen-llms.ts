@@ -18,6 +18,7 @@ const SITE = "https://nerve-demo.vercel.app"
 const PAGES = [
   { slug: "quickstart", title: "Quickstart" },
   { slug: "dsl", title: "DSL Reference" },
+  { slug: "sdk", title: "TypeScript SDK" },
   { slug: "cli", title: "CLI" },
   { slug: "artifacts", title: "Artifacts" },
   { slug: "ai", title: "AI Copilot" }
@@ -61,8 +62,8 @@ for (const page of PAGES) {
 // Rules page is generated, not authored.
 const rules = rulesMd()
 writeFileSync(join(OUT, "docs", "rules.md"), indexNote + rules)
-sections.splice(2, 0, `- [Validation Rules](${SITE}/docs/rules.md) — generated from the shipped rule set`)
-fullParts.splice(2, 0, rules)
+sections.splice(3, 0, `- [Validation Rules](${SITE}/docs/rules.md) — generated from the shipped rule set`)
+fullParts.splice(3, 0, rules)
 
 const llms = `# Grayhaven Nerve
 
