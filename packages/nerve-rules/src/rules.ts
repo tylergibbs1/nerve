@@ -21,7 +21,11 @@ import {
   isPowerSignal,
   isShieldSignal,
   parseAwg,
-  requiredAwgForCurrent
+  requiredAwgForCurrent,
+  estimateBundleDiameterMm,
+  INSULATED_OD_MM_BY_AWG,
+  signalNominalVolts,
+  sleeveCapacityMm
 } from "./wire-data.js"
 
 const { Error: Err, Warning: Warn } = DiagnosticSeverity
@@ -416,6 +420,99 @@ export const requireApprovedParts = (approvedMpns: ReadonlyArray<string>): Rule 
 }
 
 /** All built-in rules, in stable order. */
+
+export const voltageRatingBelowSignal: Rule = rule(
+  "voltageRatingBelowSignal",
+  (ctx) => {
+    for (const w of ctx.hir.wires) {
+      if (w.voltageRating === undefined || w.signal === undefined) continue
+      const nominal = signalNominalVolts(w.signal)
+      if (nominal === undefined) continue
+      if (w.voltageRating < nominal) {
+        ctx.report({
+          severity: Err,
+          message: `Wire ${w.id} is rated ${w.voltageRating}V but carries ${w.signal} (nominal ${nominal}V).`,
+          target: refs.wire(w.id)
+        })
+      }
+    }
+  },
+  { code: "HK-ELEC-005" }
+)
+
+export const reservedPinAssigned: Rule = rule(
+  "reservedPinAssigned",
+  (ctx) => {
+    for (const c of ctx.hir.connectors) {
+      if (c.reservedPins === undefined) continue
+      const reserved = new Set(c.reservedPins)
+      for (const p of c.pins) {
+        if (p.signal !== undefined && reserved.has(p.pin)) {
+          ctx.report({
+            severity: Err,
+            message: `Connector ${c.ref} pin ${p.pin} is reserved but carries ${p.signal}.`,
+            target: refs.pin(c.ref, p.pin)
+          })
+        }
+      }
+    }
+  },
+  { code: "HK-CONN-015" }
+)
+
+export const breakoutTighterThanBendRadius: Rule = rule(
+  "breakoutTighterThanBendRadius",
+  (ctx) => {
+    for (const b of ctx.hir.branches) {
+      if (b.minBendRadius === undefined || b.breakoutDistance === undefined) continue
+      if (b.breakoutDistance < b.minBendRadius) {
+        ctx.report({
+          severity: Err,
+          message: `Branch ${b.id} breaks out ${b.breakoutDistance}mm from its parent but the bundle needs a ${b.minBendRadius}mm bend radius.`,
+          target: refs.branch(b.id)
+        })
+      }
+    }
+  },
+  { code: "HK-MFG-005" }
+)
+
+export const bundleOverSleeveCapacity: Rule = rule(
+  "bundleOverSleeveCapacity",
+  (ctx) => {
+    // Member wires: both endpoints' nodes sit on the branch path (splices
+    // count via their branch assignment).
+    const spliceBranch = new Map(
+      ctx.hir.splices.flatMap((sp) => (sp.branch !== undefined ? [[sp.id, sp.branch] as const] : []))
+    )
+    for (const b of ctx.hir.branches) {
+      if (b.sleeve === undefined) continue
+      const capacity = sleeveCapacityMm(b.sleeve)
+      if (capacity === undefined) continue
+      const onBranch = new Set(b.path)
+      const nodeOnBranch = (e: (typeof ctx.hir.wires)[number]["from"]): boolean =>
+        "connector" in e ? onBranch.has(e.connector) : spliceBranch.get(e.splice) === b.id || onBranch.has(e.splice)
+      const ods: Array<number> = []
+      for (const w of ctx.hir.wires) {
+        if (!nodeOnBranch(w.from) || !nodeOnBranch(w.to)) continue
+        const awg = w.gauge !== undefined ? parseAwg(w.gauge) : undefined
+        const od = awg !== undefined ? INSULATED_OD_MM_BY_AWG[awg] : undefined
+        if (od !== undefined) ods.push(od)
+      }
+      if (ods.length === 0) continue
+      const estimated = estimateBundleDiameterMm(ods)
+      if (estimated > capacity) {
+        ctx.report({
+          severity: Err,
+          message: `Branch ${b.id} bundle is ~${estimated.toFixed(1)}mm across ${ods.length} wires but sleeve ${b.sleeve} takes ${capacity}mm.`,
+          target: refs.branch(b.id)
+        })
+      }
+    }
+  },
+  { code: "HK-MFG-006" }
+)
+
 export const builtinRules: ReadonlyArray<Rule> = [
   missingRevision,
   branchMissingLabel,
@@ -433,5 +530,9 @@ export const builtinRules: ReadonlyArray<Rule> = [
   wireSignalMismatch,
   terminalIncompatible,
   missingSeal,
-  sealIncompatible
+  sealIncompatible,
+  voltageRatingBelowSignal,
+  reservedPinAssigned,
+  breakoutTighterThanBendRadius,
+  bundleOverSleeveCapacity
 ]

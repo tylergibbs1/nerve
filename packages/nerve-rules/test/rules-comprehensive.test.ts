@@ -546,3 +546,93 @@ describe("rule engine", () => {
     expect(runRules(noisy, [custom]).map((d) => d.code)).toEqual(["ORG-042"])
   })
 })
+
+describe("HK-ELEC-005 voltageRatingBelowSignal", () => {
+  it("fires when the wire's rating is below the signal's nominal volts", () => {
+    const hir = fixture([{ from: 1, to: 1, signal: "VBAT_24V", voltageRating: 12 }])
+    expect(only(hir, "voltageRatingBelowSignal").map((d) => d.code)).toEqual(["HK-ELEC-005"])
+  })
+  it("passes at exactly nominal and when either field is absent", () => {
+    expect(only(fixture([{ from: 1, to: 1, signal: "VBAT_24V", voltageRating: 24 }]), "voltageRatingBelowSignal")).toEqual([])
+    expect(only(fixture([{ from: 1, to: 1, signal: "VBAT_24V" }]), "voltageRatingBelowSignal")).toEqual([])
+    expect(only(fixture([{ from: 1, to: 1, signal: "CAN_H", voltageRating: 5 }]), "voltageRatingBelowSignal")).toEqual([])
+  })
+  it("reads decimal rails", () => {
+    const hir = fixture([{ from: 1, to: 1, signal: "RAIL_3.3V", voltageRating: 3 }])
+    expect(only(hir, "voltageRatingBelowSignal")).toHaveLength(1)
+  })
+})
+
+describe("HK-CONN-015 reservedPinAssigned", () => {
+  const part = { mpn: "RP-4", pinCount: 4, reservedPins: [4] }
+  it("fires when a reserved pin carries a signal", () => {
+    const a = connector("J1", part, { pins: { 1: "SIG", 4: "OOPS" } })
+    const b = connector("J2", { mpn: "RP-4B", pinCount: 4 }, { pins: { 1: "SIG", 4: "OOPS" } })
+    const { hir } = compileDesign(
+      harness("t", { revision: "A", units: "mm", connectors: [a, b], wires: [
+        wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length: 100 }),
+        wire("W2", a.pin(4), b.pin(4), { gauge: "24AWG", color: "red", length: 100 })
+      ] })
+    )
+    const diags = only(hir, "reservedPinAssigned")
+    expect(diags.map((d) => d.target)).toEqual(["connector:J1.pin:4"])
+  })
+  it("passes when reserved pins stay empty", () => {
+    const a = connector("J1", part, { pins: { 1: "SIG" } })
+    const b = connector("J2", { mpn: "RP-4B", pinCount: 4 }, { pins: { 1: "SIG" } })
+    const { hir } = compileDesign(
+      harness("t", { revision: "A", units: "mm", connectors: [a, b], wires: [
+        wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length: 100 })
+      ] })
+    )
+    expect(only(hir, "reservedPinAssigned")).toEqual([])
+  })
+})
+
+describe("HK-MFG-005 breakoutTighterThanBendRadius", () => {
+  const two = () => {
+    const a = connector("J1", { mpn: "BR-2", pinCount: 2 }, { pins: { 1: "S" } })
+    const b = connector("J2", { mpn: "BR-2B", pinCount: 2 }, { pins: { 1: "S" } })
+    return { a, b, wires: [wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length: 100 })] }
+  }
+  it("fires when breakout is inside the bend radius; passes at the boundary", () => {
+    const mk = (breakoutDistance: number) => {
+      const { a, b, wires } = two()
+      return compileDesign(
+        harness("t", {
+          revision: "A", units: "mm", connectors: [a, b], wires,
+          branches: [
+            branch("main", { path: [a, b], nominalLength: 100 }),
+            branch("drop", { parent: "main", path: [a, b], nominalLength: 50, breakoutDistance, minBendRadius: 30 })
+          ]
+        })
+      ).hir
+    }
+    expect(only(mk(20), "breakoutTighterThanBendRadius").map((d) => d.code)).toEqual(["HK-MFG-005"])
+    expect(only(mk(30), "breakoutTighterThanBendRadius")).toEqual([])
+  })
+})
+
+describe("HK-MFG-006 bundleOverSleeveCapacity", () => {
+  const mk = (sleeve: string, gauges: ReadonlyArray<string>) => {
+    const part = { mpn: "BS-16", pinCount: 16 }
+    const a = connector("J1", part, { pins: Object.fromEntries(gauges.map((_, i) => [i + 1, `S${i}`])) })
+    const b = connector("J2", { ...part, mpn: "BS-16B" }, { pins: Object.fromEntries(gauges.map((_, i) => [i + 1, `S${i}`])) })
+    return compileDesign(
+      harness("t", {
+        revision: "A", units: "mm", connectors: [a, b],
+        wires: gauges.map((g, i) => wire(`W${i}`, a.pin(i + 1), b.pin(i + 1), { gauge: g, color: "red", length: 100 })),
+        branches: [branch("main", { path: [a, b], sleeve, nominalLength: 100 })]
+      })
+    ).hir
+  }
+  it("fires when the estimated bundle exceeds the sleeve, passes inside it", () => {
+    // 10x 12AWG (3.9mm OD) ~ 14.2mm bundle > 6mm sleeve
+    expect(only(mk("braided-pet-6", Array.from({ length: 10 }, () => "12AWG")), "bundleOverSleeveCapacity").map((d) => d.code)).toEqual(["HK-MFG-006"])
+    // 4x 24AWG (1.6mm) ~ 3.7mm < 6mm
+    expect(only(mk("braided-pet-6", Array.from({ length: 4 }, () => "24AWG")), "bundleOverSleeveCapacity")).toEqual([])
+  })
+  it("stays silent for unparseable sleeves or gaugeless wires", () => {
+    expect(only(mk("custom-sleeve", ["12AWG"]), "bundleOverSleeveCapacity")).toEqual([])
+  })
+})

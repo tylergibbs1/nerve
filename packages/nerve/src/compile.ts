@@ -94,6 +94,10 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         wireGaugeRange: c.part.wireGaugeRange
           ? { min: c.part.wireGaugeRange.min, max: c.part.wireGaugeRange.max }
           : undefined,
+        cavityLayout: c.part.cavityLayout
+          ? { rows: c.part.cavityLayout.rows, columns: c.part.cavityLayout.columns }
+          : undefined,
+        reservedPins: c.part.reservedPins?.map(String),
         sealed: c.part.sealed,
         compatibleTerminals: c.part.compatibleTerminals
           ? [...c.part.compatibleTerminals]
@@ -342,7 +346,8 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         parent: b.parent,
         sleeve: b.sleeve,
         nominalLength: b.nominalLength,
-        breakoutDistance: b.breakoutDistance
+        breakoutDistance: b.breakoutDistance,
+        minBendRadius: b.minBendRadius
       })
     )
   }

@@ -51,6 +51,8 @@ export const HirConnector = Schema.Struct({
   wireGaugeRange: Schema.optional(
     Schema.Struct({ min: Schema.String, max: Schema.String })
   ),
+  cavityLayout: Schema.optional(Schema.Struct({ rows: Schema.Number, columns: Schema.Number })),
+  reservedPins: Schema.optional(Schema.Array(Schema.String)),
   sealed: Schema.optional(Schema.Boolean),
   compatibleTerminals: Schema.optional(Schema.Array(Schema.String)),
   compatibleSeals: Schema.optional(Schema.Array(Schema.String)),
@@ -112,7 +114,8 @@ export const HirBranch = Schema.Struct({
   parent: Schema.optional(Schema.String),
   sleeve: Schema.optional(Schema.String),
   nominalLength: Schema.optional(Schema.Number),
-  breakoutDistance: Schema.optional(Schema.Number)
+  breakoutDistance: Schema.optional(Schema.Number),
+  minBendRadius: Schema.optional(Schema.Number)
 })
 
 export const HirLabel = Schema.Struct({

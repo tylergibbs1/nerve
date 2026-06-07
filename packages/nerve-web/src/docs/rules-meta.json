@@ -66,5 +66,21 @@
   {
     "code": "HK-CONN-014",
     "name": "sealIncompatible"
+  },
+  {
+    "code": "HK-ELEC-005",
+    "name": "voltageRatingBelowSignal"
+  },
+  {
+    "code": "HK-CONN-015",
+    "name": "reservedPinAssigned"
+  },
+  {
+    "code": "HK-MFG-005",
+    "name": "breakoutTighterThanBendRadius"
+  },
+  {
+    "code": "HK-MFG-006",
+    "name": "bundleOverSleeveCapacity"
   }
 ]

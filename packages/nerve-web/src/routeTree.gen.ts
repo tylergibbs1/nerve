@@ -25,6 +25,7 @@ import { Route as ProjectsProjectIdTestsRouteImport } from './routes/projects.$p
 import { Route as ProjectsProjectIdLabelsRouteImport } from './routes/projects.$projectId.labels'
 import { Route as ProjectsProjectIdDiagramRouteImport } from './routes/projects.$projectId.diagram'
 import { Route as ProjectsProjectIdCutListRouteImport } from './routes/projects.$projectId.cut-list'
+import { Route as ProjectsProjectIdConnectorsRouteImport } from './routes/projects.$projectId.connectors'
 import { Route as ProjectsProjectIdBomRouteImport } from './routes/projects.$projectId.bom'
 import { Route as ProjectsProjectIdBoardRouteImport } from './routes/projects.$projectId.board'
 
@@ -110,6 +111,12 @@ const ProjectsProjectIdCutListRoute =
     path: '/cut-list',
     getParentRoute: () => ProjectsProjectIdRoute,
   } as any)
+const ProjectsProjectIdConnectorsRoute =
+  ProjectsProjectIdConnectorsRouteImport.update({
+    id: '/connectors',
+    path: '/connectors',
+    getParentRoute: () => ProjectsProjectIdRoute,
+  } as any)
 const ProjectsProjectIdBomRoute = ProjectsProjectIdBomRouteImport.update({
   id: '/bom',
   path: '/bom',
@@ -135,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/projects/': typeof ProjectsIndexRoute
   '/projects/$projectId/board': typeof ProjectsProjectIdBoardRoute
   '/projects/$projectId/bom': typeof ProjectsProjectIdBomRoute
+  '/projects/$projectId/connectors': typeof ProjectsProjectIdConnectorsRoute
   '/projects/$projectId/cut-list': typeof ProjectsProjectIdCutListRoute
   '/projects/$projectId/diagram': typeof ProjectsProjectIdDiagramRoute
   '/projects/$projectId/labels': typeof ProjectsProjectIdLabelsRoute
@@ -153,6 +161,7 @@ export interface FileRoutesByTo {
   '/projects': typeof ProjectsIndexRoute
   '/projects/$projectId/board': typeof ProjectsProjectIdBoardRoute
   '/projects/$projectId/bom': typeof ProjectsProjectIdBomRoute
+  '/projects/$projectId/connectors': typeof ProjectsProjectIdConnectorsRoute
   '/projects/$projectId/cut-list': typeof ProjectsProjectIdCutListRoute
   '/projects/$projectId/diagram': typeof ProjectsProjectIdDiagramRoute
   '/projects/$projectId/labels': typeof ProjectsProjectIdLabelsRoute
@@ -174,6 +183,7 @@ export interface FileRoutesById {
   '/projects/': typeof ProjectsIndexRoute
   '/projects/$projectId/board': typeof ProjectsProjectIdBoardRoute
   '/projects/$projectId/bom': typeof ProjectsProjectIdBomRoute
+  '/projects/$projectId/connectors': typeof ProjectsProjectIdConnectorsRoute
   '/projects/$projectId/cut-list': typeof ProjectsProjectIdCutListRoute
   '/projects/$projectId/diagram': typeof ProjectsProjectIdDiagramRoute
   '/projects/$projectId/labels': typeof ProjectsProjectIdLabelsRoute
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/projects/'
     | '/projects/$projectId/board'
     | '/projects/$projectId/bom'
+    | '/projects/$projectId/connectors'
     | '/projects/$projectId/cut-list'
     | '/projects/$projectId/diagram'
     | '/projects/$projectId/labels'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/projects/$projectId/board'
     | '/projects/$projectId/bom'
+    | '/projects/$projectId/connectors'
     | '/projects/$projectId/cut-list'
     | '/projects/$projectId/diagram'
     | '/projects/$projectId/labels'
@@ -234,6 +246,7 @@ export interface FileRouteTypes {
     | '/projects/'
     | '/projects/$projectId/board'
     | '/projects/$projectId/bom'
+    | '/projects/$projectId/connectors'
     | '/projects/$projectId/cut-list'
     | '/projects/$projectId/diagram'
     | '/projects/$projectId/labels'
@@ -362,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsProjectIdCutListRouteImport
       parentRoute: typeof ProjectsProjectIdRoute
     }
+    '/projects/$projectId/connectors': {
+      id: '/projects/$projectId/connectors'
+      path: '/connectors'
+      fullPath: '/projects/$projectId/connectors'
+      preLoaderRoute: typeof ProjectsProjectIdConnectorsRouteImport
+      parentRoute: typeof ProjectsProjectIdRoute
+    }
     '/projects/$projectId/bom': {
       id: '/projects/$projectId/bom'
       path: '/bom'
@@ -404,6 +424,7 @@ const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
 interface ProjectsProjectIdRouteChildren {
   ProjectsProjectIdBoardRoute: typeof ProjectsProjectIdBoardRoute
   ProjectsProjectIdBomRoute: typeof ProjectsProjectIdBomRoute
+  ProjectsProjectIdConnectorsRoute: typeof ProjectsProjectIdConnectorsRoute
   ProjectsProjectIdCutListRoute: typeof ProjectsProjectIdCutListRoute
   ProjectsProjectIdDiagramRoute: typeof ProjectsProjectIdDiagramRoute
   ProjectsProjectIdLabelsRoute: typeof ProjectsProjectIdLabelsRoute
@@ -414,6 +435,7 @@ interface ProjectsProjectIdRouteChildren {
 const ProjectsProjectIdRouteChildren: ProjectsProjectIdRouteChildren = {
   ProjectsProjectIdBoardRoute: ProjectsProjectIdBoardRoute,
   ProjectsProjectIdBomRoute: ProjectsProjectIdBomRoute,
+  ProjectsProjectIdConnectorsRoute: ProjectsProjectIdConnectorsRoute,
   ProjectsProjectIdCutListRoute: ProjectsProjectIdCutListRoute,
   ProjectsProjectIdDiagramRoute: ProjectsProjectIdDiagramRoute,
   ProjectsProjectIdLabelsRoute: ProjectsProjectIdLabelsRoute,

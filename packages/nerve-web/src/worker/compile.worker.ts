@@ -39,7 +39,7 @@ import {
 } from "@grayhaven/nerve"
 import * as connectorsModule from "@grayhaven/nerve-connectors"
 import { builtinRules } from "@grayhaven/nerve-rules"
-import { boardSvg, generateTestPlan, schematicSvg } from "@grayhaven/nerve-exporters"
+import { boardSvg, connectorFacesSvg, generateTestPlan, schematicSvg } from "@grayhaven/nerve-exporters"
 import motorController from "@grayhaven/example-motor-controller"
 import sensorSplice from "@grayhaven/example-sensor-splice"
 import robotPlatform from "@grayhaven/example-robot-platform"
@@ -157,6 +157,7 @@ self.onmessage = async (event: MessageEvent<CompileRequest>) => {
       hir: fullHir,
       svg: schematicSvg(fullHir),
       boardSvg: boardSvg(fullHir),
+      facesSvg: connectorFacesSvg(fullHir),
       testPlan: generateTestPlan(fullHir)
     }
   } satisfies CompileResponse)

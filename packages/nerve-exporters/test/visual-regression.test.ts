@@ -15,6 +15,7 @@ import { PNG } from "pngjs"
 import pixelmatch from "pixelmatch"
 import { compileDesign, type HarnessDesign } from "@grayhaven/nerve"
 import { schematicSvg } from "../src/svg.js"
+import { connectorFacesSvg } from "../src/faces.js"
 import motor from "../../../examples/motor-controller/src/main.harness.js"
 import sensor from "../../../examples/sensor-splice/src/main.harness.js"
 import robot from "../../../examples/robot-platform/src/main.harness.js"
@@ -22,8 +23,8 @@ import robot from "../../../examples/robot-platform/src/main.harness.js"
 const BASELINES = join(__dirname, "__image_baselines__")
 mkdirSync(BASELINES, { recursive: true })
 
-const render = (design: HarnessDesign): Buffer => {
-  const svg = schematicSvg(compileDesign(design).hir)
+const render = (design: HarnessDesign, fn: (hir: ReturnType<typeof compileDesign>["hir"]) => string = schematicSvg): Buffer => {
+  const svg = fn(compileDesign(design).hir)
   const resvg = new Resvg(svg, {
     font: { loadSystemFonts: false }, // geometry-only: deterministic everywhere
     fitTo: { mode: "width", value: 1200 }
@@ -31,8 +32,8 @@ const render = (design: HarnessDesign): Buffer => {
   return Buffer.from(resvg.render().asPng())
 }
 
-const check = (name: string, design: HarnessDesign): void => {
-  const actual = render(design)
+const check = (name: string, design: HarnessDesign, fn?: (hir: ReturnType<typeof compileDesign>["hir"]) => string): void => {
+  const actual = render(design, fn)
   const baselinePath = join(BASELINES, `${name}.png`)
   if (!existsSync(baselinePath) || process.env["UPDATE_VISUALS"] === "1") {
     writeFileSync(baselinePath, actual)
@@ -57,4 +58,5 @@ describe("visual regression (pixel baselines)", () => {
   it("motor-controller", () => check("motor-controller", motor))
   it("sensor-splice", () => check("sensor-splice", sensor))
   it("robot-platform", () => check("robot-platform", robot))
+  it("motor-controller faces", () => check("motor-controller-faces", motor, connectorFacesSvg))
 })

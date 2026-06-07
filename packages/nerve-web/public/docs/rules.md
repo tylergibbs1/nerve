@@ -1,6 +1,6 @@
 > Grayhaven Nerve docs index: https://nerve-demo.vercel.app/llms.txt. Fetch it to discover all pages before exploring further.
 
-# 17 built-in validation rules.
+# 21 built-in validation rules.
 
 Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated from the shipped `builtinRules` array in `@grayhaven/nerve-rules`; it cannot drift from the code. Custom rules use the same `rule()` API and get their own codes.
 
@@ -23,6 +23,10 @@ Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated
 | `HK-CONN-012` | `terminalIncompatible` | Terminal part must accept the wire gauge crimped into it. |
 | `HK-CONN-013` | `missingSeal` | Sealed connector families require a seal part on each wired cavity. |
 | `HK-CONN-014` | `sealIncompatible` | Seal part must match the wire gauge it seals. |
+| `HK-ELEC-005` | `voltageRatingBelowSignal` | - |
+| `HK-CONN-015` | `reservedPinAssigned` | - |
+| `HK-MFG-005` | `breakoutTighterThanBendRadius` | - |
+| `HK-MFG-006` | `bundleOverSleeveCapacity` | - |
 
 ## Example diagnostic
 

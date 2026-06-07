@@ -9,6 +9,7 @@
 import type { Hir } from "@grayhaven/nerve"
 import { schematicSvg } from "./svg.js"
 import { boardSvg } from "./board.js"
+import { connectorFacesSvg } from "./faces.js"
 
 const viewer = (title: string, svg: string): string => `<!doctype html>
 <html lang="en">
@@ -74,3 +75,7 @@ export const schematicHtml = (hir: Hir): string =>
 /** Interactive board viewer. Deterministic for identical HIR. */
 export const boardHtml = (hir: Hir): string =>
   viewer(`${hir.harness.id} — board · rev ${hir.harness.revision}`, boardSvg(hir))
+
+/** Interactive connector-faces viewer. Deterministic for identical HIR. */
+export const facesHtml = (hir: Hir): string =>
+  viewer(`${hir.harness.id} — connector faces · rev ${hir.harness.revision}`, connectorFacesSvg(hir))

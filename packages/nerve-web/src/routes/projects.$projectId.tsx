@@ -39,6 +39,7 @@ export const Route = createFileRoute("/projects/$projectId")({
 // on the right. Tabs switch only the right pane.
 const TABS = [
   { to: "/projects/$projectId/diagram", label: "Diagram" },
+  { to: "/projects/$projectId/connectors", label: "Connectors" },
   { to: "/projects/$projectId/board", label: "Board" },
   { to: "/projects/$projectId/bom", label: "BOM" },
   { to: "/projects/$projectId/cut-list", label: "Cut list" },

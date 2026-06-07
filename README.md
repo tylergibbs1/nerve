@@ -9,7 +9,7 @@
 Nerve turns wiring-harness design into a version-controlled, type-safe workflow:
 
 ```
-TypeScript DSL → compiler → HIR → 17 validation rules → deterministic rendering → manufacturing packet → test artifacts
+TypeScript DSL → compiler → HIR → 21 validation rules → deterministic rendering → manufacturing packet → test artifacts
 ```
 
 **Try it now: [nerve-demo.vercel.app](https://nerve-demo.vercel.app)** — editor, docs, and three example harnesses, no install.
@@ -23,8 +23,8 @@ A wiring harness is a program your machine runs on copper. Today it lives in PDF
 ## What you get
 
 - **A typed DSL** — `harness` / `connector` / `wire` / `splice` / `cable` / `branch` / `label` / `variant`, compiled to a versioned intermediate representation (HIR)
-- **17 validation rules with stable `HK-*` codes** — missing ground returns, untwisted differential pairs (CAN/RS-485/USB, bus-indexed), ampacity vs. gauge, pin/signal mismatches, unlabeled branches… each one a potential field failure caught at compile time
-- **Deterministic artifacts** — schematic + harness-board SVGs, BOM / cut-list / label / test-plan CSVs, assembly instructions, a PDF manufacturing packet, and a zip that hashes identically for identical inputs
+- **21 validation rules with stable `HK-*` codes** — missing ground returns, untwisted differential pairs (CAN/RS-485/USB, bus-indexed), ampacity vs. gauge, pin/signal mismatches, unlabeled branches… each one a potential field failure caught at compile time
+- **Deterministic artifacts** — schematic, connector-face, and harness-board SVGs, BOM / cut-list / label / test-plan CSVs, assembly instructions, a PDF manufacturing packet, and a zip that hashes identically for identical inputs
 - **An interactive web workspace** — compile-on-type in a Web Worker, schematics with net hover-highlighting and zoom, lint gutters that point at the offending wire, full packet export from the browser, and a self-contained interactive HTML viewer you can email to the shop floor
 - **An AI copilot** — describe the change; edits land only after they compile and pass the rules (bring your own OpenAI key)
 - **Agent-ready docs** — [`/llms.txt`](https://nerve-demo.vercel.app/llms.txt), per-page markdown mirrors, copy-as-markdown everywhere
@@ -64,7 +64,7 @@ Full guides: [quickstart](https://nerve-demo.vercel.app/docs) · [DSL reference]
 | Package | What it is |
 | --- | --- |
 | [`@grayhaven/nerve`](./packages/nerve) | Domain model, DSL, versioned HIR schema (Effect Schema), deterministic `compileDesign`, diagnostics + `rule()` API, `diffHir`, `defineConfig` |
-| [`@grayhaven/nerve-rules`](./packages/nerve-rules) | 17 built-in validation rules with stable `HK-*` codes + a derived numeric code mapping for tooling |
+| [`@grayhaven/nerve-rules`](./packages/nerve-rules) | 21 built-in validation rules with stable `HK-*` codes + a derived numeric code mapping for tooling |
 | [`@grayhaven/nerve-compiler`](./packages/nerve-compiler) | `.harness.ts` loading, config discovery, Effect `CompilerService` + tagged errors, fail-closed gate |
 | [`@grayhaven/nerve-exporters`](./packages/nerve-exporters) | DrawingIR → SVG/PDF/interactive HTML; branch-rail schematic layout with net labels; BOM / cut-list / label CSVs; continuity + splice + no-short test plan; byte-deterministic packet |
 | [`@grayhaven/nerve-wireviz`](./packages/nerve-wireviz) | WireViz YAML import/export adapter with fixture corpus |

@@ -74,3 +74,39 @@ export const differentialPartner = (signal: string): string | undefined => {
   }
   return undefined
 }
+
+/** Typical insulated OD (mm) per AWG — PVC hookup wire, conservative. */
+export const INSULATED_OD_MM_BY_AWG: Readonly<Record<number, number>> = {
+  30: 1.0,
+  28: 1.1,
+  26: 1.3,
+  24: 1.6,
+  22: 1.8,
+  20: 2.1,
+  18: 2.4,
+  16: 2.8,
+  14: 3.3,
+  12: 3.9,
+  10: 4.8
+}
+
+/**
+ * Estimated bundle diameter (mm) for a set of wire ODs: area-equivalent
+ * circle with a 1.155 packing factor (hex-pack practical fill).
+ */
+export const estimateBundleDiameterMm = (odsMm: ReadonlyArray<number>): number => {
+  const area = odsMm.reduce((sum, d) => sum + d * d, 0)
+  return Math.sqrt(area) * 1.155
+}
+
+/** Sleeve capacity in mm from seed naming ("braided-pet-12" -> 12). */
+export const sleeveCapacityMm = (sleeve: string): number | undefined => {
+  const m = /-(\d+(?:\.\d+)?)$/.exec(sleeve)
+  return m !== undefined && m !== null ? Number(m[1]) : undefined
+}
+
+/** Nominal volts implied by a signal name token ("VBAT_24V" -> 24, "3.3V" -> 3.3). */
+export const signalNominalVolts = (signal: string): number | undefined => {
+  const m = /(?:^|_|\+)(\d+(?:\.\d+)?)\s*V(?:_|$)/i.exec(signal)
+  return m !== undefined && m !== null ? Number(m[1]) : undefined
+}

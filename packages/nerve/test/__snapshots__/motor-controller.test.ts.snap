@@ -40,6 +40,10 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
   "cables": [],
   "connectors": [
     {
+      "cavityLayout": {
+        "columns": 4,
+        "rows": 2,
+      },
       "compatibleTerminals": [
         "43030-0007",
         "43030-0010",
@@ -98,6 +102,10 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
       },
     },
     {
+      "cavityLayout": {
+        "columns": 4,
+        "rows": 2,
+      },
       "compatibleTerminals": [
         "43031-0007",
         "43031-0010",

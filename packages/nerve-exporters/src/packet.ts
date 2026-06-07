@@ -13,6 +13,7 @@ import { schematicHtml } from "./html.js"
 import { generateTestPlan, testPlanJson } from "./test-plan.js"
 import { schematicSvg } from "./svg.js"
 import { boardSvg } from "./board.js"
+import { connectorFacesSvg } from "./faces.js"
 import { assemblyInstructions } from "./instructions.js"
 import { bopCsv, bopJson } from "./bop.js"
 import { quoteCsv, quoteJson } from "./cost.js"
@@ -48,6 +49,7 @@ const coverSheet = (hir: Hir): string => {
     "  harness.json                machine-readable HIR",
     "  schematic.svg               wiring diagram",
     "  board.svg                   harness board / nailboard view",
+    "  connector-faces.svg         cavity layouts, population, orientation",
     "  bom.csv                     bill of materials",
     "  cut-list.csv                wire cut list",
     "  labels.csv                  label schedule",
@@ -70,6 +72,7 @@ export const buildPacket = async (
     ["schematic.svg", schematicSvg(hir)],
     ["schematic.html", schematicHtml(hir)],
     ["board.svg", boardSvg(hir)],
+    ["connector-faces.svg", connectorFacesSvg(hir)],
     ["bom.csv", bomCsv(hir)],
     ["cut-list.csv", cutListCsv(hir, options)],
     ["labels.csv", labelScheduleCsv(hir)],

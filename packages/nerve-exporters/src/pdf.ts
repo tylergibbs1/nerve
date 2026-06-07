@@ -20,6 +20,7 @@ import {
 import { generateTestPlan } from "./test-plan.js"
 import { schematicDrawing } from "./svg.js"
 import { boardDrawing } from "./board.js"
+import { connectorFacesDrawing } from "./faces.js"
 import { scaleDrawing, type Drawing } from "./drawing.js"
 import { assemblyInstructions } from "./instructions.js"
 import { bopTable, generateBop } from "./bop.js"
@@ -319,6 +320,8 @@ export const manufacturingPacketPdf = async (
   drawDrawing(schematicPage, schematicDrawing(hir), fonts)
   const boardPage = doc.addPage([PAGE_W, PAGE_H])
   drawDrawing(boardPage, boardDrawing(hir), fonts)
+  const facesPage = doc.addPage([PAGE_W, PAGE_H])
+  drawDrawing(facesPage, connectorFacesDrawing(hir), fonts)
 
   // --- Tables ----------------------------------------------------------------
   drawTablePages(doc, fonts, hir, "Bill of Materials", bomTable(hir))

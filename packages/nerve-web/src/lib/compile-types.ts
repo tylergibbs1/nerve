@@ -13,6 +13,7 @@ export interface CompileResult {
   readonly hir: Hir
   readonly svg: string
   readonly boardSvg: string
+  readonly facesSvg: string
   readonly testPlan: TestPlan
 }
 

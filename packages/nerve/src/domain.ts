@@ -34,6 +34,8 @@ export interface ConnectorPart {
   readonly pinCount: number
   readonly pinNumbering?: string
   readonly cavityLayout?: { readonly rows: number; readonly columns: number }
+  /** Pins that must stay unassigned (keying, future use, no-connects). */
+  readonly reservedPins?: ReadonlyArray<number | string>
   readonly matingMpn?: string
   readonly compatibleTerminals?: ReadonlyArray<string>
   readonly compatibleSeals?: ReadonlyArray<string>
@@ -148,6 +150,8 @@ export interface BranchProps {
   readonly sleeve?: string
   readonly nominalLength?: number
   readonly breakoutDistance?: number
+  /** Tightest bend the bundle tolerates (mm) — breakouts must clear it. */
+  readonly minBendRadius?: number
 }
 
 export interface BranchDef {
@@ -158,6 +162,7 @@ export interface BranchDef {
   readonly sleeve?: string
   readonly nominalLength?: number
   readonly breakoutDistance?: number
+  readonly minBendRadius?: number
 }
 
 export interface LabelProps {

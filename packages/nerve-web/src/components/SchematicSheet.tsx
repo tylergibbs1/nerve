@@ -23,7 +23,7 @@ export function SchematicSheet({
   svg: string
   filename: string
   hir: Hir
-  kind: "schematic" | "board"
+  kind: "schematic" | "board" | "faces"
 }) {
   const paneRef = useRef<HTMLDivElement | null>(null)
   const zoomRef = useRef(1)
@@ -101,8 +101,9 @@ export function SchematicSheet({
   // anywhere, no app needed. Lazy: shares the exporters chunk with the
   // packet export.
   const downloadHtml = async () => {
-    const { schematicHtml, boardHtml } = await import("@grayhaven/nerve-exporters")
-    const html = kind === "schematic" ? schematicHtml(hir) : boardHtml(hir)
+    const { schematicHtml, boardHtml, facesHtml } = await import("@grayhaven/nerve-exporters")
+    const html =
+      kind === "schematic" ? schematicHtml(hir) : kind === "board" ? boardHtml(hir) : facesHtml(hir)
     downloadBlob(html, filename.replace(/\.svg$/, ".html"), "text/html")
   }
 
