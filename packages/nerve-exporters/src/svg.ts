@@ -20,8 +20,11 @@ const V_GAP = 48
 const TITLE_H = 64
 /** Signals carried by at least this many wires render as net labels
  * (pin stubs + flags) instead of routed paths — the EDA convention that
- * keeps high-fanout power/bus nets from dominating the sheet. */
+ * keeps high-fanout power/bus nets from dominating the sheet. Small
+ * harnesses stay fully drawn: flags only declutter when there is
+ * clutter (splice topology in an 8-wire example is the content). */
 const NET_LABEL_FANOUT = 3
+const NET_LABEL_MIN_WIRES = 12
 const STUB_LEN = 26
 
 /** Map authored color names to visible strokes. */
@@ -190,7 +193,9 @@ export const schematicDrawing = (hir: Hir): Drawing => {
     }
   }
   const labeledNets = new Set(
-    [...signalCounts.entries()].filter(([, n]) => n >= NET_LABEL_FANOUT).map(([sig]) => sig)
+    hir.wires.length >= NET_LABEL_MIN_WIRES
+      ? [...signalCounts.entries()].filter(([, n]) => n >= NET_LABEL_FANOUT).map(([sig]) => sig)
+      : []
   )
 
   // Pre-pass: assign routed wires to lane slots (deterministic, wire order).

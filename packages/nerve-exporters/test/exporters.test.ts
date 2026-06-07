@@ -240,11 +240,29 @@ describe("net-label mode (high-fanout nets)", () => {
           wire("W1", a.pin(1), b.pin(1), { signal: "VBAT", gauge: "18AWG", color: "red", length: 100 }),
           wire("W2", a.pin(2), b.pin(2), { signal: "VBAT", gauge: "18AWG", color: "red", length: 100 }),
           wire("W3", a.pin(3), b.pin(3), { signal: "VBAT", gauge: "18AWG", color: "red", length: 100 }),
-          wire("W4", a.pin(4), b.pin(4), { signal: "DATA", gauge: "24AWG", color: "blue", length: 100 })
+          wire("W4", a.pin(4), b.pin(4), { signal: "DATA", gauge: "24AWG", color: "blue", length: 100 }),
+          // Pad past NET_LABEL_MIN_WIRES so the size gate engages.
+          ...Array.from({ length: 9 }, (_, i) =>
+            wire(`WP${i}`, a.pin(5), b.pin(5), { signal: `PAD${i}`, gauge: "24AWG", color: "black", length: 100 })
+          )
         ]
       })
     )
     const svg = schematicSvg(hir)
+    // Small harnesses stay fully drawn (size gate).
+    const small = compileDesign(
+      harness("small", {
+        revision: "A",
+        units: "mm",
+        connectors: [a, b],
+        wires: [
+          wire("S1", a.pin(1), b.pin(1), { signal: "VBAT", gauge: "18AWG", color: "red", length: 100 }),
+          wire("S2", a.pin(2), b.pin(2), { signal: "VBAT", gauge: "18AWG", color: "red", length: 100 }),
+          wire("S3", a.pin(3), b.pin(3), { signal: "VBAT", gauge: "18AWG", color: "red", length: 100 })
+        ]
+      })
+    ).hir
+    expect(schematicSvg(small)).not.toContain("▸ VBAT")
     // Labeled net: flags at both ends, no cross-canvas curve for VBAT wires.
     expect(svg).toContain("▸ VBAT")
     expect(svg).toContain("VBAT ◂")
