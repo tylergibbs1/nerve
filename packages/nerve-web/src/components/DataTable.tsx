@@ -61,21 +61,24 @@ export function DataTable<T>({
               const canSort = sortable && header.column.getCanSort()
               const dir = header.column.getIsSorted()
               return (
-                <th
-                  key={header.id}
-                  className={`mono${canSort ? " sortable" : ""}`}
-                  {...(canSort
-                    ? { onClick: header.column.getToggleSortingHandler() }
-                    : {})}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                  {canSort && (
-                    <span className="sort-icons" aria-hidden="true">
-                      <span className={`sort-icon${dir === "asc" ? " on" : ""}`}>▲</span>
-                      <span className={`sort-icon abs${dir === "desc" ? " on" : ""}`}>▼</span>
-                    </span>
+                <th key={header.id} className={`mono${canSort ? " sortable" : ""}`}>
+                  {canSort ? (
+                    <button
+                      type="button"
+                      className="th-sort"
+                      onClick={header.column.getToggleSortingHandler()}
+                      aria-label={`Sort by ${String(header.column.columnDef.header)}`}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                      <span className="sort-icons" aria-hidden="true">
+                        <span className={`sort-icon${dir === "asc" ? " on" : ""}`}>▲</span>
+                        <span className={`sort-icon abs${dir === "desc" ? " on" : ""}`}>▼</span>
+                      </span>
+                    </button>
+                  ) : header.isPlaceholder ? null : (
+                    flexRender(header.column.columnDef.header, header.getContext())
                   )}
                 </th>
               )

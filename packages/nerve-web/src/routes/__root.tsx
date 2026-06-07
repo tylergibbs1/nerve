@@ -5,6 +5,7 @@ import {
   type ErrorComponentProps
 } from "@tanstack/react-router"
 import type { QueryClient } from "@tanstack/react-query"
+import { Button } from "../ui/button.js"
 
 interface RouterContext {
   queryClient: QueryClient
@@ -19,14 +20,14 @@ function RootError({ error, reset }: ErrorComponentProps) {
   return (
     <div className="status error">
       <p>{error instanceof Error ? error.message : String(error)}</p>
-      <p style={{ display: "flex", gap: 12 }}>
-        <button className="compile-button" onClick={() => reset()}>
+      <div className="flex gap-3">
+        <Button variant="outline" size="xs" onClick={() => reset()}>
           Try again
-        </button>
-        <button className="compile-button" onClick={() => window.location.reload()}>
+        </Button>
+        <Button variant="outline" size="xs" onClick={() => window.location.reload()}>
           Reload
-        </button>
-      </p>
+        </Button>
+      </div>
     </div>
   )
 }

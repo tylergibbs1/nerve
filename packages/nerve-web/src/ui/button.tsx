@@ -1,5 +1,12 @@
 // Ported from grayhavenindustries/components/ui/button.tsx (the real design
-// system). One addition: an `xs` size for tool-density surfaces.
+// system). Deliberate deviations from source, all behavior-improving here:
+// - added `xs` size for tool-density surfaces
+// - default variant hovers bg-accent-hover (source hover:bg-accent is a
+//   white-on-white no-op in this all-white-accent theme)
+// - secondary/ghost text-muted-foreground (calmer chrome; source uses
+//   foreground), destructive text-background (value-identical)
+// - added cursor-pointer (Tailwind v4 preflight defaults to cursor:default)
+// - removed `glass` variant and `touch-target` (utility not ported)
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"

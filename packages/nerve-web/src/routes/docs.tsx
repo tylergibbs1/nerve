@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router"
-import { Button } from "../ui/button.js"
+import { Button, buttonVariants } from "../ui/button.js"
+import { cn } from "../lib/utils.js"
 
 export const Route = createFileRoute("/docs")({
   component: DocsLayout
@@ -108,7 +109,8 @@ function DocsLayout() {
     const buttons: HTMLButtonElement[] = []
     for (const pre of body.querySelectorAll("pre")) {
       const btn = document.createElement("button")
-      btn.className = "pre-copy"
+      btn.type = "button"
+      btn.className = cn(buttonVariants({ variant: "ghost", size: "xs" }), "pre-copy")
       btn.textContent = "Copy"
       btn.addEventListener("click", () => {
         void navigator.clipboard.writeText(pre.textContent ?? "").then(() => {
