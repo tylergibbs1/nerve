@@ -32,11 +32,24 @@ import { CompileError, ValidationError } from "./errors.js"
 
 const jiti = createJiti(import.meta.url, { interopDefault: true })
 
+/**
+ * Watch-mode loader: module-cache disabled so edits to the harness file
+ * (and anything it imports, config included) are seen on every recompile.
+ * The module-level `jiti` above CACHES — using it in a watch loop serves
+ * stale designs forever.
+ */
+const freshJiti = () =>
+  createJiti(import.meta.url, { interopDefault: true, moduleCache: false })
+
+const loaderFor = (fresh: boolean) => (fresh ? freshJiti() : jiti)
+
 export interface CompileFileOptions {
   /** Extra rules to run alongside the built-ins. */
   readonly rules?: ReadonlyArray<Rule>
   /** Project config; when omitted, `nerve.config.ts` next to the file is loaded if present. */
   readonly config?: NerveConfig
+  /** Bypass the module cache (watch mode): re-read every source file. */
+  readonly fresh?: boolean
 }
 
 export interface CompileFileResult {
@@ -54,11 +67,12 @@ const isHarnessDesign = (value: unknown): value is HarnessDesign =>
 
 /** Load the default-exported design from a `.harness.ts` module. */
 export const loadDesign = (
-  file: string
+  file: string,
+  options: { readonly fresh?: boolean } = {}
 ): Effect.Effect<HarnessDesign, CompileError> =>
   Effect.tryPromise({
     try: async () => {
-      const mod = await jiti.import<unknown>(resolve(file))
+      const mod = await loaderFor(options.fresh === true).import<unknown>(resolve(file))
       const design =
         isHarnessDesign(mod) ? mod : (mod as { default?: unknown })?.default
       if (!isHarnessDesign(design)) {
@@ -87,16 +101,18 @@ const CONFIG_FILES = ["nerve.config.ts", "interconnect.config.ts"]
  * `config.harnessFiles` resolve relative to the config file, not the cwd.
  */
 export const findConfig = (
-  fromDir: string
+  fromDir: string,
+  options: { readonly fresh?: boolean } = {}
 ): Effect.Effect<{ readonly config: NerveConfig; readonly dir: string }, CompileError> =>
   Effect.tryPromise({
     try: async () => {
+      const loader = loaderFor(options.fresh === true)
       let dir = resolve(fromDir)
       for (;;) {
         for (const name of CONFIG_FILES) {
           const candidate = join(dir, name)
           if (existsSync(candidate)) {
-            const mod = await jiti.import<{ default?: NerveConfig }>(candidate)
+            const mod = await loader.import<{ default?: NerveConfig }>(candidate)
             return {
               config: (mod as { default?: NerveConfig }).default ?? (mod as NerveConfig),
               dir
@@ -171,9 +187,14 @@ export const compileFile = (
   options: CompileFileOptions = {}
 ): Effect.Effect<CompileFileResult, CompileError> =>
   Effect.gen(function* () {
-    const design = yield* loadDesign(file)
+    const fresh = options.fresh === true
+    const design = yield* loadDesign(file, { fresh })
     const config =
-      options.config ?? (yield* loadConfig(dirname(resolve(file))))
+      options.config ??
+      (yield* Effect.map(
+        findConfig(dirname(resolve(file)), { fresh }),
+        ({ config }) => config
+      ))
     const { plugins, diagnostics: pluginDiagnostics } =
       config.plugins !== undefined && config.plugins.length > 0
         ? yield* loadPlugins(dirname(resolve(file)), config.plugins)

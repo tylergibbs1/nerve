@@ -30,6 +30,7 @@ import {
   type CompileFileResult
 } from "@grayhaven/nerve-compiler"
 import { exportWireViz, importWireViz } from "@grayhaven/nerve-wireviz"
+import { startDev } from "./dev.js"
 import {
   connectorFacesSvg,
   assemblyInstructions,
@@ -180,6 +181,7 @@ const USAGE = `nerve — harnesses as code (Grayhaven Nerve)
 Usage:
   nerve init [dir]
   nerve compile  <file.harness.ts> [--out dir]
+  nerve dev      [file.harness.ts] [--port 4477]   (watch + live browser preview)
   nerve validate <file.harness.ts>
   nerve render   <file.harness.ts> [--format svg] [--view schematic|board|faces|pinout|formboard] [--paper letter|a4] [--out dir]
   nerve export   <file.harness.ts> [--target manufacturing-packet|wireviz] [--out dir]
@@ -233,6 +235,22 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       printDiagnostics(result.diagnostics, io)
       io.out(summarize(result.hir))
       return hasErrors(result.diagnostics) ? 1 : 0
+    }
+
+    case "dev": {
+      const file = await resolveHarnessArg(positional)
+      if (file === undefined) return usage(io)
+      const port = flags["port"] !== undefined ? Number(flags["port"]) : undefined
+      try {
+        const dev = await startDev(file, { io, ...(port !== undefined ? { port } : {}) })
+        io.out(`nerve dev → ${dev.url}  (views: / /board /faces /pinout) — watching for changes, ctrl-c to stop`)
+        // Keep the process alive until killed.
+        await new Promise<void>((res) => process.once("SIGINT", () => void dev.close().then(res)))
+        return 0
+      } catch (cause) {
+        io.err(`Failed to start dev server: ${cause instanceof Error ? cause.message : String(cause)}`)
+        return 2
+      }
     }
 
     case "validate": {
@@ -813,3 +831,5 @@ export default harness("my-first-harness", {
 `
 
 export const main = (): Promise<number> => run(process.argv.slice(2))
+
+export { startDev, type DevServer, type DevIo } from "./dev.js"

@@ -1,13 +1,14 @@
 # nerve: deterministic, CI-ready.
 
-Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exits nonzero on validation errors, and every artifact is byte-identical for the same input.
+Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exits nonzero on validation errors, and every artifact is byte-identical for the same input. With `entry` set in nerve.config.ts, the file argument is optional.
 
 | Command | Does |
 | --- | --- |
 | `nerve init` | Scaffold a harness project (nerve.config.ts, src/main.harness.ts). |
 | `nerve compile` | Compile to HIR; print diagnostics; nonzero exit on errors. |
+| `nerve dev` | Watch + recompile + live browser preview (schematic/board/faces/pinout). |
 | `nerve validate` | Compile + rules only, the CI gate. Exit code mirrors severity. |
-| `nerve render` | Schematic / board SVG from the HIR. |
+| `nerve render` | Schematic / board / faces / pinout SVG (or PNG) from the HIR. |
 | `nerve export` | Everything: HIR, drawings, CSVs, test plan, assembly steps, PDF packet + zip. |
 | `nerve import` | WireViz YAML → Nerve harness source. |
 | `nerve diff` | Semantic diff between two revisions, down to a single pin swap. |
@@ -19,6 +20,7 @@ Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exit
 | `nerve release` | Cut a release: fail-closed validation + frozen artifact set. |
 | `nerve record` | Build record for a completed unit (serials, operators, results). |
 | `nerve redline` | Capture as-built deviations against the released design. |
+| `nerve parts` | Browse the bundled connector library (specs, MPNs, limits; `--json`). |
 
 ## CI example
 
