@@ -1,0 +1,61 @@
+# Publishing happens from a frozen-lockfile CI build, never a laptop —
+# retiring the stale-bun.lock publish footgun (v0.5.0 shipped every
+# internal dep pinned to an unpublished version because the publish ran
+# against a lockfile that predated the version bump).
+#
+# Trigger: push a tag `vX.Y.Z` matching packages/nerve/package.json.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Tag matches package version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./packages/nerve/package.json').version")"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "Tag v$TAG does not match packages/nerve version $PKG" >&2
+            exit 1
+          fi
+
+      - name: Install (frozen lockfile)
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Test
+        run: bun run test
+
+      - name: Build packages
+        run: bun run build
+
+      # The gate: tarball pins + artifacts + consumer install must pass
+      # before anything reaches the registry.
+      - name: Pack-and-install smoke test
+        run: bun scripts/smoke-tarballs.ts
+
+      - name: Publish all packages
+        run: bun scripts/publish-all.ts
+        env:
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
