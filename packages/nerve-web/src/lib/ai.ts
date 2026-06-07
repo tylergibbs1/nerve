@@ -106,14 +106,13 @@ const diagnosticsReport = (result: CompileResult): string => {
   return `Compiled: ${errors} error(s), ${warnings} warning(s).\n${lines.join("\n")}`
 }
 
-/** Apply a tool call, compile-verify it, and return the tool_result text. */
-const applyTool = async (
-  projectId: string,
+/** Pure patch engine for the agent's tools. Exported for tests: this is
+ * the logic that decides whether an LLM edit lands, so it must be exact. */
+export const applyPatch = (
+  current: string,
   name: string,
   input: unknown
-): Promise<{ ok: boolean; report: string; result?: CompileResult }> => {
-  const current = getSource(projectId)
-  let next: string
+): { ok: true; next: string } | { ok: false; report: string } => {
   if (name === "edit_harness_source") {
     const { old_string, new_string } = input as { old_string: string; new_string: string }
     const first = current.indexOf(old_string)
@@ -123,12 +122,23 @@ const applyTool = async (
     if (current.indexOf(old_string, first + 1) !== -1) {
       return { ok: false, report: "old_string is not unique. Include more surrounding context to disambiguate." }
     }
-    next = current.slice(0, first) + new_string + current.slice(first + old_string.length)
-  } else if (name === "rewrite_harness_source") {
-    next = (input as { source: string }).source
-  } else {
-    return { ok: false, report: `Unknown tool: ${name}` }
+    return { ok: true, next: current.slice(0, first) + new_string + current.slice(first + old_string.length) }
   }
+  if (name === "rewrite_harness_source") {
+    return { ok: true, next: (input as { source: string }).source }
+  }
+  return { ok: false, report: `Unknown tool: ${name}` }
+}
+
+/** Apply a tool call, compile-verify it, and return the tool_result text. */
+const applyTool = async (
+  projectId: string,
+  name: string,
+  input: unknown
+): Promise<{ ok: boolean; report: string; result?: CompileResult }> => {
+  const patched = applyPatch(getSource(projectId), name, input)
+  if (!patched.ok) return { ok: false, report: patched.report }
+  const next = patched.next
 
   try {
     const result = await compileSource(projectId, next)
