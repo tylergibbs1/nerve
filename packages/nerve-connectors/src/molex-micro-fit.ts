@@ -60,6 +60,56 @@ export const MolexMicroFit = {
       verification: "verified",
       lastVerified: "2026-06-06"
     }
+  },
+  /** Micro-Fit 3.0 receptacle housing, dual row, 16 circuits. */
+  "43025-1600": {
+    mpn: "43025-1600",
+    manufacturer: "Molex",
+    family: "Micro-Fit 3.0",
+    description: "Micro-Fit 3.0 receptacle housing, dual row, 16 circuits",
+    gender: "receptacle",
+    pinCount: 16,
+    pinNumbering: "molex-micro-fit-dual-row",
+    cavityLayout: { rows: 2, columns: 8 },
+    matingMpn: "43020-1600",
+    compatibleTerminals: ["43030-0007", "43030-0010"],
+    wireGaugeRange: { min: "30AWG", max: "20AWG" },
+    currentLimitA: 8.5,
+    voltageLimitV: 600,
+    crimpTool: "63819-0000",
+    insertionTool: "11-03-0044",
+    extractionTool: "11-03-0043",
+    provenance: {
+      source: "Molex catalog",
+      datasheet: "https://www.molex.com/en-us/products/part-detail/430251600",
+      verification: "verified",
+      lastVerified: "2026-06-07"
+    }
+  },
+  /** Micro-Fit 3.0 plug housing, dual row, 16 circuits. */
+  "43020-1600": {
+    mpn: "43020-1600",
+    manufacturer: "Molex",
+    family: "Micro-Fit 3.0",
+    description: "Micro-Fit 3.0 plug housing, dual row, 16 circuits",
+    gender: "plug",
+    pinCount: 16,
+    pinNumbering: "molex-micro-fit-dual-row",
+    cavityLayout: { rows: 2, columns: 8 },
+    matingMpn: "43025-1600",
+    compatibleTerminals: ["43031-0007", "43031-0010"],
+    wireGaugeRange: { min: "30AWG", max: "20AWG" },
+    currentLimitA: 8.5,
+    voltageLimitV: 600,
+    crimpTool: "63819-0000",
+    insertionTool: "11-03-0044",
+    extractionTool: "11-03-0043",
+    provenance: {
+      source: "Molex catalog",
+      datasheet: "https://www.molex.com/en-us/products/part-detail/430201600",
+      verification: "verified",
+      lastVerified: "2026-06-07"
+    }
   }
 } as const satisfies Readonly<Record<string, ConnectorPart>>
 

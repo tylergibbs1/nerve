@@ -1,26 +1,11 @@
 // Splice + cable example: a controller feeds two sensors. Power is spliced
 // at S1/S2 on the main branch; CAN runs as conductors of a shielded cable.
-import { harness, connector, wire, branch, label, splice, cable, type ConnectorPart } from "@grayhaven/nerve"
+import { harness, connector, wire, branch, label, splice, cable } from "@grayhaven/nerve"
+import { JstPH } from "@grayhaven/nerve-connectors"
 
-const jst3: ConnectorPart = {
-  mpn: "PHR-3",
-  manufacturer: "JST",
-  family: "PH",
-  description: "JST PH housing, 3 circuits",
-  gender: "receptacle",
-  pinCount: 3,
-  wireGaugeRange: { min: "32AWG", max: "24AWG" }
-}
-
-const jst4: ConnectorPart = {
-  mpn: "PHR-4",
-  manufacturer: "JST",
-  family: "PH",
-  description: "JST PH housing, 4 circuits",
-  gender: "receptacle",
-  pinCount: 4,
-  wireGaugeRange: { min: "32AWG", max: "24AWG" }
-}
+// Parts come from the verified library (PRD §30/§42).
+const jst3 = JstPH["PHR-3"]
+const jst4 = JstPH["PHR-4"]
 
 const controller = connector("J1", jst4, {
   pins: { 1: "V5", 2: "GND", 3: "CAN_H", 4: "CAN_L" },

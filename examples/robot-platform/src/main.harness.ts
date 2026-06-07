@@ -7,30 +7,15 @@ import {
   harness, connector, wire, branch, label, splice, cable,
   type ConnectorPart, type ConnectorInstance, type WireDef, type SpliceDef
 } from "@grayhaven/nerve"
-import { MolexMicroFit } from "@grayhaven/nerve-connectors"
+import { AmassXT60, JstPH, MolexMegaFit, MolexMicroFit } from "@grayhaven/nerve-connectors"
 
-// --- Parts -------------------------------------------------------------------
-const xt60: ConnectorPart = {
-  mpn: "XT60PW-M", manufacturer: "AMASS", family: "XT60",
-  description: "XT60 power connector", pinCount: 2
-}
-const xt60F: ConnectorPart = { ...xt60, mpn: "XT60PW-F", gender: "receptacle" }
-const megaFit8: ConnectorPart = {
-  mpn: "76829-0008", manufacturer: "Molex", family: "Mega-Fit",
-  description: "Mega-Fit dual-row receptacle, 8 circuits", gender: "receptacle",
-  pinCount: 8, wireGaugeRange: { min: "23AWG", max: "12AWG" }
-}
-const microFit16: ConnectorPart = {
-  mpn: "43025-1600", manufacturer: "Molex", family: "Micro-Fit 3.0",
-  description: "Micro-Fit 3.0 receptacle, dual row, 16 circuits", gender: "receptacle",
-  pinCount: 16, wireGaugeRange: { min: "30AWG", max: "18AWG" }
-}
-const jstPh4: ConnectorPart = {
-  mpn: "PHR-4", manufacturer: "JST", family: "PH",
-  description: "JST PH housing, 4 circuits", gender: "receptacle",
-  pinCount: 4, wireGaugeRange: { min: "32AWG", max: "24AWG" }
-}
-const jstPh2: ConnectorPart = { ...jstPh4, mpn: "PHR-2", description: "JST PH housing, 2 circuits", pinCount: 2 }
+// --- Parts: the verified library is the source of truth (PRD §30/§42) ---------
+const xt60 = AmassXT60["XT60PW-M"]
+const xt60F = AmassXT60["XT60PW-F"]
+const megaFit8 = MolexMegaFit["76829-0008"]
+const microFit16 = MolexMicroFit["43025-1600"]
+const jstPh4 = JstPH["PHR-4"]
+const jstPh2 = JstPH["PHR-2"]
 
 // --- Power chain ---------------------------------------------------------------
 const battery = connector("BAT1", xt60F, { pins: { 1: "VBAT_RAW", 2: "GND_BAT" } })

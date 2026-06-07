@@ -107,6 +107,7 @@
         "@grayhaven/nerve": "workspace:*",
       },
       "devDependencies": {
+        "@grayhaven/nerve-rules": "workspace:*",
         "typescript": "^5.8.3",
       },
     },

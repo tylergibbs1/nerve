@@ -66,6 +66,14 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
   ],
   "connectors": [
     {
+      "cavityLayout": {
+        "columns": 4,
+        "rows": 1,
+      },
+      "compatibleTerminals": [
+        "SPH-002T-P0.5S",
+        "SPH-004T-P0.5S",
+      ],
       "description": "JST PH housing, 4 circuits",
       "family": "PH",
       "gender": "receptacle",
@@ -90,6 +98,12 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
           "signal": "CAN_L",
         },
       ],
+      "provenance": {
+        "datasheet": "https://www.jst-mfg.com/product/detail_e.php?series=199",
+        "lastVerified": "2026-06-07",
+        "source": "JST catalog",
+        "verification": "inspired-by",
+      },
       "ref": "J1",
       "wireGaugeRange": {
         "max": "24AWG",
@@ -97,6 +111,14 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
       },
     },
     {
+      "cavityLayout": {
+        "columns": 3,
+        "rows": 1,
+      },
+      "compatibleTerminals": [
+        "SPH-002T-P0.5S",
+        "SPH-004T-P0.5S",
+      ],
       "description": "JST PH housing, 3 circuits",
       "family": "PH",
       "gender": "receptacle",
@@ -117,6 +139,12 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
           "signal": "CAN_H",
         },
       ],
+      "provenance": {
+        "datasheet": "https://www.jst-mfg.com/product/detail_e.php?series=199",
+        "lastVerified": "2026-06-07",
+        "source": "JST catalog",
+        "verification": "inspired-by",
+      },
       "ref": "P1",
       "wireGaugeRange": {
         "max": "24AWG",
@@ -124,6 +152,14 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
       },
     },
     {
+      "cavityLayout": {
+        "columns": 3,
+        "rows": 1,
+      },
+      "compatibleTerminals": [
+        "SPH-002T-P0.5S",
+        "SPH-004T-P0.5S",
+      ],
       "description": "JST PH housing, 3 circuits",
       "family": "PH",
       "gender": "receptacle",
@@ -144,6 +180,12 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
           "signal": "CAN_L",
         },
       ],
+      "provenance": {
+        "datasheet": "https://www.jst-mfg.com/product/detail_e.php?series=199",
+        "lastVerified": "2026-06-07",
+        "source": "JST catalog",
+        "verification": "inspired-by",
+      },
       "ref": "P2",
       "wireGaugeRange": {
         "max": "24AWG",

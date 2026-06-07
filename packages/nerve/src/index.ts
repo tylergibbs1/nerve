@@ -99,3 +99,5 @@ export {
   type RuleOptions,
   type RuleReport
 } from "./rules.js"
+export { resolvePart, staticProvider } from "./providers.js"
+export type { PartProvider, ResolvedPart } from "./providers.js"
