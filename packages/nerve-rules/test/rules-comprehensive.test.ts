@@ -549,16 +549,16 @@ describe("rule engine", () => {
 
 describe("HK-ELEC-005 voltageRatingBelowSignal", () => {
   it("fires when the wire's rating is below the signal's nominal volts", () => {
-    const hir = fixture([{ from: 1, to: 1, signal: "VBAT_24V", voltageRating: 12 }])
+    const hir = fixture([fullWire("W1", j1.pin(1), j2.pin(1), { signal: "VBAT_24V", voltageRating: 12 })])
     expect(only(hir, "voltageRatingBelowSignal").map((d) => d.code)).toEqual(["HK-ELEC-005"])
   })
   it("passes at exactly nominal and when either field is absent", () => {
-    expect(only(fixture([{ from: 1, to: 1, signal: "VBAT_24V", voltageRating: 24 }]), "voltageRatingBelowSignal")).toEqual([])
-    expect(only(fixture([{ from: 1, to: 1, signal: "VBAT_24V" }]), "voltageRatingBelowSignal")).toEqual([])
-    expect(only(fixture([{ from: 1, to: 1, signal: "CAN_H", voltageRating: 5 }]), "voltageRatingBelowSignal")).toEqual([])
+    expect(only(fixture([fullWire("W1", j1.pin(1), j2.pin(1), { signal: "VBAT_24V", voltageRating: 24 })]), "voltageRatingBelowSignal")).toEqual([])
+    expect(only(fixture([fullWire("W1", j1.pin(1), j2.pin(1), { signal: "VBAT_24V" })]), "voltageRatingBelowSignal")).toEqual([])
+    expect(only(fixture([fullWire("W1", j1.pin(1), j2.pin(1), { signal: "CAN_H", voltageRating: 5 })]), "voltageRatingBelowSignal")).toEqual([])
   })
   it("reads decimal rails", () => {
-    const hir = fixture([{ from: 1, to: 1, signal: "RAIL_3.3V", voltageRating: 3 }])
+    const hir = fixture([fullWire("W1", j1.pin(1), j2.pin(1), { signal: "RAIL_3.3V", voltageRating: 3 })])
     expect(only(hir, "voltageRatingBelowSignal")).toHaveLength(1)
   })
 })
