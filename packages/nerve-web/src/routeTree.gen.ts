@@ -16,6 +16,7 @@ import { Route as DocsIndexRouteImport } from './routes/docs.index'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
 import { Route as DocsSdkRouteImport } from './routes/docs.sdk'
 import { Route as DocsRulesRouteImport } from './routes/docs.rules'
+import { Route as DocsLifecycleRouteImport } from './routes/docs.lifecycle'
 import { Route as DocsDslRouteImport } from './routes/docs.dsl'
 import { Route as DocsCliRouteImport } from './routes/docs.cli'
 import { Route as DocsArtifactsRouteImport } from './routes/docs.artifacts'
@@ -62,6 +63,11 @@ const DocsSdkRoute = DocsSdkRouteImport.update({
 const DocsRulesRoute = DocsRulesRouteImport.update({
   id: '/rules',
   path: '/rules',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsLifecycleRoute = DocsLifecycleRouteImport.update({
+  id: '/lifecycle',
+  path: '/lifecycle',
   getParentRoute: () => DocsRoute,
 } as any)
 const DocsDslRoute = DocsDslRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/docs/artifacts': typeof DocsArtifactsRoute
   '/docs/cli': typeof DocsCliRoute
   '/docs/dsl': typeof DocsDslRoute
+  '/docs/lifecycle': typeof DocsLifecycleRoute
   '/docs/rules': typeof DocsRulesRoute
   '/docs/sdk': typeof DocsSdkRoute
   '/projects/$projectId': typeof ProjectsProjectIdRouteWithChildren
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/docs/artifacts': typeof DocsArtifactsRoute
   '/docs/cli': typeof DocsCliRoute
   '/docs/dsl': typeof DocsDslRoute
+  '/docs/lifecycle': typeof DocsLifecycleRoute
   '/docs/rules': typeof DocsRulesRoute
   '/docs/sdk': typeof DocsSdkRoute
   '/docs': typeof DocsIndexRoute
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/docs/artifacts': typeof DocsArtifactsRoute
   '/docs/cli': typeof DocsCliRoute
   '/docs/dsl': typeof DocsDslRoute
+  '/docs/lifecycle': typeof DocsLifecycleRoute
   '/docs/rules': typeof DocsRulesRoute
   '/docs/sdk': typeof DocsSdkRoute
   '/projects/$projectId': typeof ProjectsProjectIdRouteWithChildren
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/docs/artifacts'
     | '/docs/cli'
     | '/docs/dsl'
+    | '/docs/lifecycle'
     | '/docs/rules'
     | '/docs/sdk'
     | '/projects/$projectId'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/docs/artifacts'
     | '/docs/cli'
     | '/docs/dsl'
+    | '/docs/lifecycle'
     | '/docs/rules'
     | '/docs/sdk'
     | '/docs'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/docs/artifacts'
     | '/docs/cli'
     | '/docs/dsl'
+    | '/docs/lifecycle'
     | '/docs/rules'
     | '/docs/sdk'
     | '/projects/$projectId'
@@ -310,6 +322,13 @@ declare module '@tanstack/react-router' {
       path: '/rules'
       fullPath: '/docs/rules'
       preLoaderRoute: typeof DocsRulesRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/lifecycle': {
+      id: '/docs/lifecycle'
+      path: '/lifecycle'
+      fullPath: '/docs/lifecycle'
+      preLoaderRoute: typeof DocsLifecycleRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/dsl': {
@@ -404,6 +423,7 @@ interface DocsRouteChildren {
   DocsArtifactsRoute: typeof DocsArtifactsRoute
   DocsCliRoute: typeof DocsCliRoute
   DocsDslRoute: typeof DocsDslRoute
+  DocsLifecycleRoute: typeof DocsLifecycleRoute
   DocsRulesRoute: typeof DocsRulesRoute
   DocsSdkRoute: typeof DocsSdkRoute
   DocsIndexRoute: typeof DocsIndexRoute
@@ -414,6 +434,7 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsArtifactsRoute: DocsArtifactsRoute,
   DocsCliRoute: DocsCliRoute,
   DocsDslRoute: DocsDslRoute,
+  DocsLifecycleRoute: DocsLifecycleRoute,
   DocsRulesRoute: DocsRulesRoute,
   DocsSdkRoute: DocsSdkRoute,
   DocsIndexRoute: DocsIndexRoute,

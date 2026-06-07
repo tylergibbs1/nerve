@@ -21,7 +21,8 @@ const PAGES = [
   { slug: "sdk", title: "TypeScript SDK" },
   { slug: "cli", title: "CLI" },
   { slug: "artifacts", title: "Artifacts" },
-  { slug: "ai", title: "AI Copilot" }
+  { slug: "ai", title: "AI Copilot" },
+  { slug: "lifecycle", title: "Production Lifecycle" }
 ] as const
 
 const indexNote = `> Grayhaven Nerve docs index: ${SITE}/llms.txt. Fetch it to discover all pages before exploring further.\n\n`

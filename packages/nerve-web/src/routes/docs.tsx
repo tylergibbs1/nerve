@@ -7,7 +7,7 @@ export const Route = createFileRoute("/docs")({
   component: DocsLayout
 })
 
-type DocPath = "/docs" | "/docs/dsl" | "/docs/sdk" | "/docs/rules" | "/docs/cli" | "/docs/artifacts" | "/docs/ai"
+type DocPath = "/docs" | "/docs/dsl" | "/docs/sdk" | "/docs/rules" | "/docs/cli" | "/docs/artifacts" | "/docs/ai" | "/docs/lifecycle"
 interface DocItem {
   readonly to: DocPath
   readonly label: string
@@ -32,7 +32,13 @@ const GROUPS: ReadonlyArray<DocGroup> = [
       { to: "/docs/artifacts", label: "Artifacts" }
     ]
   },
-  { label: "Concepts", items: [{ to: "/docs/ai", label: "AI Copilot" }] }
+  {
+    label: "Concepts",
+    items: [
+      { to: "/docs/ai", label: "AI Copilot" },
+      { to: "/docs/lifecycle", label: "Production Lifecycle" }
+    ]
+  }
 ]
 
 const FLAT = GROUPS.flatMap((g) => g.items)
@@ -45,7 +51,8 @@ const MD_SLUGS: Record<string, string> = {
   "/docs/rules": "rules",
   "/docs/cli": "cli",
   "/docs/artifacts": "artifacts",
-  "/docs/ai": "ai"
+  "/docs/ai": "ai",
+  "/docs/lifecycle": "lifecycle"
 }
 
 /** Copy the page's agent-readable markdown mirror to the clipboard. */

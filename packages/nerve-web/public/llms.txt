@@ -11,6 +11,7 @@
 - [CLI](https://nerve-demo.vercel.app/docs/cli.md)
 - [Artifacts](https://nerve-demo.vercel.app/docs/artifacts.md)
 - [AI Copilot](https://nerve-demo.vercel.app/docs/ai.md)
+- [Production Lifecycle](https://nerve-demo.vercel.app/docs/lifecycle.md)
 
 Everything above embedded in one file: https://nerve-demo.vercel.app/llms-full.txt
 
