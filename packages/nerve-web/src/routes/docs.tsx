@@ -143,6 +143,7 @@ function DocsLayout() {
         </a>
       </nav>
       <article className="docs-body" ref={bodyRef}>
+        <div className="docs-content">
         {slug !== undefined && (
           <div className="docs-md-actions">
             <CopyMarkdown slug={slug} />
@@ -173,6 +174,7 @@ function DocsLayout() {
             <span />
           )}
         </footer>
+        </div>
       </article>
     </div>
   )
