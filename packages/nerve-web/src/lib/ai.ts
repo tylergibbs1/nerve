@@ -20,7 +20,7 @@ import { getSource, setSource } from "./sources.js"
 import type { CompileResult } from "./compile-types.js"
 
 const KEY_STORAGE = "nerve:openai-key"
-const MODEL = "gpt-5.2"
+const MODEL = "gpt-5.5"
 const MAX_TOOL_ROUNDS = 6
 
 export const getApiKey = (): string | undefined => {
