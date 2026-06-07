@@ -183,5 +183,39 @@ export const importTscircuitPinout = (
   }
 }
 
+/**
+ * Export harness connectors as tscircuit Circuit JSON source elements
+ * (PRD §37, reverse direction): a tscircuit board project can validate
+ * its connector against the HARNESS as the source of truth. Shapes match
+ * circuit-json@0.0.433; ids are deterministic.
+ */
+export const exportTscircuitCircuitJson = (
+  hir: Hir,
+  connectorRef?: string
+): Array<Record<string, unknown>> => {
+  const connectors =
+    connectorRef !== undefined
+      ? hir.connectors.filter((c) => c.ref === connectorRef)
+      : hir.connectors
+  return connectors.flatMap((c) => [
+    {
+      type: "source_component",
+      ftype: "simple_chip",
+      source_component_id: `nerve_${c.ref}`,
+      name: c.ref,
+      manufacturer_part_number: c.mpn,
+      ...(c.matingMpn !== undefined ? { display_value: `mates ${c.matingMpn}` } : {})
+    },
+    ...c.pins.map((p) => ({
+      type: "source_port",
+      source_port_id: `nerve_${c.ref}_pin${p.pin}`,
+      source_component_id: `nerve_${c.ref}`,
+      name: `pin${p.pin}`,
+      pin_number: Number(p.pin),
+      port_hints: [...(p.signal !== undefined ? [p.signal] : []), `pin${p.pin}`]
+    }))
+  ])
+}
+
 export const contractJson = (contract: ConnectorContract): string =>
   JSON.stringify(contract, null, 2) + "\n"

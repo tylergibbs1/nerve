@@ -46,7 +46,7 @@ export { bopCsv, bopJson, bopTable, generateBop, type BillOfProcess, type Operat
 export { generateQuote, quoteCsv, quoteDiff, quoteJson, quoteTable, type Quote, type QuoteDiff, type QuoteLine } from "./cost.js"
 export { analysisCsv, analysisJson, analysisTable, analyzeHarness, type AnalysisReport, type BranchAnalysis, type SpliceAnalysis, type WireAnalysis } from "./analysis.js"
 export { builtinAdapters, findAdapter, genericCutStripCsv, genericLabelPrinterCsv, genericTesterJson, type AdapterKind, type AdapterResult, type MachineAdapter } from "./adapters.js"
-export { importTscircuitPinout, contractJson, exportConnectorContract, importPinoutCsv, validateContract, type ConnectorContract } from "./contracts.js"
+export { exportTscircuitCircuitJson, importTscircuitPinout, contractJson, exportConnectorContract, importPinoutCsv, validateContract, type ConnectorContract } from "./contracts.js"
 export { formboardSheets, type Formboard, type FormboardOptions, type FormboardSheet, type Paper } from "./formboard.js"
 export { computeImpact, createRelease, hirFingerprint, ReleaseBlockedError, releaseJson, type ChangeRisk, type CreateReleaseOptions, type Release, type ReleaseImpact } from "./release.js"
 export { buildRecordJson, createBuildRecord, type BuildRecord, type BuildRecordOptions, type Measurement, type TestVerdict } from "./build-record.js"

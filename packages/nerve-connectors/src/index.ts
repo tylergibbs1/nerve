@@ -25,3 +25,4 @@ export const allParts: Readonly<Record<string, ConnectorPart>> = {
 
 /** The bundled verified library as a PartProvider (PRD §42). */
 export const nerveConnectorsProvider = staticProvider("nerve-connectors", allParts)
+export { part, partSpecs } from "./part-spec.js"

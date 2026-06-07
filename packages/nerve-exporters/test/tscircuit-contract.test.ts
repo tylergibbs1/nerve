@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from "vitest"
 import { compileDesign } from "@grayhaven/nerve"
-import { importTscircuitPinout, validateContract } from "../src/contracts.js"
+import { exportTscircuitCircuitJson, importTscircuitPinout, validateContract } from "../src/contracts.js"
 import motor from "../../../examples/motor-controller/src/main.harness.js"
 
 const board = (signals: ReadonlyArray<string>): Array<Record<string, unknown>> => [
@@ -54,5 +54,23 @@ describe("tscircuit Circuit JSON contract import (PRD §37)", () => {
     expect(importTscircuitPinout(board(MOTOR_SIGNALS), { connector: "J9" })).toBeUndefined()
     const aliased = importTscircuitPinout(board(MOTOR_SIGNALS), { connector: "J1", component: "J1" })
     expect(aliased?.connector).toBe("J1")
+  })
+})
+
+describe("tscircuit Circuit JSON export (reverse direction)", () => {
+  it("round-trips: our export -> our import -> clean validation", () => {
+    const { hir } = compileDesign(motor)
+    const circuitJson = exportTscircuitCircuitJson(hir, "J1")
+    expect(circuitJson.filter((el) => el["type"] === "source_component")).toHaveLength(1)
+    expect(circuitJson.filter((el) => el["type"] === "source_port")).toHaveLength(8)
+    const contract = importTscircuitPinout(circuitJson, { connector: "J1" })!
+    expect(validateContract(hir, contract)).toEqual([])
+  })
+
+  it("is deterministic and exports every connector when unscoped", () => {
+    const { hir } = compileDesign(motor)
+    const a = JSON.stringify(exportTscircuitCircuitJson(hir))
+    expect(JSON.stringify(exportTscircuitCircuitJson(hir))).toBe(a)
+    expect(exportTscircuitCircuitJson(hir).filter((el) => el["type"] === "source_component")).toHaveLength(2)
   })
 })

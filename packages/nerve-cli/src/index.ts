@@ -55,6 +55,7 @@ import {
   findAdapter,
   generateQuote,
   importPinoutCsv,
+  exportTscircuitCircuitJson,
   importTscircuitPinout,
   quoteCsv,
   quoteJson,
@@ -450,6 +451,16 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
         return 2
       }
       const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+      if (flags["format"] === "circuit-json") {
+        // PRD §37 reverse direction: hand tscircuit the harness side.
+        writeOut(
+          outDir,
+          `${connectorRef}.circuit.json`,
+          JSON.stringify(exportTscircuitCircuitJson(result.hir, connectorRef), null, 2) + "\n",
+          io
+        )
+        return 0
+      }
       writeOut(outDir, `contract-${connectorRef}.json`, contractJson(contract), io)
       return 0
     }

@@ -44,3 +44,25 @@ describe("bundled part library", () => {
     expect(nerveConnectorsProvider.search?.("mega-fit")).toContain("76829-0008")
   })
 })
+
+describe("compact part specs (footprinter-style)", () => {
+  it("resolves specs, raw MPNs, and case-insensitively", async () => {
+    const { part } = await import("../src/part-spec.js")
+    expect(part("microfit-2x8").mpn).toBe("43025-1600")
+    expect(part("DT-4S").mpn).toBe("DT06-4S")
+    expect(part("xt60-f").gender).toBe("receptacle")
+    expect(part("PHR-3").mpn).toBe("PHR-3") // raw MPN passthrough
+  })
+
+  it("every spec resolves to a real library part", async () => {
+    const { part, partSpecs } = await import("../src/part-spec.js")
+    for (const spec of Object.keys(partSpecs)) {
+      expect(part(spec).mpn, spec).toBe(partSpecs[spec])
+    }
+  })
+
+  it("fails loudly with the menu on unknown specs", async () => {
+    const { part } = await import("../src/part-spec.js")
+    expect(() => part("nonexistent-99")).toThrow(/Compact specs:/)
+  })
+})

@@ -102,6 +102,27 @@ const { part, provider, diagnostics } = resolvePart([plm, nerveConnectorsProvide
 
 The bundled library ships verified families with cavity layouts, gauge ranges, mating pairs, crimp tooling, and dated provenance: Molex Micro-Fit 3.0 and Mega-Fit, JST PH and XH, TE Deutsch DT, AMASS XT60.
 
+## tscircuit interop
+
+Harness and PCB check each other across ecosystems (PRD §37):
+
+```bash
+# Validate the harness against a tscircuit board (catches swapped pins):
+nerve contract ./src/main.harness.ts --connector J1 --against board.circuit.json
+
+# Or hand tscircuit the harness side as Circuit JSON:
+nerve contract ./src/main.harness.ts --connector J1 --format circuit-json
+```
+
+Compact part specs resolve library parts without memorizing MPNs:
+
+```ts
+import { part } from "@grayhaven/nerve-connectors"
+
+const mcu = connector("MCU1", part("microfit-2x8"))   // 43025-1600
+const drop = connector("S1", part("dt-4s"))           // Deutsch DT06-4S
+```
+
 ## The HIR is a schema, not a guess
 
 `harness.json` round-trips through a versioned Effect Schema: decode untrusted input, encode canonically:
