@@ -219,8 +219,9 @@ export const schematicDrawing = (hir: Hir): Drawing => {
 
   // Lane geometry: stacked rails in the channel, inset past the net-flag
   // zone and vertically centered against the connector columns.
-  const channelLeft = MARGIN + BOX_W + 150
-  const channelRight = rightX - 150
+  const FLAG_ZONE = 110
+  const channelLeft = MARGIN + BOX_W + FLAG_ZONE
+  const channelRight = rightX - FLAG_ZONE
   const SLOT_GAP = 5
   const laneBlockH = laneOrder.reduce(
     (h, id) => h + 16 + (laneSlots.get(id)?.size ?? 0) * SLOT_GAP + 14,
@@ -238,13 +239,16 @@ export const schematicDrawing = (hir: Hir): Drawing => {
   const slotY = (br: string, wireId: string): number =>
     (laneTop.get(br) ?? 0) + 14 + (laneSlots.get(br)?.get(wireId) ?? 0) * SLOT_GAP
   const junctionX = (br: string): number =>
-    channelLeft + 30 + (laneIndex.get(br) ?? 0) * 34
+    channelLeft +
+    (((laneIndex.get(br) ?? 0) + 1) * (channelRight - channelLeft)) / (laneOrder.length + 1)
+  const laneRailY = new Map<string, number>()
 
   // Rails + labels (under the wires).
   for (const id of laneOrder) {
     const top = laneTop.get(id)!
     const used = laneSlots.get(id)?.size ?? 0
     const railY = top + 14 + Math.max(0, used - 1) * SLOT_GAP * 0.5
+    laneRailY.set(id, railY)
     items.push(
       {
         kind: "line",
@@ -267,17 +271,25 @@ export const schematicDrawing = (hir: Hir): Drawing => {
     )
   }
 
-  // Lane splices sit on their rail, spread by per-branch order.
+  // Lane splices sit ON their rail (taps on the bundle), spread evenly
+  // within the channel.
+  const laneSeatedSplices = new Set<string>()
   {
-    const perBranch = new Map<string, number>()
+    const byBranch = new Map<string, Array<string>>()
     for (const sp of hir.splices) {
-      const br = sp.branch
-      if (br === undefined || !laneTop.has(br)) continue
-      const i = perBranch.get(br) ?? 0
-      perBranch.set(br, i + 1)
-      splicePos.set(sp.id, {
-        x: channelLeft + 90 + i * 80,
-        y: laneTop.get(br)! + 14 + (laneSlots.get(br)?.size ?? 0) * SLOT_GAP + 6
+      if (sp.branch !== undefined && laneRailY.has(sp.branch)) {
+        const list = byBranch.get(sp.branch) ?? []
+        list.push(sp.id)
+        byBranch.set(sp.branch, list)
+      }
+    }
+    for (const [br, ids] of byBranch) {
+      ids.forEach((id, i) => {
+        laneSeatedSplices.add(id)
+        splicePos.set(id, {
+          x: channelLeft + ((i + 1) * (channelRight - channelLeft)) / (ids.length + 1),
+          y: laneRailY.get(br)!
+        })
       })
     }
   }
@@ -343,9 +355,13 @@ export const schematicDrawing = (hir: Hir): Drawing => {
       const pts: Array<readonly [number, number]> = []
       const dirA = a.dir !== 0 ? a.dir : 1
       const stagA = (laneSlots.get(chain[0]!)?.get(w.id) ?? 0) * 4
-      const dropA =
-        a.dir === 0 ? a.x + 12 : dirA === 1 ? channelLeft - 12 - stagA : channelRight + 12 + stagA
-      pts.push([a.x, a.y], [dropA, a.y], [dropA, slotY(chain[0]!, w.id)])
+      if (a.dir === 0) {
+        // Splice tap: drop straight from the dot to the slot.
+        pts.push([a.x, a.y], [a.x, slotY(chain[0]!, w.id)])
+      } else {
+        const dropA = dirA === 1 ? channelLeft - 12 - stagA : channelRight + 12 + stagA
+        pts.push([a.x, a.y], [dropA, a.y], [dropA, slotY(chain[0]!, w.id)])
+      }
       for (let i = 0; i + 1 < chain.length; i++) {
         const cur = chain[i]!
         const next = chain[i + 1]!
@@ -356,9 +372,12 @@ export const schematicDrawing = (hir: Hir): Drawing => {
       const last = chain[chain.length - 1]!
       const dirB = b.dir !== 0 ? b.dir : 1
       const stagB = (laneSlots.get(last)?.get(w.id) ?? 0) * 4
-      const dropB =
-        b.dir === 0 ? b.x + 12 : dirB === 1 ? channelLeft - 12 - stagB : channelRight + 12 + stagB
-      pts.push([dropB, slotY(last, w.id)], [dropB, b.y], [b.x, b.y])
+      if (b.dir === 0) {
+        pts.push([b.x, slotY(last, w.id)], [b.x, b.y])
+      } else {
+        const dropB = dirB === 1 ? channelLeft - 12 - stagB : channelRight + 12 + stagB
+        pts.push([dropB, slotY(last, w.id)], [dropB, b.y], [b.x, b.y])
+      }
       items.push({
         kind: "path",
         d: pts.map(([px, py], i) => `${i === 0 ? "M" : "L"} ${px} ${py}`).join(" "),
@@ -370,17 +389,21 @@ export const schematicDrawing = (hir: Hir): Drawing => {
       const annotation = [w.id, w.gauge, w.twistGroup !== undefined ? "twisted" : undefined]
         .filter((t): t is string => t !== undefined)
         .join(" · ")
-      // Annotation hugs the pin exit (the channel itself stays clean).
-      items.push({
-        kind: "text",
-        x: a.x + dirA * 6,
-        y: a.y - 3,
-        text: annotation,
-        size: 8,
-        fill: isError ? "#d11" : "#777",
-        anchor: dirA === 1 ? "start" : "end",
-        data: { wire: w.id }
-      })
+      // Annotation hugs a PIN exit (never a splice dot — those carry the
+      // splice's own label); the channel itself stays clean.
+      const annEnd = a.dir !== 0 ? a : b.dir !== 0 ? b : undefined
+      if (annEnd !== undefined) {
+        items.push({
+          kind: "text",
+          x: annEnd.x + annEnd.dir * 6,
+          y: annEnd.y - 3,
+          text: annotation,
+          size: 8,
+          fill: isError ? "#d11" : "#777",
+          anchor: annEnd.dir === 1 ? "start" : "end",
+          data: { wire: w.id }
+        })
+      }
       continue
     }
     const dx = Math.max(60, Math.abs(x2 - x1) / 3)
@@ -467,7 +490,11 @@ export const schematicDrawing = (hir: Hir): Drawing => {
         kind: "text",
         x: pos.x,
         y: pos.y - 12,
-        text: `${s.id}${s.type !== undefined ? ` · ${s.type}` : ""}`,
+        // Rail-seated splices keep labels short (the channel is narrow);
+        // the type lives in the BOM and splice notes.
+        text: laneSeatedSplices.has(s.id)
+          ? s.id
+          : `${s.id}${s.type !== undefined ? ` · ${s.type}` : ""}`,
         size: 11,
         fill: "#333",
         anchor: "middle"
