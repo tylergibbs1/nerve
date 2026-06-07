@@ -1,12 +1,24 @@
+import { useEffect, useRef, useState } from "react"
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/docs")({
   component: DocsLayout
 })
 
+type DocPath = "/docs" | "/docs/dsl" | "/docs/rules" | "/docs/cli" | "/docs/artifacts" | "/docs/ai"
+interface DocItem {
+  readonly to: DocPath
+  readonly label: string
+  readonly exact?: boolean
+}
+interface DocGroup {
+  readonly label: string
+  readonly items: ReadonlyArray<DocItem>
+}
+
 // Diátaxis grouping: learning, reference, and explanation read differently —
 // the nav says which mode each page is in.
-const GROUPS = [
+const GROUPS: ReadonlyArray<DocGroup> = [
   { label: "Learn", items: [{ to: "/docs", label: "Quickstart", exact: true }] },
   {
     label: "Reference",
@@ -18,7 +30,9 @@ const GROUPS = [
     ]
   },
   { label: "Concepts", items: [{ to: "/docs/ai", label: "AI Copilot" }] }
-] as const
+]
+
+const FLAT = GROUPS.flatMap((g) => g.items)
 
 // Route path → agent-readable markdown mirror (generated at build).
 const MD_SLUGS: Record<string, string> = {
@@ -30,9 +44,76 @@ const MD_SLUGS: Record<string, string> = {
   "/docs/ai": "ai"
 }
 
+/** Copy the page's agent-readable markdown mirror to the clipboard. */
+function CopyMarkdown({ slug }: { slug: string }) {
+  const [copied, setCopied] = useState(false)
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  const copy = async () => {
+    try {
+      const res = await fetch(`/docs/${slug}.md`)
+      await navigator.clipboard.writeText(await res.text())
+      setCopied(true)
+      clearTimeout(timer.current)
+      timer.current = setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // clipboard denied or fetch failed — the View link still works
+    }
+  }
+
+  return (
+    <button className="docs-md-link" onClick={() => void copy()}>
+      {copied ? "Copied ✓" : "Copy Markdown"}
+    </button>
+  )
+}
+
+/** Fumadocs-style AI page actions: hand this page to an assistant. */
+function AiActions({ slug }: { slug: string }) {
+  const mdUrl = `${window.location.origin}/docs/${slug}.md`
+  const q = encodeURIComponent(`Read ${mdUrl} so I can ask questions about it.`)
+  return (
+    <>
+      <a className="docs-md-link" href={`https://claude.ai/new?q=${q}`} target="_blank" rel="noreferrer">
+        Open in Claude
+      </a>
+      <span className="sep">/</span>
+      <a className="docs-md-link" href={`https://chatgpt.com/?hints=search&q=${q}`} target="_blank" rel="noreferrer">
+        Open in ChatGPT
+      </a>
+    </>
+  )
+}
+
 function DocsLayout() {
   const { pathname } = useLocation()
-  const slug = MD_SLUGS[pathname.replace(/\/$/, "") || "/docs"]
+  const path = pathname.replace(/\/$/, "") || "/docs"
+  const slug = MD_SLUGS[path]
+  const idx = FLAT.findIndex((i) => i.to === path)
+  const prev = idx > 0 ? FLAT[idx - 1] : undefined
+  const next = idx >= 0 && idx < FLAT.length - 1 ? FLAT[idx + 1] : undefined
+  const bodyRef = useRef<HTMLElement>(null)
+
+  // Per-code-block copy buttons (Fumadocs CodeBlock pattern, minimal voice).
+  useEffect(() => {
+    const body = bodyRef.current
+    if (body === null) return
+    const buttons: HTMLButtonElement[] = []
+    for (const pre of body.querySelectorAll("pre")) {
+      const btn = document.createElement("button")
+      btn.className = "pre-copy"
+      btn.textContent = "Copy"
+      btn.addEventListener("click", () => {
+        void navigator.clipboard.writeText(pre.textContent ?? "").then(() => {
+          btn.textContent = "Copied ✓"
+          setTimeout(() => (btn.textContent = "Copy"), 2000)
+        })
+      })
+      pre.appendChild(btn)
+      buttons.push(btn)
+    }
+    return () => buttons.forEach((b) => b.remove())
+  }, [pathname])
 
   return (
     <div className="docs">
@@ -44,7 +125,7 @@ function DocsLayout() {
               <Link
                 key={item.to}
                 to={item.to}
-                activeOptions={{ exact: "exact" in item && item.exact }}
+                activeOptions={{ exact: item.exact === true }}
                 activeProps={{ className: "active" }}
               >
                 {item.label}
@@ -56,13 +137,37 @@ function DocsLayout() {
           llms.txt
         </a>
       </nav>
-      <article className="docs-body">
+      <article className="docs-body" ref={bodyRef}>
         {slug !== undefined && (
-          <a className="docs-md-link" href={`/docs/${slug}.md`}>
-            View as Markdown
-          </a>
+          <div className="docs-md-actions">
+            <CopyMarkdown slug={slug} />
+            <span className="sep">/</span>
+            <a className="docs-md-link" href={`/docs/${slug}.md`}>
+              View Markdown
+            </a>
+            <span className="sep">/</span>
+            <AiActions slug={slug} />
+          </div>
         )}
         <Outlet />
+        <footer className="docs-pager">
+          {prev !== undefined ? (
+            <Link to={prev.to} className="pager-link prev">
+              <span className="pager-dir">← Previous</span>
+              {prev.label}
+            </Link>
+          ) : (
+            <span />
+          )}
+          {next !== undefined ? (
+            <Link to={next.to} className="pager-link next">
+              <span className="pager-dir">Next →</span>
+              {next.label}
+            </Link>
+          ) : (
+            <span />
+          )}
+        </footer>
       </article>
     </div>
   )

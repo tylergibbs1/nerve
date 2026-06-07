@@ -203,8 +203,15 @@ textarea:focus-visible, select:focus-visible {
   color: color-mix(in srgb, var(--muted) 70%, transparent);
 }
 .docs-llms:hover { color: var(--muted); }
-.docs-md-link {
+.docs-md-actions {
   float: right;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.docs-md-actions .sep { font-family: var(--mono); font-size: 10px; color: color-mix(in srgb, var(--muted) 50%, transparent); }
+button.docs-md-link { background: none; cursor: pointer; padding: 0; }
+.docs-md-link {
   font-family: var(--mono);
   font-size: 10px;
   text-transform: uppercase;
@@ -253,6 +260,57 @@ textarea:focus-visible, select:focus-visible {
 .docs-body table td:first-child { font-family: var(--mono); font-size: 12px; color: var(--text); white-space: nowrap; }
 .docs-body a { color: var(--text); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 .docs-body a:hover { color: var(--accent-hover); }
+
+/* Per-code-block copy (Fumadocs CodeBlock pattern, doctrine voice). */
+.docs-body pre { position: relative; }
+.pre-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-default), color 200ms var(--ease-default), border-color 200ms var(--ease-default);
+}
+.docs-body pre:hover .pre-copy, .pre-copy:focus-visible { opacity: 1; }
+.pre-copy:hover { color: var(--text); border-color: var(--muted); }
+
+/* Prev/next pager (Fumadocs page footer pattern). */
+.docs-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 56px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.pager-link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  transition: color 200ms var(--ease-default);
+}
+.pager-link:hover { color: var(--accent-hover); }
+.pager-link.next { text-align: right; align-items: flex-end; }
+.pager-dir {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
 
 .doc-code {
   background: var(--panel);
