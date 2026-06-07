@@ -709,6 +709,20 @@ textarea:focus-visible, select:focus-visible {
 .diagnostics-panel .diag.selectable { cursor: pointer; }
 .diagnostics-panel .diag.selectable:hover { background: var(--muted-bg); }
 
+/* Structured diagnostic detail: involved refs + measured-value chips. */
+.diagnostics-panel .diag-detail { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+.diagnostics-panel .diag-chip {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--muted-bg);
+  color: var(--muted);
+}
+.diagnostics-panel button.diag-chip.ref { cursor: pointer; color: var(--text); }
+.diagnostics-panel button.diag-chip.ref:hover:not(:disabled) { border-color: var(--text); }
+
 /* Net hover-highlighting (delegated; .hl set by SchematicSheet). */
 .diagram-pane svg [data-wire] { transition: opacity 150ms var(--ease-out); }
 .diagram-pane.net-hover svg [data-wire]:not(.hl) { opacity: 0.18; }

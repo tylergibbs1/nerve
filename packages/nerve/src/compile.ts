@@ -58,13 +58,19 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
     code: string,
     message: string,
     target?: string,
-    severity: DiagnosticSeverity = DiagnosticSeverity.Error
+    severity: DiagnosticSeverity = DiagnosticSeverity.Error,
+    extra?: Pick<Diagnostic, "targets" | "data">
   ) => {
-    diagnostics.push(
-      target !== undefined
-        ? { code, severity, message, target }
-        : { code, severity, message }
-    )
+    diagnostics.push({
+      code,
+      severity,
+      message,
+      ...(target !== undefined ? { target } : {}),
+      ...(extra?.targets !== undefined && extra.targets.length > 0
+        ? { targets: extra.targets }
+        : {}),
+      ...(extra?.data !== undefined ? { data: extra.data } : {})
+    })
   }
 
   // --- Connectors ---------------------------------------------------------
@@ -276,7 +282,8 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         Codes.SpliceTooFewWires,
         `Splice ${s.id} joins ${attached.length} wire(s); a splice needs at least 2.`,
         refs.splice(s.id),
-        DiagnosticSeverity.Error
+        DiagnosticSeverity.Error,
+        { targets: attached.map(refs.wire), data: { attachedWires: attached.length } }
       )
     }
     splices.push(

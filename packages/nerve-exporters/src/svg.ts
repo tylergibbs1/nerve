@@ -9,6 +9,7 @@
  * alternate between a left and right column in canonical HIR order.
  */
 import { isPinEndpoint, type Hir, type HirEndpoint } from "@grayhaven/nerve"
+import { diagnosticBadges } from "./badges.js"
 import { renderSvg, type DrawItem, type Drawing } from "./drawing.js"
 
 const BOX_W = 180
@@ -145,8 +146,10 @@ export const schematicDrawing = (hir: Hir): Drawing => {
 
   const errorWires = new Set(
     hir.diagnostics
-      .filter((d) => d.severity === "error" && d.target?.startsWith("wire:"))
-      .map((d) => d.target!.slice("wire:".length))
+      .filter((d) => d.severity === "error")
+      .flatMap((d) => [d.target, ...(d.targets ?? [])])
+      .filter((t): t is string => t !== undefined && t.startsWith("wire:"))
+      .map((t) => t.slice("wire:".length))
   )
 
   const items: Array<DrawItem> = [
@@ -501,6 +504,48 @@ export const schematicDrawing = (hir: Hir): Drawing => {
       }
     )
   }
+
+  // ── Diagnostic badges (PRD §11.2 made visible) ──────────────────────
+  // Badges sit on the OUTER edge of connector columns (wires exit the
+  // inner edge) and beside splices/branch rails. Wire-targeted errors
+  // already carry the red-dash treatment above.
+  items.push(
+    ...diagnosticBadges(hir.diagnostics, (r) => {
+      switch (r.kind) {
+        case "pin": {
+          const p = placed.get(r.ref)
+          const y = r.pin !== undefined ? p?.pinY.get(r.pin) : undefined
+          if (p === undefined || y === undefined) return undefined
+          return {
+            x: p.side === "left" ? p.x - 12 : p.x + BOX_W + 12,
+            y,
+            data: { connector: r.ref, pin: r.pin! }
+          }
+        }
+        case "connector": {
+          const p = placed.get(r.ref)
+          if (p === undefined) return undefined
+          return {
+            x: p.side === "left" ? p.x - 12 : p.x + BOX_W + 12,
+            y: p.y + 12,
+            data: { connector: r.ref }
+          }
+        }
+        case "splice": {
+          const s = splicePos.get(r.ref)
+          if (s === undefined) return undefined
+          return { x: s.x + 14, y: s.y - 10, data: { splice: r.ref } }
+        }
+        case "branch": {
+          const railY = laneRailY.get(r.ref)
+          if (railY === undefined) return undefined
+          return { x: channelLeft - 14, y: railY, data: { branch: r.ref } }
+        }
+        default:
+          return undefined
+      }
+    })
+  )
 
   const height =
     Math.max(

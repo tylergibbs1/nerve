@@ -8,6 +8,7 @@
  * packet pages.
  */
 import type { Hir, HirBranch } from "@grayhaven/nerve"
+import { diagnosticBadges } from "./badges.js"
 import { renderSvg, type DrawItem, type Drawing } from "./drawing.js"
 
 const SCALE = 0.8 // px per mm
@@ -48,7 +49,13 @@ export const boardDrawing = (hir: Hir): Drawing => {
   let maxX = MARGIN + 400
   let y = TITLE_H + MARGIN + NODE_H
 
+  // First drawn position of each entity — diagnostic badges anchor here.
+  const connectorAt = new Map<string, { x: number; y: number }>()
+  const spliceAt = new Map<string, { x: number; y: number }>()
+  const branchAt = new Map<string, { x: number; y: number }>()
+
   const drawEndpoint = (x: number, cy: number, ref: string): void => {
+    if (!connectorAt.has(ref)) connectorAt.set(ref, { x, y: cy })
     items.push(
       {
         kind: "rect",
@@ -77,6 +84,7 @@ export const boardDrawing = (hir: Hir): Drawing => {
     const len = lengthPx(branch.nominalLength)
     const x1 = x0 + len
     maxX = Math.max(maxX, x1 + NODE_W)
+    branchAt.set(branch.id, { x: x0 + len / 2, y: cy })
 
     // Trunk (thickness suggests the bundle).
     items.push({
@@ -162,6 +170,7 @@ export const boardDrawing = (hir: Hir): Drawing => {
     // Splices located on this branch.
     for (const s of hir.splices.filter((sp) => sp.branch === branch.id)) {
       const sx = x0 + Math.min((s.location ?? 0) * SCALE, len)
+      spliceAt.set(s.id, { x: sx, y: cy })
       items.push(
         { kind: "circle", cx: sx, cy: cy, r: 6, fill: "#333" },
         {
@@ -208,6 +217,38 @@ export const boardDrawing = (hir: Hir): Drawing => {
   for (const root of roots) {
     y = drawBranch(root, MARGIN + NODE_W / 2, y + 30, 0) + TRUNK_GAP
   }
+
+  // Diagnostic badges at the entities technicians actually look at.
+  // Pins are not drawn on the board view — pin findings badge the
+  // connector node; wire findings badge nothing here (no wire geometry).
+  items.push(
+    ...diagnosticBadges(hir.diagnostics, (r) => {
+      switch (r.kind) {
+        case "connector":
+        case "pin": {
+          const p = connectorAt.get(r.ref)
+          if (p === undefined) return undefined
+          return {
+            x: p.x + NODE_W / 2 + 10,
+            y: p.y - NODE_H / 2 - 2,
+            data: r.kind === "pin" ? { connector: r.ref, pin: r.pin! } : { connector: r.ref }
+          }
+        }
+        case "splice": {
+          const s = spliceAt.get(r.ref)
+          if (s === undefined) return undefined
+          return { x: s.x + 12, y: s.y - 12, data: { splice: r.ref } }
+        }
+        case "branch": {
+          const b = branchAt.get(r.ref)
+          if (b === undefined) return undefined
+          return { x: b.x, y: b.y - NODE_H / 2 - 24, data: { branch: r.ref } }
+        }
+        default:
+          return undefined
+      }
+    })
+  )
 
   return {
     width: maxX + MARGIN,

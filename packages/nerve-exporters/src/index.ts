@@ -29,6 +29,7 @@ export {
   type DrawItem,
   type Drawing
 } from "./drawing.js"
+export { diagnosticBadges, parseRef, type BadgeAnchor, type ParsedRef } from "./badges.js"
 export { schematicDrawing, schematicSvg } from "./svg.js"
 export { boardHtml, facesHtml, schematicHtml } from "./html.js"
 export { connectorFacesDrawing, connectorFacesSvg } from "./faces.js"

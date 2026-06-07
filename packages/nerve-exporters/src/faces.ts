@@ -10,6 +10,7 @@
  * drawing says so — face views are only as physical as the part data.
  */
 import { isPinEndpoint, type Hir, type HirConnector, type HirWire } from "@grayhaven/nerve"
+import { diagnosticBadges } from "./badges.js"
 import { renderSvg, type DrawItem, type Drawing } from "./drawing.js"
 
 const CAV_R = 9
@@ -67,6 +68,11 @@ export const connectorFacesDrawing = (hir: Hir): Drawing => {
   let y = TITLE_H + 8
   let maxRight = 0
 
+  // Badge anchors: connector card headers and REAR-view cavity centers
+  // (the wire side is where a technician acts on a finding).
+  const cardAt = new Map<string, { x: number; y: number }>()
+  const cavityAt = new Map<string, { x: number; y: number }>()
+
   for (const c of hir.connectors) {
     const { rows, columns, derived } = layoutOf(c)
     const reserved = new Set(c.reservedPins ?? [])
@@ -102,6 +108,8 @@ export const connectorFacesDrawing = (hir: Hir): Drawing => {
       }
     )
 
+    cardAt.set(c.ref, { x: MARGIN + cardW, y: y + 14 })
+
     const drawView = (originX: number, mirrored: boolean, caption: string): void => {
       const gy = y + HEADER
       items.push(
@@ -121,6 +129,7 @@ export const connectorFacesDrawing = (hir: Hir): Drawing => {
         const drawCol = mirrored ? columns - 1 - col : col
         const cx = originX + CARD_PAD + drawCol * PITCH + PITCH / 2
         const cy = gy + CARD_PAD + row * PITCH + PITCH / 2
+        if (!mirrored) cavityAt.set(`${c.ref}:${cav.pin}`, { x: cx, y: cy })
         const populated = cav.wire !== undefined
         const data = {
           connector: c.ref,
@@ -173,6 +182,32 @@ export const connectorFacesDrawing = (hir: Hir): Drawing => {
     maxRight = Math.max(maxRight, MARGIN + cardW)
     y += cardH + 16
   }
+
+  // Diagnostic badges: pin findings sit at the REAR cavity (offset to the
+  // cavity rim so the pin number stays legible); connector findings sit
+  // at the card's top-right corner.
+  items.push(
+    ...diagnosticBadges(hir.diagnostics, (r) => {
+      switch (r.kind) {
+        case "pin": {
+          const p = cavityAt.get(`${r.ref}:${r.pin}`)
+          if (p === undefined) return undefined
+          return {
+            x: p.x + CAV_R + 4,
+            y: p.y - CAV_R - 2,
+            data: { connector: r.ref, pin: r.pin! }
+          }
+        }
+        case "connector": {
+          const c = cardAt.get(r.ref)
+          if (c === undefined) return undefined
+          return { x: c.x - 12, y: c.y, data: { connector: r.ref } }
+        }
+        default:
+          return undefined
+      }
+    })
+  )
 
   return { width: maxRight + MARGIN, height: y + MARGIN, background: "#fafafa", items }
 }

@@ -145,7 +145,13 @@ export const HirDiagnostic = Schema.Struct({
   code: Schema.String,
   severity: Schema.Literal("error", "warning", "info"),
   message: Schema.String,
-  target: Schema.optional(Schema.String)
+  target: Schema.optional(Schema.String),
+  /** Additional involved refs (PRD §19 grammar) — multi-entity findings. */
+  targets: Schema.optional(Schema.Array(Schema.String)),
+  /** Structured values behind the message (measured vs. limit, counts). */
+  data: Schema.optional(
+    Schema.Record({ key: Schema.String, value: Schema.Union(Schema.String, Schema.Number) })
+  )
 })
 
 export const Hir = Schema.Struct({

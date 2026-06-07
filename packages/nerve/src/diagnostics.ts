@@ -21,6 +21,17 @@ export interface Diagnostic {
   readonly message: string
   /** Stable HIR object reference, e.g. `wire:W12` or `connector:J1.pin:3`. */
   readonly target?: string | undefined
+  /**
+   * Additional involved refs (same PRD §19 grammar as `target`) for
+   * multi-entity findings — e.g. both wires of an untwisted differential
+   * pair. Renderers badge every ref; `target` remains the primary anchor.
+   */
+  readonly targets?: ReadonlyArray<string> | undefined
+  /**
+   * Structured values behind the message (measured vs. limit, counts) so
+   * tooling never has to parse prose: `{ currentEstimate: 5, ampacityA: 2.3 }`.
+   */
+  readonly data?: Readonly<Record<string, string | number>> | undefined
 }
 
 /** Structural diagnostic codes emitted by the core compiler. */

@@ -206,7 +206,13 @@ export const gaugeCurrentMismatch: Rule = rule(
         ctx.report({
           severity: Err,
           message: `Wire ${w.id} uses ${w.gauge} but its ${w.currentEstimate}A estimate${suffix}.`,
-          target: refs.wire(w.id)
+          target: refs.wire(w.id),
+          data: {
+            gauge: w.gauge,
+            currentEstimateA: w.currentEstimate,
+            ampacityA: ampacity,
+            ...(required !== undefined ? { requiredGauge: `${required}AWG` } : {})
+          }
         })
       }
     }
@@ -238,7 +244,10 @@ export const differentialPairNotTwisted: Rule = rule(
           ctx.report({
             severity: Err,
             message: `Differential pair ${signal}/${partner} (wire ${w.id}) must share a twist group.`,
-            target: refs.wire(w.id)
+            target: refs.wire(w.id),
+            // Both halves of the pair are involved — badge them all.
+            targets: partnerWires.map((p) => refs.wire(p.id)),
+            data: { signal, partnerSignal: partner }
           })
         }
       }
@@ -343,7 +352,9 @@ export const wireSignalMismatch: Rule = rule(
           ctx.report({
             severity: Err,
             message: `Wire ${w.id} carries ${w.signal} but pin ${end.connector}.${end.pin} is assigned ${pinSignal}.`,
-            target: refs.pin(end.connector, end.pin)
+            target: refs.pin(end.connector, end.pin),
+            targets: [refs.wire(w.id)],
+            data: { wireSignal: w.signal, pinSignal }
           })
         }
       }
@@ -510,11 +521,15 @@ export const bundleOverSleeveCapacity: Rule = rule(
       const nodeOnBranch = (e: (typeof ctx.hir.wires)[number]["from"]): boolean =>
         "connector" in e ? onBranch.has(e.connector) : spliceBranch.get(e.splice) === b.id || onBranch.has(e.splice)
       const ods: Array<number> = []
+      const memberWires: Array<string> = []
       for (const w of ctx.hir.wires) {
         if (!nodeOnBranch(w.from) || !nodeOnBranch(w.to)) continue
         const awg = w.gauge !== undefined ? parseAwg(w.gauge) : undefined
         const od = awg !== undefined ? INSULATED_OD_MM_BY_AWG[awg] : undefined
-        if (od !== undefined) ods.push(od)
+        if (od !== undefined) {
+          ods.push(od)
+          memberWires.push(w.id)
+        }
       }
       if (ods.length === 0) continue
       const estimated = estimateBundleDiameterMm(ods)
@@ -522,7 +537,14 @@ export const bundleOverSleeveCapacity: Rule = rule(
         ctx.report({
           severity: Err,
           message: `Branch ${b.id} bundle is ~${estimated.toFixed(1)}mm across ${ods.length} wires but sleeve ${b.sleeve} takes ${capacity}mm.`,
-          target: refs.branch(b.id)
+          target: refs.branch(b.id),
+          targets: memberWires.map(refs.wire),
+          data: {
+            estimatedBundleMm: Number(estimated.toFixed(1)),
+            sleeveCapacityMm: capacity,
+            wireCount: ods.length,
+            sleeve: b.sleeve
+          }
         })
       }
     }

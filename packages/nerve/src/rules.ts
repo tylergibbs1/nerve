@@ -12,6 +12,10 @@ export interface RuleReport {
   readonly severity: DiagnosticSeverity
   readonly message: string
   readonly target?: string
+  /** Additional involved refs (PRD §19 grammar) — multi-entity findings. */
+  readonly targets?: ReadonlyArray<string>
+  /** Structured values behind the message (measured vs. limit, counts). */
+  readonly data?: Readonly<Record<string, string | number>>
   /** Override the rule's stable code for this report. Rarely needed. */
   readonly code?: string
 }
@@ -64,12 +68,14 @@ export const runRules = (
     if (override === "off") continue
     r.run({
       hir,
-      report: ({ severity, message, target, code }) => {
+      report: ({ severity, message, target, targets, data, code }) => {
         diagnostics.push({
           code: code ?? r.code,
           severity: override ?? severity,
           message,
-          ...(target !== undefined ? { target } : {})
+          ...(target !== undefined ? { target } : {}),
+          ...(targets !== undefined && targets.length > 0 ? { targets } : {}),
+          ...(data !== undefined && Object.keys(data).length > 0 ? { data } : {})
         })
       }
     })
