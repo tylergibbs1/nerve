@@ -26,6 +26,7 @@ import {
 } from "@grayhaven/nerve"
 import {
   compileFile,
+  findConfig,
   type CompileFileResult
 } from "@grayhaven/nerve-compiler"
 import { exportWireViz, importWireViz } from "@grayhaven/nerve-wireviz"
@@ -146,6 +147,21 @@ const compileOrExit = async (
   return exit.value
 }
 
+/**
+ * Resolve the harness-file argument: explicit positional wins, else
+ * `config.entry` (relative to wherever nerve.config.ts was found) — so a
+ * configured project can run `nerve compile` bare.
+ */
+const resolveHarnessArg = async (
+  positional: ReadonlyArray<string>
+): Promise<string | undefined> => {
+  if (positional[0] !== undefined) return positional[0]
+  const exit = await Effect.runPromiseExit(findConfig(process.cwd()))
+  if (Exit.isFailure(exit)) return undefined
+  const { config, dir } = exit.value
+  return config.entry !== undefined ? join(dir, config.entry) : undefined
+}
+
 const writeOutBytes = (dir: string, name: string, bytes: Uint8Array, io: Io): void => {
   mkdirSync(dir, { recursive: true })
   writeFileSync(join(dir, name), bytes)
@@ -207,7 +223,7 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
 
   switch (command) {
     case "compile": {
-      const file = positional[0]
+      const file = await resolveHarnessArg(positional)
       if (file === undefined) return usage(io)
       const result = await compileOrExit(file, io)
       if (typeof result === "number") return result
@@ -220,7 +236,7 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
     }
 
     case "validate": {
-      const file = positional[0]
+      const file = await resolveHarnessArg(positional)
       if (file === undefined) return usage(io)
       const result = await compileOrExit(file, io)
       if (typeof result === "number") return result
@@ -230,7 +246,7 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
     }
 
     case "render": {
-      const file = positional[0]
+      const file = await resolveHarnessArg(positional)
       if (file === undefined) return usage(io)
       const format = flags["format"] ?? "svg"
       if (format !== "svg" && format !== "png") {
@@ -277,7 +293,7 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
     }
 
     case "export": {
-      const file = positional[0]
+      const file = await resolveHarnessArg(positional)
       if (file === undefined) return usage(io)
       const target = flags["target"] ?? "manufacturing-packet"
       if (target === "wireviz") {
@@ -313,7 +329,16 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       // hand-maintained list to drift (the pre-0.5.2 list silently lacked
       // connector faces, the HTML viewer, and the JSON satellites).
       const packet = await buildPacket(result.hir, options)
+      // config.exports toggles which loose files land in outputDir
+      // (declared-but-dead config is worse than none); the zip always
+      // carries the complete packet.
+      const toggles = result.config.exports
+      const skip = (name: string): boolean =>
+        (toggles?.csv === false && name.endsWith(".csv")) ||
+        (toggles?.svg === false && name.endsWith(".svg")) ||
+        (toggles?.pdf === false && name.endsWith(".pdf"))
       for (const [name, contents] of packet.files) {
+        if (skip(name)) continue
         writeOut(outDir, name, contents, io)
       }
       writeOut(outDir, "manufacturing-packet.zip", packet.zip, io)

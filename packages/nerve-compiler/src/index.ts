@@ -3,6 +3,7 @@ export {
   compileFile,
   CompilerService,
   failOnErrors,
+  findConfig,
   loadConfig,
   loadDesign,
   loadPlugins,

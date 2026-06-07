@@ -81,10 +81,14 @@ export const loadDesign = (
 
 const CONFIG_FILES = ["nerve.config.ts", "interconnect.config.ts"]
 
-/** Load `nerve.config.ts` (or legacy `interconnect.config.ts`) from a directory, walking up to the package root. */
-export const loadConfig = (
+/**
+ * Locate and load the project config, walking up to the package root.
+ * Returns the directory it was found in too — `config.entry` and
+ * `config.harnessFiles` resolve relative to the config file, not the cwd.
+ */
+export const findConfig = (
   fromDir: string
-): Effect.Effect<NerveConfig, CompileError> =>
+): Effect.Effect<{ readonly config: NerveConfig; readonly dir: string }, CompileError> =>
   Effect.tryPromise({
     try: async () => {
       let dir = resolve(fromDir)
@@ -93,12 +97,15 @@ export const loadConfig = (
           const candidate = join(dir, name)
           if (existsSync(candidate)) {
             const mod = await jiti.import<{ default?: NerveConfig }>(candidate)
-            return (mod as { default?: NerveConfig }).default ?? (mod as NerveConfig)
+            return {
+              config: (mod as { default?: NerveConfig }).default ?? (mod as NerveConfig),
+              dir
+            }
           }
         }
-        if (existsSync(join(dir, "package.json"))) return {}
+        if (existsSync(join(dir, "package.json"))) return { config: {}, dir }
         const parent = dirname(dir)
-        if (parent === dir) return {}
+        if (parent === dir) return { config: {}, dir }
         dir = parent
       }
     },
@@ -108,6 +115,12 @@ export const loadConfig = (
         cause
       })
   })
+
+/** Load `nerve.config.ts` (or legacy `interconnect.config.ts`) from a directory, walking up to the package root. */
+export const loadConfig = (
+  fromDir: string
+): Effect.Effect<NerveConfig, CompileError> =>
+  Effect.map(findConfig(fromDir), ({ config }) => config)
 
 /** Load plugin modules declared in config (PRD §40). */
 export const loadPlugins = (

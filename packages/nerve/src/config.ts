@@ -76,6 +76,13 @@ export interface NerveConfig {
   readonly units?: Units
   readonly defaultWireTolerance?: number
   readonly outputDir?: string
+  /**
+   * Default harness entrypoint, relative to this config file — lets
+   * `nerve compile` (and friends) run with no file argument.
+   */
+  readonly entry?: string
+  /** All harness files in a multi-harness repo (watch/snapshot targets). */
+  readonly harnessFiles?: ReadonlyArray<string>
   readonly rules?: RuleConfig
   readonly costing?: CostModel
   /** Shop manufacturing capabilities; parameterizes the HK-MFG rules. */

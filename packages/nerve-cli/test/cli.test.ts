@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, existsSync, writeFileSync, mkdirSync } from "node:fs"
+import { mkdtempSync, readFileSync, existsSync, writeFileSync, mkdirSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import { describe, expect, it } from "vitest"
@@ -231,6 +231,67 @@ describe("nerve inspect / init / help", () => {
     const io = capture()
     expect(await run([], io)).toBe(2)
     expect(io.stdout.join("\n")).toContain("Usage:")
+  })
+})
+
+describe("config-driven entrypoint + exports toggles", () => {
+  // Inside the repo tree (not os tmp): the scaffolded harness imports
+  // @grayhaven/nerve, which must resolve through the workspace.
+  const project = (config: string): string => {
+    const dir = mkdtempSync(join(import.meta.dirname, "tmp-entry-"))
+    mkdirSync(join(dir, "src"), { recursive: true })
+    writeFileSync(join(dir, "nerve.config.ts"), config)
+    writeFileSync(
+      join(dir, "src", "main.harness.ts"),
+      readFileSync(FIXTURE, "utf8")
+    )
+    return dir
+  }
+
+  const inDir = async <T>(dir: string, fn: () => Promise<T>): Promise<T> => {
+    const prev = process.cwd()
+    process.chdir(dir)
+    try {
+      return await fn()
+    } finally {
+      process.chdir(prev)
+      rmSync(dir, { recursive: true, force: true })
+    }
+  }
+
+  it("nerve compile runs bare via config.entry", async () => {
+    const dir = project(
+      `export default { entry: "./src/main.harness.ts", outputDir: "dist" }\n`
+    )
+    await inDir(dir, async () => {
+      const io = capture()
+      expect(await run(["compile"], io)).toBe(0)
+      expect(existsSync(join(dir, "dist", "harness.json"))).toBe(true)
+    })
+  })
+
+  it("without entry, bare compile still prints usage", async () => {
+    const dir = project(`export default { outputDir: "dist" }\n`)
+    await inDir(dir, async () => {
+      const io = capture()
+      expect(await run(["compile"], io)).toBe(2)
+      expect(io.stdout.join("\n")).toContain("Usage:")
+    })
+  })
+
+  it("config.exports toggles filter loose files; the zip stays complete", async () => {
+    const dir = project(
+      `export default { entry: "./src/main.harness.ts", exports: { csv: false, svg: false, pdf: true } }\n`
+    )
+    await inDir(dir, async () => {
+      const out = join(dir, "packet")
+      expect(await run(["export", "--out", out], capture())).toBe(0)
+      expect(existsSync(join(out, "manufacturing-packet.pdf"))).toBe(true)
+      expect(existsSync(join(out, "manufacturing-packet.zip"))).toBe(true)
+      expect(existsSync(join(out, "harness.json"))).toBe(true)
+      expect(existsSync(join(out, "bom.csv"))).toBe(false)
+      expect(existsSync(join(out, "schematic.svg"))).toBe(false)
+    })
   })
 })
 
