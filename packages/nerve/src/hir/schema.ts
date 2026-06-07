@@ -8,7 +8,7 @@
  * Defined with Effect Schema so every boundary (worker messages, cached
  * artifacts, CLI `inspect`) decodes through the same versioned codec.
  */
-import { Schema } from "effect"
+import { JSONSchema, Schema } from "effect"
 
 import { HIR_SCHEMA_VERSION } from "./core.js"
 
@@ -197,5 +197,13 @@ export const decodeHirEffect = Schema.decodeUnknown(Hir)
 
 /** Encode HIR back to its JSON-ready form. */
 export const encodeHir = Schema.encodeSync(Hir)
+
+/**
+ * The HIR contract as draft-07 JSON Schema. Powers the shape-snapshot
+ * guard (tests/hir-shape.test.ts) and generated schema docs; useful to
+ * external validators too.
+ */
+export const hirJsonSchema = (): unknown =>
+  JSON.parse(JSON.stringify(JSONSchema.make(Hir)))
 
 

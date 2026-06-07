@@ -52,6 +52,7 @@ export {
   decodeHir,
   decodeHirEffect,
   encodeHir,
+  hirJsonSchema,
   Hir,
   HirBomItem,
   HirBranch,

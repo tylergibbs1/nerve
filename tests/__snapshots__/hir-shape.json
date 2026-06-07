@@ -1,0 +1,613 @@
+{
+  "hirSchemaVersion": "0.1.0",
+  "jsonSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "required": [
+      "schemaVersion",
+      "harness",
+      "connectors",
+      "wires",
+      "cables",
+      "branches",
+      "splices",
+      "labels",
+      "bom",
+      "diagnostics",
+      "layoutHints",
+      "exports"
+    ],
+    "properties": {
+      "schemaVersion": {
+        "type": "string",
+        "enum": [
+          "0.1.0"
+        ]
+      },
+      "harness": {
+        "type": "object",
+        "required": [
+          "id",
+          "revision",
+          "units",
+          "metadata"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string"
+          },
+          "units": {
+            "type": "string",
+            "enum": [
+              "mm",
+              "in"
+            ]
+          },
+          "metadata": {
+            "type": "object",
+            "required": [],
+            "properties": {},
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "connectors": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "ref",
+            "mpn",
+            "pinCount",
+            "pins"
+          ],
+          "properties": {
+            "ref": {
+              "type": "string"
+            },
+            "mpn": {
+              "type": "string"
+            },
+            "manufacturer": {
+              "type": "string"
+            },
+            "family": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "gender": {
+              "type": "string",
+              "enum": [
+                "plug",
+                "receptacle",
+                "hermaphroditic"
+              ]
+            },
+            "pinCount": {
+              "type": "number"
+            },
+            "wireGaugeRange": {
+              "type": "object",
+              "required": [
+                "min",
+                "max"
+              ],
+              "properties": {
+                "min": {
+                  "type": "string"
+                },
+                "max": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "cavityLayout": {
+              "type": "object",
+              "required": [
+                "rows",
+                "columns"
+              ],
+              "properties": {
+                "rows": {
+                  "type": "number"
+                },
+                "columns": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            },
+            "matingMpn": {
+              "type": "string"
+            },
+            "reservedPins": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "sealed": {
+              "type": "boolean"
+            },
+            "compatibleTerminals": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "compatibleSeals": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "currentLimitA": {
+              "type": "number"
+            },
+            "voltageLimitV": {
+              "type": "number"
+            },
+            "crimpTool": {
+              "type": "string"
+            },
+            "provenance": {
+              "type": "object",
+              "required": [
+                "verification"
+              ],
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "datasheet": {
+                  "type": "string"
+                },
+                "verification": {
+                  "type": "string",
+                  "enum": [
+                    "unverified",
+                    "inspired-by",
+                    "verified"
+                  ]
+                },
+                "lastVerified": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "pins": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "pin"
+                ],
+                "properties": {
+                  "pin": {
+                    "type": "string"
+                  },
+                  "signal": {
+                    "type": "string"
+                  },
+                  "terminal": {
+                    "type": "string"
+                  },
+                  "seal": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "wires": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "from",
+            "to"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "from": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": [
+                    "connector",
+                    "pin"
+                  ],
+                  "properties": {
+                    "connector": {
+                      "type": "string"
+                    },
+                    "pin": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "splice"
+                  ],
+                  "properties": {
+                    "splice": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "to": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "required": [
+                    "connector",
+                    "pin"
+                  ],
+                  "properties": {
+                    "connector": {
+                      "type": "string"
+                    },
+                    "pin": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "splice"
+                  ],
+                  "properties": {
+                    "splice": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "gauge": {
+              "type": "string"
+            },
+            "color": {
+              "type": "string"
+            },
+            "stripe": {
+              "type": "string"
+            },
+            "length": {
+              "type": "number"
+            },
+            "lengthTolerance": {
+              "type": "number"
+            },
+            "signal": {
+              "type": "string"
+            },
+            "insulation": {
+              "type": "string"
+            },
+            "voltageRating": {
+              "type": "number"
+            },
+            "temperatureRating": {
+              "type": "number"
+            },
+            "currentEstimate": {
+              "type": "number"
+            },
+            "twistGroup": {
+              "type": "string"
+            },
+            "shieldGroup": {
+              "type": "string"
+            },
+            "cable": {
+              "type": "string"
+            },
+            "conductor": {
+              "type": "string"
+            },
+            "branch": {
+              "type": "string"
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "cables": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "wires"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "conductors": {
+              "type": "number"
+            },
+            "shield": {
+              "type": "string"
+            },
+            "jacket": {
+              "type": "string"
+            },
+            "outerDiameter": {
+              "type": "number"
+            },
+            "cutLength": {
+              "type": "number"
+            },
+            "notes": {
+              "type": "string"
+            },
+            "wires": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "branches": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "path"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "path": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "parent": {
+              "type": "string"
+            },
+            "sleeve": {
+              "type": "string"
+            },
+            "nominalLength": {
+              "type": "number"
+            },
+            "breakoutDistance": {
+              "type": "number"
+            },
+            "minBendRadius": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "splices": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "wires"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "part": {
+              "type": "string"
+            },
+            "branch": {
+              "type": "string"
+            },
+            "location": {
+              "type": "number"
+            },
+            "notes": {
+              "type": "string"
+            },
+            "wires": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "labels": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "text",
+            "attachTo"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "attachTo": {
+              "type": "string"
+            },
+            "offsetFrom": {
+              "type": "string"
+            },
+            "distance": {
+              "type": "number"
+            },
+            "material": {
+              "type": "string"
+            },
+            "quantity": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "bom": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "mpn",
+            "quantity",
+            "unitOfMeasure",
+            "usedBy"
+          ],
+          "properties": {
+            "internalPartId": {
+              "type": "string"
+            },
+            "mpn": {
+              "type": "string"
+            },
+            "manufacturer": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "quantity": {
+              "type": "number"
+            },
+            "unitOfMeasure": {
+              "type": "string"
+            },
+            "usedBy": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "diagnostics": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "code",
+            "severity",
+            "message"
+          ],
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "severity": {
+              "type": "string",
+              "enum": [
+                "error",
+                "warning",
+                "info"
+              ]
+            },
+            "message": {
+              "type": "string"
+            },
+            "target": {
+              "type": "string"
+            },
+            "targets": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "data": {
+              "type": "object",
+              "required": [],
+              "properties": {},
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "layoutHints": {
+        "type": "array",
+        "items": {
+          "$id": "/schemas/unknown",
+          "title": "unknown"
+        }
+      },
+      "exports": {
+        "type": "object",
+        "required": [],
+        "properties": {},
+        "additionalProperties": {
+          "$id": "/schemas/unknown",
+          "title": "unknown"
+        }
+      }
+    },
+    "additionalProperties": false
+  }
+}
