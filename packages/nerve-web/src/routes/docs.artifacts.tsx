@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Markdown } from "../components/Markdown.js"
-import src from "../../docs-content/artifacts.md?raw"
+import { docsContent } from "../docs/content.js"
 
 export const Route = createFileRoute("/docs/artifacts")({
   component: Page
@@ -12,7 +12,7 @@ function Page() {
   return (
     <>
       <span className="spec-tag">Artifacts</span>
-      <Markdown src={src} />
+      <Markdown src={docsContent("artifacts")} />
     </>
   )
 }

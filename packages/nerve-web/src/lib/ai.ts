@@ -10,10 +10,9 @@
  * No server: this is a static SPA, so calls go browser → Anthropic with a
  * user-supplied API key (kept in localStorage, sent only to Anthropic).
  */
-// Import the bare client (not the root index): the root re-exports Node-only
-// helpers (node:crypto) that break the browser bundle. Types are erased.
-import { Anthropic } from "@anthropic-ai/sdk/client"
-import { APIError, AuthenticationError } from "@anthropic-ai/sdk/error"
+// The SDK loads lazily on the first agent turn (dynamic import below), so
+// none of it ships in the route chunk. The /client entry (not the root
+// index) avoids Node-only helpers that break the browser bundle.
 import type { MessageParam, Tool, ToolResultBlockParam } from "@anthropic-ai/sdk/resources/messages"
 import { compileSource, countDiagnostics } from "./compile-client.js"
 import { getSource, setSource } from "./sources.js"
@@ -160,6 +159,11 @@ export const runAgentTurn = async (
     onEvent({ type: "error", text: "No API key configured." })
     return
   }
+  // Lazy-load the SDK: ~100KB that only users of the AI pane ever pay for.
+  const [{ Anthropic }, { APIError, AuthenticationError }] = await Promise.all([
+    import("@anthropic-ai/sdk/client"),
+    import("@anthropic-ai/sdk/error")
+  ])
   const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true })
 
   const messages: MessageParam[] = [

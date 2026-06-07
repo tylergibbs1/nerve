@@ -18,6 +18,29 @@ export default defineConfig({
       }
     ]
   },
+  build: {
+    // vendor-editor (CodeMirror+lezer, one logical unit) sits at ~510KB and
+    // only loads with the workspace; the default 500KB warning is noise here.
+    chunkSizeWarningLimit: 560,
+    rollupOptions: {
+      output: {
+        // Vendor groups: framework bytes change far less often than app
+        // code — splitting keeps them cache-stable across deploys.
+        manualChunks(id: string) {
+          if (id.includes("node_modules")) {
+            if (/codemirror|@lezer|@uiw/.test(id)) return "vendor-editor"
+            if (/react-dom|\/react\//.test(id)) return "vendor-react"
+            if (/@tanstack/.test(id)) return "vendor-tanstack"
+          }
+          return undefined
+        }
+      }
+    }
+  },
+  server: {
+    // Pre-transform the hot paths on dev start.
+    warmup: { clientFiles: ["./src/main.tsx", "./src/routes/projects.$projectId.tsx"] }
+  },
   plugins: [
     tailwindcss(),
     // Must come before react() per TanStack Router docs.

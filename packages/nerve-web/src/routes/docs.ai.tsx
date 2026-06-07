@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Markdown } from "../components/Markdown.js"
-import src from "../../docs-content/ai.md?raw"
+import { docsContent } from "../docs/content.js"
 
 export const Route = createFileRoute("/docs/ai")({
   component: Page
@@ -12,7 +12,7 @@ function Page() {
   return (
     <>
       <span className="spec-tag">AI Copilot</span>
-      <Markdown src={src} />
+      <Markdown src={docsContent("ai")} />
     </>
   )
 }
