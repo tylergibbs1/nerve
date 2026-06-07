@@ -31,14 +31,17 @@ const gaugeArb = fc.oneof(
   fc.constant(undefined)
 )
 
-const partArb: fc.Arbitrary<ConnectorPart> = fc.record({
-  mpn: fc.stringMatching(/^[A-Z]{2}-\d{2}$/),
-  pinCount: fc.integer({ min: 1, max: 8 }),
-  wireGaugeRange: fc.oneof(
-    fc.constant(undefined),
-    fc.constant({ min: "30AWG", max: "18AWG" } as const)
+const partArb: fc.Arbitrary<ConnectorPart> = fc
+  .tuple(
+    fc.stringMatching(/^[A-Z]{2}-\d{2}$/),
+    fc.integer({ min: 1, max: 8 }),
+    fc.boolean()
   )
-}, { requiredKeys: ["mpn", "pinCount"] })
+  .map(([mpn, pinCount, ranged]) => ({
+    mpn,
+    pinCount,
+    ...(ranged ? { wireGaugeRange: { min: "30AWG", max: "18AWG" } } : {})
+  }))
 
 /** A random but structurally valid design: connectors with some assigned
  * pins, wires between existing pins. */
