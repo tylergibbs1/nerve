@@ -60,6 +60,21 @@ test("multi-file project: variants tab compiles the long SKU (§9.6 fsMap)", asy
   })
 })
 
+test("share link round-trips: Share copies a URL whose fragment recompiles the harness", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"])
+  await page.goto("/projects/motor-controller/diagram")
+  await expect(page.locator(".diagram-pane svg")).toBeVisible({ timeout: 15_000 })
+  await page.getByRole("button", { name: "Share" }).click()
+  await expect(page.getByRole("button", { name: /Link copied/ })).toBeVisible()
+  const url = await page.evaluate(() => navigator.clipboard.readText())
+  expect(url).toContain("/shared#v1.")
+  // The fragment IS the source: a fresh navigation decodes and compiles it.
+  await page.goto(url)
+  await expect(page.locator(".diagram-pane svg")).toBeVisible({ timeout: 20_000 })
+  await expect(page.locator(".diagram-pane svg")).toContainText("motor-controller-harness")
+  await expect(page.locator(".toolbar-status")).toContainText(/0 error/i, { timeout: 20_000 })
+})
+
 test("diagram sheet actions exist and Copy SVG puts markup on the clipboard", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"])
   await page.goto("/projects/motor-controller/diagram")

@@ -9,7 +9,7 @@ import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js"
 import { SourcePane } from "../components/SourcePane.js"
 import { AiPane } from "../components/AiPane.js"
 import { useIsDirty } from "../lib/useSources.js"
-import { PROJECTS } from "../lib/projects.js"
+import { projectMeta } from "../lib/projects.js"
 import { Badge } from "../ui/badge.js"
 
 export const Route = createFileRoute("/projects/$projectId")({
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/projects/$projectId")({
     middlewares: [retainSearchParams(["sortBy", "desc"])]
   },
   beforeLoad: ({ params }) => {
-    if (!PROJECTS.some((p) => p.id === params.projectId)) throw notFound()
+    if (projectMeta(params.projectId) === undefined) throw notFound()
   },
   // Intent preloading (hover a project card) compiles in the worker
   // before the click; staleTime: Infinity makes the preload stick.
@@ -71,6 +71,23 @@ function ExportButton({ projectId }: { projectId: string }) {
   )
 }
 
+/** Copy a zero-backend share link: the source gzipped into the fragment. */
+function ShareButton({ projectId }: { projectId: string }) {
+  const [copied, setCopied] = useState(false)
+  const run = async () => {
+    const { shareUrl } = await import("../lib/share.js")
+    const { getSource } = await import("../lib/sources.js")
+    await navigator.clipboard.writeText(shareUrl(getSource(projectId)))
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  return (
+    <Button variant="secondary" size="xs" onClick={() => void run()}>
+      {copied ? "Link copied ✓" : "Share"}
+    </Button>
+  )
+}
+
 function ProjectWorkspace() {
   const { projectId } = Route.useParams()
   const workspaceLayout = useDefaultLayout({ id: "nerve-workspace-3", panelIds: ["ai", "source", "render"] })
@@ -97,6 +114,7 @@ function ProjectWorkspace() {
               : "valid"}
         </Badge>
         <SearchBox hir={data.hir} projectId={projectId} />
+        <ShareButton projectId={projectId} />
         <ExportButton projectId={projectId} />
         <nav className="tabs">
           {TABS.map((tab) => (

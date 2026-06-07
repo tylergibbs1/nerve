@@ -8,6 +8,16 @@ export interface ProjectMeta {
   readonly description: string
 }
 
+/** Ephemeral share-link project (not listed on the index page). */
+export const SHARED_PROJECT: ProjectMeta = {
+  id: "shared",
+  name: "Shared Harness",
+  description: "Opened from a share link — source lives in the URL fragment, nowhere else"
+}
+
+export const projectMeta = (id: string): ProjectMeta | undefined =>
+  id === SHARED_PROJECT.id ? SHARED_PROJECT : PROJECTS.find((p) => p.id === id)
+
 export const PROJECTS: ReadonlyArray<ProjectMeta> = [
   {
     id: "motor-controller",

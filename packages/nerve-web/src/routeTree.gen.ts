@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SharedRouteImport } from './routes/shared'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
@@ -31,6 +32,11 @@ import { Route as ProjectsProjectIdConnectorsRouteImport } from './routes/projec
 import { Route as ProjectsProjectIdBomRouteImport } from './routes/projects.$projectId.bom'
 import { Route as ProjectsProjectIdBoardRouteImport } from './routes/projects.$projectId.board'
 
+const SharedRoute = SharedRouteImport.update({
+  id: '/shared',
+  path: '/shared',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DocsRoute = DocsRouteImport.update({
   id: '/docs',
   path: '/docs',
@@ -143,6 +149,7 @@ const ProjectsProjectIdBoardRoute = ProjectsProjectIdBoardRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/docs': typeof DocsRouteWithChildren
+  '/shared': typeof SharedRoute
   '/docs/ai': typeof DocsAiRoute
   '/docs/artifacts': typeof DocsArtifactsRoute
   '/docs/cli': typeof DocsCliRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/shared': typeof SharedRoute
   '/docs/ai': typeof DocsAiRoute
   '/docs/artifacts': typeof DocsArtifactsRoute
   '/docs/cli': typeof DocsCliRoute
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/docs': typeof DocsRouteWithChildren
+  '/shared': typeof SharedRoute
   '/docs/ai': typeof DocsAiRoute
   '/docs/artifacts': typeof DocsArtifactsRoute
   '/docs/cli': typeof DocsCliRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/docs'
+    | '/shared'
     | '/docs/ai'
     | '/docs/artifacts'
     | '/docs/cli'
@@ -235,6 +245,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/shared'
     | '/docs/ai'
     | '/docs/artifacts'
     | '/docs/cli'
@@ -257,6 +268,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/docs'
+    | '/shared'
     | '/docs/ai'
     | '/docs/artifacts'
     | '/docs/cli'
@@ -281,12 +293,20 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DocsRoute: typeof DocsRouteWithChildren
+  SharedRoute: typeof SharedRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRouteWithChildren
   ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/shared': {
+      id: '/shared'
+      path: '/shared'
+      fullPath: '/shared'
+      preLoaderRoute: typeof SharedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/docs': {
       id: '/docs'
       path: '/docs'
@@ -491,6 +511,7 @@ const ProjectsProjectIdRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DocsRoute: DocsRouteWithChildren,
+  SharedRoute: SharedRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRouteWithChildren,
   ProjectsIndexRoute: ProjectsIndexRoute,
 }
