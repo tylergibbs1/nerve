@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { builtinRules } from "@grayhaven/nerve-rules"
+// Extracted at build time by scripts/gen-llms.ts from the shipped
+// builtinRules array (importing the package here would pull the effect
+// runtime into this route chunk).
+import rulesMeta from "../docs/rules-meta.json"
 import { RULE_SUMMARIES } from "../docs/rule-summaries.js"
 
 export const Route = createFileRoute("/docs/rules")({
@@ -10,10 +13,10 @@ function RulesReference() {
   return (
     <>
       <span className="spec-tag">Validation Rules</span>
-      <h1>{builtinRules.length} built-in rules.</h1>
+      <h1>{rulesMeta.length} built-in rules.</h1>
       <p>
         Stable <code>HK-*</code> codes, suitable for CI gating and waivers. This table renders
-        from the shipped <code>builtinRules</code> array; it cannot drift from the code.
+        extracted at build time from the shipped <code>builtinRules</code> array.
         Custom rules use the same <code>rule()</code> API and get their own codes.
       </p>
       <table className="data">
@@ -25,7 +28,7 @@ function RulesReference() {
           </tr>
         </thead>
         <tbody>
-          {builtinRules.map((r) => (
+          {rulesMeta.map((r) => (
             <tr key={r.code}>
               <td className="cell-code">{r.code}</td>
               <td className="cell-code">{r.name}</td>

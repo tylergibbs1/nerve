@@ -17,7 +17,7 @@ import {
   useQuery,
   type QueryClient
 } from "@tanstack/react-query"
-import { getSource } from "./sources.js"
+import { getSource, isDirty } from "./sources.js"
 import type { CompileRequest, CompileResponse, CompileResult } from "./compile-types.js"
 
 let worker: Worker | undefined
@@ -55,7 +55,7 @@ const getWorker = (): Worker => {
 /** Compile TypeScript source in the worker (§9.6). Abortable. */
 export const compileSource = (
   projectId: string,
-  source: string,
+  source: string | undefined,
   signal?: AbortSignal
 ): Promise<CompileResult> =>
   new Promise((resolve, reject) => {
@@ -68,7 +68,11 @@ export const compileSource = (
         )
       }
     })
-    getWorker().postMessage({ id, projectId, source } satisfies CompileRequest)
+    getWorker().postMessage({
+      id,
+      projectId,
+      ...(source !== undefined ? { source } : {})
+    } satisfies CompileRequest)
   })
 
 export const compileKeys = {
@@ -79,8 +83,12 @@ export const compileKeys = {
 export const compileQueryOptions = (projectId: string) =>
   queryOptions({
     queryKey: compileKeys.project(projectId),
-    // Always compiles the *current* source — edited or bundled.
-    queryFn: ({ signal }) => compileSource(projectId, getSource(projectId), signal),
+    // Compiles the *current* state: edited source when dirty (isDirty is
+    // re-evaluated at refetch time, so a refetch can never revert an editor
+    // compile), undefined otherwise so the worker uses its bundled design
+    // and skips loading the sucrase transform entirely.
+    queryFn: ({ signal }) =>
+      compileSource(projectId, isDirty(projectId) ? getSource(projectId) : undefined, signal),
     staleTime: Infinity
   })
 

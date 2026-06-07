@@ -47,13 +47,12 @@ export {
   type Diagnostic
 } from "./diagnostics.js"
 
+export { endpointLabel, HIR_SCHEMA_VERSION, isPinEndpoint, refs } from "./hir/core.js"
 export {
   decodeHir,
   decodeHirEffect,
   encodeHir,
-  endpointLabel,
   Hir,
-  HIR_SCHEMA_VERSION,
   HirBomItem,
   HirBranch,
   HirCable,
@@ -63,9 +62,7 @@ export {
   HirPinRef,
   HirSplice,
   HirSpliceRef,
-  HirWire,
-  isPinEndpoint,
-  refs
+  HirWire
 } from "./hir/schema.js"
 
 export { compileDesign, type CompileResult } from "./compile.js"

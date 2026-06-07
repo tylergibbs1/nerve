@@ -25,6 +25,10 @@ cat > dist/vercel.json <<'JSON'
     {
       "source": "/llms(.*).txt",
       "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }
   ]
 }

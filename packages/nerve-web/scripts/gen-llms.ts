@@ -13,7 +13,7 @@ import { RULE_SUMMARIES } from "../src/docs/rule-summaries.ts"
 
 const ROOT = join(import.meta.dir, "..")
 const OUT = join(ROOT, "public")
-const SITE = "https://nerve-demo.vercel.app"
+import { SITE } from "./site.js"
 
 const PAGES = [
   { slug: "quickstart", title: "Quickstart" },
@@ -99,4 +99,10 @@ const full = `# Grayhaven Nerve: complete documentation
 ${fullParts.join("\n\n---\n\n")}
 `
 writeFileSync(join(OUT, "llms-full.txt"), full)
+// Effect-free rules metadata for the docs page (importing builtinRules in
+// the client would drag the effect runtime into the route chunk).
+writeFileSync(
+  join(ROOT, "src", "docs", "rules-meta.json"),
+  JSON.stringify(builtinRules.map((r) => ({ code: r.code, name: r.name })), null, 2) + "\n"
+)
 console.log(`generated llms.txt, llms-full.txt, ${PAGES.length + 1} page mirrors`)

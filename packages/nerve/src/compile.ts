@@ -13,10 +13,8 @@
  */
 import type { HarnessDesign } from "./domain.js"
 import { Codes, DiagnosticSeverity, type Diagnostic } from "./diagnostics.js"
+import { endpointLabel, HIR_SCHEMA_VERSION, refs } from "./hir/core.js"
 import {
-  endpointLabel,
-  HIR_SCHEMA_VERSION,
-  refs,
   type Hir,
   type HirBomItem,
   type HirBranch,

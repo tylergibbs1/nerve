@@ -1,0 +1,70 @@
+[
+  {
+    "code": "HK-DOC-001",
+    "name": "missingRevision"
+  },
+  {
+    "code": "HK-DOC-002",
+    "name": "branchMissingLabel"
+  },
+  {
+    "code": "HK-DOC-003",
+    "name": "spliceMissingNotes"
+  },
+  {
+    "code": "HK-MFG-001",
+    "name": "missingWireLength"
+  },
+  {
+    "code": "HK-MFG-002",
+    "name": "missingWireColor"
+  },
+  {
+    "code": "HK-MFG-003",
+    "name": "missingWireGauge"
+  },
+  {
+    "code": "HK-MFG-004",
+    "name": "gaugeOutsideConnectorRange"
+  },
+  {
+    "code": "HK-WIRE-004",
+    "name": "gaugeCurrentMismatch"
+  },
+  {
+    "code": "HK-ELEC-001",
+    "name": "differentialPairNotTwisted"
+  },
+  {
+    "code": "HK-ELEC-002",
+    "name": "twistGroupTooSmall"
+  },
+  {
+    "code": "HK-ELEC-003",
+    "name": "missingGroundReturn"
+  },
+  {
+    "code": "HK-ELEC-004",
+    "name": "shieldDrainUnconnected"
+  },
+  {
+    "code": "HK-CONN-010",
+    "name": "unconnectedAssignedPin"
+  },
+  {
+    "code": "HK-CONN-011",
+    "name": "wireSignalMismatch"
+  },
+  {
+    "code": "HK-CONN-012",
+    "name": "terminalIncompatible"
+  },
+  {
+    "code": "HK-CONN-013",
+    "name": "missingSeal"
+  },
+  {
+    "code": "HK-CONN-014",
+    "name": "sealIncompatible"
+  }
+]

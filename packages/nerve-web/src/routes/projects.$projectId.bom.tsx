@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import type { ColumnDef, SortingState } from "@tanstack/react-table"
 import type { HirBomItem } from "@grayhaven/nerve"
-import { DataTable, parseSortSearch, sortingToSearch } from "../components/DataTable.js"
+import { DataTable } from "../components/DataTable.js"
+import { parseSortSearch, sortingToSearch } from "../components/table-search.js"
 import { compileQueryOptions } from "../lib/compile-client.js"
 
 export const Route = createFileRoute("/projects/$projectId/bom")({

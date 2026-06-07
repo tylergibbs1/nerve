@@ -8,9 +8,35 @@
  *    evaluate it here — inside the worker, away from the DOM — with a
  *    require() shim that only exposes the Nerve libraries.
  */
-import { transform } from "sucrase"
-import { compileDesign, runRules, type HarnessDesign } from "@grayhaven/nerve"
-import * as nerveModule from "@grayhaven/nerve"
+// sucrase (~200KB) loads lazily on the first source-mode compile; the
+// bundled-example path never pays for it.
+import {
+  branch,
+  cable,
+  Codes,
+  compileDesign,
+  connector,
+  defineConfig,
+  definePlugin,
+  DiagnosticSeverity,
+  diffHir,
+  endpointLabel,
+  formatDiff,
+  harness,
+  hasErrors,
+  HIR_SCHEMA_VERSION,
+  isEmptyDiff,
+  isNervePlugin,
+  isPinEndpoint,
+  label,
+  refs,
+  rule,
+  runRules,
+  splice,
+  variant,
+  wire,
+  type HarnessDesign
+} from "@grayhaven/nerve"
 import * as connectorsModule from "@grayhaven/nerve-connectors"
 import { builtinRules } from "@grayhaven/nerve-rules"
 import { boardSvg, generateTestPlan, schematicSvg } from "@grayhaven/nerve-exporters"
@@ -25,9 +51,37 @@ const designs: Readonly<Record<string, HarnessDesign>> = {
   "robot-platform": robotPlatform
 }
 
-/** Modules visible to editor-authored code. */
+/** Modules visible to editor-authored code. The nerve surface is a curated
+ * named-import object (not `import *`): a namespace import would mark the
+ * barrel's Effect Schema codecs as used and drag ~160KB of effect into the
+ * worker. Everything except decodeHir/encodeHir/Hir codecs is exposed. */
 const SANDBOX_MODULES: Readonly<Record<string, unknown>> = {
-  "@grayhaven/nerve": nerveModule,
+  "@grayhaven/nerve": {
+    branch,
+    cable,
+    Codes,
+    compileDesign,
+    connector,
+    defineConfig,
+    definePlugin,
+    DiagnosticSeverity,
+    diffHir,
+    endpointLabel,
+    formatDiff,
+    harness,
+    hasErrors,
+    HIR_SCHEMA_VERSION,
+    isEmptyDiff,
+    isNervePlugin,
+    isPinEndpoint,
+    label,
+    refs,
+    rule,
+    runRules,
+    splice,
+    variant,
+    wire
+  },
   "@grayhaven/nerve-connectors": connectorsModule
 }
 
@@ -36,7 +90,8 @@ const isHarnessDesign = (value: unknown): value is HarnessDesign =>
   value !== null &&
   (value as { kind?: unknown }).kind === "harness"
 
-const evaluateSource = (source: string): HarnessDesign => {
+const evaluateSource = async (source: string): Promise<HarnessDesign> => {
+  const { transform } = await import("sucrase")
   const { code } = transform(source, { transforms: ["typescript", "imports"] })
   const mod = { exports: {} as Record<string, unknown> }
   const sandboxRequire = (name: string): unknown => {
@@ -56,11 +111,13 @@ const evaluateSource = (source: string): HarnessDesign => {
   return design
 }
 
-self.onmessage = (event: MessageEvent<CompileRequest>) => {
+// Async handler: overlapping requests may complete out of order, which is
+// safe because compile-client matches responses by id.
+self.onmessage = async (event: MessageEvent<CompileRequest>) => {
   const { id, projectId, source } = event.data
   let design: HarnessDesign | undefined
   try {
-    design = source !== undefined ? evaluateSource(source) : designs[projectId]
+    design = source !== undefined ? await evaluateSource(source) : designs[projectId]
   } catch (cause) {
     self.postMessage({
       id,

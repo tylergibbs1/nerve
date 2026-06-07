@@ -6,7 +6,8 @@
  * BOM rows — the categories §21 requires. Deterministic: output order
  * follows canonical HIR ordering.
  */
-import { endpointLabel, type Hir } from "./hir/schema.js"
+import { endpointLabel } from "./hir/core.js"
+import type { Hir } from "./hir/schema.js"
 
 export interface FieldChange {
   readonly field: string

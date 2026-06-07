@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+/* Self-hosted brand fonts (copied from the company repo). Archivo is a
+   variable font: the 400-700 range declaration is required or browsers
+   synthesize bold for the 500-700 usages. */
+@font-face {
+  font-family: "Archivo";
+  src: url("/fonts/Archivo-var.woff2") format("woff2");
+  font-weight: 400 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/IBMPlexMono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/IBMPlexMono-500.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("/fonts/IBMPlexMono-600.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Chakra Petch";
+  src: url("/fonts/ChakraPetch-600.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
 /* Tailwind theme bridge: the reference repo's shadcn-style semantic tokens
    (globals.css + tailwind.config.ts) mapped onto Tailwind v4. The ported
    ui/ components consume these via bg-foreground, tracking-spec-wide, etc. */

@@ -10,7 +10,7 @@
  */
 import { Schema } from "effect"
 
-export const HIR_SCHEMA_VERSION = "0.1.0" as const
+import { HIR_SCHEMA_VERSION } from "./core.js"
 
 export const HirUnits = Schema.Literal("mm", "in")
 
@@ -176,13 +176,6 @@ export type HirEndpoint = Schema.Schema.Type<typeof HirEndpoint>
 export type HirSplice = Schema.Schema.Type<typeof HirSplice>
 export type HirCable = Schema.Schema.Type<typeof HirCable>
 
-/** Narrow an endpoint to a pin ref. */
-export const isPinEndpoint = (e: HirEndpoint): e is HirPinRef => "connector" in e
-
-/** Stable display form: `J1.1` or `S1`. */
-export const endpointLabel = (e: HirEndpoint): string =>
-  isPinEndpoint(e) ? `${e.connector}.${e.pin}` : e.splice
-
 /** Decode an untrusted value (e.g. a cached `harness.json`) into HIR. Throws `ParseError`. */
 export const decodeHir = Schema.decodeUnknownSync(Hir)
 
@@ -192,13 +185,4 @@ export const decodeHirEffect = Schema.decodeUnknown(Hir)
 /** Encode HIR back to its JSON-ready form. */
 export const encodeHir = Schema.encodeSync(Hir)
 
-/** Stable object references (PRD §19), e.g. `connector:J1.pin:1`. */
-export const refs = {
-  connector: (ref: string) => `connector:${ref}`,
-  pin: (connector: string, pin: string) => `connector:${connector}.pin:${pin}`,
-  wire: (id: string) => `wire:${id}`,
-  branch: (id: string) => `branch:${id}`,
-  splice: (id: string) => `splice:${id}`,
-  label: (id: string) => `label:${id}`,
-  bom: (mpn: string) => `bom:${mpn}`
-} as const
+
