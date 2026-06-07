@@ -30,6 +30,7 @@ import {
 } from "@grayhaven/nerve-compiler"
 import { exportWireViz, importWireViz } from "@grayhaven/nerve-wireviz"
 import {
+  connectorFacesSvg,
   assemblyInstructions,
   boardSvg,
   bomCsv,
@@ -142,6 +143,12 @@ const compileOrExit = async (
   return exit.value
 }
 
+const writeOutBytes = (dir: string, name: string, bytes: Uint8Array, io: Io): void => {
+  mkdirSync(dir, { recursive: true })
+  writeFileSync(join(dir, name), bytes)
+  io.out(`wrote ${join(dir, name)}`)
+}
+
 const writeOut = (dir: string, name: string, contents: string | Uint8Array, io: Io): void => {
   mkdirSync(dir, { recursive: true })
   const path = join(dir, name)
@@ -222,13 +229,13 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       const file = positional[0]
       if (file === undefined) return usage(io)
       const format = flags["format"] ?? "svg"
-      if (format !== "svg") {
-        io.err(`Unsupported render format: ${format} (supported: svg)`)
+      if (format !== "svg" && format !== "png") {
+        io.err(`Unsupported render format: ${format} (supported: svg, png)`)
         return 2
       }
       const view = flags["view"] ?? "schematic"
-      if (view !== "schematic" && view !== "board" && view !== "formboard") {
-        io.err(`Unsupported render view: ${view} (supported: schematic, board, formboard)`)
+      if (view !== "schematic" && view !== "board" && view !== "faces" && view !== "formboard") {
+        io.err(`Unsupported render view: ${view} (supported: schematic, board, faces, formboard)`)
         return 2
       }
       const result = await compileOrExit(file, io)
@@ -243,10 +250,21 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
         )
         return 0
       }
-      if (view === "board") {
-        writeOut(outDir, "board.svg", boardSvg(result.hir), io)
+      const svg =
+        view === "board"
+          ? boardSvg(result.hir)
+          : view === "faces"
+            ? connectorFacesSvg(result.hir)
+            : schematicSvg(result.hir)
+      const base = view === "schematic" ? "schematic" : view === "faces" ? "connector-faces" : "board"
+      if (format === "png") {
+        // PNG preview (PRD §9.8): native resvg lives in the CLI only — the
+        // exporters package stays browser-clean.
+        const { Resvg } = await import("@resvg/resvg-js")
+        const png = new Resvg(svg, { fitTo: { mode: "width", value: 1600 } }).render().asPng()
+        writeOutBytes(outDir, `${base}.png`, png, io)
       } else {
-        writeOut(outDir, "schematic.svg", schematicSvg(result.hir), io)
+        writeOut(outDir, `${base}.svg`, svg, io)
       }
       return 0
     }

@@ -32,6 +32,14 @@ export {
 export { schematicDrawing, schematicSvg } from "./svg.js"
 export { boardHtml, facesHtml, schematicHtml } from "./html.js"
 export { connectorFacesDrawing, connectorFacesSvg } from "./faces.js"
+export {
+  bomJsonSatellite,
+  cutListJsonSatellite,
+  diagnosticsJson,
+  graphJson,
+  labelScheduleJsonSatellite,
+  renderLayoutJson
+} from "./satellites.js"
 export { boardDrawing, boardSvg } from "./board.js"
 export { assemblyInstructions } from "./instructions.js"
 export { bopCsv, bopJson, bopTable, generateBop, type BillOfProcess, type Operation, type Workstation } from "./bop.js"

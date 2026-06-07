@@ -73,6 +73,7 @@
         "@grayhaven/nerve-compiler": "workspace:*",
         "@grayhaven/nerve-exporters": "workspace:*",
         "@grayhaven/nerve-wireviz": "workspace:*",
+        "@resvg/resvg-js": "^2.6.2",
         "effect": "^3.16.0",
         "jiti": "^2.4.2",
       },
