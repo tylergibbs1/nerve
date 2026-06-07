@@ -1,6 +1,6 @@
 > Grayhaven Nerve docs index: https://nerve-demo.vercel.app/llms.txt. Fetch it to discover all pages before exploring further.
 
-# 21 built-in validation rules.
+# 22 built-in validation rules.
 
 Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated from the shipped `builtinRules` array in `@grayhaven/nerve-rules`; it cannot drift from the code. Custom rules use the same `rule()` API and get their own codes.
 
@@ -13,6 +13,7 @@ Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated
 | `HK-MFG-002` | `missingWireColor` | Every wire should declare a color for the cut list and loom work. |
 | `HK-MFG-003` | `missingWireGauge` | Every wire must declare a gauge. |
 | `HK-MFG-004` | `gaugeOutsideConnectorRange` | Wire gauge must sit inside the connector part's wireGaugeRange. |
+| `HK-MFG-007` | `unparseableGauge` | - |
 | `HK-WIRE-004` | `gaugeCurrentMismatch` | Wire gauge must carry the declared or estimated current (ampacity table). |
 | `HK-ELEC-001` | `differentialPairNotTwisted` | Differential pairs (CAN_H/CAN_L…) must share a twist group. |
 | `HK-ELEC-002` | `twistGroupTooSmall` | A twist group needs at least two wires. |

@@ -17,6 +17,7 @@ export {
   terminalIncompatible,
   twistGroupTooSmall,
   unconnectedAssignedPin,
+  unparseableGauge,
   wireSignalMismatch
 } from "./rules.js"
 

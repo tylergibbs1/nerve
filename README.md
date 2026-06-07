@@ -64,7 +64,7 @@ Full guides: [quickstart](https://nerve-demo.vercel.app/docs) · [DSL reference]
 | Package | What it is |
 | --- | --- |
 | [`@grayhaven/nerve`](./packages/nerve) | Domain model, DSL, versioned HIR schema (Effect Schema), deterministic `compileDesign`, diagnostics + `rule()` API, `diffHir`, `defineConfig` |
-| [`@grayhaven/nerve-rules`](./packages/nerve-rules) | 21 built-in validation rules with stable `HK-*` codes + a derived numeric code mapping for tooling |
+| [`@grayhaven/nerve-rules`](./packages/nerve-rules) | 22 built-in validation rules with stable `HK-*` codes + a derived numeric code mapping for tooling |
 | [`@grayhaven/nerve-compiler`](./packages/nerve-compiler) | `.harness.ts` loading, config discovery, Effect `CompilerService` + tagged errors, fail-closed gate |
 | [`@grayhaven/nerve-exporters`](./packages/nerve-exporters) | DrawingIR → SVG/PDF/interactive HTML; branch-rail schematic layout with net labels; BOM / cut-list / label CSVs; continuity + splice + no-short test plan; byte-deterministic packet |
 | [`@grayhaven/nerve-wireviz`](./packages/nerve-wireviz) | WireViz YAML import/export adapter with fixture corpus |

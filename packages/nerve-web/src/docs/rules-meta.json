@@ -28,6 +28,10 @@
     "name": "gaugeOutsideConnectorRange"
   },
   {
+    "code": "HK-MFG-007",
+    "name": "unparseableGauge"
+  },
+  {
     "code": "HK-WIRE-004",
     "name": "gaugeCurrentMismatch"
   },

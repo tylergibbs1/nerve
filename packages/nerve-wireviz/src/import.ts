@@ -10,6 +10,7 @@
 import { parse } from "yaml"
 import {
   cable,
+  canonicalGauge,
   connector,
   harness,
   wire,
@@ -74,9 +75,8 @@ const expandPins = (spec: unknown): Array<string> => {
 
 const normalizeGauge = (gauge: unknown): string | undefined => {
   if (gauge === undefined || gauge === null) return undefined
-  const s = String(gauge).trim()
-  const awg = /^(\d+)\s*AWG$/i.exec(s)
-  return awg !== null ? `${awg[1]}AWG` : s
+  // Same canonicalization compileDesign applies — one spelling everywhere.
+  return canonicalGauge(String(gauge).trim())
 }
 
 export const importWireViz = (

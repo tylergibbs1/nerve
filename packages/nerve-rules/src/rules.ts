@@ -169,6 +169,23 @@ export const gaugeOutsideConnectorRange: Rule = rule(
   { code: "HK-MFG-004" }
 )
 
+export const unparseableGauge: Rule = rule(
+  "unparseableGauge",
+  (ctx) => {
+    for (const w of ctx.hir.wires) {
+      if (w.gauge === undefined) continue // HK-MFG-003's job
+      if (parseAwg(w.gauge) === undefined) {
+        ctx.report({
+          severity: Warn,
+          message: `Wire ${w.id} gauge "${w.gauge}" is not recognized as AWG; gauge-based checks (HK-MFG-004, HK-WIRE-004, HK-MFG-006) cannot verify this wire.`,
+          target: refs.wire(w.id)
+        })
+      }
+    }
+  },
+  { code: "HK-MFG-007" }
+)
+
 // --- Electrical sanity ------------------------------------------------------
 
 export const gaugeCurrentMismatch: Rule = rule(
@@ -521,6 +538,7 @@ export const builtinRules: ReadonlyArray<Rule> = [
   missingWireColor,
   missingWireGauge,
   gaugeOutsideConnectorRange,
+  unparseableGauge,
   gaugeCurrentMismatch,
   differentialPairNotTwisted,
   twistGroupTooSmall,

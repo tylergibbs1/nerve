@@ -109,6 +109,32 @@ describe("manufacturing rules", () => {
     expect(diags.map((d) => d.code)).toEqual(["HK-MFG-004", "HK-MFG-004"])
     expect(diags[0]?.message).toContain("accepts 18AWG to 30AWG")
   })
+
+  it("HK-MFG-007: unparseable gauge is a visible warning, not a silent skip", () => {
+    const hir = make([
+      wire("W1", j1.pin(1), j2.pin(1), { gauge: "0.5mm2", signal: "VBAT_24V" })
+    ])
+    const diags = runRules(
+      hir,
+      builtinRules.filter((r) => r.name === "unparseableGauge")
+    )
+    expect(diags.map((d) => d.code)).toEqual(["HK-MFG-007"])
+    expect(diags[0]?.severity).toBe("warning")
+    expect(diags[0]?.message).toContain('"0.5mm2"')
+    expect(diags[0]?.message).toContain("HK-MFG-004")
+  })
+
+  it("HK-MFG-007: canonicalized AWG spellings never fire", () => {
+    // "20" canonicalizes to "20AWG" in compileDesign, so gauge-based
+    // rules see it — the original silent-skip bug.
+    const hir = make([
+      wire("W1", j1.pin(1), j2.pin(1), { gauge: "20", signal: "VBAT_24V" })
+    ])
+    expect(hir.wires[0]?.gauge).toBe("20AWG")
+    expect(
+      runRules(hir, builtinRules.filter((r) => r.name === "unparseableGauge"))
+    ).toEqual([])
+  })
 })
 
 describe("electrical rules", () => {

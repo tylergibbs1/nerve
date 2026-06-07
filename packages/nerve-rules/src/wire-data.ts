@@ -6,14 +6,9 @@
  * standards-informed data later (PRD §38).
  */
 
-/** Parse "18AWG" / "18 AWG" / "awg18" → 18. */
-export const parseAwg = (gauge: string): number | undefined => {
-  const match = /(\d+)\s*AWG|AWG\s*(\d+)/i.exec(gauge.trim())
-  const raw = match?.[1] ?? match?.[2]
-  if (raw === undefined) return undefined
-  const n = Number(raw)
-  return Number.isInteger(n) && n > 0 ? n : undefined
-}
+// Gauge parsing lives in core: compileDesign canonicalizes gauges into HIR
+// with the same parser, so rules and compiler can never disagree.
+export { parseAwg } from "@grayhaven/nerve"
 
 /** Max continuous current (A) per AWG, bundled/derated. */
 export const AMPACITY_BY_AWG: Readonly<Record<number, number>> = {

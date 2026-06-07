@@ -67,6 +67,8 @@ export {
 
 export { compileDesign, type CompileResult } from "./compile.js"
 
+export { canonicalGauge, parseAwg } from "./gauge.js"
+
 export {
   defineConfig,
   type CostModel,

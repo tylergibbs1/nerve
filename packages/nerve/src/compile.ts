@@ -13,6 +13,7 @@
  */
 import type { HarnessDesign } from "./domain.js"
 import { Codes, DiagnosticSeverity, type Diagnostic } from "./diagnostics.js"
+import { canonicalGauge } from "./gauge.js"
 import { endpointLabel, HIR_SCHEMA_VERSION, refs } from "./hir/core.js"
 import {
   type Hir,
@@ -224,7 +225,9 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         id: w.id,
         from,
         to,
-        gauge: w.gauge,
+        // "awg 20" / "20 AWG" / "20" all compile to "20AWG" so gauge-based
+        // rules and exporters see one spelling (HK-MFG-007 flags the rest).
+        gauge: w.gauge !== undefined ? canonicalGauge(w.gauge) : undefined,
         color: w.color,
         stripe: w.stripe,
         length: w.length,

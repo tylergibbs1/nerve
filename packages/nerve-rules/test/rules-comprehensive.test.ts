@@ -97,11 +97,12 @@ describe("parseAwg", () => {
     expect(parseAwg("4/0AWG")).toBeUndefined()
   })
 
-  it("documents the decimal quirk: '20.5AWG' parses as 5AWG", () => {
-    // Known limitation: the regex finds the first integer-followed-by-AWG.
-    // Decimal gauges do not exist in practice; this asserts the current
-    // behavior so any future change is deliberate.
-    expect(parseAwg("20.5AWG")).toBe(5)
+  it("rejects decimal gauges: '20.5AWG' is not 5AWG", () => {
+    // The pre-canonicalization parser was unanchored and found "5AWG"
+    // inside "20.5AWG". Parsing now anchors on the whole string (it also
+    // backs compileDesign's gauge canonicalization), so malformed gauges
+    // fall through to HK-MFG-007 instead of becoming a wrong number.
+    expect(parseAwg("20.5AWG")).toBeUndefined()
   })
 })
 
