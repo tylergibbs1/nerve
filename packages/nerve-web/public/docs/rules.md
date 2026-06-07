@@ -1,12 +1,12 @@
-> Grayhaven Nerve docs index: https://nerve-demo.vercel.app/llms.txt — fetch it to discover all pages before exploring further.
+> Grayhaven Nerve docs index: https://nerve-demo.vercel.app/llms.txt. Fetch it to discover all pages before exploring further.
 
 # 17 built-in validation rules.
 
-Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated from the shipped `builtinRules` array in `@grayhaven/nerve-rules` — it cannot drift from the code. Custom rules use the same `rule()` API and get their own codes.
+Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated from the shipped `builtinRules` array in `@grayhaven/nerve-rules`; it cannot drift from the code. Custom rules use the same `rule()` API and get their own codes.
 
 | Code | Rule | Checks |
 | --- | --- | --- |
-| `HK-DOC-001` | `missingRevision` | Harness must declare a revision — releases fail closed without one. |
+| `HK-DOC-001` | `missingRevision` | Harness must declare a revision; releases fail closed without one. |
 | `HK-DOC-002` | `branchMissingLabel` | Bundle branches should carry a printed label. |
 | `HK-DOC-003` | `spliceMissingNotes` | Splices should document their joint (type/notes) for the build book. |
 | `HK-MFG-001` | `missingWireLength` | Every wire should declare a length; cut lists need real numbers. |

@@ -1,10 +1,10 @@
-# Grayhaven Nerve — complete documentation
+# Grayhaven Nerve: complete documentation
 
 > Harnesses as code. This file embeds every docs page; no further fetches needed. Index: https://nerve-demo.vercel.app/llms.txt
 
 # Harnesses are programs.
 
-A Nerve harness is a TypeScript module. You describe connectors, wires, splices, and cables once; the compiler validates the design against electrical and manufacturing rules, then emits every artifact a build needs — deterministically.
+A Nerve harness is a TypeScript module. You describe connectors, wires, splices, and cables once; the compiler validates the design against electrical and manufacturing rules, then emits every artifact a build needs, deterministically.
 
 ## Install
 
@@ -38,7 +38,7 @@ export default harness("motor-controller-harness", {
 })
 ```
 
-`nerve export` writes `dist/`: the canonical `harness.json` (HIR), schematic and board SVGs, BOM / cut-list / label CSVs, a continuity test plan, assembly instructions, and the PDF manufacturing packet — all byte-identical across runs.
+`nerve export` writes `dist/`: the canonical `harness.json` (HIR), schematic and board SVGs, BOM / cut-list / label CSVs, a continuity test plan, assembly instructions, and the PDF manufacturing packet, all byte-identical across runs.
 
 Or skip the install entirely: [the editor in this app](/projects) compiles in your browser as you type.
 
@@ -55,7 +55,7 @@ Everything imports from `@grayhaven/nerve`. The DSL builds a typed design graph;
 harness(id, { revision, units, connectors, wires, branches?, labels?, splices?, cables? })
 ```
 
-The root design object. `revision` and `units` are required — releases fail closed without them.
+The root design object. `revision` and `units` are required; releases fail closed without them.
 
 ## connector(id, part, { pins })
 
@@ -87,7 +87,7 @@ Printed label on the loom; exported to the label schedule CSV.
 
 ## variant(base, overrides)
 
-Derive a configuration from a base harness — add/remove wires per option code without forking the file.
+Derive a configuration from a base harness: add/remove wires per option code without forking the file.
 
 ## rule(name, run, { code })
 
@@ -98,7 +98,7 @@ Author a custom validation rule; `report()` diagnostics with a stable code. Plug
 
 # The TypeScript SDK.
 
-Everything the CLI does is a library call. Use the packages directly to embed harness compilation in your own tools — CI checks, generators, PLM integrations, or a build step.
+Everything the CLI does is a library call. Use the packages directly to embed harness compilation in your own tools: CI checks, generators, PLM integrations, or a build step.
 
 ## Compile and validate
 
@@ -118,7 +118,7 @@ if (hasErrors(diagnostics)) {
 }
 ```
 
-Severities are tunable per rule without forking it — `runRules(hir, builtinRules, { missingWireColor: "error", spliceMissingNotes: "off" })`.
+Severities are tunable per rule without forking it: `runRules(hir, builtinRules, { missingWireColor: "error", spliceMissingNotes: "off" })`.
 
 ## Generate artifacts
 
@@ -164,7 +164,7 @@ export const maxBundleLength = rule(
         ctx.report({
           severity: "error",
           target: `branch:${b.id}`,
-          message: `Branch ${b.id} is ${b.length}mm — shop limit is 2000mm.`,
+          message: `Branch ${b.id} is ${b.length}mm; shop limit is 2000mm.`,
         })
       }
     }
@@ -187,7 +187,7 @@ export default defineConfig({
 
 ## The HIR is a schema, not a guess
 
-`harness.json` round-trips through a versioned Effect Schema — decode untrusted input, encode canonically:
+`harness.json` round-trips through a versioned Effect Schema: decode untrusted input, encode canonically:
 
 ```ts
 import { decodeHir, encodeHir, HIR_SCHEMA_VERSION } from "@grayhaven/nerve"
@@ -196,22 +196,22 @@ const hir = decodeHir(JSON.parse(fileContents))  // throws on schema mismatch
 const canonical = encodeHir(hir)                 // stable field order, diffs cleanly
 ```
 
-Types for every node — `HirWire`, `HirConnector`, `HirEndpoint`, … — ship with the package, so downstream tools are typed end to end.
+Types for every node (`HirWire`, `HirConnector`, `HirEndpoint`, and the rest) ship with the package, so downstream tools are typed end to end.
 
 ## Loading .harness.ts files
 
-The CLI loads design files through `@grayhaven/nerve-compiler` (jiti under the hood — no build step needed). Use it when your tool takes a file path rather than an imported module; everything in this page works in any bundler, Node 20+, or Bun.
+The CLI loads design files through `@grayhaven/nerve-compiler` (jiti under the hood, no build step needed). Use it when your tool takes a file path rather than an imported module; everything in this page works in any bundler, Node 20+, or Bun.
 
 
 ---
 
 # 17 built-in validation rules.
 
-Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated from the shipped `builtinRules` array in `@grayhaven/nerve-rules` — it cannot drift from the code. Custom rules use the same `rule()` API and get their own codes.
+Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated from the shipped `builtinRules` array in `@grayhaven/nerve-rules`; it cannot drift from the code. Custom rules use the same `rule()` API and get their own codes.
 
 | Code | Rule | Checks |
 | --- | --- | --- |
-| `HK-DOC-001` | `missingRevision` | Harness must declare a revision — releases fail closed without one. |
+| `HK-DOC-001` | `missingRevision` | Harness must declare a revision; releases fail closed without one. |
 | `HK-DOC-002` | `branchMissingLabel` | Bundle branches should carry a printed label. |
 | `HK-DOC-003` | `spliceMissingNotes` | Splices should document their joint (type/notes) for the build book. |
 | `HK-MFG-001` | `missingWireLength` | Every wire should declare a length; cut lists need real numbers. |
@@ -241,7 +241,7 @@ Severity drives exit codes: errors fail `nerve validate` (exit 1), warnings pass
 
 ---
 
-# nerve — deterministic, CI-ready.
+# nerve: deterministic, CI-ready.
 
 Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exits nonzero on validation errors, and every artifact is byte-identical for the same input.
 
@@ -249,7 +249,7 @@ Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exit
 | --- | --- |
 | `nerve init` | Scaffold a harness project (nerve.config.ts, src/main.harness.ts). |
 | `nerve compile` | Compile to HIR; print diagnostics; nonzero exit on errors. |
-| `nerve validate` | Compile + rules only — the CI gate. Exit code mirrors severity. |
+| `nerve validate` | Compile + rules only, the CI gate. Exit code mirrors severity. |
 | `nerve render` | Schematic / board SVG from the HIR. |
 | `nerve export` | Everything: HIR, drawings, CSVs, test plan, assembly steps, PDF packet + zip. |
 | `nerve import` | WireViz YAML → Nerve harness source. |
@@ -268,7 +268,7 @@ Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exit
 ```yaml
 - name: Validate harness
   run: npx --package=@grayhaven/nerve-cli nerve validate ./src/main.harness.ts
-# Exit 1 on any HK-* error — the release gate fails closed.
+# Exit 1 on any HK-* error; the release gate fails closed.
 ```
 
 
@@ -276,11 +276,11 @@ Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exit
 
 # One compile, every output.
 
-`nerve export` emits the complete set. Determinism is load-bearing: the same source produces byte-identical bytes — drawings, CSVs, the PDF, even the zip — so artifacts diff cleanly in review and hash-verify in CI.
+`nerve export` emits the complete set. Determinism is load-bearing: the same source produces byte-identical bytes (drawings, CSVs, the PDF, even the zip), so artifacts diff cleanly in review and hash-verify in CI.
 
 | File | Contents |
 | --- | --- |
-| `harness.json` | Canonical HIR — versioned schema, the single source every other artifact derives from. |
+| `harness.json` | Canonical HIR: versioned schema, the single source every other artifact derives from. |
 | `schematic.svg` | Connection diagram: connectors, pins, wires with gauge/color annotations. |
 | `board.svg` | Harness-board (nailboard) view at real lengths for the build fixture. |
 | `bom.csv` | Rolled-up bill of materials with MPNs, quantities, and design-object references. |
@@ -291,22 +291,22 @@ Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exit
 | `manufacturing-packet.pdf` | The build book: every drawing and table in one reviewed, printable document. |
 | `packet.zip` | Everything above, zipped byte-identically (fixed timestamps) for release archival. |
 
-The renderer never owns truth — every line in every artifact traces back to a design object in the HIR.
+The renderer never owns truth: every line in every artifact traces back to a design object in the HIR.
 
 
 ---
 
 # Compile-verified edits.
 
-The editor's left pane is an agent that changes the harness for you — "add a third sensor on the CAN bus", "swap W2 to 18AWG and fix whatever breaks". It is not a chat box that pastes code: every proposed edit is a structured patch.
+The editor's left pane is an agent that changes the harness for you: "add a third sensor on the CAN bus", "swap W2 to 18AWG and fix whatever breaks". It is not a chat box that pastes code: every proposed edit is a structured patch.
 
 ## The loop
 
-Each tool call the agent makes is compiled in the local worker **before** it lands. Diagnostics feed back into the loop: if a patch introduces `HK-*` errors, the agent sees them and must converge to a clean compile — it cannot bypass rule failures. Applied edits write through the editor and the diagram live, exactly like keystrokes.
+Each tool call the agent makes is compiled in the local worker **before** it lands. Diagnostics feed back into the loop: if a patch introduces `HK-*` errors, the agent sees them and must converge to a clean compile; it cannot bypass rule failures. Applied edits write through the editor and the diagram live, exactly like keystrokes.
 
 ## Keys and privacy
 
 There is no server. Your browser calls Anthropic directly with an API key you paste into the pane; the key lives in localStorage and is sent nowhere else. The "key ✕" button forgets it.
 
-Try it in [the editor](/projects) — open a project and ask for a change while watching the diagram.
+Try it in [the editor](/projects): open a project and ask for a change while watching the diagram.
 

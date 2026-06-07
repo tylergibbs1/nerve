@@ -13,7 +13,7 @@ function RulesReference() {
       <h1>{builtinRules.length} built-in rules.</h1>
       <p>
         Stable <code>HK-*</code> codes, suitable for CI gating and waivers. This table renders
-        from the shipped <code>builtinRules</code> array — it cannot drift from the code.
+        from the shipped <code>builtinRules</code> array; it cannot drift from the code.
         Custom rules use the same <code>rule()</code> API and get their own codes.
       </p>
       <table className="data">
@@ -29,7 +29,7 @@ function RulesReference() {
             <tr key={r.code}>
               <td className="cell-code">{r.code}</td>
               <td className="cell-code">{r.name}</td>
-              <td className="cell-text">{RULE_SUMMARIES[r.name] ?? "—"}</td>
+              <td className="cell-text">{RULE_SUMMARIES[r.name] ?? "-"}</td>
             </tr>
           ))}
         </tbody>

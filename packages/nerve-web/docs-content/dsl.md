@@ -8,7 +8,7 @@ Everything imports from `@grayhaven/nerve`. The DSL builds a typed design graph;
 harness(id, { revision, units, connectors, wires, branches?, labels?, splices?, cables? })
 ```
 
-The root design object. `revision` and `units` are required — releases fail closed without them.
+The root design object. `revision` and `units` are required; releases fail closed without them.
 
 ## connector(id, part, { pins })
 
@@ -40,7 +40,7 @@ Printed label on the loom; exported to the label schedule CSV.
 
 ## variant(base, overrides)
 
-Derive a configuration from a base harness — add/remove wires per option code without forking the file.
+Derive a configuration from a base harness: add/remove wires per option code without forking the file.
 
 ## rule(name, run, { code })
 

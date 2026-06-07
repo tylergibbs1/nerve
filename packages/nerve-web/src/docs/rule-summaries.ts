@@ -2,7 +2,7 @@
  * live builtinRules array (in the app and in the generated llms files), so
  * the reference cannot drift from the shipped rule set. */
 export const RULE_SUMMARIES: Record<string, string> = {
-  missingRevision: "Harness must declare a revision — releases fail closed without one.",
+  missingRevision: "Harness must declare a revision; releases fail closed without one.",
   missingWireColor: "Every wire should declare a color for the cut list and loom work.",
   missingWireLength: "Every wire should declare a length; cut lists need real numbers.",
   branchMissingLabel: "Bundle branches should carry a printed label.",

@@ -1,6 +1,6 @@
 # The TypeScript SDK.
 
-Everything the CLI does is a library call. Use the packages directly to embed harness compilation in your own tools — CI checks, generators, PLM integrations, or a build step.
+Everything the CLI does is a library call. Use the packages directly to embed harness compilation in your own tools: CI checks, generators, PLM integrations, or a build step.
 
 ## Compile and validate
 
@@ -20,7 +20,7 @@ if (hasErrors(diagnostics)) {
 }
 ```
 
-Severities are tunable per rule without forking it — `runRules(hir, builtinRules, { missingWireColor: "error", spliceMissingNotes: "off" })`.
+Severities are tunable per rule without forking it: `runRules(hir, builtinRules, { missingWireColor: "error", spliceMissingNotes: "off" })`.
 
 ## Generate artifacts
 
@@ -66,7 +66,7 @@ export const maxBundleLength = rule(
         ctx.report({
           severity: "error",
           target: `branch:${b.id}`,
-          message: `Branch ${b.id} is ${b.length}mm — shop limit is 2000mm.`,
+          message: `Branch ${b.id} is ${b.length}mm; shop limit is 2000mm.`,
         })
       }
     }
@@ -89,7 +89,7 @@ export default defineConfig({
 
 ## The HIR is a schema, not a guess
 
-`harness.json` round-trips through a versioned Effect Schema — decode untrusted input, encode canonically:
+`harness.json` round-trips through a versioned Effect Schema: decode untrusted input, encode canonically:
 
 ```ts
 import { decodeHir, encodeHir, HIR_SCHEMA_VERSION } from "@grayhaven/nerve"
@@ -98,8 +98,8 @@ const hir = decodeHir(JSON.parse(fileContents))  // throws on schema mismatch
 const canonical = encodeHir(hir)                 // stable field order, diffs cleanly
 ```
 
-Types for every node — `HirWire`, `HirConnector`, `HirEndpoint`, … — ship with the package, so downstream tools are typed end to end.
+Types for every node (`HirWire`, `HirConnector`, `HirEndpoint`, and the rest) ship with the package, so downstream tools are typed end to end.
 
 ## Loading .harness.ts files
 
-The CLI loads design files through `@grayhaven/nerve-compiler` (jiti under the hood — no build step needed). Use it when your tool takes a file path rather than an imported module; everything in this page works in any bundler, Node 20+, or Bun.
+The CLI loads design files through `@grayhaven/nerve-compiler` (jiti under the hood, no build step needed). Use it when your tool takes a file path rather than an imported module; everything in this page works in any bundler, Node 20+, or Bun.

@@ -1,4 +1,4 @@
-# nerve — deterministic, CI-ready.
+# nerve: deterministic, CI-ready.
 
 Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exits nonzero on validation errors, and every artifact is byte-identical for the same input.
 
@@ -6,7 +6,7 @@ Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exit
 | --- | --- |
 | `nerve init` | Scaffold a harness project (nerve.config.ts, src/main.harness.ts). |
 | `nerve compile` | Compile to HIR; print diagnostics; nonzero exit on errors. |
-| `nerve validate` | Compile + rules only — the CI gate. Exit code mirrors severity. |
+| `nerve validate` | Compile + rules only, the CI gate. Exit code mirrors severity. |
 | `nerve render` | Schematic / board SVG from the HIR. |
 | `nerve export` | Everything: HIR, drawings, CSVs, test plan, assembly steps, PDF packet + zip. |
 | `nerve import` | WireViz YAML → Nerve harness source. |
@@ -25,5 +25,5 @@ Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exit
 ```yaml
 - name: Validate harness
   run: npx --package=@grayhaven/nerve-cli nerve validate ./src/main.harness.ts
-# Exit 1 on any HK-* error — the release gate fails closed.
+# Exit 1 on any HK-* error; the release gate fails closed.
 ```

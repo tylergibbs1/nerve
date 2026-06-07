@@ -1,6 +1,6 @@
 # Harnesses are programs.
 
-A Nerve harness is a TypeScript module. You describe connectors, wires, splices, and cables once; the compiler validates the design against electrical and manufacturing rules, then emits every artifact a build needs — deterministically.
+A Nerve harness is a TypeScript module. You describe connectors, wires, splices, and cables once; the compiler validates the design against electrical and manufacturing rules, then emits every artifact a build needs, deterministically.
 
 ## Install
 
@@ -34,6 +34,6 @@ export default harness("motor-controller-harness", {
 })
 ```
 
-`nerve export` writes `dist/`: the canonical `harness.json` (HIR), schematic and board SVGs, BOM / cut-list / label CSVs, a continuity test plan, assembly instructions, and the PDF manufacturing packet — all byte-identical across runs.
+`nerve export` writes `dist/`: the canonical `harness.json` (HIR), schematic and board SVGs, BOM / cut-list / label CSVs, a continuity test plan, assembly instructions, and the PDF manufacturing packet, all byte-identical across runs.
 
 Or skip the install entirely: [the editor in this app](/projects) compiles in your browser as you type.

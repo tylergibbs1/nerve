@@ -139,6 +139,8 @@ textarea:focus-visible, select:focus-visible {
 }
 .topnav a:hover { color: var(--text); }
 .topnav a.active { color: var(--accent); }
+.topnav .gh-link { display: inline-flex; align-items: center; }
+.landing-links a.gh-inline { display: inline-flex; align-items: center; gap: 6px; }
 .topbar .tagline {
   font-family: var(--mono);
   color: var(--muted);
