@@ -37,3 +37,7 @@ export default harness("motor-controller-harness", {
 `nerve export` writes `dist/`: the canonical `harness.json` (HIR), schematic and board SVGs, BOM / cut-list / label CSVs, a continuity test plan, assembly instructions, and the PDF manufacturing packet, all byte-identical across runs.
 
 Or skip the install entirely: [the editor in this app](/projects) compiles in your browser as you type.
+
+## Share a harness
+
+Hit **Share** in the editor and the whole project — every file — is gzipped into the URL fragment. There's no backend: the fragment never leaves your browser, and opening the link recompiles the exact same design, byte for byte. Because the source rides in the link, a share URL *is* a reproducible bug report.
