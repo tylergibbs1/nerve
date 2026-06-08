@@ -154,6 +154,9 @@ textarea:focus-visible, select:focus-visible {
 /* Brand wordmark: bare mono uppercase tracked — the reference nav voice,
    never bracketed (components/logo.tsx). */
 .topbar .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   font-family: var(--mono);
   font-weight: 400;
   letter-spacing: 0.05em;
@@ -162,6 +165,7 @@ textarea:focus-visible, select:focus-visible {
   text-transform: uppercase;
   transition: color 200ms var(--ease-default);
 }
+.topbar .brand svg { flex-shrink: 0; }
 .topbar .brand:hover { color: var(--accent-hover); }
 .topnav { margin-left: auto; display: flex; gap: 18px; }
 .topnav a {
@@ -176,13 +180,6 @@ textarea:focus-visible, select:focus-visible {
 .topnav a.active { color: var(--accent); }
 .topnav .gh-link { display: inline-flex; align-items: center; }
 .landing-links a.gh-inline { display: inline-flex; align-items: center; gap: 6px; }
-.topbar .tagline {
-  font-family: var(--mono);
-  color: var(--muted);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
 
 .app-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
