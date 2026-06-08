@@ -546,15 +546,28 @@ export const voltageRatingBelowSignal: Rule = rule(
 export const reservedPinAssigned: Rule = rule(
   "reservedPinAssigned",
   (ctx) => {
+    const wired = wiredPins(ctx.hir)
     for (const c of ctx.hir.connectors) {
       if (c.reservedPins === undefined) continue
-      const reserved = new Set(c.reservedPins)
-      for (const p of c.pins) {
-        if (p.signal !== undefined && reserved.has(p.pin)) {
+      for (const pin of c.reservedPins) {
+        const p = c.pins.find((x) => x.pin === pin)
+        const landed = wired.has(`${c.ref}:${pin}`)
+        // Any sign the cavity was put into service violates the keep-out.
+        const how =
+          p?.signal !== undefined
+            ? `carries ${p.signal}`
+            : landed
+              ? "has a wire landed on it"
+              : p?.terminal !== undefined
+                ? `has terminal ${p.terminal} populated`
+                : p?.seal !== undefined
+                  ? `has seal ${p.seal} populated`
+                  : undefined
+        if (how !== undefined) {
           ctx.report({
             severity: Err,
-            message: `Connector ${c.ref} pin ${p.pin} is reserved but carries ${p.signal}.`,
-            target: refs.pin(c.ref, p.pin)
+            message: `Connector ${c.ref} pin ${pin} is reserved but ${how}.`,
+            target: refs.pin(c.ref, pin)
           })
         }
       }
@@ -638,6 +651,228 @@ export const bundleOverSleeveCapacityWith = (shop?: ShopProfile): Rule => rule(
 
 export const bundleOverSleeveCapacity: Rule = bundleOverSleeveCapacityWith()
 
+// --- Structural integrity (rule layer; the compiler already catches
+// undefined/duplicate refs as HK-CONN-001/002/003, HK-WIRE-001/002,
+// HK-BRANCH-001/002, HK-SPLICE-001..004, HK-CABLE-001/002 — these check the
+// well-formedness it leaves on the table) ------------------------------------
+
+/** Wires of DIFFERING gauge crimped into one contact: the terminal can't
+ * compress two unlike cross-sections reliably, so the join pulls out or runs
+ * hot. A same-gauge double-crimp is a legitimate distribution pattern (one
+ * power/ground pin feeding several downstream loads), so it isn't flagged.
+ * Splice endpoints legitimately fan out, so only pin endpoints count.
+ *
+ * Opt-in (not in `builtinRules`): some shops intentionally consolidate
+ * mixed-gauge returns onto one contact, so this ships off by default — enable
+ * it where A-620-style single-gauge-per-contact is a house rule. */
+export const multipleWiresIntoPin: Rule = rule(
+  "multipleWiresIntoPin",
+  (ctx) => {
+    const byPin = new Map<
+      string,
+      { connector: string; pin: string; wires: Array<string>; gauges: Set<string> }
+    >()
+    for (const w of ctx.hir.wires) {
+      for (const end of [w.from, w.to]) {
+        if (!isPinEndpoint(end)) continue
+        const key = `${end.connector}:${end.pin}`
+        const entry =
+          byPin.get(key) ??
+          { connector: end.connector, pin: end.pin, wires: [], gauges: new Set<string>() }
+        entry.wires.push(w.id)
+        if (w.gauge !== undefined) entry.gauges.add(w.gauge)
+        byPin.set(key, entry)
+      }
+    }
+    for (const e of byPin.values()) {
+      // Two or more wires of genuinely different gauges in one contact.
+      if (e.wires.length < 2 || e.gauges.size < 2) continue
+      ctx.report({
+        severity: Err,
+        message: `Pin ${e.connector}.${e.pin} has ${e.wires.length} wires of differing gauge crimped into one contact (${[...e.gauges].sort().join(", ")}).`,
+        target: refs.pin(e.connector, e.pin),
+        targets: e.wires.sort().map(refs.wire),
+        data: { wireCount: e.wires.length, gauges: [...e.gauges].sort().join(", ") }
+      })
+    }
+  },
+  { code: "HK-CONN-018" }
+)
+
+/** A connector cannot have more populated cavities than the housing has. */
+export const contactCountExceedsPinCount: Rule = rule(
+  "contactCountExceedsPinCount",
+  (ctx) => {
+    for (const c of ctx.hir.connectors) {
+      if (c.pins.length > c.pinCount) {
+        ctx.report({
+          severity: Err,
+          message: `Connector ${c.ref} (${c.mpn}) declares ${c.pins.length} pins but the housing has only ${c.pinCount} cavities.`,
+          target: refs.connector(c.ref),
+          data: { declaredPins: c.pins.length, pinCount: c.pinCount }
+        })
+      }
+    }
+  },
+  { code: "HK-CONN-019" }
+)
+
+/** A declared cavity grid must account for exactly the housing's cavities. */
+export const cavityLayoutMismatch: Rule = rule(
+  "cavityLayoutMismatch",
+  (ctx) => {
+    for (const c of ctx.hir.connectors) {
+      if (c.cavityLayout === undefined) continue
+      const cells = c.cavityLayout.rows * c.cavityLayout.columns
+      if (cells !== c.pinCount) {
+        ctx.report({
+          severity: Err,
+          message: `Connector ${c.ref} (${c.mpn}) cavity layout ${c.cavityLayout.rows}×${c.cavityLayout.columns} = ${cells} does not match its ${c.pinCount}-cavity pin count.`,
+          target: refs.connector(c.ref),
+          data: { rows: c.cavityLayout.rows, columns: c.cavityLayout.columns, pinCount: c.pinCount }
+        })
+      }
+    }
+  },
+  { code: "HK-CONN-020" }
+)
+
+/** A length of zero or below is a unit-entry error; cut lists need real mm. */
+export const nonPositiveWireLength: Rule = rule(
+  "nonPositiveWireLength",
+  (ctx) => {
+    for (const w of ctx.hir.wires) {
+      if (w.length !== undefined && w.length <= 0) {
+        ctx.report({
+          severity: Err,
+          message: `Wire ${w.id} has a non-positive length (${w.length}); the cut list and routing need a real length.`,
+          target: refs.wire(w.id),
+          data: { length: w.length }
+        })
+      }
+    }
+  },
+  { code: "HK-MFG-008" }
+)
+
+/** Branch `parent` is carried into HIR but not validated by the compiler:
+ * a parent naming no branch, or a parent chain that loops, makes the routed
+ * tree unbuildable. */
+export const branchParentInvalid: Rule = rule(
+  "branchParentInvalid",
+  (ctx) => {
+    const byId = new Map(ctx.hir.branches.map((b) => [b.id, b]))
+    for (const b of ctx.hir.branches) {
+      if (b.parent === undefined) continue
+      if (!byId.has(b.parent)) {
+        ctx.report({
+          severity: Err,
+          message: `Branch ${b.id} names parent ${b.parent}, which is not a defined branch.`,
+          target: refs.branch(b.id),
+          data: { parent: b.parent }
+        })
+        continue
+      }
+      // Walk parents to a root; revisiting a branch means a cycle.
+      const seen = new Set<string>([b.id])
+      let cur: string | undefined = b.parent
+      while (cur !== undefined) {
+        if (seen.has(cur)) {
+          ctx.report({
+            severity: Err,
+            message: `Branch ${b.id} sits in a parent cycle (reaches ${cur} again); the branch tree must be acyclic.`,
+            target: refs.branch(b.id),
+            data: { parent: b.parent }
+          })
+          break
+        }
+        seen.add(cur)
+        cur = byId.get(cur)?.parent
+      }
+    }
+  },
+  { code: "HK-MFG-009" }
+)
+
+/** A cable cannot carry more member wires than it has conductors. (Under-fill
+ * is legal — those are spare conductors — so only an overflow is flagged.) */
+export const cableConductorOverflow: Rule = rule(
+  "cableConductorOverflow",
+  (ctx) => {
+    for (const c of ctx.hir.cables) {
+      if (c.conductors === undefined) continue
+      if (c.wires.length > c.conductors) {
+        ctx.report({
+          severity: Err,
+          message: `Cable ${c.id} carries ${c.wires.length} wires but is a ${c.conductors}-conductor cable.`,
+          target: `cable:${c.id}`,
+          targets: [...c.wires].sort().map(refs.wire),
+          data: { memberWires: c.wires.length, conductors: c.conductors }
+        })
+      }
+    }
+  },
+  { code: "HK-MFG-010" }
+)
+
+/** A named bus differential half (CAN/RS-485/USB) whose partner appears on no
+ * wire. HK-ELEC-001 only fires once BOTH halves exist; this catches the
+ * lone-half case. Restricted to strong bus patterns so an incidentally
+ * `_P`/`_N`-suffixed single-ended signal isn't misread as differential. */
+const STRONG_DIFFERENTIAL = /(CAN\d*_?[HL]|RS485_?[AB]|USB_?D[PM])$/i
+
+export const orphanedDifferentialHalf: Rule = rule(
+  "orphanedDifferentialHalf",
+  (ctx) => {
+    const present = new Set<string>()
+    for (const w of ctx.hir.wires) {
+      if (w.signal !== undefined) present.add(w.signal.toUpperCase())
+    }
+    const reported = new Set<string>()
+    for (const w of ctx.hir.wires) {
+      if (w.signal === undefined) continue
+      const sig = w.signal.toUpperCase()
+      if (!STRONG_DIFFERENTIAL.test(sig) || reported.has(sig)) continue
+      const partner = differentialPartner(sig)
+      if (partner === undefined || present.has(partner)) continue
+      reported.add(sig)
+      ctx.report({
+        severity: Err,
+        message: `Differential signal ${w.signal} has no partner ${partner} anywhere in the harness; a bus pair needs both halves.`,
+        target: refs.wire(w.id),
+        data: { signal: w.signal, missingPartner: partner }
+      })
+    }
+  },
+  { code: "HK-ELEC-006" }
+)
+
+/** Wires sharing a twist group should share a gauge — a gauge mismatch within
+ * a twisted pair introduces skew and impedance imbalance. */
+export const twistGroupGaugeMismatch: Rule = rule(
+  "twistGroupGaugeMismatch",
+  (ctx) => {
+    const byGroup = new Map<string, { wires: Array<string>; gauges: Set<string> }>()
+    for (const w of ctx.hir.wires) {
+      if (w.twistGroup === undefined || w.gauge === undefined) continue
+      const entry = byGroup.get(w.twistGroup) ?? { wires: [], gauges: new Set<string>() }
+      entry.wires.push(w.id)
+      entry.gauges.add(w.gauge)
+      byGroup.set(w.twistGroup, entry)
+    }
+    for (const [group, e] of byGroup) {
+      if (e.gauges.size <= 1) continue
+      ctx.report({
+        severity: Warn,
+        message: `Twist group ${group} mixes gauges (${[...e.gauges].sort().join(", ")}); a twisted pair should be a matched gauge to limit skew.`,
+        targets: [...e.wires].sort().map(refs.wire),
+        data: { group, gauges: [...e.gauges].sort().join(", ") }
+      })
+    }
+  },
+  { code: "HK-ELEC-007" }
+)
+
 /**
  * builtinRules with the shop-capability rules parameterized by a profile
  * (PRD §10.5 config: `defineConfig({ shop: { … } })`). Same rule names and
@@ -680,5 +915,12 @@ export const builtinRules: ReadonlyArray<Rule> = [
   voltageRatingBelowSignal,
   reservedPinAssigned,
   breakoutTighterThanBendRadius,
-  bundleOverSleeveCapacity
+  bundleOverSleeveCapacity,
+  contactCountExceedsPinCount,
+  cavityLayoutMismatch,
+  nonPositiveWireLength,
+  branchParentInvalid,
+  cableConductorOverflow,
+  orphanedDifferentialHalf,
+  twistGroupGaugeMismatch
 ]

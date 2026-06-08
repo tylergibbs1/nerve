@@ -12,7 +12,7 @@
 - [Part Library](https://nerve-demo.vercel.app/docs/library.md) (generated from the shipped connector library)
 - [CLI](https://nerve-demo.vercel.app/docs/cli.md)
 - [Artifacts](https://nerve-demo.vercel.app/docs/artifacts.md)
-- [AI Copilot](https://nerve-demo.vercel.app/docs/ai.md)
+- [autonerve](https://nerve-demo.vercel.app/docs/ai.md)
 - [Production Lifecycle](https://nerve-demo.vercel.app/docs/lifecycle.md)
 
 Everything above embedded in one file: https://nerve-demo.vercel.app/llms-full.txt
@@ -20,7 +20,7 @@ Everything above embedded in one file: https://nerve-demo.vercel.app/llms-full.t
 ## Packages (npm)
 
 - [@grayhaven/nerve](https://www.npmjs.com/package/@grayhaven/nerve): DSL, HIR schema, compileDesign, diff, rule API
-- [@grayhaven/nerve-rules](https://www.npmjs.com/package/@grayhaven/nerve-rules): 24 built-in validation rules (HK-* codes)
+- [@grayhaven/nerve-rules](https://www.npmjs.com/package/@grayhaven/nerve-rules): 31 built-in validation rules (HK-* codes)
 - [@grayhaven/nerve-compiler](https://www.npmjs.com/package/@grayhaven/nerve-compiler): .harness.ts loading, fail-closed gate
 - [@grayhaven/nerve-exporters](https://www.npmjs.com/package/@grayhaven/nerve-exporters): SVG/PDF/CSV/test-plan/packet generation
 - [@grayhaven/nerve-wireviz](https://www.npmjs.com/package/@grayhaven/nerve-wireviz): WireViz YAML import/export

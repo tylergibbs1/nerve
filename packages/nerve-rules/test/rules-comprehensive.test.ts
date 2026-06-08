@@ -11,6 +11,7 @@
 import { describe, expect, it } from "vitest"
 import {
   branch,
+  cable,
   compileDesign,
   connector,
   harness,
@@ -30,6 +31,7 @@ import {
   isGroundSignal,
   isPowerSignal,
   isShieldSignal,
+  multipleWiresIntoPin,
   parseAwg,
   requiredAwgForCurrent
 } from "@grayhaven/nerve-rules"
@@ -635,5 +637,224 @@ describe("HK-MFG-006 bundleOverSleeveCapacity", () => {
   })
   it("stays silent for unparseable sleeves or gaugeless wires", () => {
     expect(only(mk("custom-sleeve", ["12AWG"]), "bundleOverSleeveCapacity")).toEqual([])
+  })
+})
+
+// --- Structural-integrity rules (the well-formedness the compiler leaves) ----
+
+describe("HK-CONN-018 multipleWiresIntoPin (opt-in)", () => {
+  // Opt-in rule: run it directly, not via builtinRules.
+  const run = (hir: Hir) => runRules(hir, [multipleWiresIntoPin])
+  const mk = (gauges: ReadonlyArray<string>) => {
+    const a = connector("J1", { mpn: "M-2", pinCount: 2 }, { pins: { 1: "S" } })
+    const b = connector("J2", { mpn: "M-2B", pinCount: 4 }, { pins: { 1: "A", 2: "B", 3: "C" } })
+    return compileDesign(
+      harness("t", {
+        revision: "A", units: "mm", connectors: [a, b],
+        // All wires land on the SAME pin J1.1 (a forced double/triple-crimp).
+        wires: gauges.map((g, i) =>
+          wire(`W${i}`, a.pin(1), b.pin(i + 1), { gauge: g, color: "red", length: 100 }))
+      })
+    ).hir
+  }
+  it("is not a default built-in (mixed-gauge returns are a valid house pattern)", () => {
+    expect(builtinRules.some((r) => r.name === "multipleWiresIntoPin")).toBe(false)
+  })
+  it("errors on differing gauge crimped into one contact", () => {
+    const diags = run(mk(["24AWG", "20AWG"]))
+    expect(diags.map((d) => d.code)).toEqual(["HK-CONN-018"])
+    expect(diags[0]?.severity).toBe("error")
+    expect(diags[0]?.target).toBe("connector:J1.pin:1")
+  })
+  it("allows a same-gauge double-crimp (power/ground distribution)", () => {
+    expect(run(mk(["24AWG", "24AWG"]))).toEqual([])
+  })
+  it("passes when each contact takes one wire", () => {
+    const a = connector("J1", { mpn: "M-2", pinCount: 2 }, { pins: { 1: "A", 2: "B" } })
+    const b = connector("J2", { mpn: "M-2B", pinCount: 2 }, { pins: { 1: "A", 2: "B" } })
+    const { hir } = compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [
+        wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length: 10 }),
+        wire("W2", a.pin(2), b.pin(2), { gauge: "24AWG", color: "red", length: 10 })
+      ]
+    }))
+    expect(run(hir)).toEqual([])
+  })
+})
+
+describe("HK-CONN-019 contactCountExceedsPinCount", () => {
+  it("errors when more cavities are populated than the housing has", () => {
+    const a = connector("J1", { mpn: "OV-2", pinCount: 2 }, { pins: { 1: "A", 2: "B", 3: "C" } })
+    const b = connector("J2", { mpn: "OV-2B", pinCount: 4 }, { pins: { 1: "A", 2: "B" } })
+    const { hir } = compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length: 10 })]
+    }))
+    const diags = only(hir, "contactCountExceedsPinCount")
+    expect(diags.map((d) => d.code)).toEqual(["HK-CONN-019"])
+    expect(diags[0]?.target).toBe("connector:J1")
+    expect(diags[0]?.data).toMatchObject({ declaredPins: 3, pinCount: 2 })
+  })
+  it("passes at or below the cavity count", () => {
+    const a = connector("J1", { mpn: "OK-2", pinCount: 2 }, { pins: { 1: "A", 2: "B" } })
+    const b = connector("J2", { mpn: "OK-2B", pinCount: 2 }, { pins: { 1: "A" } })
+    const { hir } = compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length: 10 })]
+    }))
+    expect(only(hir, "contactCountExceedsPinCount")).toEqual([])
+  })
+})
+
+describe("HK-CONN-020 cavityLayoutMismatch", () => {
+  const mk = (rows: number, columns: number, pinCount: number) => {
+    const a = connector("J1", { mpn: "CL", pinCount, cavityLayout: { rows, columns } }, { pins: { 1: "A" } })
+    const b = connector("J2", { mpn: "CLB", pinCount: 2 }, { pins: { 1: "A" } })
+    return compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length: 10 })]
+    })).hir
+  }
+  it("errors when rows×columns ≠ pinCount", () => {
+    const diags = only(mk(2, 3, 4), "cavityLayoutMismatch")
+    expect(diags.map((d) => d.code)).toEqual(["HK-CONN-020"])
+  })
+  it("passes when the grid matches", () => {
+    expect(only(mk(2, 2, 4), "cavityLayoutMismatch")).toEqual([])
+  })
+})
+
+describe("HK-MFG-008 nonPositiveWireLength", () => {
+  it("errors on zero or negative length, passes on positive/absent", () => {
+    const a = connector("J1", part, { pins: { 1: "VBAT_24V" } })
+    const b = connector("J2", part, { pins: { 1: "VBAT_24V" } })
+    const mk = (length: number) => compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length })]
+    })).hir
+    expect(only(mk(0), "nonPositiveWireLength").map((d) => d.code)).toEqual(["HK-MFG-008"])
+    expect(only(mk(-5), "nonPositiveWireLength").map((d) => d.code)).toEqual(["HK-MFG-008"])
+    expect(only(mk(100), "nonPositiveWireLength")).toEqual([])
+  })
+})
+
+describe("HK-MFG-009 branchParentInvalid", () => {
+  const two = () => {
+    const a = connector("J1", { mpn: "B-2", pinCount: 2 }, { pins: { 1: "S" } })
+    const b = connector("J2", { mpn: "B-2B", pinCount: 2 }, { pins: { 1: "S" } })
+    return { a, b, w: wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length: 10 }) }
+  }
+  it("errors on a parent that names no branch", () => {
+    const { a, b, w } = two()
+    const { hir } = compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b], wires: [w],
+      branches: [branch("main", { path: [a, b], parent: "ghost", nominalLength: 100 })]
+    }))
+    expect(only(hir, "branchParentInvalid").map((d) => d.code)).toEqual(["HK-MFG-009"])
+  })
+  it("errors on a parent cycle", () => {
+    const { a, b, w } = two()
+    const { hir } = compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b], wires: [w],
+      branches: [
+        branch("b1", { path: [a, b], parent: "b2", nominalLength: 100 }),
+        branch("b2", { path: [a, b], parent: "b1", nominalLength: 100 })
+      ]
+    }))
+    expect(only(hir, "branchParentInvalid").length).toBeGreaterThan(0)
+    expect(only(hir, "branchParentInvalid")[0]?.message).toContain("cycle")
+  })
+  it("passes for a valid parent chain or no parent", () => {
+    const { a, b, w } = two()
+    const { hir } = compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b], wires: [w],
+      branches: [
+        branch("trunk", { path: [a, b], nominalLength: 100 }),
+        branch("leg", { path: [a, b], parent: "trunk", nominalLength: 50 })
+      ]
+    }))
+    expect(only(hir, "branchParentInvalid")).toEqual([])
+  })
+})
+
+describe("HK-MFG-010 cableConductorOverflow", () => {
+  const mk = (conductors: number, wireCount: number) => {
+    const a = connector("J1", { mpn: "C-8", pinCount: 8 }, { pins: Object.fromEntries(Array.from({ length: wireCount }, (_, i) => [i + 1, `S${i}`])) })
+    const b = connector("J2", { mpn: "C-8B", pinCount: 8 }, { pins: Object.fromEntries(Array.from({ length: wireCount }, (_, i) => [i + 1, `S${i}`])) })
+    return compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      cables: [cable("C1", { conductors })],
+      wires: Array.from({ length: wireCount }, (_, i) =>
+        wire(`W${i}`, a.pin(i + 1), b.pin(i + 1), { cable: "C1", gauge: "24AWG", color: "red", length: 10 }))
+    })).hir
+  }
+  it("errors when members exceed conductors", () => {
+    expect(only(mk(2, 3), "cableConductorOverflow").map((d) => d.code)).toEqual(["HK-MFG-010"])
+  })
+  it("passes at or under the conductor count (spares are legal)", () => {
+    expect(only(mk(2, 2), "cableConductorOverflow")).toEqual([])
+    expect(only(mk(4, 2), "cableConductorOverflow")).toEqual([])
+  })
+})
+
+describe("HK-ELEC-006 orphanedDifferentialHalf", () => {
+  const mk = (signals: ReadonlyArray<string>) => {
+    const a = connector("J1", { mpn: "D-8", pinCount: 8 }, { pins: Object.fromEntries(signals.map((s, i) => [i + 1, s])) })
+    const b = connector("J2", { mpn: "D-8B", pinCount: 8 }, { pins: Object.fromEntries(signals.map((s, i) => [i + 1, s])) })
+    return compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: signals.map((s, i) => wire(`W${i}`, a.pin(i + 1), b.pin(i + 1), { signal: s, gauge: "24AWG", color: "red", length: 10 }))
+    })).hir
+  }
+  it("errors on a lone CAN_H with no CAN_L anywhere", () => {
+    const diags = only(mk(["CAN_H", "GND"]), "orphanedDifferentialHalf")
+    expect(diags.map((d) => d.code)).toEqual(["HK-ELEC-006"])
+    expect(diags[0]?.data).toMatchObject({ missingPartner: "CAN_L" })
+  })
+  it("passes when both halves are present", () => {
+    expect(only(mk(["CAN_H", "CAN_L"]), "orphanedDifferentialHalf")).toEqual([])
+  })
+  it("ignores single-ended signals that merely end in _N", () => {
+    expect(only(mk(["SENSE_N", "GND"]), "orphanedDifferentialHalf")).toEqual([])
+  })
+})
+
+describe("HK-ELEC-007 twistGroupGaugeMismatch", () => {
+  const mk = (g1: string, g2: string) => {
+    const a = connector("J1", { mpn: "T-2", pinCount: 2 }, { pins: { 1: "CAN_H", 2: "CAN_L" } })
+    const b = connector("J2", { mpn: "T-2B", pinCount: 2 }, { pins: { 1: "CAN_H", 2: "CAN_L" } })
+    return compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [
+        wire("W1", a.pin(1), b.pin(1), { signal: "CAN_H", twistGroup: "tp1", gauge: g1, color: "white", length: 10 }),
+        wire("W2", a.pin(2), b.pin(2), { signal: "CAN_L", twistGroup: "tp1", gauge: g2, color: "blue", length: 10 })
+      ]
+    })).hir
+  }
+  it("warns when a twist group mixes gauges", () => {
+    const diags = only(mk("24AWG", "22AWG"), "twistGroupGaugeMismatch")
+    expect(diags.map((d) => d.code)).toEqual(["HK-ELEC-007"])
+    expect(diags[0]?.severity).toBe("warning")
+  })
+  it("passes for a matched-gauge pair", () => {
+    expect(only(mk("24AWG", "24AWG"), "twistGroupGaugeMismatch")).toEqual([])
+  })
+})
+
+describe("HK-CONN-015 reservedPinAssigned (broadened to terminal/seal/wire)", () => {
+  it("fires when a wire lands on a reserved pin carrying no signal", () => {
+    const a = connector("J1", { mpn: "RP", pinCount: 4, reservedPins: [4] }, { pins: { 1: "SIG" } })
+    const b = connector("J2", { mpn: "RPB", pinCount: 4 }, { pins: { 1: "SIG" } })
+    const { hir } = compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [
+        wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length: 10 }),
+        wire("W2", a.pin(4), b.pin(2), { gauge: "24AWG", color: "red", length: 10 })
+      ]
+    }))
+    const diags = only(hir, "reservedPinAssigned")
+    expect(diags.map((d) => d.target)).toEqual(["connector:J1.pin:4"])
+    expect(diags[0]?.message).toContain("wire landed")
   })
 })

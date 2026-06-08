@@ -26,5 +26,13 @@ export const RULE_SUMMARIES: Record<string, string> = {
   voltageRatingBelowSignal: "A wire's voltage rating must meet the nominal volts its signal carries.",
   reservedPinAssigned: "Reserved/keyed pins must stay unassigned.",
   breakoutTighterThanBendRadius: "A branch breakout must clear the bundle's minimum bend radius.",
-  bundleOverSleeveCapacity: "A branch bundle must fit inside its sleeve's capacity."
+  bundleOverSleeveCapacity: "A branch bundle must fit inside its sleeve's capacity.",
+  multipleWiresIntoPin: "Wires crimped into one contact must share a gauge (differing gauges won't crimp).",
+  contactCountExceedsPinCount: "A connector can't populate more cavities than its housing has.",
+  cavityLayoutMismatch: "A connector's cavity grid must multiply to its pin count.",
+  nonPositiveWireLength: "A wire length must be greater than zero.",
+  branchParentInvalid: "A branch's parent must exist and the branch tree must be acyclic.",
+  cableConductorOverflow: "A cable can't carry more wires than it has conductors.",
+  orphanedDifferentialHalf: "A bus differential half (CAN/RS-485/USB) needs its partner present.",
+  twistGroupGaugeMismatch: "Wires in one twist group should share a gauge to limit skew."
 }
