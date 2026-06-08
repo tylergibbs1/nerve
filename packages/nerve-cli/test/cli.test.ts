@@ -392,6 +392,24 @@ describe("nerve snapshot", () => {
     }
   }, 60000)
 
+  it("a boolean flag before the file doesn't swallow it (--update <file>)", async () => {
+    const { dir, harness } = project()
+    try {
+      // First write snapshots, then change the design.
+      expect(await run(["snapshot", harness], capture())).toBe(0)
+      writeFileSync(harness, readFileSync(harness, "utf8").replace('revision: "A"', 'revision: "C"'))
+      // Flag BEFORE the positional — `--update` must not consume the path
+      // (which would drop the file and update ALL configured harnesses).
+      const io = capture()
+      expect(await run(["snapshot", "--update", harness], io)).toBe(0)
+      expect(io.stdout.join("\n")).toContain("main-schematic.snap.svg")
+      // The named file was updated, so a re-check is clean.
+      expect(await run(["snapshot", harness], capture())).toBe(0)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  }, 60000)
+
   it("--ci fails on a MISSING snapshot instead of writing-and-passing", async () => {
     const { dir, harness } = project()
     try {

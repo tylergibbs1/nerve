@@ -92,6 +92,18 @@ interface ParsedArgs {
   readonly flags: Readonly<Record<string, string>>
 }
 
+// Value-less boolean flags MUST NOT consume the next token — otherwise
+// `nerve snapshot --update main.harness.ts` swallows the file as
+// --update's "value" and updates every configured harness instead.
+const BOOLEAN_FLAGS = new Set([
+  "update",
+  "ci",
+  "json",
+  "accept",
+  "reject",
+  "help"
+])
+
 const parseArgs = (argv: ReadonlyArray<string>): ParsedArgs => {
   const [command, ...rest] = argv
   const positional: Array<string> = []
@@ -103,7 +115,11 @@ const parseArgs = (argv: ReadonlyArray<string>): ParsedArgs => {
       if (eq > -1) {
         flags[arg.slice(2, eq)] = arg.slice(eq + 1)
       } else {
-        flags[arg.slice(2)] = rest[i + 1]?.startsWith("--") === false ? rest[++i]! : "true"
+        const name = arg.slice(2)
+        flags[name] =
+          !BOOLEAN_FLAGS.has(name) && rest[i + 1]?.startsWith("--") === false
+            ? rest[++i]!
+            : "true"
       }
     } else {
       positional.push(arg)
