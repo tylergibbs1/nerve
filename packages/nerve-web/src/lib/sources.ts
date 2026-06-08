@@ -84,10 +84,26 @@ const fromStorage = (projectId: string, path: string): string | undefined => {
 export const hasBundledSource = (projectId: string): boolean =>
   initial[projectId] !== undefined
 
+// Projects with no bundled baseline (the shared project, opened from a
+// link) register their file set here so tabs/compile see every file.
+const registered = new Map<string, ReadonlyArray<string>>()
+
+/** Seed a project from a decoded share link: write each file's source and
+ * record its file list (so listFiles shows all the tabs). */
+export const registerProjectFiles = (
+  projectId: string,
+  files: Readonly<Record<string, string>>
+): void => {
+  for (const [path, source] of Object.entries(files)) edited.set(editKey(projectId, path), source)
+  registered.set(projectId, Object.keys(files))
+}
+
 /** Project file listing, entry first (stable order for tabs). */
 export const listFiles = (projectId: string): ReadonlyArray<string> => {
-  const paths = Object.keys(initial[projectId] ?? { [ENTRY_FILE]: "" })
-  return [ENTRY_FILE, ...paths.filter((p) => p !== ENTRY_FILE).sort()]
+  const paths = Object.keys(initial[projectId] ?? {})
+  const registeredPaths = registered.get(projectId) ?? []
+  const all = new Set([ENTRY_FILE, ...paths, ...registeredPaths])
+  return [ENTRY_FILE, ...[...all].filter((p) => p !== ENTRY_FILE).sort()]
 }
 
 export const getFileSource = (projectId: string, path: string): string =>

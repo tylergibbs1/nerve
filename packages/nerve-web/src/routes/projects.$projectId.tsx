@@ -76,8 +76,10 @@ function ShareButton({ projectId }: { projectId: string }) {
   const [copied, setCopied] = useState(false)
   const run = async () => {
     const { shareUrl } = await import("../lib/share.js")
-    const { getSource } = await import("../lib/sources.js")
-    await navigator.clipboard.writeText(shareUrl(getSource(projectId)))
+    const { getFiles } = await import("../lib/sources.js")
+    // Encode the whole project so multi-file projects don't lose their
+    // extra files; single-entry projects still get a compact v1 link.
+    await navigator.clipboard.writeText(shareUrl(getFiles(projectId)))
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

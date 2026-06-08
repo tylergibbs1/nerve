@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { decodeShareHash } from "../lib/share.js"
-import { setSource } from "../lib/sources.js"
+import { decodeShareFiles } from "../lib/share.js"
+import { registerProjectFiles } from "../lib/sources.js"
 
 export const Route = createFileRoute("/shared")({
   component: SharedLanding
@@ -18,12 +18,12 @@ function SharedLanding() {
   const [bad, setBad] = useState(false)
 
   useEffect(() => {
-    const source = decodeShareHash(window.location.hash)
-    if (source === undefined || source.trim() === "") {
+    const files = decodeShareFiles(window.location.hash)
+    if (files === undefined || Object.values(files).every((s) => s.trim() === "")) {
       setBad(true)
       return
     }
-    setSource("shared", source)
+    registerProjectFiles("shared", files)
     void navigate({
       to: "/projects/$projectId/diagram",
       params: { projectId: "shared" },

@@ -6,7 +6,12 @@
 import { describe, expect, it } from "vitest"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
-import { decodeShareHash, encodeShareHash } from "../packages/nerve-web/src/lib/share.js"
+import {
+  decodeShareFiles,
+  decodeShareHash,
+  encodeShareFiles,
+  encodeShareHash
+} from "../packages/nerve-web/src/lib/share.js"
 
 const MOTOR = readFileSync(
   join(import.meta.dirname, "..", "examples", "motor-controller", "src", "main.harness.ts"),
@@ -42,7 +47,27 @@ describe("share-link codec", () => {
   it("rejects malformed or foreign payloads", () => {
     expect(decodeShareHash("")).toBeUndefined()
     expect(decodeShareHash("v1.!!!not-base64!!!")).toBeUndefined()
-    expect(decodeShareHash("v2.AAAA")).toBeUndefined() // unknown version
+    expect(decodeShareHash("v2.AAAA")).toBeUndefined() // not v1
     expect(decodeShareHash("v1.AAAA")).toBeUndefined() // not gzip
+  })
+
+  it("v2 round-trips a multi-file project (no file dropped)", () => {
+    const files = {
+      "/main.harness.ts": MOTOR,
+      "/variants/long.ts": `import base from "../main.harness.js"\nexport default base`
+    }
+    const hash = encodeShareFiles(files)
+    expect(hash).toMatch(/^v2\./)
+    expect(decodeShareFiles(`#${hash}`)).toEqual(files)
+  })
+
+  it("decodeShareFiles maps a legacy v1 link onto the entry path", () => {
+    const v1 = encodeShareHash(MOTOR)
+    expect(decodeShareFiles(v1)).toEqual({ "/main.harness.ts": MOTOR })
+  })
+
+  it("decodeShareFiles rejects malformed v2 (non-object, bad gzip)", () => {
+    expect(decodeShareFiles("v2.!!!")).toBeUndefined()
+    expect(decodeShareFiles("v3.AAAA")).toBeUndefined()
   })
 })

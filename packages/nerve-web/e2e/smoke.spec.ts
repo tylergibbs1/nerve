@@ -67,12 +67,15 @@ test("share link round-trips: Share copies a URL whose fragment recompiles the h
   await page.getByRole("button", { name: "Share" }).click()
   await expect(page.getByRole("button", { name: /Link copied/ })).toBeVisible()
   const url = await page.evaluate(() => navigator.clipboard.readText())
-  expect(url).toContain("/shared#v1.")
-  // The fragment IS the source: a fresh navigation decodes and compiles it.
+  // motor-controller ships variants/long.ts, so it's a multi-file (v2) link.
+  expect(url).toContain("/shared#v2.")
+  // The fragment IS the project: a fresh navigation decodes and compiles it.
   await page.goto(url)
   await expect(page.locator(".diagram-pane svg")).toBeVisible({ timeout: 20_000 })
   await expect(page.locator(".diagram-pane svg")).toContainText("motor-controller-harness")
   await expect(page.locator(".toolbar-status")).toContainText(/0 error/i, { timeout: 20_000 })
+  // The extra file survived the round-trip (not dropped): its tab is present.
+  await expect(page.locator(".source-tab", { hasText: "variants/long.ts" })).toBeVisible()
 })
 
 test("diagram sheet actions exist and Copy SVG puts markup on the clipboard", async ({ page, context }) => {
