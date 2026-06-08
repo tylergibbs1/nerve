@@ -37,7 +37,7 @@ const GROUPS: ReadonlyArray<DocGroup> = [
   {
     label: "Concepts",
     items: [
-      { to: "/docs/ai", label: "AI Copilot" },
+      { to: "/docs/ai", label: "autonerve" },
       { to: "/docs/lifecycle", label: "Production Lifecycle" }
     ]
   }

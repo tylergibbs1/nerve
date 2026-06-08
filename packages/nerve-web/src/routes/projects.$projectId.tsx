@@ -92,7 +92,7 @@ function ShareButton({ projectId }: { projectId: string }) {
 
 function ProjectWorkspace() {
   const { projectId } = Route.useParams()
-  const workspaceLayout = useDefaultLayout({ id: "nerve-workspace-3", panelIds: ["ai", "source", "render"] })
+  const workspaceLayout = useDefaultLayout({ id: "nerve-workspace-4", panelIds: ["ai", "source", "render"] })
   const { data } = useSuspenseQuery(compileQueryOptions(projectId))
   const dirty = useIsDirty(projectId)
   const { errors, warnings } = countDiagnostics(data.hir.diagnostics)
@@ -137,15 +137,15 @@ function ProjectWorkspace() {
         className="workspace-split"
         {...workspaceLayout}
       >
-        <Panel id="ai" defaultSize="22%" minSize="220px" maxSize="34%" collapsible>
+        <Panel id="ai" defaultSize="0%" minSize="220px" maxSize="34%" collapsible>
           <AiPane projectId={projectId} />
         </Panel>
         <Separator className="pane-handle" />
-        <Panel id="source" defaultSize="38%" minSize="300px" maxSize="60%" collapsible>
+        <Panel id="source" defaultSize="50%" minSize="300px" maxSize="70%" collapsible>
           <SourcePane projectId={projectId} />
         </Panel>
         <Separator className="pane-handle" />
-        <Panel id="render" minSize="25%">
+        <Panel id="render" defaultSize="50%" minSize="25%">
           <div className="render-pane">
             <Outlet />
           </div>

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/docs/ai")({
 function Page() {
   return (
     <>
-      <span className="spec-tag">AI Copilot</span>
+      <span className="spec-tag">autonerve</span>
       <Markdown src={docsContent("ai")} />
     </>
   )

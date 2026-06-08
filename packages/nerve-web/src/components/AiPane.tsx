@@ -90,7 +90,7 @@ export function AiPane({ projectId }: { projectId: string }) {
     return (
       <div className="ai-pane">
         <div className="ai-setup">
-          <span className="spec-tag">AI Copilot</span>
+          <span className="spec-tag">autonerve</span>
           <p>
             Edits your harness through compile-verified patches. Calls go directly from your
             browser to OpenAI — the key is stored locally and sent nowhere else.
@@ -126,7 +126,7 @@ export function AiPane({ projectId }: { projectId: string }) {
   return (
     <div className="ai-pane">
       <div className="ai-header">
-        <span className="spec-tag">AI Copilot</span>
+        <span className="spec-tag">autonerve</span>
         <Button
           variant="ghost"
           size="xs"
