@@ -130,15 +130,19 @@ transcripts and triaged against the post-fix code.
 - #10 "fs-eval/share untested" — false; tests/fs-eval.test.ts and
   tests/share.test.ts both exist.
 
-## Known-limitation / deferred (real but niche or larger; 7)
-- #8 share links encode only the entry file (multi-file share is an
-  enhancement)
-- #14 watch mode caches plugin rule packs (fresh doesn't reach loadPlugins)
-- #18 bare `nerve compile` resolves outputDir vs cwd not the config dir
-- #20 pinout elbow leaders can cross for 3+ row grids (crossing-free
-  holds for the ≤2-row derived grids)
-- #22 render-layout.json omits the pinout view; board geometry is the
-  display-scaled drawing
-- #24 pinout/faces assume numeric cavities (named pins show "—")
-- #27 no committed byte-golden for zip/share-link output
-- #28 dev watcher path (fs.watch/filter/debounce) has no direct test
+## Deferred items — now all resolved (2026-06-08)
+
+All 7 were tackled in a follow-up pass:
+- #8 share links encode the whole project (v2 multi-file format; v1 still
+  round-trips); the /shared route restores every file as a tab.
+- #14 loadPlugins honors compileFile's `fresh` — plugin packs reload in
+  watch mode.
+- #18 config.outputDir resolves relative to the config dir, not cwd
+  (bare compile from a subdir lands dist/ next to the config).
+- #20 pinout leaders are crossing-free for 3+ row grids (lane offset).
+- #22 render-layout.json includes the pinout sheet.
+- #24 pinout/faces render named (non-numeric) cavities instead of "—".
+- #27 byte-goldens added for the packet zip + share-link encoding.
+- #28 the dev watcher path (fs.watch/filter/debounce) is now tested.
+
+(Original deferral notes preserved in git history.)
