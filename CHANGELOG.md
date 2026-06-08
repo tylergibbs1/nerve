@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 6.0.0 — 2026-06-08
 
 The tscircuit ecosystem deep-dive, implemented end to end (24 items,
 one commit each — see `git log` for the per-item rationale).
