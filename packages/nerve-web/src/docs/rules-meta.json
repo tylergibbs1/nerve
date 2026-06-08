@@ -94,5 +94,33 @@
   {
     "code": "HK-MFG-006",
     "name": "bundleOverSleeveCapacity"
+  },
+  {
+    "code": "HK-CONN-019",
+    "name": "contactCountExceedsPinCount"
+  },
+  {
+    "code": "HK-CONN-020",
+    "name": "cavityLayoutMismatch"
+  },
+  {
+    "code": "HK-MFG-008",
+    "name": "nonPositiveWireLength"
+  },
+  {
+    "code": "HK-MFG-009",
+    "name": "branchParentInvalid"
+  },
+  {
+    "code": "HK-MFG-010",
+    "name": "cableConductorOverflow"
+  },
+  {
+    "code": "HK-ELEC-006",
+    "name": "orphanedDifferentialHalf"
+  },
+  {
+    "code": "HK-ELEC-007",
+    "name": "twistGroupGaugeMismatch"
   }
 ]
