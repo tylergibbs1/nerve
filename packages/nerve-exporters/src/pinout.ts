@@ -95,20 +95,17 @@ export const pinoutDrawing = (hir: Hir): Drawing => {
     const topBand = topCavs.length * LABEL_H + 10
     const botBand = botCavs.length > 0 ? botCavs.length * LABEL_H + 10 : 0
     const gridY = y + HEADER + topBand
-    const cardW = textX + LEADER_GAP + gridW + CARD_PAD
+    // The header line (mpn · gender · wire side) is drawn at MARGIN+12,
+    // size 10 — include it in the card width or a long MPN overruns the
+    // card and canvas (the wave's own text-overflow invariant).
+    const headerText = `${c.mpn}${c.gender !== undefined ? ` · ${c.gender}` : ""} · wire side`
+    const cardW = Math.max(textX + LEADER_GAP + gridW + CARD_PAD, 12 + textWidth(headerText, 10) + 12)
     const cardH = HEADER + topBand + gridH + botBand + CARD_PAD
 
     items.push(
       { kind: "rect", x: MARGIN, y, w: cardW, h: cardH, rx: 6, fill: "#ffffff", stroke: "#333", strokeWidth: 1.5, data: { connector: c.ref } },
       { kind: "text", x: MARGIN + 12, y: y + 20, text: c.ref, weight: "bold", fill: "#111", data: { connector: c.ref } },
-      {
-        kind: "text",
-        x: MARGIN + 12,
-        y: y + 36,
-        text: `${c.mpn}${c.gender !== undefined ? ` · ${c.gender}` : ""} · wire side`,
-        size: 10,
-        fill: "#777"
-      }
+      { kind: "text", x: MARGIN + 12, y: y + 36, text: headerText, size: 10, fill: "#777" }
     )
 
     const cavCenter = (cv: CavityInfo): { x: number; y: number } => ({
