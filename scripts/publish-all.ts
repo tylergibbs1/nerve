@@ -64,11 +64,15 @@ for (const name of PACKAGES) {
   writeFileSync(pkgPath, JSON.stringify(transformed, null, 2) + "\n")
   let status: number | null
   try {
+    // NB: no --tolerate-republish — in bun 1.3.x that flag 404s on a
+    // version that doesn't already exist (it only no-ops re-publishing an
+    // EXISTING version), which breaks every fresh release. The
+    // abort-on-first-failure below is what actually keeps a partial
+    // release from shipping phantom pins; a re-run after a partial failure
+    // just skips the already-published prefix manually.
     const args = packOnly
       ? ["pm", "pack", "--destination", packDest]
-      : // --tolerate-republish makes re-running a tag after a partial
-        // release idempotent (already-published packages don't error).
-        ["publish", "--access", "public", "--tolerate-republish"]
+      : ["publish", "--access", "public"]
     status = spawnSync("bun", args, { cwd: dir, stdio: "inherit" }).status
   } finally {
     renameSync(backupPath, pkgPath)
@@ -79,8 +83,8 @@ for (const name of PACKAGES) {
     // PACKAGES is dependencies-first. In PUBLISH mode, never publish a
     // dependent past a failed dependency — that ships exactly the
     // phantom-internal-pin breakage this script exists to prevent. Stop
-    // now; a re-run of the tag resumes idempotently. (--pack accumulates
-    // so a local dry run reports every failure at once.)
+    // now; to resume, comment out the already-published prefix and re-run.
+    // (--pack accumulates so a local dry run reports every failure at once.)
     if (!packOnly) break
   } else {
     console.log(`✓ ${name}`)
