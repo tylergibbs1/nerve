@@ -670,6 +670,21 @@ describe("HK-CONN-018 multipleWiresIntoPin (opt-in)", () => {
   it("allows a same-gauge double-crimp (power/ground distribution)", () => {
     expect(run(mk(["24AWG", "24AWG"]))).toEqual([])
   })
+  it("also catches differing gauge converging on a TO endpoint", () => {
+    // Both wires land on J1.1 as their `to` (the rule scans both endpoints).
+    const a = connector("J1", { mpn: "M-2", pinCount: 2 }, { pins: { 1: "S" } })
+    const b = connector("J2", { mpn: "M-2B", pinCount: 2 }, { pins: { 1: "A", 2: "B" } })
+    const { hir } = compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [
+        wire("W1", b.pin(1), a.pin(1), { gauge: "24AWG", color: "red", length: 10 }),
+        wire("W2", b.pin(2), a.pin(1), { gauge: "20AWG", color: "red", length: 10 })
+      ]
+    }))
+    const diags = run(hir)
+    expect(diags.map((d) => d.code)).toEqual(["HK-CONN-018"])
+    expect(diags[0]?.target).toBe("connector:J1.pin:1")
+  })
   it("passes when each contact takes one wire", () => {
     const a = connector("J1", { mpn: "M-2", pinCount: 2 }, { pins: { 1: "A", 2: "B" } })
     const b = connector("J2", { mpn: "M-2B", pinCount: 2 }, { pins: { 1: "A", 2: "B" } })
@@ -841,6 +856,19 @@ describe("HK-ELEC-007 twistGroupGaugeMismatch", () => {
   it("passes for a matched-gauge pair", () => {
     expect(only(mk("24AWG", "24AWG"), "twistGroupGaugeMismatch")).toEqual([])
   })
+  it("does not fire when a group member has no gauge (defensive; HK-MFG-003 owns that)", () => {
+    const a = connector("J1", { mpn: "T-2", pinCount: 2 }, { pins: { 1: "CAN_H", 2: "CAN_L" } })
+    const b = connector("J2", { mpn: "T-2B", pinCount: 2 }, { pins: { 1: "CAN_H", 2: "CAN_L" } })
+    const { hir } = compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [
+        wire("W1", a.pin(1), b.pin(1), { signal: "CAN_H", twistGroup: "tp1", gauge: "24AWG", color: "white", length: 10 }),
+        // No gauge on W2 — the rule skips it, leaving one known gauge in the group.
+        wire("W2", a.pin(2), b.pin(2), { signal: "CAN_L", twistGroup: "tp1", color: "blue", length: 10 })
+      ]
+    }))
+    expect(only(hir, "twistGroupGaugeMismatch")).toEqual([])
+  })
 })
 
 describe("HK-CONN-015 reservedPinAssigned (broadened to terminal/seal/wire)", () => {
@@ -857,6 +885,32 @@ describe("HK-CONN-015 reservedPinAssigned (broadened to terminal/seal/wire)", ()
     const diags = only(hir, "reservedPinAssigned")
     expect(diags.map((d) => d.target)).toEqual(["connector:J1.pin:4"])
     expect(diags[0]?.message).toContain("wire landed")
+  })
+
+  // The compiler only attaches terminals/seals to signal-bearing pins, so the
+  // terminal/seal branches are exercised against directly-built HIR — the
+  // shape a plugin or a cached harness.json could carry.
+  const hirWithReservedPin = (pin: { pin: string; terminal?: string; seal?: string }): Hir =>
+    ({
+      schemaVersion: "0.1.0",
+      harness: { id: "t", revision: "A", units: "mm", metadata: {} },
+      connectors: [{ ref: "J1", mpn: "RP", pinCount: 4, reservedPins: ["4"], pins: [pin] }],
+      wires: [], cables: [], branches: [], splices: [], labels: [], bom: [],
+      diagnostics: [], layoutHints: [], exports: {}
+    }) as unknown as Hir
+
+  it("fires when a reserved pin has a terminal populated", () => {
+    const diags = only(hirWithReservedPin({ pin: "4", terminal: "T-1" }), "reservedPinAssigned")
+    expect(diags.map((d) => d.target)).toEqual(["connector:J1.pin:4"])
+    expect(diags[0]?.message).toContain("terminal T-1")
+  })
+  it("fires when a reserved pin has a seal populated", () => {
+    const diags = only(hirWithReservedPin({ pin: "4", seal: "S-1" }), "reservedPinAssigned")
+    expect(diags.map((d) => d.target)).toEqual(["connector:J1.pin:4"])
+    expect(diags[0]?.message).toContain("seal S-1")
+  })
+  it("stays silent for an empty reserved pin", () => {
+    expect(only(hirWithReservedPin({ pin: "4" }), "reservedPinAssigned")).toEqual([])
   })
 })
 
@@ -883,6 +937,9 @@ describe("HK-ELEC-008 emcAggressorVictimShareBranch", () => {
   it("stays silent without both roles, or when wires are unclassified", () => {
     expect(only(mk("aggressor", "neutral"), "emcAggressorVictimShareBranch")).toEqual([])
     expect(only(mk(undefined, undefined), "emcAggressorVictimShareBranch")).toEqual([])
+    // One classified wire, one unclassified — needs BOTH roles present to fire.
+    expect(only(mk("aggressor", undefined), "emcAggressorVictimShareBranch")).toEqual([])
+    expect(only(mk(undefined, "victim"), "emcAggressorVictimShareBranch")).toEqual([])
   })
 })
 
@@ -924,6 +981,9 @@ describe("HK-ELEC-010 overcurrentExceedsConductor", () => {
   })
   it("passes when the device protects the conductor", () => {
     expect(only(mk(2), "overcurrentExceedsConductor")).toEqual([])
+  })
+  it("passes at exactly the conductor ampacity (strict >)", () => {
+    expect(only(mk(2.3), "overcurrentExceedsConductor")).toEqual([])
   })
   it("is silent when no protections are declared", () => {
     const a = connector("J1", { mpn: "N-2", pinCount: 2 }, { pins: { 1: "PWR" } })
