@@ -38,21 +38,37 @@ const editKey = (projectId: string, path: string): string => `${projectId} ${pat
 const storageKey = (projectId: string, path: string): string =>
   path === ENTRY_FILE ? `nerve:source:${projectId}` : `nerve:source:${projectId}:${path}`
 
-const persist = new Debouncer(
-  (projectId: string, path: string, source: string) => {
-    try {
-      // Edits matching the bundled source don't need persisting.
-      if (source === initial[projectId]?.[path]) {
-        localStorage.removeItem(storageKey(projectId, path))
-      } else {
-        localStorage.setItem(storageKey(projectId, path), source)
-      }
-    } catch {
-      // Quota/privacy-mode failures degrade to session-only edits.
+const writePersist = (projectId: string, path: string, source: string): void => {
+  // The shared project is ephemeral — its source lives in the URL
+  // fragment, not localStorage. Persisting it would leave it on disk
+  // forever, contradicting the share-link contract.
+  if (projectId === "shared") return
+  try {
+    // Edits matching the bundled source don't need persisting.
+    if (source === initial[projectId]?.[path]) {
+      localStorage.removeItem(storageKey(projectId, path))
+    } else {
+      localStorage.setItem(storageKey(projectId, path), source)
     }
-  },
-  { wait: 500 }
-)
+  } catch {
+    // Quota/privacy-mode failures degrade to session-only edits.
+  }
+}
+
+// One debouncer PER (project,path): a single shared Debouncer is one
+// trailing timer, so editing file B within 500ms of file A would drop A's
+// write entirely (silent loss on reload). Keyed timers debounce each file
+// independently.
+const persisters = new Map<string, Debouncer<(s: string) => void>>()
+const persist = (projectId: string, path: string, source: string): void => {
+  const key = `${projectId} ${path}`
+  let d = persisters.get(key)
+  if (d === undefined) {
+    d = new Debouncer((s: string) => writePersist(projectId, path, s), { wait: 500 })
+    persisters.set(key, d)
+  }
+  d.maybeExecute(source)
+}
 
 const fromStorage = (projectId: string, path: string): string | undefined => {
   try {
@@ -61,6 +77,12 @@ const fromStorage = (projectId: string, path: string): string | undefined => {
     return undefined
   }
 }
+
+/** Whether the project has a bundled baseline to reset to. The shared
+ * project does not — its only source is the URL fragment, so "Reset"
+ * would wipe it to an empty string irrecoverably. */
+export const hasBundledSource = (projectId: string): boolean =>
+  initial[projectId] !== undefined
 
 /** Project file listing, entry first (stable order for tabs). */
 export const listFiles = (projectId: string): ReadonlyArray<string> => {
@@ -112,7 +134,7 @@ if (channel !== undefined) {
 
 export const setFileSource = (projectId: string, path: string, source: string): void => {
   edited.set(editKey(projectId, path), source)
-  persist.maybeExecute(projectId, path, source)
+  persist(projectId, path, source)
   channel?.postMessage({ projectId, path, source })
   notify(projectId, "local")
 }

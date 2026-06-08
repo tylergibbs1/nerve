@@ -19,6 +19,7 @@ import {
 import {
   ENTRY_FILE,
   getFileSource,
+  hasBundledSource,
   isDirty,
   listFiles,
   resetSource,
@@ -37,6 +38,10 @@ export function SourcePane({ projectId }: { projectId: string }) {
   // Multi-file projects (§9.6): tabs per file; the active file is also the
   // compile ENTRYPOINT — opening variants/long.ts renders the long SKU.
   const [activeFile, setActiveFile] = useState(ENTRY_FILE)
+  // Mirror activeFile into a ref so the compile mutation's async onSuccess
+  // can tell whether the user has since switched tabs.
+  const activeFileRef = useRef(activeFile)
+  activeFileRef.current = activeFile
   const files = listFiles(projectId)
   const [source, setLocalSource] = useState(() => getFileSource(projectId, ENTRY_FILE))
   const [autoCompile, setAutoCompile] = useState(true)
@@ -82,8 +87,12 @@ export function SourcePane({ projectId }: { projectId: string }) {
     mutationFn: ({ path, text }: { path: string; text: string }) =>
       compileProjectFile(projectId, path, text),
     onSuccess: (result, { path, text }) => {
-      // Supersession guard: a newer edit exists — drop this stale result.
+      // Supersession guards: drop a stale result if a newer edit exists
+      // for that file, OR if the user switched tabs while it was in flight
+      // (else a late tab-A compile paints A's lint ranges onto B's document
+      // and overwrites B's render).
       if (text !== getFileSource(projectId, path)) return
+      if (path !== activeFileRef.current) return
       lastCompiled.current = text
       publishDiagnostics(text, result.hir.diagnostics)
       setCompileResult(queryClient, projectId, result)
@@ -185,7 +194,7 @@ export function SourcePane({ projectId }: { projectId: string }) {
           />
           auto
         </label>
-        {isDirty(projectId) && (
+        {hasBundledSource(projectId) && isDirty(projectId) && (
           <Button
             variant="secondary"
             size="xs"
