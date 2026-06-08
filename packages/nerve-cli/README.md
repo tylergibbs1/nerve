@@ -8,4 +8,4 @@ npx --package=@grayhaven/nerve-cli nerve export ./src/main.harness.ts
 # dist/ -> drawings, CSVs, test plan, PDF packet, zip
 ```
 
-Part of [Grayhaven Nerve](https://github.com/tylergibbs1/nerve) — harnesses as code. [Live demo + docs](https://nerve-demo.vercel.app) · [llms.txt](https://nerve-demo.vercel.app/llms.txt) · Apache-2.0
+Part of [Grayhaven Nerve](https://github.com/tylergibbs1/nerve) — harnesses as code. [Live demo + docs](https://nerve.grayhavenindustries.com) · [llms.txt](https://nerve.grayhavenindustries.com/llms.txt) · Apache-2.0

@@ -9,4 +9,4 @@ part("microfit-2x8")  // -> Molex 43025-1600, full verified record
 part("dt-4s")         // -> Deutsch DT06-4S
 ```
 
-Part of [Grayhaven Nerve](https://github.com/tylergibbs1/nerve) — harnesses as code. [Live demo + docs](https://nerve-demo.vercel.app) · [llms.txt](https://nerve-demo.vercel.app/llms.txt) · Apache-2.0
+Part of [Grayhaven Nerve](https://github.com/tylergibbs1/nerve) — harnesses as code. [Live demo + docs](https://nerve.grayhavenindustries.com) · [llms.txt](https://nerve.grayhavenindustries.com/llms.txt) · Apache-2.0

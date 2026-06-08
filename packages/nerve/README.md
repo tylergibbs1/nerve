@@ -12,4 +12,4 @@ const j1 = connector("J1", MolexMicroFit["43025-0800"], {
 // wire(), branch(), label() ... -> compileDesign() -> deterministic HIR
 ```
 
-Part of [Grayhaven Nerve](https://github.com/tylergibbs1/nerve) — harnesses as code. [Live demo + docs](https://nerve-demo.vercel.app) · [llms.txt](https://nerve-demo.vercel.app/llms.txt) · Apache-2.0
+Part of [Grayhaven Nerve](https://github.com/tylergibbs1/nerve) — harnesses as code. [Live demo + docs](https://nerve.grayhavenindustries.com) · [llms.txt](https://nerve.grayhavenindustries.com/llms.txt) · Apache-2.0

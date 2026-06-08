@@ -12,9 +12,9 @@ Nerve turns wiring-harness design into a version-controlled, type-safe workflow:
 TypeScript DSL → compiler → HIR → 21 validation rules → deterministic rendering → manufacturing packet → test artifacts
 ```
 
-**Try it now: [nerve-demo.vercel.app](https://nerve-demo.vercel.app)** — editor, docs, and three example harnesses, no install.
+**Try it now: [nerve.grayhavenindustries.com](https://nerve.grayhavenindustries.com)** — editor, docs, and three example harnesses, no install.
 
-[![The workspace: source editor, AI copilot, live schematic](./docs/assets/workspace.png)](https://nerve-demo.vercel.app/projects/robot-platform/diagram)
+[![The workspace: source editor, AI copilot, live schematic](./docs/assets/workspace.png)](https://nerve.grayhavenindustries.com/projects/robot-platform/diagram)
 
 ## Why
 
@@ -27,11 +27,11 @@ A wiring harness is a program your machine runs on copper. Today it lives in PDF
 - **Deterministic artifacts** — schematic, connector-face, and harness-board SVGs, BOM / cut-list / label / test-plan CSVs, assembly instructions, a PDF manufacturing packet, and a zip that hashes identically for identical inputs
 - **An interactive web workspace** — compile-on-type in a Web Worker, schematics with net hover-highlighting and zoom, lint gutters that point at the offending wire, full packet export from the browser, and a self-contained interactive HTML viewer you can email to the shop floor
 - **An AI copilot** — describe the change; edits land only after they compile and pass the rules (bring your own OpenAI key)
-- **Agent-ready docs** — [`/llms.txt`](https://nerve-demo.vercel.app/llms.txt), per-page markdown mirrors, copy-as-markdown everywhere
+- **Agent-ready docs** — [`/llms.txt`](https://nerve.grayhavenindustries.com/llms.txt), per-page markdown mirrors, copy-as-markdown everywhere
 
 The editor catches the classic mistake — a wire carrying `V5` landing on a pin assigned `V9` — as you type:
 
-[![HK-CONN-011 in the lint gutter and diagnostics panel](./docs/assets/diagnostics.png)](https://nerve-demo.vercel.app/projects/sensor-splice/diagram)
+[![HK-CONN-011 in the lint gutter and diagnostics panel](./docs/assets/diagnostics.png)](https://nerve.grayhavenindustries.com/projects/sensor-splice/diagram)
 
 ## Quick start
 
@@ -55,9 +55,9 @@ const j1 = connector("J1", MolexMicroFit["43025-0800"], {
 // ...wires, branches, labels — see examples/motor-controller
 ```
 
-Full guides: [quickstart](https://nerve-demo.vercel.app/docs) · [DSL reference](https://nerve-demo.vercel.app/docs/dsl) · [TypeScript SDK](https://nerve-demo.vercel.app/docs/sdk) · [rules](https://nerve-demo.vercel.app/docs/rules) · [CLI](https://nerve-demo.vercel.app/docs/cli) · [artifacts](https://nerve-demo.vercel.app/docs/artifacts) · [AI copilot](https://nerve-demo.vercel.app/docs/ai)
+Full guides: [quickstart](https://nerve.grayhavenindustries.com/docs) · [DSL reference](https://nerve.grayhavenindustries.com/docs/dsl) · [TypeScript SDK](https://nerve.grayhavenindustries.com/docs/sdk) · [rules](https://nerve.grayhavenindustries.com/docs/rules) · [CLI](https://nerve.grayhavenindustries.com/docs/cli) · [artifacts](https://nerve.grayhavenindustries.com/docs/artifacts) · [AI copilot](https://nerve.grayhavenindustries.com/docs/ai)
 
-[![Docs with editor-grammar syntax highlighting](./docs/assets/docs.png)](https://nerve-demo.vercel.app/docs/dsl)
+[![Docs with editor-grammar syntax highlighting](./docs/assets/docs.png)](https://nerve.grayhavenindustries.com/docs/dsl)
 
 ## Packages (v6.0.1)
 
@@ -98,4 +98,4 @@ bun run --filter @grayhaven/nerve-web dev   # web workspace
 
 PRD implemented end to end (M0–M9 + the full expansion tier: Bill of Process, costing, component registry, shop-floor adapters, formboard tiling, engineering analysis, ECO/releases, build records, interface contracts, redlines, plugin SDK). See [`CHANGELOG.md`](./CHANGELOG.md) for release history, [`GOAL.md`](./GOAL.md) for current direction, and [`docs/prd.md`](./docs/prd.md) for the PRD.
 
-**Live**: [nerve-demo.vercel.app](https://nerve-demo.vercel.app) ([nerve-site.vercel.app](https://nerve-site.vercel.app) aliases the same deployment). Licensed under Apache-2.0.
+**Live**: [nerve.grayhavenindustries.com](https://nerve.grayhavenindustries.com). Licensed under Apache-2.0.
