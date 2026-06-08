@@ -1,18 +1,16 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Weekly grouped bumps gated by the determinism suite: if a dep changes one output byte, golden corpora fail CI and the PR does not merge. bun.lock regenerates in the same PR, keeping the lockfile perpetually fresh (the stale-lockfile publish class).",
+  "description": "Weekly grouped bumps gated by the determinism suite: if a dep changes one output byte, golden corpora fail CI and Renovate won't merge. The bun manager refreshes bun.lock in the same PR automatically, keeping the lockfile fresh (the stale-lockfile publish class).",
   "extends": ["config:recommended", ":semanticCommitsDisabled"],
   "schedule": ["before 9am on monday"],
   "timezone": "America/Chicago",
   "rangeStrategy": "bump",
-  "postUpdateOptions": ["bunInstall"],
   "packageRules": [
     {
-      "description": "One weekly PR for everything non-major; CI (tests + tarball smoke + e2e) is the merge gate.",
+      "description": "One weekly PR for everything non-major. automerge WITHOUT platformAutomerge: Renovate's own automerge waits for all status checks (tests + tarball smoke + e2e) to pass before merging, so the determinism suite is a real gate without needing branch protection. (platformAutomerge would delegate to GitHub auto-merge, which only enforces CI if branch protection requires it.)",
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "groupName": "weekly non-major bumps",
-      "automerge": true,
-      "platformAutomerge": true
+      "automerge": true
     },
     {
       "description": "Majors stay individual PRs for a human look.",
