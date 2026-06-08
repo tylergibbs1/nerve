@@ -8,6 +8,7 @@
 | `schematic.svg` | Connection diagram: connectors, pins, wires with gauge/color annotations. |
 | `board.svg` | Harness-board (nailboard) view at real lengths for the build fixture. |
 | `connector-faces.svg` | Cavity layouts per connector: FRONT (mating side, mirrored) and REAR views, population state, wire colors, orientation markers. |
+| `pinout.svg` | Per-connector pinout tables: each cavity's pin, signal, wire, gauge, terminal, and seal, with crossing-free leaders to the cavity grid. |
 | `schematic.html` | Self-contained interactive viewer: hover a net to trace it, zoom, pan. Opens anywhere, no app needed. |
 | `bom.csv` | Rolled-up bill of materials with MPNs, quantities, and design-object references. |
 | `cut-list.csv` | Per-wire cut lengths, gauges, colors, strip specs. |

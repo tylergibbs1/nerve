@@ -59,7 +59,7 @@ Full guides: [quickstart](https://nerve-demo.vercel.app/docs) · [DSL reference]
 
 [![Docs with editor-grammar syntax highlighting](./docs/assets/docs.png)](https://nerve-demo.vercel.app/docs/dsl)
 
-## Packages (v6.0.0)
+## Packages (v6.0.1)
 
 | Package | What it is |
 | --- | --- |
