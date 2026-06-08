@@ -89,4 +89,49 @@ describe("nerve dev server", () => {
       await dev.close()
     }
   }, 30000)
+
+  it("the WATCHER path recompiles on a real file write (fs.watch → filter → debounce)", async () => {
+    // The other tests call rebuild() directly; this exercises the actual
+    // watcher: write a config-dir file and poll /state.json for the new
+    // fingerprint, with NO manual rebuild() call.
+    const io = sink()
+    const dev = await startDev(harnessPath, { io, port: 0 })
+    try {
+      const before = (await (await fetch(`${dev.url}/state.json`)).json()) as { fingerprint: string }
+      // Change the revision regardless of its current value (earlier tests
+      // share this fixture) so the HIR — and thus the fingerprint — moves.
+      const src = readFileSync(harnessPath, "utf8")
+      writeFileSync(harnessPath, src.replace(/revision: "[^"]*"/, 'revision: "WATCH"'))
+      // Poll up to ~8s for the watcher+debounce to land a new compile.
+      let after = before
+      for (let i = 0; i < 80 && after.fingerprint === before.fingerprint; i++) {
+        await new Promise((r) => setTimeout(r, 100))
+        after = (await (await fetch(`${dev.url}/state.json`)).json()) as { fingerprint: string }
+      }
+      expect(after.fingerprint).not.toBe(before.fingerprint)
+      expect(await (await fetch(`${dev.url}/`)).text()).toContain("rev WATCH")
+    } finally {
+      await dev.close()
+    }
+  }, 30000)
+
+  it("config edits above src/ trigger the watcher (watch root = project root)", async () => {
+    // nerve.config.ts lives at the project root, above the entry's src/
+    // dir; a write there must still recompile (#31).
+    const io = sink()
+    writeFileSync(join(dir, "nerve.config.ts"), `export default { units: "mm" }\n`)
+    const dev = await startDev(harnessPath, { io, port: 0 })
+    try {
+      const seen = io.lines.length
+      writeFileSync(join(dir, "nerve.config.ts"), `export default { units: "mm", defaultWireTolerance: 5 }\n`)
+      let recompiled = false
+      for (let i = 0; i < 80 && !recompiled; i++) {
+        await new Promise((r) => setTimeout(r, 100))
+        recompiled = io.lines.slice(seen).some((l) => l.includes("compiled"))
+      }
+      expect(recompiled).toBe(true)
+    } finally {
+      await dev.close()
+    }
+  }, 30000)
 })
