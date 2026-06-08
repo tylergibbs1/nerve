@@ -67,8 +67,16 @@ export const pinoutDrawing = (hir: Hir): Drawing => {
   for (const c of hir.connectors) {
     const { rows, columns } = layoutOf(c)
     const byPin = new Map(c.pins.map((p) => [p.pin, p]))
-    const cavities: Array<CavityInfo> = Array.from({ length: c.pinCount }, (_, i) => {
-      const pin = String(i + 1)
+    // Cavity → pin key. Numeric connectors use 1..pinCount (the physical
+    // cavity number). Named connectors (pins like "A1"/"HOT") have no
+    // numeric cavity index, so cells map to the declared pin order — the
+    // grid loses true geometry but the per-pin data (signal/wire/terminal/
+    // seal) is correct instead of showing "—".
+    const numeric = c.pins.every((p) => /^\d+$/.test(p.pin))
+    const cellCount = numeric ? c.pinCount : Math.max(c.pinCount, c.pins.length)
+    const pinAt = (i: number): string => (numeric ? String(i + 1) : c.pins[i]?.pin ?? String(i + 1))
+    const cavities: Array<CavityInfo> = Array.from({ length: cellCount }, (_, i) => {
+      const pin = pinAt(i)
       const assigned = byPin.get(pin)
       const w = wireAt.get(`${c.ref}:${pin}`)
       const label = [

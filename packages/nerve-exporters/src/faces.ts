@@ -76,8 +76,13 @@ export const connectorFacesDrawing = (hir: Hir): Drawing => {
   for (const c of hir.connectors) {
     const { rows, columns, derived } = layoutOf(c)
     const reserved = new Set(c.reservedPins ?? [])
-    const cavities: Array<CavityState> = Array.from({ length: c.pinCount }, (_, i) => {
-      const pin = String(i + 1)
+    // Numeric connectors number cavities 1..pinCount; named connectors
+    // (pins like "A1") have no numeric cavity index, so cells follow the
+    // declared pin order — their data shows instead of an empty "—".
+    const numeric = c.pins.every((p) => /^\d+$/.test(p.pin))
+    const cellCount = numeric ? c.pinCount : Math.max(c.pinCount, c.pins.length)
+    const cavities: Array<CavityState> = Array.from({ length: cellCount }, (_, i) => {
+      const pin = numeric ? String(i + 1) : c.pins[i]?.pin ?? String(i + 1)
       const assigned = c.pins.find((p) => p.pin === pin)
       return {
         pin,

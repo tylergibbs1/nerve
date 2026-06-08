@@ -87,4 +87,21 @@ describe("pinout cards (PRD §9.5.2)", () => {
     const svg = pinoutSvg(fixture())
     expect(svg).toContain('data-connector="J1" data-pin="1" data-wire="W1"')
   })
+
+  it("shows data for named (non-numeric) cavities instead of '—'", () => {
+    const part = { mpn: "NAMED-2", pinCount: 2 }
+    const j1 = connector("J1", part, { pins: { HOT: "PWR_12V", RTN: "GND" } })
+    const j2 = connector("J2", part, { pins: { HOT: "PWR_12V", RTN: "GND" } })
+    const { hir } = compileDesign(
+      harness("named", {
+        revision: "A",
+        units: "mm",
+        connectors: [j1, j2],
+        wires: [wire("W1", j1.pin("HOT"), j2.pin("HOT"), { signal: "PWR_12V", gauge: "18AWG" })]
+      })
+    )
+    const svg = pinoutSvg(hir)
+    expect(svg).toContain("HOT · PWR_12V · W1 · 18AWG")
+    expect(svg).toContain("RTN · GND")
+  })
 })

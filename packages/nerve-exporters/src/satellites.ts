@@ -14,6 +14,7 @@ import { computeNets, isPinEndpoint, type Hir, type HirEndpoint } from "@grayhav
 import { schematicDrawing } from "./svg.js"
 import { boardDrawing } from "./board.js"
 import { connectorFacesDrawing } from "./faces.js"
+import { pinoutDrawing } from "./pinout.js"
 import { bomTable, cutListTable, labelScheduleTable, type CutListOptions } from "./csv.js"
 
 const stringify = (value: unknown): string => JSON.stringify(value, null, 2) + "\n"
@@ -55,10 +56,14 @@ export const renderLayoutJson = (hir: Hir): string =>
   stringify({
     schemaVersion: hir.schemaVersion,
     harness: hir.harness,
+    // Every rendered sheet, at its native DrawingIR geometry (board is
+    // 1:1 mm; boardSvg applies a display scale at the SVG boundary, not
+    // here — the IR is the source of truth callers should mirror).
     sheets: {
       schematic: schematicDrawing(hir),
       board: boardDrawing(hir),
-      connectorFaces: connectorFacesDrawing(hir)
+      connectorFaces: connectorFacesDrawing(hir),
+      pinout: pinoutDrawing(hir)
     }
   })
 
