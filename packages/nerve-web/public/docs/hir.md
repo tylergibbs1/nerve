@@ -64,6 +64,7 @@ Array of:
 | `voltageRating` | `number` | no |  |
 | `temperatureRating` | `number` | no |  |
 | `currentEstimate` | `number` | no |  |
+| `emcClass` | `"aggressor" \| "victim" \| "neutral"` | no |  |
 | `twistGroup` | `string` | no |  |
 | `shieldGroup` | `string` | no |  |
 | `cable` | `string` | no |  |
@@ -100,6 +101,7 @@ Array of:
 | `nominalLength` | `number` | no |  |
 | `breakoutDistance` | `number` | no |  |
 | `minBendRadius` | `number` | no |  |
+| `ambientTemperatureC` | `number` | no |  |
 
 ## splices
 
@@ -143,6 +145,18 @@ Array of:
 | `quantity` | `number` | yes |  |
 | `unitOfMeasure` | `string` | yes |  |
 | `usedBy` | `Array<string>` | yes |  |
+| `notes` | `string` | no |  |
+
+## protections
+
+Array of:
+
+| Field | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `id` | `string` | yes |  |
+| `kind` | `"fuse" \| "breaker"` | yes |  |
+| `ratingA` | `number` | yes |  |
+| `protects` | `Array<string>` | yes |  |
 | `notes` | `string` | no |  |
 
 ## diagnostics

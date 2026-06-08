@@ -50,7 +50,9 @@ export const Codes = {
   SpliceTooFewWires: "HK-SPLICE-003",
   SpliceUndefinedBranch: "HK-SPLICE-004",
   DuplicateCableId: "HK-CABLE-001",
-  UndefinedCableRef: "HK-CABLE-002"
+  UndefinedCableRef: "HK-CABLE-002",
+  DuplicateProtectionId: "HK-PROT-001",
+  ProtectionUndefinedWire: "HK-PROT-002"
 } as const
 
 export const hasErrors = (diagnostics: ReadonlyArray<Diagnostic>): boolean =>

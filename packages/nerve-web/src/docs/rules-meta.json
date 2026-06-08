@@ -122,5 +122,17 @@
   {
     "code": "HK-ELEC-007",
     "name": "twistGroupGaugeMismatch"
+  },
+  {
+    "code": "HK-ELEC-008",
+    "name": "emcAggressorVictimShareBranch"
+  },
+  {
+    "code": "HK-ELEC-009",
+    "name": "wireTempBelowAmbient"
+  },
+  {
+    "code": "HK-ELEC-010",
+    "name": "overcurrentExceedsConductor"
   }
 ]

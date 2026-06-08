@@ -23,6 +23,7 @@ import {
   type HirConnector,
   type HirEndpoint,
   type HirLabel,
+  type HirProtection,
   type HirSplice,
   type HirWire
 } from "./hir/schema.js"
@@ -245,6 +246,7 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         voltageRating: w.voltageRating,
         temperatureRating: w.temperatureRating,
         currentEstimate: w.currentEstimate,
+        emcClass: w.emcClass,
         twistGroup: w.twistGroup,
         shieldGroup: w.shieldGroup,
         cable: w.cable,
@@ -360,11 +362,46 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         sleeve: b.sleeve,
         nominalLength: b.nominalLength,
         breakoutDistance: b.breakoutDistance,
-        minBendRadius: b.minBendRadius
+        minBendRadius: b.minBendRadius,
+        ambientTemperatureC: b.ambientTemperatureC
       })
     )
   }
   branches.sort((a, b) => compareStrings(a.id, b.id))
+
+  // --- Protections --------------------------------------------------------
+  const protectionIds = new Set<string>()
+  const protections: Array<HirProtection> = []
+  for (const p of design.protections) {
+    if (protectionIds.has(p.id)) {
+      report(
+        Codes.DuplicateProtectionId,
+        `Protection ID ${p.id} is defined more than once.`,
+        `protection:${p.id}`
+      )
+      continue
+    }
+    protectionIds.add(p.id)
+    for (const wireId of p.protects) {
+      if (!wireIds.has(wireId)) {
+        report(
+          Codes.ProtectionUndefinedWire,
+          `Protection ${p.id} guards undefined wire ${wireId}.`,
+          `protection:${p.id}`
+        )
+      }
+    }
+    protections.push(
+      compact({
+        id: p.id,
+        kind: p.kind,
+        ratingA: p.ratingA,
+        protects: [...p.protects].sort(compareStrings),
+        notes: p.notes
+      })
+    )
+  }
+  protections.sort((a, b) => compareStrings(a.id, b.id))
 
   // --- Labels ---------------------------------------------------------------
   const labelIds = new Set<string>()
@@ -481,6 +518,8 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
     splices,
     labels,
     bom,
+    // Omitted when empty so existing golden HIR stays byte-identical.
+    ...(protections.length > 0 ? { protections } : {}),
     diagnostics,
     layoutHints: [],
     exports: {}

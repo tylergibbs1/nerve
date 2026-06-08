@@ -110,6 +110,9 @@ export interface WireProps {
   readonly voltageRating?: number
   readonly temperatureRating?: number
   readonly currentEstimate?: number
+  /** Crosstalk role for EMC segregation: "aggressor" (noisy source),
+   * "victim" (sensitive sink), or "neutral". */
+  readonly emcClass?: "aggressor" | "victim" | "neutral"
   readonly twistGroup?: string
   readonly shieldGroup?: string
   /** Cable this wire is a conductor of (see `cable()`). */
@@ -167,6 +170,9 @@ export interface BranchProps {
   readonly breakoutDistance?: number
   /** Tightest bend the bundle tolerates (mm) — breakouts must clear it. */
   readonly minBendRadius?: number
+  /** Ambient temperature the bundle runs in (°C); member wires need a
+   * temperature rating at or above it. */
+  readonly ambientTemperatureC?: number
 }
 
 export interface BranchDef {
@@ -178,6 +184,21 @@ export interface BranchDef {
   readonly nominalLength?: number
   readonly breakoutDistance?: number
   readonly minBendRadius?: number
+  readonly ambientTemperatureC?: number
+}
+
+export interface ProtectionProps {
+  /** Overcurrent device kind. */
+  readonly kind: "fuse" | "breaker"
+  /** Device rating in amps; must not exceed the ampacity of any wire it guards. */
+  readonly ratingA: number
+  /** Wire IDs this device protects (explicit, so no current-flow inference). */
+  readonly protects: ReadonlyArray<string>
+  readonly notes?: string
+}
+
+export interface ProtectionDef extends ProtectionProps {
+  readonly id: string
 }
 
 export interface LabelProps {
@@ -210,6 +231,7 @@ export interface HarnessProps {
   readonly labels?: ReadonlyArray<LabelDef>
   readonly splices?: ReadonlyArray<SpliceDef>
   readonly cables?: ReadonlyArray<CableDef>
+  readonly protections?: ReadonlyArray<ProtectionDef>
 }
 
 /** The root design object returned by `harness(...)` — the unit of compilation. */
@@ -225,4 +247,5 @@ export interface HarnessDesign {
   readonly labels: ReadonlyArray<LabelDef>
   readonly splices: ReadonlyArray<SpliceDef>
   readonly cables: ReadonlyArray<CableDef>
+  readonly protections: ReadonlyArray<ProtectionDef>
 }

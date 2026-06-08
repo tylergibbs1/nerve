@@ -320,6 +320,14 @@
             "currentEstimate": {
               "type": "number"
             },
+            "emcClass": {
+              "type": "string",
+              "enum": [
+                "aggressor",
+                "victim",
+                "neutral"
+              ]
+            },
             "twistGroup": {
               "type": "string"
             },
@@ -416,6 +424,9 @@
               "type": "number"
             },
             "minBendRadius": {
+              "type": "number"
+            },
+            "ambientTemperatureC": {
               "type": "number"
             }
           },
@@ -527,6 +538,43 @@
               "type": "string"
             },
             "usedBy": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "protections": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "kind",
+            "ratingA",
+            "protects"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "fuse",
+                "breaker"
+              ]
+            },
+            "ratingA": {
+              "type": "number"
+            },
+            "protects": {
               "type": "array",
               "items": {
                 "type": "string"

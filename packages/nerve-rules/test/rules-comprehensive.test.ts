@@ -16,6 +16,7 @@ import {
   connector,
   harness,
   label,
+  protection,
   splice,
   wire,
   type ConnectorPart,
@@ -856,5 +857,95 @@ describe("HK-CONN-015 reservedPinAssigned (broadened to terminal/seal/wire)", ()
     const diags = only(hir, "reservedPinAssigned")
     expect(diags.map((d) => d.target)).toEqual(["connector:J1.pin:4"])
     expect(diags[0]?.message).toContain("wire landed")
+  })
+})
+
+// --- EMC / environment / protection (tier-2 HIR fields) ---------------------
+
+describe("HK-ELEC-008 emcAggressorVictimShareBranch", () => {
+  const mk = (c1?: "aggressor" | "victim" | "neutral", c2?: "aggressor" | "victim" | "neutral") => {
+    const a = connector("J1", { mpn: "E-2", pinCount: 2 }, { pins: { 1: "A", 2: "B" } })
+    const b = connector("J2", { mpn: "E-2B", pinCount: 2 }, { pins: { 1: "A", 2: "B" } })
+    return compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [
+        wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length: 10, ...(c1 ? { emcClass: c1 } : {}) }),
+        wire("W2", a.pin(2), b.pin(2), { gauge: "24AWG", color: "black", length: 10, ...(c2 ? { emcClass: c2 } : {}) })
+      ],
+      branches: [branch("main", { path: [a, b], nominalLength: 10 })]
+    })).hir
+  }
+  it("warns when an aggressor and a victim share a branch", () => {
+    const diags = only(mk("aggressor", "victim"), "emcAggressorVictimShareBranch")
+    expect(diags.map((d) => d.code)).toEqual(["HK-ELEC-008"])
+    expect(diags[0]?.severity).toBe("warning")
+  })
+  it("stays silent without both roles, or when wires are unclassified", () => {
+    expect(only(mk("aggressor", "neutral"), "emcAggressorVictimShareBranch")).toEqual([])
+    expect(only(mk(undefined, undefined), "emcAggressorVictimShareBranch")).toEqual([])
+  })
+})
+
+describe("HK-ELEC-009 wireTempBelowAmbient", () => {
+  const mk = (rating: number | undefined, ambient: number | undefined) => {
+    const a = connector("J1", { mpn: "TH-2", pinCount: 2 }, { pins: { 1: "A" } })
+    const b = connector("J2", { mpn: "TH-2B", pinCount: 2 }, { pins: { 1: "A" } })
+    return compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [wire("W1", a.pin(1), b.pin(1), { gauge: "24AWG", color: "red", length: 10, ...(rating !== undefined ? { temperatureRating: rating } : {}) })],
+      branches: [branch("main", { path: [a, b], nominalLength: 10, ...(ambient !== undefined ? { ambientTemperatureC: ambient } : {}) })]
+    })).hir
+  }
+  it("errors when a wire's rating is below the branch ambient", () => {
+    expect(only(mk(85, 105), "wireTempBelowAmbient").map((d) => d.code)).toEqual(["HK-ELEC-009"])
+  })
+  it("passes at or above ambient, or when either value is absent", () => {
+    expect(only(mk(125, 105), "wireTempBelowAmbient")).toEqual([])
+    expect(only(mk(undefined, 105), "wireTempBelowAmbient")).toEqual([])
+    expect(only(mk(85, undefined), "wireTempBelowAmbient")).toEqual([])
+  })
+})
+
+describe("HK-ELEC-010 overcurrentExceedsConductor", () => {
+  // 22AWG bundled ampacity is 2.3A in the shipped table.
+  const mk = (ratingA: number, gauge = "22AWG") => {
+    const a = connector("J1", { mpn: "F-2", pinCount: 2 }, { pins: { 1: "PWR" } })
+    const b = connector("J2", { mpn: "F-2B", pinCount: 2 }, { pins: { 1: "PWR" } })
+    return compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [wire("W1", a.pin(1), b.pin(1), { gauge, color: "red", length: 10, signal: "VBAT_12V" })],
+      protections: [protection("F1", { kind: "fuse", ratingA, protects: ["W1"] })]
+    })).hir
+  }
+  it("errors when the device out-rates the thinnest protected conductor", () => {
+    const diags = only(mk(5), "overcurrentExceedsConductor")
+    expect(diags.map((d) => d.code)).toEqual(["HK-ELEC-010"])
+    expect(diags[0]?.data).toMatchObject({ ratingA: 5, conductorAmpacityA: 2.3, governingWire: "W1" })
+  })
+  it("passes when the device protects the conductor", () => {
+    expect(only(mk(2), "overcurrentExceedsConductor")).toEqual([])
+  })
+  it("is silent when no protections are declared", () => {
+    const a = connector("J1", { mpn: "N-2", pinCount: 2 }, { pins: { 1: "PWR" } })
+    const b = connector("J2", { mpn: "N-2B", pinCount: 2 }, { pins: { 1: "PWR" } })
+    const { hir } = compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [wire("W1", a.pin(1), b.pin(1), { gauge: "22AWG", color: "red", length: 10 })]
+    }))
+    expect(only(hir, "overcurrentExceedsConductor")).toEqual([])
+  })
+})
+
+describe("compiler validates protections", () => {
+  it("HK-PROT-002 flags a protection guarding an undefined wire", () => {
+    const a = connector("J1", { mpn: "P-2", pinCount: 2 }, { pins: { 1: "PWR" } })
+    const b = connector("J2", { mpn: "P-2B", pinCount: 2 }, { pins: { 1: "PWR" } })
+    const { diagnostics, hir } = compileDesign(harness("t", {
+      revision: "A", units: "mm", connectors: [a, b],
+      wires: [wire("W1", a.pin(1), b.pin(1), { gauge: "22AWG", color: "red", length: 10 })],
+      protections: [protection("F1", { kind: "fuse", ratingA: 2, protects: ["W1", "GHOST"] })]
+    }))
+    expect(diagnostics.map((d) => d.code)).toContain("HK-PROT-002")
+    expect(hir.protections?.[0]).toMatchObject({ id: "F1", kind: "fuse", ratingA: 2 })
   })
 })

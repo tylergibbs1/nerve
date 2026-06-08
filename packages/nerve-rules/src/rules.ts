@@ -44,6 +44,23 @@ const wiredPins = (hir: Hir): ReadonlySet<string> => {
   return set
 }
 
+/** Wires whose endpoints both sit on a branch's path (splices count via their
+ * branch assignment) — the same membership the bundle-diameter rule uses. */
+const wiresOnBranch = (
+  hir: Hir,
+  branch: Hir["branches"][number]
+): ReadonlyArray<Hir["wires"][number]> => {
+  const onPath = new Set(branch.path)
+  const spliceBranch = new Map(
+    hir.splices.flatMap((sp) => (sp.branch !== undefined ? [[sp.id, sp.branch] as const] : []))
+  )
+  const nodeOnBranch = (e: HirEndpoint): boolean =>
+    isPinEndpoint(e)
+      ? onPath.has(e.connector)
+      : spliceBranch.get(e.splice) === branch.id || onPath.has(e.splice)
+  return hir.wires.filter((w) => nodeOnBranch(w.from) && nodeOnBranch(w.to))
+}
+
 // --- Documentation ----------------------------------------------------------
 
 export const missingRevision: Rule = rule(
@@ -873,6 +890,97 @@ export const twistGroupGaugeMismatch: Rule = rule(
   { code: "HK-ELEC-007" }
 )
 
+// --- EMC / environment / protection (HIR §tier-2 fields) --------------------
+
+/** A noisy "aggressor" wire and a sensitive "victim" wire bundled on the same
+ * branch couple crosstalk — they should route in separate bundles. Only fires
+ * when wires are explicitly classified via `emcClass`. */
+export const emcAggressorVictimShareBranch: Rule = rule(
+  "emcAggressorVictimShareBranch",
+  (ctx) => {
+    for (const b of ctx.hir.branches) {
+      const members = wiresOnBranch(ctx.hir, b)
+      const aggressors = members.filter((w) => w.emcClass === "aggressor")
+      const victims = members.filter((w) => w.emcClass === "victim")
+      if (aggressors.length === 0 || victims.length === 0) continue
+      ctx.report({
+        severity: Warn,
+        message: `Branch ${b.id} bundles aggressor wire(s) (${aggressors.map((w) => w.id).sort().join(", ")}) with victim wire(s) (${victims.map((w) => w.id).sort().join(", ")}); separate them to limit crosstalk.`,
+        target: refs.branch(b.id),
+        targets: [...aggressors, ...victims].map((w) => refs.wire(w.id)).sort(),
+        data: { aggressors: aggressors.length, victims: victims.length }
+      })
+    }
+  },
+  { code: "HK-ELEC-008" }
+)
+
+/** A wire routed through a branch hotter than its insulation rating will
+ * degrade. Fires when a branch declares an ambient above a member wire's
+ * temperatureRating. */
+export const wireTempBelowAmbient: Rule = rule(
+  "wireTempBelowAmbient",
+  (ctx) => {
+    for (const b of ctx.hir.branches) {
+      if (b.ambientTemperatureC === undefined) continue
+      for (const w of wiresOnBranch(ctx.hir, b)) {
+        if (w.temperatureRating === undefined) continue
+        if (w.temperatureRating < b.ambientTemperatureC) {
+          ctx.report({
+            severity: Err,
+            message: `Wire ${w.id} is rated ${w.temperatureRating}°C but branch ${b.id} runs at ${b.ambientTemperatureC}°C ambient.`,
+            target: refs.wire(w.id),
+            targets: [refs.branch(b.id)],
+            data: { temperatureRating: w.temperatureRating, ambientTemperatureC: b.ambientTemperatureC }
+          })
+        }
+      }
+    }
+  },
+  { code: "HK-ELEC-009" }
+)
+
+/** The cardinal protection rule: an overcurrent device must trip before the
+ * wire it guards overheats, so its rating cannot exceed the ampacity of the
+ * thinnest conductor it protects — otherwise "the wire becomes the fuse."
+ * Shop-parameterized so the ampacity table can be overridden. */
+export const overcurrentExceedsConductorWith = (shop?: ShopProfile): Rule => rule(
+  "overcurrentExceedsConductor",
+  (ctx) => {
+    const protections = ctx.hir.protections ?? []
+    if (protections.length === 0) return
+    const table = { ...AMPACITY_BY_AWG, ...shop?.ampacityByAwg }
+    const wireById = new Map(ctx.hir.wires.map((w) => [w.id, w]))
+    for (const p of protections) {
+      let governing: { wireId: string; ampacity: number } | undefined
+      for (const wireId of p.protects) {
+        const w = wireById.get(wireId)
+        if (w?.gauge === undefined) continue
+        const awg = parseAwg(w.gauge)
+        if (awg === undefined) continue
+        const ampacity = table[awg]
+        if (ampacity === undefined) continue
+        if (governing === undefined || ampacity < governing.ampacity) {
+          governing = { wireId, ampacity }
+        }
+      }
+      if (governing === undefined) continue
+      if (p.ratingA > governing.ampacity) {
+        ctx.report({
+          severity: Err,
+          message: `${p.kind} ${p.id} is rated ${p.ratingA}A but its thinnest protected wire ${governing.wireId} carries only ${governing.ampacity}A; the wire would fail before the device trips.`,
+          target: `protection:${p.id}`,
+          targets: [refs.wire(governing.wireId)],
+          data: { ratingA: p.ratingA, conductorAmpacityA: governing.ampacity, governingWire: governing.wireId }
+        })
+      }
+    }
+  },
+  { code: "HK-ELEC-010" }
+)
+
+export const overcurrentExceedsConductor: Rule = overcurrentExceedsConductorWith()
+
 /**
  * builtinRules with the shop-capability rules parameterized by a profile
  * (PRD §10.5 config: `defineConfig({ shop: { … } })`). Same rule names and
@@ -888,7 +996,9 @@ export const builtinRulesWith = (shop?: ShopProfile): ReadonlyArray<Rule> =>
             ? bundleOverSleeveCapacityWith(shop)
             : r.name === "breakoutTighterThanBendRadius"
               ? breakoutTighterThanBendRadiusWith(shop)
-              : r
+              : r.name === "overcurrentExceedsConductor"
+                ? overcurrentExceedsConductorWith(shop)
+                : r
       )
 
 export const builtinRules: ReadonlyArray<Rule> = [
@@ -922,5 +1032,8 @@ export const builtinRules: ReadonlyArray<Rule> = [
   branchParentInvalid,
   cableConductorOverflow,
   orphanedDifferentialHalf,
-  twistGroupGaugeMismatch
+  twistGroupGaugeMismatch,
+  emcAggressorVictimShareBranch,
+  wireTempBelowAmbient,
+  overcurrentExceedsConductor
 ]

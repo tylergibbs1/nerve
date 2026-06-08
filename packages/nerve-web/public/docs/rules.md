@@ -1,6 +1,6 @@
 > Grayhaven Nerve docs index: https://nerve-demo.vercel.app/llms.txt. Fetch it to discover all pages before exploring further.
 
-# 31 built-in validation rules.
+# 34 built-in validation rules.
 
 Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated from the shipped `builtinRules` array in `@grayhaven/nerve-rules`; it cannot drift from the code. Custom rules use the same `rule()` API and get their own codes.
 
@@ -37,6 +37,9 @@ Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated
 | `HK-MFG-010` | `cableConductorOverflow` | A cable can't carry more wires than it has conductors. |
 | `HK-ELEC-006` | `orphanedDifferentialHalf` | A bus differential half (CAN/RS-485/USB) needs its partner present. |
 | `HK-ELEC-007` | `twistGroupGaugeMismatch` | Wires in one twist group should share a gauge to limit skew. |
+| `HK-ELEC-008` | `emcAggressorVictimShareBranch` | Aggressor and victim wires shouldn't share a bundle. |
+| `HK-ELEC-009` | `wireTempBelowAmbient` | A wire's temperature rating must meet its branch's ambient. |
+| `HK-ELEC-010` | `overcurrentExceedsConductor` | A fuse/breaker rating can't exceed the ampacity of the thinnest wire it protects. |
 
 ## Example diagnostic
 

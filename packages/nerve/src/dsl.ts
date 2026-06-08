@@ -18,6 +18,8 @@ import type {
   LabelProps,
   PinAssignments,
   PinRef,
+  ProtectionDef,
+  ProtectionProps,
   SpliceDef,
   SpliceProps,
   WireDef,
@@ -127,6 +129,14 @@ export const branch = (id: string, props: BranchProps): BranchDef => {
   }
 }
 
+/** Define an overcurrent device and the wires it guards:
+ * `protection("F1", { kind: "fuse", ratingA: 5, protects: ["W1", "W2"] })`. */
+export const protection = (id: string, props: ProtectionProps): ProtectionDef => ({
+  id,
+  ...props,
+  protects: [...props.protects]
+})
+
 /** Define a label: `label("L1", { text: "MOTOR CTRL A", attachTo: "main", ... })`. */
 export const label = (id: string, props: LabelProps): LabelDef => {
   const { attachTo, offsetFrom, ...rest } = props
@@ -151,5 +161,6 @@ export const harness = (id: string, props: HarnessProps): HarnessDesign => ({
   branches: props.branches ?? [],
   labels: props.labels ?? [],
   splices: props.splices ?? [],
-  cables: props.cables ?? []
+  cables: props.cables ?? [],
+  protections: props.protections ?? []
 })
