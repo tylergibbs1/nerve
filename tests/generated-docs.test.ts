@@ -12,6 +12,8 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 import { dslReferenceMd, extractDslMeta } from "../packages/nerve-web/scripts/extract-dsl.js"
+import { builtinRules } from "../packages/nerve-rules/src/index.js"
+import { RULE_SUMMARIES } from "../packages/nerve-web/src/docs/rule-summaries.js"
 
 const WEB = join(import.meta.dirname, "..", "packages", "nerve-web")
 const REGEN = "Regenerate: cd packages/nerve-web && bun scripts/gen-llms.ts"
@@ -53,5 +55,19 @@ describe("generated DSL reference", () => {
     const label = fresh.interfaces.find((i) => i.name === "LabelProps")
     expect(label?.props.map((p) => p.name)).toContain("attachTo")
     expect(label?.props.map((p) => p.name)).not.toContain("position")
+  })
+})
+
+describe("generated rules reference", () => {
+  // The rules page renders RULE_SUMMARIES[name] ?? "-" on a page that
+  // advertises it cannot drift — a missing summary ships a blank "Checks"
+  // cell. Every built-in rule must carry one (caught HK-MFG-007 and
+  // HK-CONN-016/017 shipping blank).
+  it("every built-in rule has a one-line summary", () => {
+    const missing = builtinRules.filter((r) => RULE_SUMMARIES[r.name] === undefined)
+    expect(
+      missing.map((r) => `${r.code} ${r.name}`),
+      "add these to packages/nerve-web/src/docs/rule-summaries.ts"
+    ).toEqual([])
   })
 })

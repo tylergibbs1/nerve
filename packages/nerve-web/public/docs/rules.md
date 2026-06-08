@@ -13,7 +13,7 @@ Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated
 | `HK-MFG-002` | `missingWireColor` | Every wire should declare a color for the cut list and loom work. |
 | `HK-MFG-003` | `missingWireGauge` | Every wire must declare a gauge. |
 | `HK-MFG-004` | `gaugeOutsideConnectorRange` | Wire gauge must sit inside the connector part's wireGaugeRange. |
-| `HK-MFG-007` | `unparseableGauge` | - |
+| `HK-MFG-007` | `unparseableGauge` | Flags gauges that aren't AWG, so the gauge-based checks can't verify them (metric is Info, not a warning). |
 | `HK-WIRE-004` | `gaugeCurrentMismatch` | Wire gauge must carry the declared or estimated current (ampacity table). |
 | `HK-ELEC-001` | `differentialPairNotTwisted` | Differential pairs (CAN_H/CAN_L…) must share a twist group. |
 | `HK-ELEC-002` | `twistGroupTooSmall` | A twist group needs at least two wires. |
@@ -24,12 +24,12 @@ Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated
 | `HK-CONN-012` | `terminalIncompatible` | Terminal part must accept the wire gauge crimped into it. |
 | `HK-CONN-013` | `missingSeal` | Sealed connector families require a seal part on each wired cavity. |
 | `HK-CONN-014` | `sealIncompatible` | Seal part must match the wire gauge it seals. |
-| `HK-CONN-016` | `connectorCurrentExceeded` | - |
-| `HK-CONN-017` | `connectorVoltageExceeded` | - |
-| `HK-ELEC-005` | `voltageRatingBelowSignal` | - |
-| `HK-CONN-015` | `reservedPinAssigned` | - |
-| `HK-MFG-005` | `breakoutTighterThanBendRadius` | - |
-| `HK-MFG-006` | `bundleOverSleeveCapacity` | - |
+| `HK-CONN-016` | `connectorCurrentExceeded` | Wire current estimate must stay within the connector contact's rated amps. |
+| `HK-CONN-017` | `connectorVoltageExceeded` | A rail's nominal voltage (from its name) must stay within the connector's rated volts. |
+| `HK-ELEC-005` | `voltageRatingBelowSignal` | A wire's voltage rating must meet the nominal volts its signal carries. |
+| `HK-CONN-015` | `reservedPinAssigned` | Reserved/keyed pins must stay unassigned. |
+| `HK-MFG-005` | `breakoutTighterThanBendRadius` | A branch breakout must clear the bundle's minimum bend radius. |
+| `HK-MFG-006` | `bundleOverSleeveCapacity` | A branch bundle must fit inside its sleeve's capacity. |
 
 ## Example diagnostic
 

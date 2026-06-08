@@ -6,7 +6,7 @@
  *   public/llms-full.txt    — the entire docs embedded, no fetches needed
  * The rules page is generated from the live builtinRules array.
  */
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { builtinRules } from "../../nerve-rules/src/index.ts"
 import { allParts, partSpecs } from "../../nerve-connectors/src/index.ts"
@@ -61,22 +61,42 @@ const hirMd = (): string => {
   }
   type Obj = Record<string, unknown>
   const isObj = (v: unknown): v is Obj => typeof v === "object" && v !== null && !Array.isArray(v)
+  // Effect emits Schema.Unknown as { $id: "/schemas/unknown" } (or {}).
+  // Match it precisely — a stringify-includes check would mis-flag any
+  // struct that merely CONTAINS an unknown field as wholly unknown.
+  const isUnknownSchema = (s: Obj): boolean =>
+    s["$id"] === "/schemas/unknown" ||
+    (typeof s["$ref"] === "string" && s["$ref"].endsWith("/unknown")) ||
+    Object.keys(s).length === 0
+  // A record (Schema.Record) is an object with NO declared properties but
+  // an additionalProperties value-schema — distinct from a struct.
+  const isRecord = (s: Obj): boolean =>
+    s["type"] === "object" &&
+    (!isObj(s["properties"]) || Object.keys(s["properties"] as Obj).length === 0)
   const typeOf = (s: unknown): string => {
     if (!isObj(s)) return "unknown"
     if (s["enum"] !== undefined) return (s["enum"] as Array<unknown>).map((e) => JSON.stringify(e)).join(" \\| ")
     if (s["anyOf"] !== undefined) return (s["anyOf"] as Array<unknown>).map(typeOf).join(" \\| ")
     if (s["type"] === "array") return `Array<${typeOf(s["items"])}>`
+    // Record before the unknown check: a record-of-unknown is
+    // Record<string, unknown>, not bare "unknown".
+    if (isRecord(s)) {
+      const valueType = isObj(s["additionalProperties"]) ? typeOf(s["additionalProperties"]) : "unknown"
+      return `Record<string, ${valueType}>`
+    }
+    if (isUnknownSchema(s)) return "unknown"
     if (s["type"] === "object" && isObj(s["properties"])) {
       return `{ ${Object.keys(s["properties"]).join(", ")} }`
     }
-    if (s["type"] === "object") return "object (record)"
     return String(s["type"] ?? "unknown")
   }
   const table = (name: string, s: unknown): string => {
     if (!isObj(s)) return ""
     // Arrays of structs document the element shape.
     const target = s["type"] === "array" && isObj(s["items"]) ? s["items"] : s
-    if (!isObj(target) || !isObj(target["properties"])) {
+    // Records and property-less objects have no field table — render the
+    // single-line type form instead of an empty header-only table.
+    if (!isObj(target) || isRecord(target) || !isObj(target["properties"]) || Object.keys(target["properties"] as Obj).length === 0) {
       return `## ${name}\n\nType: \`${typeOf(s)}\`\n`
     }
     const req = new Set(Array.isArray(target["required"]) ? (target["required"] as Array<string>) : [])
@@ -266,4 +286,7 @@ writeFileSync(
   join(ROOT, "src", "docs", "rules-meta.json"),
   JSON.stringify(builtinRules.map((r) => ({ code: r.code, name: r.name })), null, 2) + "\n"
 )
-console.log(`generated llms.txt, llms-full.txt, ${PAGES.length + 1} page mirrors`)
+// Count what was actually written rather than trusting a hand-kept
+// formula (it drifted to "+1" while the script grew rules/hir/library).
+const mirrorCount = readdirSync(join(OUT, "docs")).filter((f) => f.endsWith(".md")).length
+console.log(`generated llms.txt, llms-full.txt, ${mirrorCount} page mirrors`)

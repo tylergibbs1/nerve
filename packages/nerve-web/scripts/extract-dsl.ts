@@ -74,11 +74,22 @@ const docOf = (node: ts.Node): string => {
   return ""
 }
 
-/** Single-line rendering of a type/params source span: newlines inside
- * object literals become `; ` separators (TS allows newline as member
- * separator in source; flattened text needs the explicit one). */
+/** Single-line rendering of a type/params source span. Newlines inside
+ * object literals become `; ` separators (TS allows newline as a member
+ * separator), BUT a newline that follows a separator already present in
+ * the syntax (`,`, `|`, `&`, `{`, `(`, `<`) or precedes one (`|`, `&`,
+ * `)`, `}`, `>`) must collapse to a space, or a wrapped union
+ * (`| "a"\n| "b"`) / trailing comma would gain a spurious `;`. Line and
+ * block comments are stripped first (they'd swallow the rest of the
+ * single line otherwise). */
 const flat = (text: string): string =>
   text
+    .replace(/\/\/[^\n]*/g, "") // line comments
+    .replace(/\/\*[\s\S]*?\*\//g, "") // block comments
+    // newline that is structurally already separated → just whitespace
+    .replace(/([,{(<|&])\s*\n\s*/g, "$1 ")
+    .replace(/\s*\n\s*([|&)}\]>])/g, " $1")
+    // remaining newlines separate object members → explicit `;`
     .replace(/\s*\n\s*/g, "; ")
     .replace(/\{;\s*/g, "{ ")
     .replace(/;\s*\}/g, " }")
@@ -136,7 +147,7 @@ export const dslReferenceMd = (meta: DslMeta): string => {
       const rows = i.props
         .map(
           (p) =>
-            `| \`${p.name}\` | \`${p.type.replace(/\|/g, "\\|")}\` | ${p.optional ? "no" : "yes"} | ${p.doc.replace(/\n/g, " ")} |`
+            `| \`${p.name}\` | \`${p.type.replace(/\|/g, "\\|")}\` | ${p.optional ? "no" : "yes"} | ${p.doc.replace(/\n/g, " ").replace(/\|/g, "\\|")} |`
         )
         .join("\n")
       return `### ${i.name}\n\n| Prop | Type | Required | Notes |\n| --- | --- | --- | --- |\n${rows}`

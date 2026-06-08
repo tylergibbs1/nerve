@@ -17,7 +17,7 @@ Type: `"0.1.0"`
 | `id` | `string` | yes |  |
 | `revision` | `string` | yes |  |
 | `units` | `"mm" \| "in"` | yes |  |
-| `metadata` | `{  }` | yes |  |
+| `metadata` | `Record<string, string>` | yes |  |
 
 ## connectors
 
@@ -156,7 +156,7 @@ Array of:
 | `message` | `string` | yes |  |
 | `target` | `string` | no |  |
 | `targets` | `Array<string>` | no |  |
-| `data` | `{  }` | no |  |
+| `data` | `Record<string, string \| number>` | no |  |
 
 ## layoutHints
 
@@ -164,11 +164,7 @@ Type: `Array<unknown>`
 
 ## exports
 
-
-
-| Field | Type | Required | Notes |
-| --- | --- | --- | --- |
-
+Type: `Record<string, unknown>`
 
 ## Versioning
 

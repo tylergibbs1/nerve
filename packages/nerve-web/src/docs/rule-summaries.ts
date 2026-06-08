@@ -19,5 +19,12 @@ export const RULE_SUMMARIES: Record<string, string> = {
   shieldDrainUnconnected: "Cable shields must land their drain on a pin.",
   spliceMissingNotes: "Splices should document their joint (type/notes) for the build book.",
   unconnectedAssignedPin: "A pin assigned a signal must be touched by at least one wire.",
-  wireSignalMismatch: "A wire's endpoints must agree on the signal it carries."
+  wireSignalMismatch: "A wire's endpoints must agree on the signal it carries.",
+  unparseableGauge: "Flags gauges that aren't AWG, so the gauge-based checks can't verify them (metric is Info, not a warning).",
+  connectorCurrentExceeded: "Wire current estimate must stay within the connector contact's rated amps.",
+  connectorVoltageExceeded: "A rail's nominal voltage (from its name) must stay within the connector's rated volts.",
+  voltageRatingBelowSignal: "A wire's voltage rating must meet the nominal volts its signal carries.",
+  reservedPinAssigned: "Reserved/keyed pins must stay unassigned.",
+  breakoutTighterThanBendRadius: "A branch breakout must clear the bundle's minimum bend radius.",
+  bundleOverSleeveCapacity: "A branch bundle must fit inside its sleeve's capacity."
 }
