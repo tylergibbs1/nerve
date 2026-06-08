@@ -26,6 +26,13 @@ describe("share-link codec", () => {
     expect(a).toMatch(/^v1\.[A-Za-z0-9_-]+$/) // base64url, no padding
   })
 
+  it("encoding is byte-golden — an fflate bump that changes the bytes fails here", () => {
+    // The gzip output (and thus the share URL) must be stable across
+    // fflate versions, or old links would stop round-tripping. Snapshot
+    // the encoded fragment; refresh intentionally with `vitest -u`.
+    expect(encodeShareHash(MOTOR)).toMatchSnapshot()
+  })
+
   it("stays comfortably inside URL limits for a real harness", () => {
     // ~2KB gzipped for the PRD example; browsers handle fragments far
     // larger, but keep an eye on growth.

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import { describe, expect, it } from "vitest"
 import { PDFDocument } from "pdf-lib"
 import { compileDesign, branch, connector, harness, wire } from "@grayhaven/nerve"
@@ -235,6 +236,15 @@ describe("manufacturing packet (PRD §9.8)", () => {
       "assembly-instructions.txt"
     ])
     expect(Buffer.from(a.zip).equals(Buffer.from(b.zip))).toBe(true)
+  })
+
+  it("packet zip bytes are golden — an fflate/pdf-lib bump that changes them fails here", async () => {
+    // Same-process determinism (above) can't see a dependency-version
+    // byte change. This hashes the whole zip against a committed snapshot,
+    // so a Renovate bump that alters compression/PDF output trips the
+    // determinism gate. Refresh intentionally with `vitest -u`.
+    const { zip } = await buildPacket(hir, { defaultWireTolerance: 10 })
+    expect(createHash("sha256").update(Buffer.from(zip)).digest("hex")).toMatchSnapshot()
   })
 
   it("cover sheet carries revision metadata, not timestamps", async () => {

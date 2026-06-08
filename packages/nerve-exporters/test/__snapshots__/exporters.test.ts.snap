@@ -172,6 +172,8 @@ exports[`harness board view (PRD §9.5.3) > renders branch trunk, endpoints, sle
 "
 `;
 
+exports[`manufacturing packet (PRD §9.8) > packet zip bytes are golden — an fflate/pdf-lib bump that changes them fails here 1`] = `"69bffecb0954ff29a75b48c7a220dc7b3678d6731984459f8b01dec077bf7ddc"`;
+
 exports[`test plan (PRD §9.9) > CSV form is deterministic 1`] = `
 "Test ID,Type,From connector,From pin,To connector,To pin,Expected,Net,Wire
 T-001,continuity,J1,1,M1,1,closed,VBAT_24V,W1
