@@ -237,6 +237,9 @@ fullParts.splice(3, 0, rules)
 // HIR contract page is generated from the live schema, not authored.
 const hir = hirMd()
 writeFileSync(join(OUT, "docs", "hir.md"), indexNote + hir)
+// Also emit the raw markdown into docs-content so the in-app /docs/hir
+// route renders it through the same glob the authored pages use.
+writeFileSync(join(ROOT, "docs-content", "hir.md"), hir)
 sections.splice(4, 0, `- [HIR Schema](${SITE}/docs/hir.md) (generated from the live Effect schema)`)
 fullParts.splice(4, 0, hir)
 
