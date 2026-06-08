@@ -22,7 +22,11 @@ describe("parseAwg", () => {
     ["41", undefined], // bare numbers only inside hookup-wire range
     ["0.5", undefined], // metric mm² stays unparsed
     ["0.5mm2", undefined],
-    ["18AWG TXL", undefined], // anchored: trailing junk is not silently accepted
+    // Spec-suffixed catalog strings still yield their gauge for the rules
+    // (leading-anchored with a word boundary); canonicalGauge keeps the text.
+    ["18AWG TXL", 18],
+    ["18 AWG TXL", 18],
+    ["AWG18 (TEW)", 18],
     ["", undefined]
   ])("%j → %j", (input, expected) => {
     expect(parseAwg(input)).toBe(expected)
@@ -39,6 +43,11 @@ describe("canonicalGauge", () => {
   it("passes unparseable gauges through unchanged", () => {
     expect(canonicalGauge("0.5mm2")).toBe("0.5mm2")
     expect(canonicalGauge("twisted-pair")).toBe("twisted-pair")
+  })
+
+  it("leaves spec-suffixed AWG strings verbatim (no info loss)", () => {
+    expect(canonicalGauge("18 AWG TXL")).toBe("18 AWG TXL")
+    expect(canonicalGauge("AWG18 (TEW)")).toBe("AWG18 (TEW)")
   })
 })
 

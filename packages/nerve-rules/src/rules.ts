@@ -29,7 +29,7 @@ import {
   sleeveCapacityMm
 } from "./wire-data.js"
 
-const { Error: Err, Warning: Warn } = DiagnosticSeverity
+const { Error: Err, Warning: Warn, Info } = DiagnosticSeverity
 
 const endpointKey = (e: HirEndpoint): string =>
   isPinEndpoint(e) ? `${e.connector}:${e.pin}` : `splice:${e.splice}`
@@ -170,18 +170,31 @@ export const gaugeOutsideConnectorRange: Rule = rule(
   { code: "HK-MFG-004" }
 )
 
+/** Well-formed metric cross-section, e.g. "0.5mm2" / "16 mm²". */
+const isMetricGauge = (gauge: string): boolean =>
+  /^\d+(\.\d+)?\s*mm(2|²)$/i.test(gauge.trim())
+
 export const unparseableGauge: Rule = rule(
   "unparseableGauge",
   (ctx) => {
     for (const w of ctx.hir.wires) {
       if (w.gauge === undefined) continue // HK-MFG-003's job
-      if (parseAwg(w.gauge) === undefined) {
+      if (parseAwg(w.gauge) !== undefined) continue
+      // A well-formed metric gauge isn't an error — it's just outside the
+      // AWG-keyed tables. Info, not a forever-Warning on every metric wire.
+      if (isMetricGauge(w.gauge)) {
         ctx.report({
-          severity: Warn,
-          message: `Wire ${w.id} gauge "${w.gauge}" is not recognized as AWG; gauge-based checks (HK-MFG-004, HK-WIRE-004, HK-MFG-006) cannot verify this wire.`,
+          severity: Info,
+          message: `Wire ${w.id} uses metric gauge "${w.gauge}"; the AWG-based checks (HK-MFG-004, HK-WIRE-004, HK-MFG-006) don't apply.`,
           target: refs.wire(w.id)
         })
+        continue
       }
+      ctx.report({
+        severity: Warn,
+        message: `Wire ${w.id} gauge "${w.gauge}" is not recognized as AWG; gauge-based checks (HK-MFG-004, HK-WIRE-004, HK-MFG-006) cannot verify this wire.`,
+        target: refs.wire(w.id)
+      })
     }
   },
   { code: "HK-MFG-007" }
@@ -459,6 +472,11 @@ export const connectorVoltageExceeded: Rule = rule(
     const byRef = new Map(ctx.hir.connectors.map((c) => [c.ref, c]))
     for (const w of ctx.hir.wires) {
       if (w.signal === undefined) continue
+      // Voltage is INFERRED from the signal name, so only trust it for
+      // rail-shaped names (isPowerSignal is anchored precisely to exclude
+      // FB_400V / EN_48V / SENSE_24V, which carry logic levels). And even
+      // then it's an inference — Warning, not a fail-closed Error.
+      if (!isPowerSignal(w.signal)) continue
       const nominal = signalNominalVolts(w.signal)
       if (nominal === undefined) continue
       for (const end of [w.from, w.to]) {
@@ -467,8 +485,8 @@ export const connectorVoltageExceeded: Rule = rule(
         if (c?.voltageLimitV === undefined) continue
         if (nominal > c.voltageLimitV) {
           ctx.report({
-            severity: Err,
-            message: `Wire ${w.id} carries ${w.signal} (nominal ${nominal}V) but connector ${end.connector} (${c.mpn}) is rated ${c.voltageLimitV}V.`,
+            severity: Warn,
+            message: `Wire ${w.id} carries ${w.signal} (nominal ${nominal}V inferred from its name) but connector ${end.connector} (${c.mpn}) is rated ${c.voltageLimitV}V.`,
             target: refs.pin(end.connector, end.pin),
             targets: [refs.wire(w.id)],
             data: { nominalV: nominal, voltageLimitV: c.voltageLimitV }

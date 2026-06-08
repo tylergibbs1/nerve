@@ -75,8 +75,13 @@ const expandPins = (spec: unknown): Array<string> => {
 
 const normalizeGauge = (gauge: unknown): string | undefined => {
   if (gauge === undefined || gauge === null) return undefined
-  // Same canonicalization compileDesign applies — one spelling everywhere.
-  return canonicalGauge(String(gauge).trim())
+  const s = String(gauge).trim()
+  // WireViz convention (syntax.md): a unitless gauge number is mm², NOT
+  // AWG. Tag it so canonicalGauge/parseAwg never misread "16" (16mm² ≈
+  // 5AWG) as 16AWG. Explicit AWG spellings canonicalize as everywhere else.
+  if (/awg/i.test(s)) return canonicalGauge(s)
+  if (/^\d+(\.\d+)?$/.test(s)) return `${s}mm2`
+  return s
 }
 
 export const importWireViz = (

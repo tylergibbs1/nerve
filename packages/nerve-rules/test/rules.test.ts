@@ -118,7 +118,21 @@ describe("manufacturing rules", () => {
     expect(diags[0]?.message).toContain("accepts 18AWG to 30AWG")
   })
 
-  it("HK-MFG-007: unparseable gauge is a visible warning, not a silent skip", () => {
+  it("HK-MFG-007: a genuine non-AWG typo is a visible warning, not a silent skip", () => {
+    const hir = make([
+      wire("W1", j1.pin(1), j2.pin(1), { gauge: "18AGW", signal: "VBAT_24V" })
+    ])
+    const diags = runRules(
+      hir,
+      builtinRules.filter((r) => r.name === "unparseableGauge")
+    )
+    expect(diags.map((d) => d.code)).toEqual(["HK-MFG-007"])
+    expect(diags[0]?.severity).toBe("warning")
+    expect(diags[0]?.message).toContain('"18AGW"')
+    expect(diags[0]?.message).toContain("HK-MFG-004")
+  })
+
+  it("HK-MFG-007: a well-formed metric gauge is Info, not a forever-Warning", () => {
     const hir = make([
       wire("W1", j1.pin(1), j2.pin(1), { gauge: "0.5mm2", signal: "VBAT_24V" })
     ])
@@ -127,9 +141,8 @@ describe("manufacturing rules", () => {
       builtinRules.filter((r) => r.name === "unparseableGauge")
     )
     expect(diags.map((d) => d.code)).toEqual(["HK-MFG-007"])
-    expect(diags[0]?.severity).toBe("warning")
-    expect(diags[0]?.message).toContain('"0.5mm2"')
-    expect(diags[0]?.message).toContain("HK-MFG-004")
+    expect(diags[0]?.severity).toBe("info")
+    expect(diags[0]?.message).toContain("metric gauge")
   })
 
   it("HK-MFG-007: canonicalized AWG spellings never fire", () => {
@@ -255,16 +268,16 @@ describe("electrical rules", () => {
     expect(diags[0]?.data).toMatchObject({ currentEstimateA: 5, currentLimitA: 2 })
   })
 
-  it("HK-CONN-017: signal nominal volts above connector rating", () => {
+  it("HK-CONN-017: rail nominal volts above connector rating (Warning, inferred)", () => {
     const rated: ConnectorPart = { mpn: "PH-2", pinCount: 2, voltageLimitV: 100 }
-    const a = connector("J1", rated, { pins: { 1: "HV_400V", 2: "GND" } })
-    const b = connector("J2", part, { pins: { 1: "HV_400V", 2: "GND" } })
+    const a = connector("J1", rated, { pins: { 1: "VBAT_400V", 2: "GND" } })
+    const b = connector("J2", part, { pins: { 1: "VBAT_400V", 2: "GND" } })
     const hir = compile(
       harness("overvoltage", {
         revision: "A",
         units: "mm",
         connectors: [a, b],
-        wires: [wire("W1", a.pin(1), b.pin(1), { signal: "HV_400V" })]
+        wires: [wire("W1", a.pin(1), b.pin(1), { signal: "VBAT_400V" })]
       })
     )
     const diags = runRules(
@@ -272,7 +285,29 @@ describe("electrical rules", () => {
       builtinRules.filter((r) => r.name === "connectorVoltageExceeded")
     )
     expect(diags.map((d) => d.code)).toEqual(["HK-CONN-017"])
+    // Inferred from the name → Warning, not a fail-closed Error.
+    expect(diags[0]?.severity).toBe("warning")
     expect(diags[0]?.data).toMatchObject({ nominalV: 400, voltageLimitV: 100 })
+  })
+
+  it("HK-CONN-017: does NOT fire on non-rail names with a volt token (FB_400V, EN_48V)", () => {
+    const rated: ConnectorPart = { mpn: "PH-2", pinCount: 2, voltageLimitV: 100 }
+    const a = connector("J1", rated, { pins: { 1: "FB_400V", 2: "EN_48V" } })
+    const b = connector("J2", part, { pins: { 1: "FB_400V", 2: "EN_48V" } })
+    const hir = compile(
+      harness("logic-lines", {
+        revision: "A",
+        units: "mm",
+        connectors: [a, b],
+        wires: [
+          wire("W1", a.pin(1), b.pin(1), { signal: "FB_400V" }),
+          wire("W2", a.pin(2), b.pin(2), { signal: "EN_48V" })
+        ]
+      })
+    )
+    expect(
+      runRules(hir, builtinRules.filter((r) => r.name === "connectorVoltageExceeded"))
+    ).toEqual([])
   })
 
   it("HK-ELEC-001: differential pair not twisted", () => {

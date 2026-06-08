@@ -17,13 +17,18 @@ const BARE_AWG_MIN = 1
 const BARE_AWG_MAX = 40
 
 /**
- * Parse an AWG gauge string → its number.
- * Accepts "18AWG", "18 AWG", "awg18", "AWG 18", and bare "18".
+ * Parse an AWG gauge string → its number, for the rule layer.
+ *
+ * Leading-anchored with a word boundary so spec-suffixed catalog strings
+ * still yield their gauge: "18 AWG TXL" / "AWG18 (TEW)" → 18 (the rules
+ * must still hold these to ampacity). A bare integer is AWG only inside
+ * the hookup-wire range. "20.5AWG" stays unparsed (the decimal breaks the
+ * boundary), as does any string whose number isn't immediately AWG.
  */
 export const parseAwg = (gauge: string): number | undefined => {
   const s = gauge.trim()
   const match =
-    /^(\d+)\s*AWG$/i.exec(s) ?? /^AWG\s*(\d+)$/i.exec(s) ?? /^(\d+)$/.exec(s)
+    /^(\d+)\s*AWG\b/i.exec(s) ?? /^AWG\s*(\d+)\b/i.exec(s) ?? /^(\d+)$/.exec(s)
   if (match === null) return undefined
   const n = Number(match[1])
   if (!Number.isInteger(n) || n <= 0) return undefined
@@ -33,11 +38,18 @@ export const parseAwg = (gauge: string): number | undefined => {
 }
 
 /**
- * Canonical spelling for a gauge string: AWG inputs normalize to "18AWG";
- * anything unparseable is returned unchanged (and HK-MFG-007 flags it).
+ * Canonical spelling for a gauge string. Only a WHOLE-string AWG spelling
+ * is rewritten ("20"/"20 AWG"/"awg20" → "20AWG"); spec-suffixed strings
+ * ("18 AWG TXL") and metric ("0.5mm2") keep their text verbatim so no
+ * information is lost — parseAwg still reads the gauge from them for the
+ * rules, and HK-MFG-007 flags whatever genuinely isn't AWG.
  */
 export const canonicalGauge = (gauge: string): string => {
-  const awg = parseAwg(gauge)
+  const s = gauge.trim()
+  const whole =
+    /^(\d+)\s*AWG$/i.exec(s) ?? /^AWG\s*(\d+)$/i.exec(s) ?? /^(\d+)$/.exec(s)
+  if (whole === null) return gauge
+  const awg = parseAwg(s)
   return awg !== undefined ? `${awg}AWG` : gauge
 }
 
