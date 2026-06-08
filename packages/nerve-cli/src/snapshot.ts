@@ -92,6 +92,15 @@ export const runSnapshot = async (
       const actual = render(hir)
       const snapPath = join(snapDir, `${name}-${view}.snap.svg`)
       const existed = existsSync(snapPath)
+      // In --ci a MISSING snapshot is a failure, never a silent
+      // write-and-pass: otherwise a CI repo that never committed
+      // __snapshots__/ is green-by-creation forever (the gate enforces
+      // nothing). Auto-write only on local / --update runs.
+      if (!existed && ci && !update) {
+        drifted += 1
+        io.err(`✗ ${name}-${view}: no committed snapshot — run \`nerve snapshot\` locally and commit ${snapPath}`)
+        continue
+      }
       if (!existed || update) {
         mkdirSync(snapDir, { recursive: true })
         writeFileSync(snapPath, actual)
@@ -114,7 +123,7 @@ export const runSnapshot = async (
   }
 
   if (drifted > 0) {
-    io.err(`${drifted} snapshot(s) drifted. If intentional, run with --update to fix.`)
+    io.err(`${drifted} snapshot(s) drifted or missing. If intentional, run with --update to fix.`)
     return 1
   }
   io.out(

@@ -102,7 +102,11 @@ const INIT_TSCONFIG = `{
 `
 
 const INIT_GITIGNORE = `node_modules/
-dist/
+# Ignore build output, but commit the HIR baseline so the reproduce
+# workflow has something to diff against (git can't re-include a file
+# under a fully-ignored dir, so ignore the CONTENTS, not the dir).
+dist/*
+!dist/harness.json
 `
 
 /** init: a complete runnable project. */
@@ -128,7 +132,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm ci || npm install
+      # npm ci fails loudly on lockfile drift; the old "|| npm install"
+      # fallback would swallow that and float deps in the gate.
+      - run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
       # Exit 1 on any HK-* error; the release gate fails closed.
       - run: npx nerve validate
 `
@@ -146,7 +152,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm ci || npm install
+      # npm ci fails loudly on lockfile drift; the old "|| npm install"
+      # fallback would swallow that and float deps in the gate.
+      - run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
       # Byte-exact: any drawing change fails until snapshots are
       # deliberately refreshed with \`nerve snapshot --update\`.
       - run: npx nerve snapshot --ci
@@ -173,13 +181,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm ci || npm install
+      # npm ci fails loudly on lockfile drift; the old "|| npm install"
+      # fallback would swallow that and float deps in the gate.
+      - run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
       - run: |
           if [ -f dist/harness.json ]; then
             npx nerve compile --out /tmp/fresh
             npx nerve diff dist/harness.json /tmp/fresh/harness.json
           else
-            echo "No committed dist/harness.json — nothing to reproduce."
+            echo "::notice::No committed dist/harness.json — run nerve compile and commit it to enable the reproducibility gate."
           fi
 `
 

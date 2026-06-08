@@ -391,6 +391,23 @@ describe("nerve snapshot", () => {
       rmSync(dir, { recursive: true, force: true })
     }
   }, 60000)
+
+  it("--ci fails on a MISSING snapshot instead of writing-and-passing", async () => {
+    const { dir, harness } = project()
+    try {
+      // No snapshots committed yet. A bare --ci run must NOT silently
+      // create them and pass (green-by-creation) — it must fail loudly.
+      const io = capture()
+      expect(await run(["snapshot", harness, "--ci"], io)).toBe(1)
+      expect(io.stderr.join("\n")).toContain("no committed snapshot")
+      expect(existsSync(join(dir, "src", "__snapshots__"))).toBe(false)
+      // Local (non-ci) run still writes them.
+      expect(await run(["snapshot", harness], capture())).toBe(0)
+      expect(existsSync(join(dir, "src", "__snapshots__", "main-schematic.snap.svg"))).toBe(true)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
+  }, 60000)
 })
 
 describe("nerve parts", () => {

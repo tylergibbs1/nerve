@@ -62,19 +62,28 @@ for (const name of PACKAGES) {
 
   copyFileSync(pkgPath, backupPath)
   writeFileSync(pkgPath, JSON.stringify(transformed, null, 2) + "\n")
+  let status: number | null
   try {
     const args = packOnly
       ? ["pm", "pack", "--destination", packDest]
-      : ["publish", "--access", "public"]
-    const r = spawnSync("bun", args, { cwd: dir, stdio: "inherit" })
-    if (r.status !== 0) {
-      console.error(`✗ ${name}: bun exited ${r.status}`)
-      failed = true
-    } else {
-      console.log(`✓ ${name}`)
-    }
+      : // --tolerate-republish makes re-running a tag after a partial
+        // release idempotent (already-published packages don't error).
+        ["publish", "--access", "public", "--tolerate-republish"]
+    status = spawnSync("bun", args, { cwd: dir, stdio: "inherit" }).status
   } finally {
     renameSync(backupPath, pkgPath)
+  }
+  if (status !== 0) {
+    console.error(`✗ ${name}: bun exited ${status}`)
+    failed = true
+    // PACKAGES is dependencies-first. In PUBLISH mode, never publish a
+    // dependent past a failed dependency — that ships exactly the
+    // phantom-internal-pin breakage this script exists to prevent. Stop
+    // now; a re-run of the tag resumes idempotently. (--pack accumulates
+    // so a local dry run reports every failure at once.)
+    if (!packOnly) break
+  } else {
+    console.log(`✓ ${name}`)
   }
 }
 

@@ -17,9 +17,12 @@ env:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # NOTE: no id-token/provenance — publishing goes through `bun publish`,
+    # which has no --provenance support (as of bun 1.3). Claiming it would
+    # be a false supply-chain signal. Switch to `npm publish --provenance`
+    # (+ id-token: write) if provenance attestation is wanted later.
     permissions:
       contents: read
-      id-token: write # npm provenance
     steps:
       - uses: actions/checkout@v5
 
