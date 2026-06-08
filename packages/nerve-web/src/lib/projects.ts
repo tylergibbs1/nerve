@@ -15,8 +15,20 @@ export const SHARED_PROJECT: ProjectMeta = {
   description: "Opened from a share link — source lives in the URL fragment, nowhere else"
 }
 
+/** The in-browser scratch pad (the "New harness" action). Baseline is a
+ * starter template; edits persist to localStorage, Share is the save. */
+export const SCRATCH_PROJECT: ProjectMeta = {
+  id: "scratch",
+  name: "New Harness",
+  description: "A blank in-browser harness — Share to keep it (the link is your save)"
+}
+
 export const projectMeta = (id: string): ProjectMeta | undefined =>
-  id === SHARED_PROJECT.id ? SHARED_PROJECT : PROJECTS.find((p) => p.id === id)
+  id === SHARED_PROJECT.id
+    ? SHARED_PROJECT
+    : id === SCRATCH_PROJECT.id
+      ? SCRATCH_PROJECT
+      : PROJECTS.find((p) => p.id === id)
 
 export const PROJECTS: ReadonlyArray<ProjectMeta> = [
   {

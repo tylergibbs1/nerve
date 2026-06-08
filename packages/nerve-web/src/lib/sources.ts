@@ -18,6 +18,28 @@ import robotPlatformSource from "../../../../examples/robot-platform/src/main.ha
 
 export const ENTRY_FILE = "/main.harness.ts"
 
+// Starter for the in-browser scratch pad (the "New harness" button). Blank
+// but valid, so the author starts from green. It's the `scratch` project's
+// baseline: edits persist to localStorage, and Reset returns to this.
+const SCRATCH_STARTER = `import { harness, connector, wire, type ConnectorPart } from "@grayhaven/nerve"
+
+// A blank canvas — edit freely; the compiler checks every change live.
+// There's no server: hit Share to keep this (the link is your save).
+const part: ConnectorPart = { mpn: "GENERIC-2", pinCount: 2 }
+const j1 = connector("J1", part, { pins: { 1: "PWR", 2: "GND" } })
+const j2 = connector("J2", part, { pins: { 1: "PWR", 2: "GND" } })
+
+export default harness("my-harness", {
+  revision: "A",
+  units: "mm",
+  connectors: [j1, j2],
+  wires: [
+    wire("W1", j1.pin(1), j2.pin(1), { signal: "PWR", gauge: "20AWG", color: "red", length: 100 }),
+    wire("W2", j1.pin(2), j2.pin(2), { signal: "GND", gauge: "20AWG", color: "black", length: 100 })
+  ]
+})
+`
+
 const initial: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   "motor-controller": {
     [ENTRY_FILE]: motorControllerSource,
@@ -26,7 +48,9 @@ const initial: Readonly<Record<string, Readonly<Record<string, string>>>> = {
     "/variants/long.ts": motorControllerLongSource
   },
   "sensor-splice": { [ENTRY_FILE]: sensorSpliceSource },
-  "robot-platform": { [ENTRY_FILE]: robotPlatformSource }
+  "robot-platform": { [ENTRY_FILE]: robotPlatformSource },
+  // The user's scratch pad — starter baseline, persisted like any edit.
+  scratch: { [ENTRY_FILE]: SCRATCH_STARTER }
 }
 
 const edited = new Map<string, string>() // `${projectId} ${path}` → source

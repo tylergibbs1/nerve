@@ -12,6 +12,17 @@ function ProjectList() {
         <span className="spec-tag">Projects</span>
         <h1>Projects</h1>
       </div>
+      <Link
+        className="project-card project-card-new"
+        to="/projects/$projectId/diagram"
+        params={{ projectId: "scratch" }}
+      >
+        <h3>+ Start a harness</h3>
+        <p>
+          A blank canvas that compiles in your browser as you type. No sign-up — hit Share to keep
+          it (the link is your save).
+        </p>
+      </Link>
       {PROJECTS.map((p) => (
         <Link
           key={p.id}

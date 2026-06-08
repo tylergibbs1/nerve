@@ -488,6 +488,14 @@ textarea:focus-visible, select:focus-visible {
   transition: border-color 200ms var(--ease-default);
 }
 .project-card:hover { border-color: var(--muted); }
+/* The "Start a harness" action reads as primary: accented edge + tint. */
+.project-card-new {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  margin-bottom: 28px;
+}
+.project-card-new:hover { border-color: var(--accent); }
+.project-card-new h3 { color: var(--accent); }
 .project-card h3 {
   margin: 0 0 4px;
   font-size: 18px;

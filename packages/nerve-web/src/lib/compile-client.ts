@@ -18,6 +18,7 @@ import {
   type QueryClient
 } from "@tanstack/react-query"
 import { ENTRY_FILE, getFiles, getSource, isDirty, listFiles } from "./sources.js"
+import { PROJECTS } from "./projects.js"
 import type { CompileRequest, CompileResponse, CompileResult } from "./compile-types.js"
 
 let worker: Worker | undefined
@@ -88,12 +89,17 @@ const requestCompile = (
  * and no edits, the worker uses its bundled design and never loads the
  * transform.
  */
+// Only the bundled examples have a pre-evaluated design in the worker.
+// scratch/shared have no bundled design, so they must always ship source.
+const hasBundledDesign = (projectId: string): boolean =>
+  PROJECTS.some((p) => p.id === projectId)
+
 export const compileSource = (
   projectId: string,
   source: string | undefined,
   signal?: AbortSignal
 ): Promise<CompileResult> => {
-  if (source === undefined && !isDirty(projectId)) {
+  if (source === undefined && !isDirty(projectId) && hasBundledDesign(projectId)) {
     return requestCompile(projectId, {}, signal)
   }
   const fsMap = {
