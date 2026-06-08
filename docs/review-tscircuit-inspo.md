@@ -92,3 +92,53 @@
 - **Evidence:** `console.log(\`generated llms.txt, llms-full.txt, ${PAGES.length + 1} page mirrors\`)` — PAGES.length is 7 and the script writes 7 authored + rules + hir + library = 10 mirrors (confirmed by running it: prints '8 page mirrors', public/docs/ contains 10 .md files). The `+ 1` predates the hir.md and library.md mirrors added this wave. Relatedly, `sections.splice(3,0,…)` / `splice(4,0,…)` / `splice(5,0,…)` hardcode the generated pages' positions relative to PAGES order in three places.
 - **Impact:** The count lie misleads anyone eyeballing build logs for missing mirrors (the exact signal the message exists to give). The splice indices mean adding/reordering an authored page before index 3 silently shifts the rules/HIR/library entries to wrong positions in llms.txt and llms-full.txt without any test failing.
 - **Fix:** Build one ordered array of {slug, title, content, note?} covering authored and generated pages, derive the writes, llms.txt sections, llms-full.txt parts, and the count from it; log the array length.
+
+---
+
+# Triage of the 34 rate-limited findings (2026-06-08)
+
+The review's verifier phase hit the weekly limit mid-run, leaving 34
+reviewer findings un-adjudicated. All 34 were recovered from the
+transcripts and triaged against the post-fix code.
+
+## Fixed in the triage wave (17)
+- #1 prefixRefs now namespaces twistGroup/shieldGroup
+- #6 per-(project,path) debouncer (was dropping cross-file persists)
+- #7 Reset hidden for projects with no bundled source (was wiping shared)
+- #9/#25 supersession guard now also checks the active tab
+- #11 shared project no longer persists to localStorage
+- #13 boolean CLI flags no longer consume the next positional
+- #16 dev watcher rebuild has .catch (no more unhandled-rejection crash)
+- #17 dev server binds 127.0.0.1
+- #19 dev serves an auto-reloading error page on first-compile failure
+- #21 pinout card width includes the header MPN line
+- #23 badge count counts diagnostics, not refs
+- #26 formboard true 1:1 mm (removed the 120mm floor)
+- #29/#3 hir-shape guard recurses into additionalProperties (records)
+- #31/#15 dev watches the config/project root
+- #32 renovate: removed invalid "bunInstall" postUpdateOption
+- #33 renovate: dropped platformAutomerge (Renovate's own automerge gates on CI)
+- #34 tarball smoke scans all dependency blocks
+
+## Already fixed in the first review wave / 6.0.0 (4)
+- #2 canonicalGauge metric, #5 anchored parseAwg, #12 snapshot --ci,
+  #30 .gitignore dist reproduce
+
+## Refuted (2)
+- #4 "canonicalization phantom diff under same schemaVersion" — inherent
+  to any compile-output improvement; recompile both sides before diffing.
+- #10 "fs-eval/share untested" — false; tests/fs-eval.test.ts and
+  tests/share.test.ts both exist.
+
+## Known-limitation / deferred (real but niche or larger; 7)
+- #8 share links encode only the entry file (multi-file share is an
+  enhancement)
+- #14 watch mode caches plugin rule packs (fresh doesn't reach loadPlugins)
+- #18 bare `nerve compile` resolves outputDir vs cwd not the config dir
+- #20 pinout elbow leaders can cross for 3+ row grids (crossing-free
+  holds for the ≤2-row derived grids)
+- #22 render-layout.json omits the pinout view; board geometry is the
+  display-scaled drawing
+- #24 pinout/faces assume numeric cavities (named pins show "—")
+- #27 no committed byte-golden for zip/share-link output
+- #28 dev watcher path (fs.watch/filter/debounce) has no direct test
