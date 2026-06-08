@@ -311,6 +311,23 @@ describe("config-driven entrypoint + exports toggles", () => {
     })
   })
 
+  it("bare compile from a SUBDIR writes dist next to the config, not cwd", async () => {
+    const dir = project(
+      `export default { entry: "./src/main.harness.ts", outputDir: "dist" }\n`
+    )
+    const prev = process.cwd()
+    process.chdir(join(dir, "src")) // run from a subdir, not the project root
+    try {
+      expect(await run(["compile"], capture())).toBe(0)
+      // output lands at <project>/dist, NOT <project>/src/dist
+      expect(existsSync(join(dir, "dist", "harness.json"))).toBe(true)
+      expect(existsSync(join(dir, "src", "dist", "harness.json"))).toBe(false)
+    } finally {
+      process.chdir(prev)
+      rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
   it("without entry, bare compile still prints usage", async () => {
     const dir = project(`export default { outputDir: "dist" }\n`)
     await inDir(dir, async () => {

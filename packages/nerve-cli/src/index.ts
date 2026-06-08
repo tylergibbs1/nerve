@@ -12,7 +12,7 @@
  * All file output is deterministic and CI-suitable.
  */
 import { mkdirSync, readFileSync, writeFileSync, existsSync, statSync } from "node:fs"
-import { join, resolve } from "node:path"
+import { dirname, join, resolve } from "node:path"
 import { Effect, Exit, Cause } from "effect"
 import {
   compileDesign,
@@ -167,19 +167,39 @@ const compileOrExit = async (
 }
 
 /**
- * Resolve the harness-file argument: explicit positional wins, else
- * `config.entry` (relative to wherever nerve.config.ts was found) — so a
- * configured project can run `nerve compile` bare.
+ * Resolve the harness-file argument and the directory its nerve.config.ts
+ * lives in. Explicit positional wins, else `config.entry`. `configDir` is
+ * the base for `config.outputDir` so a configured project's output lands
+ * next to the config, not in whatever cwd the command ran from.
  */
 const resolveHarnessArg = async (
   positional: ReadonlyArray<string>
-): Promise<string | undefined> => {
-  if (positional[0] !== undefined) return positional[0]
+): Promise<{ file: string; configDir: string } | undefined> => {
+  if (positional[0] !== undefined) {
+    const file = positional[0]
+    const exit = await Effect.runPromiseExit(findConfig(dirname(resolve(file))))
+    const configDir = Exit.isSuccess(exit) ? exit.value.dir : process.cwd()
+    return { file, configDir }
+  }
   const exit = await Effect.runPromiseExit(findConfig(process.cwd()))
   if (Exit.isFailure(exit)) return undefined
   const { config, dir } = exit.value
-  return config.entry !== undefined ? join(dir, config.entry) : undefined
+  return config.entry !== undefined ? { file: join(dir, config.entry), configDir: dir } : undefined
 }
+
+/**
+ * Output directory: an explicit `--out` is relative to the cwd (the user's
+ * intent), but a `config.outputDir` is relative to the config dir so bare
+ * commands from a subdir don't scatter dist/ into the cwd.
+ */
+const resolveOutDir = (
+  flags: Readonly<Record<string, string>>,
+  config: { readonly outputDir?: string },
+  configDir: string
+): string =>
+  flags["out"] !== undefined
+    ? resolve(flags["out"])
+    : resolve(configDir, config.outputDir ?? "dist")
 
 const writeOutBytes = (dir: string, name: string, bytes: Uint8Array, io: Io): void => {
   mkdirSync(dir, { recursive: true })
@@ -245,11 +265,12 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
 
   switch (command) {
     case "compile": {
-      const file = await resolveHarnessArg(positional)
-      if (file === undefined) return usage(io)
+      const arg = await resolveHarnessArg(positional)
+      if (arg === undefined) return usage(io)
+      const { file, configDir } = arg
       const result = await compileOrExit(file, io)
       if (typeof result === "number") return result
-      const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+      const outDir = resolveOutDir(flags, result.config, configDir)
       writeOut(outDir, "harness.json", JSON.stringify(result.hir, null, 2) + "\n", io)
       writeOut(outDir, "diagnostics.json", JSON.stringify(result.diagnostics, null, 2) + "\n", io)
       printDiagnostics(result.diagnostics, io)
@@ -258,8 +279,9 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
     }
 
     case "dev": {
-      const file = await resolveHarnessArg(positional)
-      if (file === undefined) return usage(io)
+      const arg = await resolveHarnessArg(positional)
+      if (arg === undefined) return usage(io)
+      const { file } = arg
       const port = flags["port"] !== undefined ? Number(flags["port"]) : undefined
       try {
         const dev = await startDev(file, { io, ...(port !== undefined ? { port } : {}) })
@@ -289,8 +311,9 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
     }
 
     case "validate": {
-      const file = await resolveHarnessArg(positional)
-      if (file === undefined) return usage(io)
+      const arg = await resolveHarnessArg(positional)
+      if (arg === undefined) return usage(io)
+      const { file } = arg
       const result = await compileOrExit(file, io)
       if (typeof result === "number") return result
       printDiagnostics(result.diagnostics, io)
@@ -299,8 +322,9 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
     }
 
     case "render": {
-      const file = await resolveHarnessArg(positional)
-      if (file === undefined) return usage(io)
+      const arg = await resolveHarnessArg(positional)
+      if (arg === undefined) return usage(io)
+      const { file, configDir } = arg
       const format = flags["format"] ?? "svg"
       if (format !== "svg" && format !== "png") {
         io.err(`Unsupported render format: ${format} (supported: svg, png)`)
@@ -313,7 +337,7 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       }
       const result = await compileOrExit(file, io)
       if (typeof result === "number") return result
-      const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+      const outDir = resolveOutDir(flags, result.config, configDir)
       if (view === "formboard") {
         const paper = flags["paper"] === "a4" ? "a4" as const : "letter" as const
         const board = formboardSheets(result.hir, { paper })
@@ -346,15 +370,16 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
     }
 
     case "export": {
-      const file = await resolveHarnessArg(positional)
-      if (file === undefined) return usage(io)
+      const arg = await resolveHarnessArg(positional)
+      if (arg === undefined) return usage(io)
+      const { file, configDir } = arg
       const target = flags["target"] ?? "manufacturing-packet"
       if (target === "wireviz") {
         const result = await compileOrExit(file, io)
         if (typeof result === "number") return result
         const { yaml, diagnostics } = exportWireViz(result.hir)
         printDiagnostics(diagnostics, io)
-        const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+        const outDir = resolveOutDir(flags, result.config, configDir)
         writeOut(outDir, "wireviz.yml", yaml, io)
         return 0
       }
@@ -371,7 +396,7 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
         )
         return 1
       }
-      const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+      const outDir = resolveOutDir(flags, result.config, configDir)
       const tolerance = result.config.defaultWireTolerance
       const options = {
         ...(tolerance !== undefined ? { defaultWireTolerance: tolerance } : {}),

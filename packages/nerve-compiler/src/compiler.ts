@@ -141,18 +141,20 @@ export const loadConfig = (
 /** Load plugin modules declared in config (PRD §40). */
 export const loadPlugins = (
   fromDir: string,
-  specifiers: ReadonlyArray<string>
+  specifiers: ReadonlyArray<string>,
+  options: { readonly fresh?: boolean } = {}
 ): Effect.Effect<
   { plugins: ReadonlyArray<NervePlugin>; diagnostics: ReadonlyArray<Diagnostic> },
   CompileError
 > =>
   Effect.tryPromise({
     try: async () => {
+      const loader = loaderFor(options.fresh === true)
       const plugins: Array<NervePlugin> = []
       const diagnostics: Array<Diagnostic> = []
       for (const spec of specifiers) {
         const path = spec.startsWith(".") ? resolve(fromDir, spec) : spec
-        const mod = await jiti.import<{ default?: unknown }>(path)
+        const mod = await loader.import<{ default?: unknown }>(path)
         const plugin = (mod as { default?: unknown }).default ?? mod
         if (!isNervePlugin(plugin)) {
           throw new CompileError({
@@ -197,7 +199,7 @@ export const compileFile = (
       ))
     const { plugins, diagnostics: pluginDiagnostics } =
       config.plugins !== undefined && config.plugins.length > 0
-        ? yield* loadPlugins(dirname(resolve(file)), config.plugins)
+        ? yield* loadPlugins(dirname(resolve(file)), config.plugins, { fresh })
         : { plugins: [], diagnostics: [] }
     const { hir, diagnostics: structural } = compileDesign(design)
     const ruleDiagnostics = runRules(
