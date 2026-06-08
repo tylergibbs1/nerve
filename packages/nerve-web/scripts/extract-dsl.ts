@@ -37,7 +37,7 @@ const NERVE_SRC = join(import.meta.dirname, "../../nerve/src")
 
 /** Builders documented in the DSL reference, in presentation order. */
 const BUILDERS: ReadonlyArray<{ file: string; names: ReadonlyArray<string> }> = [
-  { file: "dsl.ts", names: ["harness", "connector", "wire", "splice", "cable", "branch", "label"] },
+  { file: "dsl.ts", names: ["harness", "connector", "wire", "splice", "cable", "branch", "label", "protection"] },
   { file: "variant.ts", names: ["variant"] },
   { file: "rules.ts", names: ["rule"] },
   { file: "config.ts", names: ["defineConfig"] }
@@ -54,7 +54,8 @@ const INTERFACES: ReadonlyArray<{ file: string; names: ReadonlyArray<string> }> 
       "SpliceProps",
       "CableProps",
       "BranchProps",
-      "LabelProps"
+      "LabelProps",
+      "ProtectionProps"
     ]
   }
 ]

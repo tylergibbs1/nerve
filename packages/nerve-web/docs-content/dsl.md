@@ -53,6 +53,7 @@ splice(id: string, props: SpliceProps = {})
 cable(id: string, props: CableProps = {})
 branch(id: string, props: BranchProps)
 label(id: string, props: LabelProps)
+protection(id: string, props: ProtectionProps)
 variant(base: HarnessDesign, opts: VariantOptions)
 rule(name: string, run: (ctx: RuleContext) => void, options: RuleOptions = {})
 defineConfig(config: NerveConfig)
@@ -71,6 +72,7 @@ defineConfig(config: NerveConfig)
 | `labels` | `ReadonlyArray<LabelDef>` | no |  |
 | `splices` | `ReadonlyArray<SpliceDef>` | no |  |
 | `cables` | `ReadonlyArray<CableDef>` | no |  |
+| `protections` | `ReadonlyArray<ProtectionDef>` | no |  |
 
 ### ConnectorPart
 
@@ -112,6 +114,7 @@ defineConfig(config: NerveConfig)
 | `voltageRating` | `number` | no |  |
 | `temperatureRating` | `number` | no |  |
 | `currentEstimate` | `number` | no |  |
+| `emcClass` | `"aggressor" \| "victim" \| "neutral"` | no | Crosstalk role for EMC segregation: "aggressor" (noisy source), "victim" (sensitive sink), or "neutral". |
 | `twistGroup` | `string` | no |  |
 | `shieldGroup` | `string` | no |  |
 | `cable` | `string` | no | Cable this wire is a conductor of (see `cable()`). |
@@ -149,6 +152,7 @@ defineConfig(config: NerveConfig)
 | `nominalLength` | `number` | no |  |
 | `breakoutDistance` | `number` | no |  |
 | `minBendRadius` | `number` | no | Tightest bend the bundle tolerates (mm) — breakouts must clear it. |
+| `ambientTemperatureC` | `number` | no | Ambient temperature the bundle runs in (°C); member wires need a temperature rating at or above it. |
 
 ### LabelProps
 
@@ -160,4 +164,13 @@ defineConfig(config: NerveConfig)
 | `distance` | `number` | no |  |
 | `material` | `string` | no |  |
 | `quantity` | `number` | no |  |
+
+### ProtectionProps
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `kind` | `"fuse" \| "breaker"` | yes | Overcurrent device kind. |
+| `ratingA` | `number` | yes | Device rating in amps; must not exceed the ampacity of any wire it guards. |
+| `protects` | `ReadonlyArray<string>` | yes | Wire IDs this device protects (explicit, so no current-flow inference). |
+| `notes` | `string` | no |  |
 <!-- generated:dsl-reference:end -->

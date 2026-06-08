@@ -24,6 +24,7 @@ const FUNCTIONS: ReadonlyArray<Completion> = [
   fn("cable", "(id, { conductors, shield? })", "Group wires into a multi-conductor cable; shield drains must land on a pin."),
   fn("branch", "(id, { path, nominalLength })", "Physical bundle segment for the board view and cut-length math."),
   fn("label", "(id, { text, attachTo })", "Printed loom label; exported to the label schedule."),
+  fn("protection", "(id, { kind, ratingA, protects })", "Overcurrent device (fuse/breaker); its rating must not exceed the ampacity of the wires it protects."),
   fn("variant", "(base, overrides)", "Derive a configuration from a base harness without forking the file."),
   fn("rule", "(name, run, { code })", "Author a custom validation rule with a stable diagnostic code."),
   fn("defineConfig", "(config)", "Project config: plugins, rule severity overrides."),

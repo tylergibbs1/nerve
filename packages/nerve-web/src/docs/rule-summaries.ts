@@ -34,5 +34,8 @@ export const RULE_SUMMARIES: Record<string, string> = {
   branchParentInvalid: "A branch's parent must exist and the branch tree must be acyclic.",
   cableConductorOverflow: "A cable can't carry more wires than it has conductors.",
   orphanedDifferentialHalf: "A bus differential half (CAN/RS-485/USB) needs its partner present.",
-  twistGroupGaugeMismatch: "Wires in one twist group should share a gauge to limit skew."
+  twistGroupGaugeMismatch: "Wires in one twist group should share a gauge to limit skew.",
+  emcAggressorVictimShareBranch: "Aggressor and victim wires shouldn't share a bundle.",
+  wireTempBelowAmbient: "A wire's temperature rating must meet its branch's ambient.",
+  overcurrentExceedsConductor: "A fuse/breaker rating can't exceed the ampacity of the thinnest wire it protects."
 }

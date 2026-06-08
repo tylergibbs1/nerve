@@ -86,5 +86,7 @@ export const variant = (base: HarnessDesign, opts: VariantOptions): HarnessDesig
   branches: apply(base.branches, opts.branches),
   labels: apply(base.labels, opts.labels),
   splices: apply(base.splices, opts.splices),
-  cables: apply(base.cables, opts.cables)
+  cables: apply(base.cables, opts.cables),
+  // Carried through unchanged; protection edits aren't a variant axis yet.
+  protections: base.protections
 })

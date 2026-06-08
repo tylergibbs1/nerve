@@ -79,6 +79,9 @@ export const HirWire = Schema.Struct({
   voltageRating: Schema.optional(Schema.Number),
   temperatureRating: Schema.optional(Schema.Number),
   currentEstimate: Schema.optional(Schema.Number),
+  /** Crosstalk role for EMC segregation (HK-ELEC-008): noisy source,
+   * sensitive sink, or neutral. */
+  emcClass: Schema.optional(Schema.Literal("aggressor", "victim", "neutral")),
   twistGroup: Schema.optional(Schema.String),
   shieldGroup: Schema.optional(Schema.String),
   cable: Schema.optional(Schema.String),
@@ -119,7 +122,22 @@ export const HirBranch = Schema.Struct({
   sleeve: Schema.optional(Schema.String),
   nominalLength: Schema.optional(Schema.Number),
   breakoutDistance: Schema.optional(Schema.Number),
-  minBendRadius: Schema.optional(Schema.Number)
+  minBendRadius: Schema.optional(Schema.Number),
+  /** Ambient the bundle runs in (°C); wires in it need a temperature rating
+   * at or above this (HK-ELEC-009). */
+  ambientTemperatureC: Schema.optional(Schema.Number)
+})
+
+/** An overcurrent protection device (fuse/breaker) and the wires it guards.
+ * The link is explicit (`protects`) so the rule never has to infer current
+ * flow direction from the undirected wire graph. */
+export const HirProtection = Schema.Struct({
+  id: Schema.String,
+  kind: Schema.Literal("fuse", "breaker"),
+  ratingA: Schema.Number,
+  /** Wire IDs this device protects. */
+  protects: Schema.Array(Schema.String),
+  notes: Schema.optional(Schema.String)
 })
 
 export const HirLabel = Schema.Struct({
@@ -172,6 +190,8 @@ export const Hir = Schema.Struct({
   splices: Schema.Array(HirSplice),
   labels: Schema.Array(HirLabel),
   bom: Schema.Array(HirBomItem),
+  /** Overcurrent protection devices (optional; omitted when none declared). */
+  protections: Schema.optional(Schema.Array(HirProtection)),
   diagnostics: Schema.Array(HirDiagnostic),
   layoutHints: Schema.Array(Schema.Unknown),
   exports: Schema.Record({ key: Schema.String, value: Schema.Unknown })
@@ -188,6 +208,7 @@ export type HirSpliceRef = Schema.Schema.Type<typeof HirSpliceRef>
 export type HirEndpoint = Schema.Schema.Type<typeof HirEndpoint>
 export type HirSplice = Schema.Schema.Type<typeof HirSplice>
 export type HirCable = Schema.Schema.Type<typeof HirCable>
+export type HirProtection = Schema.Schema.Type<typeof HirProtection>
 
 /** Decode an untrusted value (e.g. a cached `harness.json`) into HIR. Throws `ParseError`. */
 export const decodeHir = Schema.decodeUnknownSync(Hir)

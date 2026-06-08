@@ -36,6 +36,11 @@
       "doc": "Define a label: `label(\"L1\", { text: \"MOTOR CTRL A\", attachTo: \"main\", ... })`."
     },
     {
+      "name": "protection",
+      "signature": "protection(id: string, props: ProtectionProps)",
+      "doc": "Define an overcurrent device and the wires it guards:\n`protection(\"F1\", { kind: \"fuse\", ratingA: 5, protects: [\"W1\", \"W2\"] })`."
+    },
+    {
       "name": "variant",
       "signature": "variant(base: HarnessDesign, opts: VariantOptions)",
       "doc": "Derive a variant: `variant(base, { id: \"...-long\", wires: { override: { W1: { length: 800 } } } })`."
@@ -106,6 +111,12 @@
         {
           "name": "cables",
           "type": "ReadonlyArray<CableDef>",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "protections",
+          "type": "ReadonlyArray<ProtectionDef>",
           "optional": true,
           "doc": ""
         }
@@ -306,6 +317,12 @@
           "doc": ""
         },
         {
+          "name": "emcClass",
+          "type": "\"aggressor\" | \"victim\" | \"neutral\"",
+          "optional": true,
+          "doc": "Crosstalk role for EMC segregation: \"aggressor\" (noisy source),\n\"victim\" (sensitive sink), or \"neutral\"."
+        },
+        {
           "name": "twistGroup",
           "type": "string",
           "optional": true,
@@ -451,6 +468,12 @@
           "type": "number",
           "optional": true,
           "doc": "Tightest bend the bundle tolerates (mm) — breakouts must clear it."
+        },
+        {
+          "name": "ambientTemperatureC",
+          "type": "number",
+          "optional": true,
+          "doc": "Ambient temperature the bundle runs in (°C); member wires need a\ntemperature rating at or above it."
         }
       ]
     },
@@ -490,6 +513,35 @@
         {
           "name": "quantity",
           "type": "number",
+          "optional": true,
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "ProtectionProps",
+      "props": [
+        {
+          "name": "kind",
+          "type": "\"fuse\" | \"breaker\"",
+          "optional": false,
+          "doc": "Overcurrent device kind."
+        },
+        {
+          "name": "ratingA",
+          "type": "number",
+          "optional": false,
+          "doc": "Device rating in amps; must not exceed the ampacity of any wire it guards."
+        },
+        {
+          "name": "protects",
+          "type": "ReadonlyArray<string>",
+          "optional": false,
+          "doc": "Wire IDs this device protects (explicit, so no current-flow inference)."
+        },
+        {
+          "name": "notes",
+          "type": "string",
           "optional": true,
           "doc": ""
         }
