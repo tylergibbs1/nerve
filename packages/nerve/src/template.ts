@@ -93,7 +93,12 @@ export const prefixRefs = (prefix: string, fragment: HarnessFragment): HarnessFr
       id: p(w.id),
       from: mapEndpoint(w.from),
       to: mapEndpoint(w.to),
-      ...(w.cable !== undefined && cableIds.has(w.cable) ? { cable: p(w.cable) } : {})
+      ...(w.cable !== undefined && cableIds.has(w.cable) ? { cable: p(w.cable) } : {}),
+      // twist/shield groups are per-instance grouping keys — namespace them
+      // too, or two instances of a template would merge into ONE twist
+      // (or shield) group and defeat the collision-free guarantee.
+      ...(w.twistGroup !== undefined ? { twistGroup: p(w.twistGroup) } : {}),
+      ...(w.shieldGroup !== undefined ? { shieldGroup: p(w.shieldGroup) } : {})
     })),
     branches: (fragment.branches ?? []).map((b) => ({
       ...b,

@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest"
 import { PDFDocument } from "pdf-lib"
-import { compileDesign } from "@grayhaven/nerve"
+import { compileDesign, branch, connector, harness, wire } from "@grayhaven/nerve"
 import {
   assemblyInstructions,
+  boardDrawing,
   boardSvg,
   bomCsv,
   buildPacket,
@@ -151,6 +152,29 @@ describe("harness board view (PRD §9.5.3)", () => {
     expect(boardSvg(hir)).toBe(svg)
     const { hir: bare } = compileDesign({ ...design, branches: [], labels: [] })
     expect(boardSvg(bare)).toContain("No branches defined")
+  })
+
+  it("lays out at true 1:1 mm — a short branch is NOT inflated to a 120mm floor", () => {
+    const part = { mpn: "T-2", pinCount: 2 }
+    const a = connector("A", part, { pins: { 1: "X" } })
+    const b = connector("B", part, { pins: { 1: "X" } })
+    const { hir: shortHir } = compileDesign(
+      harness("short", {
+        revision: "A",
+        units: "mm",
+        connectors: [a, b],
+        wires: [wire("W1", a.pin(1), b.pin(1), { signal: "X" })],
+        branches: [branch("B1", { path: [a, b], nominalLength: 50 })]
+      })
+    )
+    // The trunk line (stroke #444, width 5) must span 50 units, not 120 —
+    // the formboard prints this 1:1, so the floor would break calibration.
+    const trunk = boardDrawing(shortHir).items.find(
+      (i): i is Extract<typeof i, { kind: "line" }> =>
+        i.kind === "line" && i.stroke === "#444" && i.strokeWidth === 5
+    )
+    expect(trunk).toBeDefined()
+    expect((trunk!.x2 - trunk!.x1)).toBe(50)
   })
 })
 

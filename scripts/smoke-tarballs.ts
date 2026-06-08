@@ -71,20 +71,24 @@ const collectPaths = (value: unknown, out: string[]): void => {
 
 const problems: string[] = []
 for (const [name, { pkg, entries }] of packed) {
-  // 2a. internal dep pins match the workspace exactly
-  const deps = (pkg["dependencies"] ?? {}) as Record<string, string>
-  for (const [dep, spec] of Object.entries(deps)) {
-    if (!dep.startsWith("@grayhaven/")) continue
-    if (spec.startsWith("workspace:")) {
-      problems.push(`${name}: ${dep} still uses workspace protocol (${spec})`)
-      continue
-    }
-    const expected = workspaceVersions.get(dep)
-    const pinned = spec.replace(/^[\^~]/, "")
-    if (pinned !== expected) {
-      problems.push(
-        `${name}: ${dep} pinned to ${spec} but workspace has ${expected} — stale bun.lock? Run bun install and re-pack.`
-      )
+  // 2a. internal dep pins match the workspace exactly — across EVERY dep
+  // block (a workspace: leak or stale pin in peer/dev/optional deps breaks
+  // installs too, and ships in the published package.json).
+  for (const block of ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"]) {
+    const deps = (pkg[block] ?? {}) as Record<string, string>
+    for (const [dep, spec] of Object.entries(deps)) {
+      if (!dep.startsWith("@grayhaven/")) continue
+      if (spec.startsWith("workspace:")) {
+        problems.push(`${name}: ${dep} still uses workspace protocol in ${block} (${spec})`)
+        continue
+      }
+      const expected = workspaceVersions.get(dep)
+      const pinned = spec.replace(/^[\^~]/, "")
+      if (pinned !== expected) {
+        problems.push(
+          `${name}: ${dep} (${block}) pinned to ${spec} but workspace has ${expected} — stale bun.lock? Run bun install and re-pack.`
+        )
+      }
     }
   }
   // 2b. every referenced artifact exists in the tarball

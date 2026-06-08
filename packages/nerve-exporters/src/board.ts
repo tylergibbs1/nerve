@@ -21,8 +21,12 @@ const DEFAULT_LEN_MM = 240
 const NODE_W = 64
 const NODE_H = 26
 
+// True length: 1 unit = 1 mm with NO floor. The old Math.max(120, mm)
+// inflated every sub-120mm branch, which silently broke the formboard's
+// "1:1 / calibration exact" promise (a 50mm drop printed at 120mm).
+// Only an UNdimensioned branch falls back to a nominal display length.
 const lengthMm = (mm: number | undefined): number =>
-  mm !== undefined ? Math.max(120, mm) : DEFAULT_LEN_MM
+  mm !== undefined ? mm : DEFAULT_LEN_MM
 
 export const boardDrawing = (hir: Hir): Drawing => {
   const items: Array<DrawItem> = [

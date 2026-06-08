@@ -65,6 +65,14 @@ const breakingDiffs = (oldS: unknown, newS: unknown, path: string): Array<string
       for (const key of newReq) {
         if (!oldReq.has(key) && key in oldProps) diffs.push(`${path}.${key}: optional → required`)
       }
+      // Records carry their value-type in additionalProperties, not
+      // properties — recurse into it, or a breaking change to a record's
+      // value type (e.g. the diagnostic `data` Record) reads as additive.
+      if (oldS["additionalProperties"] !== undefined || newS["additionalProperties"] !== undefined) {
+        diffs.push(
+          ...breakingDiffs(oldS["additionalProperties"], newS["additionalProperties"], `${path}{}`)
+        )
+      }
       // Non-structural keys (description, $schema, …) are not contract.
       return diffs
     }
@@ -159,5 +167,14 @@ describe("breaking-diff classifier", () => {
   it("optional → required is breaking", () => {
     const next = { ...base, required: ["a", "b"] }
     expect(breakingDiffs(base, next, "x")).toContainEqual(expect.stringContaining("optional → required"))
+  })
+
+  it("a record's value-type change (additionalProperties) is breaking", () => {
+    // e.g. diagnostics.data going from Record<string, string|number> to
+    // Record<string, string> — invisible if we only diff `properties`.
+    const rec = { type: "object", properties: {}, additionalProperties: { type: ["string", "number"] } }
+    const narrowed = { type: "object", properties: {}, additionalProperties: { type: "string" } }
+    expect(breakingDiffs(rec, narrowed, "x").length).toBeGreaterThan(0)
+    expect(breakingDiffs(rec, rec, "x")).toEqual([])
   })
 })

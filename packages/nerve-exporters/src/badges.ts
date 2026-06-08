@@ -53,7 +53,7 @@ export const diagnosticBadges = (
     readonly anchor: BadgeAnchor
     readonly codes: Array<string>
     error: boolean
-    count: number
+    diagnostics: number
   }
   const groups = new Map<string, Group>()
   for (const d of diagnostics) {
@@ -61,14 +61,21 @@ export const diagnosticBadges = (
     const refsOf = [...new Set([d.target, ...(d.targets ?? [])])].filter(
       (r): r is string => r !== undefined
     )
+    // A single diagnostic counts ONCE per anchor even if several of its
+    // refs resolve to the same point — the badge number is "how many
+    // findings sit here", not "how many refs".
+    const anchored = new Set<string>()
     for (const r of refsOf) {
       const parsed = parseRef(r)
       if (parsed === undefined) continue
       const anchor = resolve(parsed)
       if (anchor === undefined) continue
       const key = `${anchor.x},${anchor.y}`
-      const g = groups.get(key) ?? { anchor, codes: [], error: false, count: 0 }
-      g.count += 1
+      const g = groups.get(key) ?? { anchor, codes: [], error: false, diagnostics: 0 }
+      if (!anchored.has(key)) {
+        g.diagnostics += 1
+        anchored.add(key)
+      }
       if (!g.codes.includes(d.code)) g.codes.push(d.code)
       if (d.severity === "error") g.error = true
       groups.set(key, g)
@@ -90,7 +97,7 @@ export const diagnosticBadges = (
         kind: "text",
         x: g.anchor.x,
         y: g.anchor.y + 3.5,
-        text: g.count > 1 ? String(g.count) : "!",
+        text: g.diagnostics > 1 ? String(g.diagnostics) : "!",
         size: 10,
         weight: "bold",
         fill: "#ffffff",

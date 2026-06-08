@@ -62,6 +62,26 @@ describe("diagnosticBadges", () => {
     expect(texts.every((t) => t.data?.["diagnostic"] !== undefined)).toBe(true)
   })
 
+  it("counts DIAGNOSTICS at an anchor, not refs — one finding never shows '2'", () => {
+    // A single diagnostic whose target AND a targets entry resolve to the
+    // same anchor must count as one (badge "!", not "2").
+    const items = diagnosticBadges(
+      [{ code: "HK-X", severity: "error", message: "x", target: "wire:W1", targets: ["wire:W1b"] }],
+      () => ({ x: 5, y: 5 }) // both refs collapse to the same point
+    )
+    const text = items.find((i) => i.kind === "text")
+    expect(text).toMatchObject({ text: "!" })
+    // Two DISTINCT diagnostics at one anchor still show "2".
+    const two = diagnosticBadges(
+      [
+        { code: "HK-A", severity: "warning", message: "a", target: "wire:W1" },
+        { code: "HK-B", severity: "error", message: "b", target: "wire:W2" }
+      ],
+      () => ({ x: 5, y: 5 })
+    )
+    expect(two.find((i) => i.kind === "text")).toMatchObject({ text: "2" })
+  })
+
   it("groups co-anchored diagnostics into one counted badge", () => {
     const items = diagnosticBadges(
       [

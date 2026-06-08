@@ -86,6 +86,17 @@ describe("harnessTemplate + prefixRefs (PRD §18)", () => {
     expect(canDrop.templateName).toBe("can-sensor-drop")
   })
 
+  it("namespaces twistGroup/shieldGroup so instances don't merge into one group", () => {
+    // canDrop's pair shares twistGroup "drop-twist"; two instances must NOT
+    // collapse into a single 4-wire twist group.
+    const d1 = prefixRefs("D1", canDrop({ trunkHPin: 1, trunkLPin: 2, length: 300 }))
+    const d2 = prefixRefs("D2", canDrop({ trunkHPin: 3, trunkLPin: 4, length: 450 }))
+    const groups = new Set(
+      [...(d1.wires ?? []), ...(d2.wires ?? [])].map((w) => w.twistGroup)
+    )
+    expect(groups).toEqual(new Set(["D1-drop-twist", "D2-drop-twist"]))
+  })
+
   it("rewrites splice endpoints, branch parents, and wire→cable refs", () => {
     const frag: HarnessFragment = {
       splices: [splice("SP", { branch: "stub" })],
