@@ -152,10 +152,16 @@ export const pinoutDrawing = (hir: Hir): Drawing => {
       )
     }
 
-    // Elbow leaders + labels. Within a band, leftmost col = level closest
-    // to the grid (crossing-free; see header comment).
-    const lead = (cv: CavityInfo, levelIdx: number, dir: "up" | "down"): void => {
+    // Elbow leaders + labels, crossing-free for ANY row count: row 0 fans
+    // up, the rest fan down (so the common ≤2-row grids reach an adjacent
+    // edge directly, unchanged). A leader that must cross intervening rows
+    // on its way out runs its vertical at a small horizontal LANE offset
+    // (> the cavity radius, < half-pitch), threading BESIDE the crossed
+    // dots instead of through them.
+    const LANE = CAV_R + 3
+    const lead = (cv: CavityInfo, levelIdx: number, dir: "up" | "down", crosses: boolean): void => {
       const { x: cx, y: cy } = cavCenter(cv)
+      const laneX = crosses ? cx + LANE : cx
       const levelY =
         dir === "up"
           ? gridY - 10 - levelIdx * LABEL_H
@@ -167,8 +173,13 @@ export const pinoutDrawing = (hir: Hir): Drawing => {
         ...(cv.wire !== undefined ? { wire: cv.wire.id } : {})
       }
       items.push(
-        { kind: "line", x1: cx, y1: startY, x2: cx, y2: levelY, stroke: "#b0aca2", strokeWidth: 1, data },
-        { kind: "line", x1: MARGIN + textX + 4, y1: levelY, x2: cx, y2: levelY, stroke: "#b0aca2", strokeWidth: 1, data },
+        // cavity → lane (short, stays inside the column), lane vertical to
+        // the label level, then horizontal to the label.
+        ...(crosses
+          ? [{ kind: "line" as const, x1: cx, y1: cy, x2: laneX, y2: cy, stroke: "#b0aca2", strokeWidth: 1, data }]
+          : []),
+        { kind: "line", x1: laneX, y1: crosses ? cy : startY, x2: laneX, y2: levelY, stroke: "#b0aca2", strokeWidth: 1, data },
+        { kind: "line", x1: MARGIN + textX + 4, y1: levelY, x2: laneX, y2: levelY, stroke: "#b0aca2", strokeWidth: 1, data },
         {
           kind: "text",
           x: MARGIN + textX,
@@ -181,8 +192,11 @@ export const pinoutDrawing = (hir: Hir): Drawing => {
         }
       )
     }
-    topCavs.forEach((cv, i) => lead(cv, i, "up"))
-    botCavs.forEach((cv, i) => lead(cv, i, "down"))
+    // A leader crosses other cavities iff its row isn't the one adjacent to
+    // the edge it exits toward (row 0 for up, last row for down).
+    const lastRow = rows - 1
+    topCavs.forEach((cv, i) => lead(cv, i, "up", cv.row !== 0))
+    botCavs.forEach((cv, i) => lead(cv, i, "down", cv.row !== lastRow))
 
     maxRight = Math.max(maxRight, MARGIN + cardW)
     y += cardH + 16

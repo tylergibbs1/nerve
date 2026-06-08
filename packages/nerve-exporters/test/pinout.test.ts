@@ -88,6 +88,40 @@ describe("pinout cards (PRD §9.5.2)", () => {
     expect(svg).toContain('data-connector="J1" data-pin="1" data-wire="W1"')
   })
 
+  it("3+ row grids: no leader vertical passes through a cavity dot (#20)", () => {
+    // A 3-row connector — the middle row must thread its leader BESIDE the
+    // other rows' dots, not through them.
+    const part = { mpn: "GRID-9", pinCount: 9, cavityLayout: { rows: 3, columns: 3 } }
+    const c = connector("J1", part, {
+      pins: Object.fromEntries(Array.from({ length: 9 }, (_, i) => [i + 1, `S${i + 1}`]))
+    })
+    const { hir } = compileDesign(
+      harness("grid3", { revision: "A", units: "mm", connectors: [c], wires: [] })
+    )
+    const svg = pinoutSvg(hir)
+    const CAV_R = 9
+    // Cavity centers from the arc paths: d="M {cx-CAV_R} {cy} A ...".
+    const centers: Array<{ x: number; y: number }> = []
+    for (const m of svg.matchAll(/<path[^>]*d="M ([\d.-]+) ([\d.-]+) A/g)) {
+      centers.push({ x: Number(m[1]) + CAV_R, y: Number(m[2]) })
+    }
+    expect(centers.length).toBe(9)
+    const verticals: Array<{ x: number; y0: number; y1: number }> = []
+    for (const m of svg.matchAll(/<line[^>]*stroke="#b0aca2"[^>]*\/>/g)) {
+      const at = (n: string) => Number(new RegExp(`${n}="([\\d.-]+)"`).exec(m[0])?.[1])
+      if (at("x1") === at("x2")) verticals.push({ x: at("x1"), y0: Math.min(at("y1"), at("y2")), y1: Math.max(at("y1"), at("y2")) })
+    }
+    for (const v of verticals) {
+      for (const c2 of centers) {
+        const throughDot =
+          Math.abs(v.x - c2.x) < CAV_R && c2.y > v.y0 - CAV_R && c2.y < v.y1 + CAV_R
+        // allowed only when the vertical IS this cavity's own exit lane
+        const ownExit = Math.abs(v.x - c2.x) < 1 && (Math.abs(v.y0 - c2.y) < CAV_R + 1 || Math.abs(v.y1 - c2.y) < CAV_R + 1)
+        expect(throughDot && !ownExit, `vertical x=${v.x} passes through dot (${c2.x},${c2.y})`).toBe(false)
+      }
+    }
+  })
+
   it("shows data for named (non-numeric) cavities instead of '—'", () => {
     const part = { mpn: "NAMED-2", pinCount: 2 }
     const j1 = connector("J1", part, { pins: { HOT: "PWR_12V", RTN: "GND" } })
