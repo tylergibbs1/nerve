@@ -1,5 +1,50 @@
 # Changelog
 
+## 6.0.1 — 2026-06-08
+
+Fixes from a multi-agent code review of the 6.0.0 wave (13 confirmed +
+34 rate-limited findings, all adjudicated) plus a dogfooding pass.
+
+### Correctness
+- Gauge parser regression fixed: spec-suffixed catalog gauges
+  ("18 AWG TXL") parse again (over-current errors no longer downgraded);
+  canonicalGauge only rewrites whole-string AWG.
+- WireViz unitless gauges import as mm², not misread as AWG; HK-MFG-007
+  reports metric as Info, not a forever-warning.
+- HK-CONN-017 only fires on rail-shaped signal names, at Warning
+  severity — no more false errors on FB_400V/EN_48V logic lines.
+- `prefixRefs` namespaces twistGroup/shieldGroup so template instances
+  don't merge into one group.
+- `nerve dev`: watcher rebuild can't crash the process (.catch), binds
+  127.0.0.1, watches the config/project root, serves an auto-reloading
+  page on first-compile failure; watch mode reloads plugin packs.
+- `nerve snapshot --ci` fails on a missing snapshot (no green-by-creation);
+  boolean flags no longer swallow the next positional.
+- `nerve compile` resolves config.outputDir relative to the config dir.
+- publish-all aborts on first failure (no partial release); dropped the
+  bun-incompatible --tolerate-republish.
+- Web: per-file localStorage debounce (no dropped edits); shared project
+  is ephemeral and can't be Reset to empty; compile supersession ignores
+  superseded tabs.
+
+### Views & docs
+- pinout/faces render named (non-numeric) cavities; pinout leaders are
+  crossing-free for 3+ row grids; pinout card width includes the header;
+  formboard is true 1:1 (no 120mm floor).
+- HIR schema docs: records render as Record<…>; the in-app /docs/hir
+  page now exists (was agent-only, 404 in the app).
+- Generated rules page: the new rules carry descriptions; the doc
+  generator's mirror count is honest.
+
+### Release safety / CI
+- Tarball smoke scans all dependency blocks and flags over-packing;
+  @grayhaven/nerve-react ships dist only (was leaking src/tests).
+- Byte-goldens for the packet zip and share-link encoding.
+- render-layout.json includes the pinout sheet.
+- renovate.json fixed (the invalid "bunInstall" option made it open zero
+  PRs; automerge now gates on CI without needing branch protection).
+- release.yml dropped its false npm-provenance claim.
+
 ## 6.0.0 — 2026-06-08
 
 The tscircuit ecosystem deep-dive, implemented end to end (24 items,

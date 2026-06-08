@@ -1,6 +1,6 @@
 {
   "name": "@grayhaven/nerve-wireviz",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "type": "module",
   "description": "WireViz YAML import/export adapter for Grayhaven Nerve (PRD \u00a727.2).",
   "exports": {

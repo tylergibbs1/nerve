@@ -1,6 +1,6 @@
 {
   "name": "@grayhaven/nerve-exporters",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "type": "module",
   "sideEffects": false,
   "description": "Grayhaven Nerve exporters: CSV, SVG, JSON, and zip manufacturing outputs generated from HIR.",
