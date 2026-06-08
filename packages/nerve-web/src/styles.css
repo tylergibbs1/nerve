@@ -457,6 +457,9 @@ textarea:focus-visible, select:focus-visible {
   transition: color 0.2s var(--ease-default), border-color 0.2s var(--ease-default);
 }
 .landing-links a:hover { color: var(--accent-hover); border-color: var(--accent-hover); }
+/* Primary CTA: accented so it leads the row. */
+.landing-links a.landing-cta { color: var(--accent); border-color: var(--accent); }
+.landing-links a.landing-cta:hover { color: var(--accent-hover); border-color: var(--accent-hover); }
 .landing-links .sep { color: color-mix(in srgb, var(--muted) 50%, transparent); }
 @keyframes spec-rise {
   from { opacity: 0; transform: translateY(12px); filter: blur(4px); }

@@ -16,6 +16,10 @@ function Landing() {
         validated, fail-closed.
       </p>
       <div className="landing-links">
+        <Link to="/projects/$projectId/diagram" params={{ projectId: "scratch" }} className="landing-cta">
+          Start a harness
+        </Link>
+        <span className="sep">/</span>
         <Link to="/projects">Open the demo</Link>
         <span className="sep">/</span>
         <Link to="/docs">Read the docs</Link>
