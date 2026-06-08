@@ -96,6 +96,27 @@ for (const [name, { pkg, entries }] of packed) {
     }
   }
   if (referenced.length === 0) problems.push(`${name}: no exports/main/bin paths found to verify`)
+  // 2c. nothing the publish shouldn't ship leaked in (a missing `files`
+  // allowlist over-packs src/, tests, tsconfig, and the transient
+  // package.json.publish-backup — caught nerve-react shipping its source).
+  const leaked = [...entries].filter((e) => {
+    const rel = e.replace(/^package\//, "").replace(/\/$/, "")
+    if (rel === "" || rel === "package") return false
+    return (
+      rel.startsWith("src/") ||
+      rel.startsWith("test/") ||
+      rel.startsWith("tests/") ||
+      rel === "tsconfig.json" ||
+      rel.endsWith(".publish-backup") ||
+      rel.endsWith(".test.ts") ||
+      rel.endsWith(".test.tsx")
+    )
+  })
+  if (leaked.length > 0) {
+    problems.push(
+      `${name}: tarball ships files it shouldn't (add a "files" allowlist): ${leaked.join(", ")}`
+    )
+  }
 }
 if (problems.length > 0) {
   console.error("✗ tarball integrity failures:")
