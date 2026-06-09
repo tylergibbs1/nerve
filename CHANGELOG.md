@@ -1,5 +1,54 @@
 # Changelog
 
+## 6.1.0 — 2026-06-08
+
+New validation rules from a first-principles gap review, cross-referenced
+against the compiler's existing structural diagnostics (HK-CONN-001/002/003,
+HK-WIRE/BRANCH/SPLICE/CABLE) so only genuinely-missing, defect-only checks
+ship. All HIR changes are additive optional fields — no `HIR_SCHEMA_VERSION`
+bump; old `harness.json` still decodes and golden HIR stays byte-identical.
+
+### Validation — structural integrity
+- HK-CONN-019 `contactCountExceedsPinCount`: a connector can't populate
+  more cavities than its housing has.
+- HK-CONN-020 `cavityLayoutMismatch`: a cavity grid must multiply to the
+  pin count.
+- HK-MFG-008 `nonPositiveWireLength`: wire length must be greater than zero.
+- HK-MFG-009 `branchParentInvalid`: a branch `parent` must exist and the
+  branch tree must be acyclic (the compiler validated `path` but never
+  `parent`).
+- HK-MFG-010 `cableConductorOverflow`: a cable can't carry more wires than
+  it has conductors (under-fill is legal — those are spares).
+- HK-CONN-015 `reservedPinAssigned` broadened: now also fires on a
+  terminal, seal, or landed wire on a reserved pin, not just a signal.
+
+### Validation — electrical / EMC / thermal
+- HK-ELEC-006 `orphanedDifferentialHalf`: a CAN/RS-485/USB half with no
+  partner anywhere (HK-ELEC-001 only fires once both halves exist).
+- HK-ELEC-007 `twistGroupGaugeMismatch`: wires in one twist group should
+  share a gauge to limit skew.
+- HK-ELEC-008 `emcAggressorVictimShareBranch`: warns when wires marked
+  `emcClass: "aggressor"` and `"victim"` share a branch (new `wire.emcClass`).
+- HK-ELEC-009 `wireTempBelowAmbient`: a wire's `temperatureRating` must
+  meet its branch's `ambientTemperatureC` (new `branch.ambientTemperatureC`).
+- HK-ELEC-010 `overcurrentExceedsConductor`: a fuse/breaker rating may not
+  exceed the ampacity of the thinnest wire it protects ("the wire becomes
+  the fuse"). Shop-parameterizable via the ampacity table.
+- HK-CONN-018 `multipleWiresIntoPin` ships **opt-in** (not a built-in):
+  differing-gauge wires crimped into one contact. Off by default because
+  same-gauge return/power consolidation onto one contact is a valid house
+  pattern.
+
+### DSL & HIR
+- New `protection("F1", { kind, ratingA, protects })` primitive and
+  optional `Hir.protections` collection. The fuse→wire link is explicit
+  (`protects: [wireId]`), so the overcurrent rule never infers current-flow
+  direction from the undirected wire graph. Exposed in the editor sandbox
+  and completions.
+- New optional fields: `wire.emcClass`, `branch.ambientTemperatureC`.
+- Compiler validates protections: HK-PROT-001 (duplicate id), HK-PROT-002
+  (guards an undefined wire); the collection is omitted when empty.
+
 ## 6.0.1 — 2026-06-08
 
 Fixes from a multi-agent code review of the 6.0.0 wave (13 confirmed +
