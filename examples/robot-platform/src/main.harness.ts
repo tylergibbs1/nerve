@@ -33,13 +33,15 @@ const pdbOut = connector("PDB_OUT", megaFit8, {
   pins: {
     1: "VBAT_MD1", 2: "GND_MD1", 3: "VBAT_MD2", 4: "GND_MD2",
     5: "VBAT_MD3", 6: "GND_MD3", 7: "VBAT_MD4", 8: "GND_MD4"
-  }
+  },
+  terminals: "76650-0117"
 })
 const pdbAux = connector("PDB_AUX", MolexMicroFit["43025-0800"], {
   pins: {
     1: "5V_MCU", 2: "GND_MCU", 3: "12V_LIDAR", 4: "GND_LIDAR",
     5: "12V_FAN", 6: "GND_FAN", 7: "5V_SENS", 8: "GND_SENS"
-  }
+  },
+  terminals: "43030-0007"
 })
 
 const batPlus = splice("S_BP", {
@@ -58,10 +60,17 @@ const mcu = connector("MCU1", microFit16, {
     5: "GPS_TX", 6: "GPS_RX", 7: "ESTOP_SENSE", 8: "LED_CTRL",
     9: "ETH_P", 10: "ETH_N", 11: "BUMP_L", 12: "BUMP_R",
     13: "GND_SIG", 14: "GND_SIG"
+  },
+  terminals: {
+    1: "43030-0007", 2: "43030-0007", 3: "43030-0007", 4: "43030-0007",
+    5: "43030-0010", 6: "43030-0010", 7: "43030-0007", 8: "43030-0010",
+    9: "43030-0010", 10: "43030-0010", 11: "43030-0010", 12: "43030-0010",
+    13: "43030-0010", 14: "43030-0010"
   }
 })
 const imu = connector("IMU1", jstPh4, {
-  pins: { 1: "5V_SENS", 2: "GND_SENS", 3: "CAN_H", 4: "CAN_L" }
+  pins: { 1: "5V_SENS", 2: "GND_SENS", 3: "CAN_H", 4: "CAN_L" },
+  terminals: "SPH-004T-P0.5S"
 })
 
 const canH = splice("S_CANH", {
@@ -96,10 +105,15 @@ const drive = (n: 1 | 2 | 3 | 4, feedLength: number, encLength: number): Drive =
     pins: {
       1: `VBAT_MD${n}`, 2: `GND_MD${n}`, 3: "CAN_H", 4: "CAN_L",
       5: `ENC${n}_A`, 6: `ENC${n}_B`, 7: `MOTOR${n}_TEMP`, 8: `SHIELD${n}_DRAIN`
+    },
+    terminals: {
+      1: "43030-0007", 2: "43030-0007", 3: "43030-0007", 4: "43030-0007",
+      5: "43030-0010", 6: "43030-0010", 7: "43030-0010", 8: "43030-0010"
     }
   })
   const motor = connector(`M${n}`, jstPh4, {
-    pins: { 1: `ENC${n}_A`, 2: `ENC${n}_B`, 3: `MOTOR${n}_TEMP`, 4: `SHIELD${n}_DRAIN` }
+    pins: { 1: `ENC${n}_A`, 2: `ENC${n}_B`, 3: `MOTOR${n}_TEMP`, 4: `SHIELD${n}_DRAIN` },
+    terminals: "SPH-004T-P0.5S"
   })
   const feedPin = (n - 1) * 2 + 1
   return {
@@ -134,15 +148,25 @@ const drives = [drive(1, 450, 120), drive(2, 470, 120), drive(3, 450, 120), driv
 
 // --- Sensor / accessory drops -----------------------------------------------------
 const gps = connector("GPS1", jstPh4, {
-  pins: { 1: "5V_SENS", 2: "GND_SENS", 3: "GPS_TX", 4: "GPS_RX" }
+  pins: { 1: "5V_SENS", 2: "GND_SENS", 3: "GPS_TX", 4: "GPS_RX" },
+  terminals: "SPH-004T-P0.5S"
 })
 const lidar = connector("LIDAR1", jstPh4, {
-  pins: { 1: "12V_LIDAR", 2: "GND_LIDAR", 3: "ETH_P", 4: "ETH_N" }
+  pins: { 1: "12V_LIDAR", 2: "GND_LIDAR", 3: "ETH_P", 4: "ETH_N" },
+  terminals: "SPH-004T-P0.5S"
 })
-const fan = connector("FAN1", jstPh2, { pins: { 1: "12V_FAN", 2: "GND_FAN" } })
-const led = connector("LED1", jstPh2, { pins: { 1: "LED_CTRL", 2: "GND_SIG" } })
-const bumpL = connector("BUMP1", jstPh2, { pins: { 1: "BUMP_L", 2: "GND_SIG" } })
-const bumpR = connector("BUMP2", jstPh2, { pins: { 1: "BUMP_R", 2: "GND_SIG" } })
+const fan = connector("FAN1", jstPh2, {
+  pins: { 1: "12V_FAN", 2: "GND_FAN" }, terminals: "SPH-004T-P0.5S"
+})
+const led = connector("LED1", jstPh2, {
+  pins: { 1: "LED_CTRL", 2: "GND_SIG" }, terminals: "SPH-004T-P0.5S"
+})
+const bumpL = connector("BUMP1", jstPh2, {
+  pins: { 1: "BUMP_L", 2: "GND_SIG" }, terminals: "SPH-004T-P0.5S"
+})
+const bumpR = connector("BUMP2", jstPh2, {
+  pins: { 1: "BUMP_R", 2: "GND_SIG" }, terminals: "SPH-004T-P0.5S"
+})
 
 const ethCable = cable("C_ETH", {
   type: "2x26AWG twisted shielded", conductors: 2, shield: "braid",

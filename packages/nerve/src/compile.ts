@@ -44,6 +44,20 @@ const comparePins = (a: string, b: string): number => {
 const compareStrings = (a: string, b: string): number =>
   a < b ? -1 : a > b ? 1 : 0
 
+const isPositiveFinite = (value: number): boolean => Number.isFinite(value) && value > 0
+const isNonNegativeFinite = (value: number): boolean => Number.isFinite(value) && value >= 0
+const isPositiveInteger = (value: number): boolean => Number.isInteger(value) && value > 0
+
+/** Numeric conductor labels have one canonical identity (`01` and `1` are
+ * the same conductor); non-numeric labels such as `red` remain valid. */
+const normalizeConductor = (value: string | number): string | undefined => {
+  const raw = String(value).trim()
+  if (raw === "") return undefined
+  if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw)) return raw
+  const numeric = Number(raw)
+  return isPositiveInteger(numeric) ? String(numeric) : undefined
+}
+
 /** Strip `undefined` values so optional fields are absent in serialized HIR. */
 const compact = <T extends Record<string, unknown>>(obj: T): T => {
   const out: Record<string, unknown> = {}
@@ -86,6 +100,42 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
       continue
     }
     connectorByRef.set(c.ref, c)
+    if (!isPositiveInteger(c.part.pinCount)) {
+      report(
+        Codes.InvalidConnectorQuantity,
+        `Connector ${c.ref} has pinCount ${c.part.pinCount}; pinCount must be a positive integer.`,
+        refs.connector(c.ref),
+        DiagnosticSeverity.Error,
+        { data: { pinCount: c.part.pinCount } }
+      )
+    }
+    if (
+      c.part.cavityLayout !== undefined &&
+      (!isPositiveInteger(c.part.cavityLayout.rows) ||
+        !isPositiveInteger(c.part.cavityLayout.columns))
+    ) {
+      report(
+        Codes.InvalidConnectorQuantity,
+        `Connector ${c.ref} has cavity layout ${c.part.cavityLayout.rows}×${c.part.cavityLayout.columns}; rows and columns must be positive integers.`,
+        refs.connector(c.ref),
+        DiagnosticSeverity.Error,
+        { data: { rows: c.part.cavityLayout.rows, columns: c.part.cavityLayout.columns } }
+      )
+    }
+    for (const [field, value] of [
+      ["currentLimitA", c.part.currentLimitA],
+      ["voltageLimitV", c.part.voltageLimitV]
+    ] as const) {
+      if (value !== undefined && !isPositiveFinite(value)) {
+        report(
+          Codes.InvalidConnectorQuantity,
+          `Connector ${c.ref} has ${field} ${value}; electrical ratings must be positive finite values.`,
+          refs.connector(c.ref),
+          DiagnosticSeverity.Error,
+          { data: { field, value } }
+        )
+      }
+    }
   }
 
   const connectors: Array<HirConnector> = [...connectorByRef.values()]
@@ -153,6 +203,7 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
   }
 
   const cableIds = new Set<string>()
+  const cableById = new Map<string, (typeof design.cables)[number]>()
   for (const c of design.cables) {
     if (cableIds.has(c.id)) {
       report(
@@ -160,8 +211,26 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         `Cable ID ${c.id} is defined more than once.`,
         `cable:${c.id}`
       )
-    }
+    } else cableById.set(c.id, c)
     cableIds.add(c.id)
+    if (c.conductors !== undefined && !isPositiveInteger(c.conductors)) {
+      report(
+        Codes.InvalidCableDefinition,
+        `Cable ${c.id} has conductor count ${c.conductors}; conductor count must be a positive integer.`,
+        `cable:${c.id}`,
+        DiagnosticSeverity.Error,
+        { data: { conductors: c.conductors } }
+      )
+    }
+    if (c.outerDiameter !== undefined && !isPositiveFinite(c.outerDiameter)) {
+      report(
+        Codes.InvalidCableDefinition,
+        `Cable ${c.id} has outer diameter ${c.outerDiameter}; outer diameter must be positive and finite.`,
+        `cable:${c.id}`,
+        DiagnosticSeverity.Error,
+        { data: { outerDiameter: c.outerDiameter } }
+      )
+    }
   }
 
   const checkEndpoint = (owner: string, end: HirEndpoint) => {
@@ -198,6 +267,7 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
   // --- Wires --------------------------------------------------------------
   const wireIds = new Set<string>()
   const wires: Array<HirWire> = []
+  const conductorOwners = new Map<string, string>()
   for (const w of design.wires) {
     if (wireIds.has(w.id)) {
       report(
@@ -229,6 +299,85 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
       )
     }
 
+    if (w.lengthTolerance !== undefined) {
+      const toleranceValid = isNonNegativeFinite(w.lengthTolerance)
+      const belowLength =
+        w.length === undefined || !isPositiveFinite(w.length) || w.lengthTolerance < w.length
+      if (!toleranceValid || !belowLength) {
+        report(
+          Codes.InvalidWireQuantity,
+          `Wire ${w.id} has length tolerance ${w.lengthTolerance}; tolerance must be non-negative, finite, and smaller than its positive length${w.length !== undefined ? ` (${w.length})` : ""}.`,
+          refs.wire(w.id),
+          DiagnosticSeverity.Error,
+          {
+            data: {
+              lengthTolerance: w.lengthTolerance,
+              ...(w.length !== undefined ? { length: w.length } : {})
+            }
+          }
+        )
+      }
+    }
+    for (const [field, value, valid] of [
+      ["voltageRating", w.voltageRating, w.voltageRating === undefined || isPositiveFinite(w.voltageRating)],
+      ["currentEstimate", w.currentEstimate, w.currentEstimate === undefined || isNonNegativeFinite(w.currentEstimate)],
+      ["temperatureRating", w.temperatureRating, w.temperatureRating === undefined || Number.isFinite(w.temperatureRating)]
+    ] as const) {
+      if (!valid && value !== undefined) {
+        report(
+          Codes.InvalidWireQuantity,
+          `Wire ${w.id} has invalid ${field} ${value}.`,
+          refs.wire(w.id),
+          DiagnosticSeverity.Error,
+          { data: { field, value } }
+        )
+      }
+    }
+
+    const conductor =
+      w.conductor !== undefined ? normalizeConductor(w.conductor) : undefined
+    if (w.conductor !== undefined && conductor === undefined) {
+      report(
+        Codes.InvalidCableConductor,
+        `Wire ${w.id} has invalid conductor identifier "${String(w.conductor)}"; use a positive integer or a non-empty name.`,
+        refs.wire(w.id)
+      )
+    }
+    if (w.conductor !== undefined && w.cable === undefined) {
+      report(
+        Codes.InvalidCableConductor,
+        `Wire ${w.id} declares conductor ${String(w.conductor)} without declaring a cable.`,
+        refs.wire(w.id)
+      )
+    }
+    if (w.cable !== undefined && conductor !== undefined) {
+      const cable = cableById.get(w.cable)
+      const numeric = /^\d+$/.test(conductor) ? Number(conductor) : undefined
+      if (numeric !== undefined && cable?.conductors !== undefined && numeric > cable.conductors) {
+        report(
+          Codes.InvalidCableConductor,
+          `Wire ${w.id} uses conductor ${conductor} of cable ${w.cable}, but that cable has only ${cable.conductors} conductors.`,
+          refs.wire(w.id),
+          DiagnosticSeverity.Error,
+          { data: { cable: w.cable, conductor, conductors: cable.conductors } }
+        )
+      }
+      const key = `${w.cable}\u0000${conductor}`
+      const previous = conductorOwners.get(key)
+      if (previous !== undefined) {
+        report(
+          Codes.DuplicateCableConductor,
+          `Wires ${previous} and ${w.id} both claim conductor ${conductor} of cable ${w.cable}.`,
+          refs.wire(w.id),
+          DiagnosticSeverity.Error,
+          {
+            targets: [refs.wire(previous)],
+            data: { cable: w.cable, conductor, firstWire: previous }
+          }
+        )
+      } else conductorOwners.set(key, w.id)
+    }
+
     wires.push(
       compact({
         id: w.id,
@@ -250,7 +399,7 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         twistGroup: w.twistGroup,
         shieldGroup: w.shieldGroup,
         cable: w.cable,
-        conductor: w.conductor !== undefined ? String(w.conductor) : undefined,
+        conductor,
         notes: w.notes
       })
     )
@@ -278,6 +427,15 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
         Codes.SpliceUndefinedBranch,
         `Splice ${s.id} is located on undefined branch ${s.branch}.`,
         refs.splice(s.id)
+      )
+    }
+    if (s.location !== undefined && !isNonNegativeFinite(s.location)) {
+      report(
+        Codes.InvalidSpliceLocation,
+        `Splice ${s.id} has location ${s.location}; splice location must be non-negative and finite.`,
+        refs.splice(s.id),
+        DiagnosticSeverity.Error,
+        { data: { location: s.location } }
       )
     }
     const attached = spliceWires(s.id)
@@ -344,6 +502,23 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
     }
     branchIds.add(b.id)
 
+    for (const [field, value, valid] of [
+      ["nominalLength", b.nominalLength, b.nominalLength === undefined || isPositiveFinite(b.nominalLength)],
+      ["breakoutDistance", b.breakoutDistance, b.breakoutDistance === undefined || isNonNegativeFinite(b.breakoutDistance)],
+      ["minBendRadius", b.minBendRadius, b.minBendRadius === undefined || isPositiveFinite(b.minBendRadius)],
+      ["ambientTemperatureC", b.ambientTemperatureC, b.ambientTemperatureC === undefined || Number.isFinite(b.ambientTemperatureC)]
+    ] as const) {
+      if (!valid && value !== undefined) {
+        report(
+          Codes.InvalidBranchGeometry,
+          `Branch ${b.id} has invalid ${field} ${value}.`,
+          refs.branch(b.id),
+          DiagnosticSeverity.Error,
+          { data: { field, value } }
+        )
+      }
+    }
+
     for (const endpoint of b.path) {
       if (!connectorByRef.has(endpoint)) {
         report(
@@ -382,6 +557,15 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
       continue
     }
     protectionIds.add(p.id)
+    if (!isPositiveFinite(p.ratingA)) {
+      report(
+        Codes.InvalidProtectionRating,
+        `${p.kind} ${p.id} has rating ${p.ratingA}A; protection ratings must be positive and finite.`,
+        `protection:${p.id}`,
+        DiagnosticSeverity.Error,
+        { data: { ratingA: p.ratingA } }
+      )
+    }
     for (const wireId of p.protects) {
       if (!wireIds.has(wireId)) {
         report(
@@ -416,6 +600,25 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
       continue
     }
     labelIds.add(l.id)
+
+    if (l.distance !== undefined && !isNonNegativeFinite(l.distance)) {
+      report(
+        Codes.InvalidLabelQuantity,
+        `Label ${l.id} has distance ${l.distance}; placement distance must be non-negative and finite.`,
+        refs.label(l.id),
+        DiagnosticSeverity.Error,
+        { data: { distance: l.distance } }
+      )
+    }
+    if (l.quantity !== undefined && !isPositiveInteger(l.quantity)) {
+      report(
+        Codes.InvalidLabelQuantity,
+        `Label ${l.id} has quantity ${l.quantity}; label quantity must be a positive integer.`,
+        refs.label(l.id),
+        DiagnosticSeverity.Error,
+        { data: { quantity: l.quantity } }
+      )
+    }
 
     if (!branchIds.has(l.attachTo) && !connectorByRef.has(l.attachTo)) {
       report(

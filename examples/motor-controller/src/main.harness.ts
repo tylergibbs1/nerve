@@ -18,6 +18,12 @@ const controller = connector("J1", MolexMicroFit["43025-0800"], {
     7: "MOTOR_TEMP",
     8: "SHIELD_DRAIN",
   },
+  terminals: {
+    1: "43030-0007",
+    2: "43030-0007",
+    3: "43030-0007",
+    4: "43030-0007",
+  },
 });
 
 const motor = connector("M1", MolexMicroFit["43020-0800"], {
@@ -30,6 +36,12 @@ const motor = connector("M1", MolexMicroFit["43020-0800"], {
     6: "ENC_B",
     7: "MOTOR_TEMP",
     8: "SHIELD_DRAIN",
+  },
+  terminals: {
+    1: "43031-0007",
+    2: "43031-0007",
+    3: "43031-0007",
+    4: "43031-0007",
   },
 });
 

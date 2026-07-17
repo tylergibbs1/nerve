@@ -9,14 +9,17 @@ const jst4 = JstPH["PHR-4"]
 
 const controller = connector("J1", jst4, {
   pins: { 1: "V5", 2: "GND", 3: "CAN_H", 4: "CAN_L" },
+  terminals: "SPH-004T-P0.5S",
 })
 
 const sensorA = connector("P1", jst3, {
   pins: { 1: "V5", 2: "GND", 3: "CAN_H" },
+  terminals: "SPH-004T-P0.5S",
 })
 
 const sensorB = connector("P2", jst3, {
   pins: { 1: "V5", 2: "GND", 3: "CAN_L" },
+  terminals: "SPH-004T-P0.5S",
 })
 
 const powerSplice = splice("S1", {

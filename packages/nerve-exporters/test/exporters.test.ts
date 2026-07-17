@@ -28,7 +28,7 @@ describe("CSV exporters (PRD §20)", () => {
     expect(header).toBe(
       "Item number,Quantity,Unit of measure,Internal part number,Manufacturer,Manufacturer part number,Description,Category,Used by,Approved alternates,Notes"
     )
-    expect(rows).toHaveLength(2)
+    expect(rows).toHaveLength(4)
     expect(rows[0]).toContain("43020-0800")
     expect(rows[0]).toContain("connector:M1")
     expect(csv).toMatchSnapshot()
@@ -40,7 +40,9 @@ describe("CSV exporters (PRD §20)", () => {
     expect(lines[0]).toBe(
       "Wire ID,Signal,Gauge,Color,Stripe,Cut length,Finished length,Tolerance,From connector,From pin,To connector,To pin,Terminal A,Terminal B,Branch,Notes"
     )
-    expect(lines[1]).toBe("W1,VBAT_24V,20AWG,red,,420,420,10,J1,1,M1,1,,,,")
+    expect(lines[1]).toBe(
+      "W1,VBAT_24V,20AWG,red,,420,420,10,J1,1,M1,1,43030-0007,43031-0007,,"
+    )
     expect(csv).toMatchSnapshot()
   })
 

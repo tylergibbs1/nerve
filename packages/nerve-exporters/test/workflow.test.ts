@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { compileDesign, variant } from "@grayhaven/nerve"
+import { compileDesign, connector, harness, splice, variant, wire } from "@grayhaven/nerve"
 import {
   createBuildRecord,
   createRedline,
@@ -88,6 +88,28 @@ describe("ECO / release records (PRD §35)", () => {
     }
     expect(() =>
       createRelease(bad, { eco: { id: "ECO-X", reason: "no" }, createdAt: "2026-06-06" })
+    ).toThrow(ReleaseBlockedError)
+  })
+
+  it("fails closed when an electrical net cannot be proven by a continuity test", () => {
+    const part = { mpn: "P", pinCount: 1 }
+    const j1 = connector("J1", part, { pins: { 1: "SIG" } })
+    const s1 = splice("S1", { type: "crimp" })
+    const untestable = compileDesign(
+      harness("untestable-net", {
+        revision: "A",
+        units: "mm",
+        connectors: [j1],
+        splices: [s1],
+        wires: [wire("W1", j1.pin(1), s1, { signal: "SIG" })]
+      })
+    ).hir
+
+    expect(() =>
+      createRelease(untestable, {
+        eco: { id: "ECO-X", reason: "Incomplete verification boundary" },
+        createdAt: "2026-06-06"
+      })
     ).toThrow(ReleaseBlockedError)
   })
 })

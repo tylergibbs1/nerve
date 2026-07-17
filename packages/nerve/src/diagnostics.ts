@@ -39,20 +39,29 @@ export const Codes = {
   DuplicateConnectorRef: "HK-CONN-001",
   UndefinedConnectorRef: "HK-CONN-002",
   UndefinedPinRef: "HK-CONN-003",
+  InvalidConnectorQuantity: "HK-CONN-004",
   DuplicateWireId: "HK-WIRE-001",
   WireEndpointsIdentical: "HK-WIRE-002",
+  InvalidWireQuantity: "HK-WIRE-003",
   DuplicateBranchId: "HK-BRANCH-001",
   BranchUndefinedEndpoint: "HK-BRANCH-002",
+  InvalidBranchGeometry: "HK-BRANCH-003",
   DuplicateLabelId: "HK-LABEL-001",
   LabelUndefinedTarget: "HK-LABEL-002",
+  InvalidLabelQuantity: "HK-LABEL-003",
   DuplicateSpliceId: "HK-SPLICE-001",
   UndefinedSpliceRef: "HK-SPLICE-002",
   SpliceTooFewWires: "HK-SPLICE-003",
   SpliceUndefinedBranch: "HK-SPLICE-004",
+  InvalidSpliceLocation: "HK-SPLICE-005",
   DuplicateCableId: "HK-CABLE-001",
   UndefinedCableRef: "HK-CABLE-002",
+  InvalidCableDefinition: "HK-CABLE-003",
+  DuplicateCableConductor: "HK-CABLE-004",
+  InvalidCableConductor: "HK-CABLE-005",
   DuplicateProtectionId: "HK-PROT-001",
-  ProtectionUndefinedWire: "HK-PROT-002"
+  ProtectionUndefinedWire: "HK-PROT-002",
+  InvalidProtectionRating: "HK-PROT-003"
 } as const
 
 export const hasErrors = (diagnostics: ReadonlyArray<Diagnostic>): boolean =>

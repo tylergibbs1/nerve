@@ -64,6 +64,10 @@
     "name": "terminalIncompatible"
   },
   {
+    "code": "HK-CONN-021",
+    "name": "missingTerminal"
+  },
+  {
     "code": "HK-CONN-013",
     "name": "missingSeal"
   },
@@ -116,6 +120,10 @@
     "name": "cableConductorOverflow"
   },
   {
+    "code": "HK-MFG-011",
+    "name": "missingCableConductor"
+  },
+  {
     "code": "HK-ELEC-006",
     "name": "orphanedDifferentialHalf"
   },
@@ -134,5 +142,9 @@
   {
     "code": "HK-ELEC-010",
     "name": "overcurrentExceedsConductor"
+  },
+  {
+    "code": "HK-ELEC-011",
+    "name": "uncoveredNet"
   }
 ]

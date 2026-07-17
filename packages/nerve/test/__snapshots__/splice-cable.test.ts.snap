@@ -36,6 +36,24 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
         "connector:J1",
       ],
     },
+    {
+      "category": "terminal",
+      "mpn": "SPH-004T-P0.5S",
+      "quantity": 10,
+      "unitOfMeasure": "ea",
+      "usedBy": [
+        "connector:J1.pin:1",
+        "connector:J1.pin:2",
+        "connector:J1.pin:3",
+        "connector:J1.pin:4",
+        "connector:P1.pin:1",
+        "connector:P1.pin:2",
+        "connector:P1.pin:3",
+        "connector:P2.pin:1",
+        "connector:P2.pin:2",
+        "connector:P2.pin:3",
+      ],
+    },
   ],
   "branches": [
     {
@@ -86,18 +104,22 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
         {
           "pin": "1",
           "signal": "V5",
+          "terminal": "SPH-004T-P0.5S",
         },
         {
           "pin": "2",
           "signal": "GND",
+          "terminal": "SPH-004T-P0.5S",
         },
         {
           "pin": "3",
           "signal": "CAN_H",
+          "terminal": "SPH-004T-P0.5S",
         },
         {
           "pin": "4",
           "signal": "CAN_L",
+          "terminal": "SPH-004T-P0.5S",
         },
       ],
       "provenance": {
@@ -134,14 +156,17 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
         {
           "pin": "1",
           "signal": "V5",
+          "terminal": "SPH-004T-P0.5S",
         },
         {
           "pin": "2",
           "signal": "GND",
+          "terminal": "SPH-004T-P0.5S",
         },
         {
           "pin": "3",
           "signal": "CAN_H",
+          "terminal": "SPH-004T-P0.5S",
         },
       ],
       "provenance": {
@@ -178,14 +203,17 @@ exports[`splice + cable compilation (PRD §9.2, golden) > matches the golden sna
         {
           "pin": "1",
           "signal": "V5",
+          "terminal": "SPH-004T-P0.5S",
         },
         {
           "pin": "2",
           "signal": "GND",
+          "terminal": "SPH-004T-P0.5S",
         },
         {
           "pin": "3",
           "signal": "CAN_L",
+          "terminal": "SPH-004T-P0.5S",
         },
       ],
       "provenance": {

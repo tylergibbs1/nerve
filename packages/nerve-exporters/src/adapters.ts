@@ -148,7 +148,17 @@ export const genericTesterJson: MachineAdapter = {
         from: t.from,
         to: t.to,
         thresholdOhms: t.expected === "closed" ? 2 : 100000,
-        hirRef: t.type === "continuity" ? refs.wire(t.wire) : t.type === "splice" ? refs.splice(t.splice) : null
+        hirRef:
+          t.type === "continuity"
+            ? refs.wire(t.wire)
+            : t.type === "splice"
+              ? refs.splice(t.splice)
+              : t.type === "net-continuity"
+                ? refs.wire(t.wires[0]!)
+                : null,
+        ...(t.type === "net-continuity"
+          ? { hirRefs: [...t.wires.map(refs.wire), ...t.splices.map(refs.splice)] }
+          : {})
       }))
     }
     return {

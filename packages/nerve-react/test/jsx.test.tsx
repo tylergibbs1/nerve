@@ -16,8 +16,18 @@ const PINS = {
 
 const jsxStyle = (
   <Harness id="motor-controller-harness" revision="A" units="mm">
-    <Connector ref="J1" part={MolexMicroFit["43025-0800"]} pins={PINS} />
-    <Connector ref="M1" part={MolexMicroFit["43020-0800"]} pins={PINS} />
+    <Connector
+      ref="J1"
+      part={MolexMicroFit["43025-0800"]}
+      pins={PINS}
+      terminals={{ 1: "43030-0007", 2: "43030-0007", 3: "43030-0007", 4: "43030-0007" }}
+    />
+    <Connector
+      ref="M1"
+      part={MolexMicroFit["43020-0800"]}
+      pins={PINS}
+      terminals={{ 1: "43031-0007", 2: "43031-0007", 3: "43031-0007", 4: "43031-0007" }}
+    />
     <Wire id="W1" from="J1.1" to="M1.1" gauge="20AWG" color="red" length={420} signal="VBAT_24V" />
     <Wire id="W2" from="J1.2" to="M1.2" gauge="20AWG" color="black" length={420} signal="GND" />
     <Wire id="W3" from="J1.3" to="M1.3" gauge="24AWG" color="white" twistGroup="CAN_PAIR" signal="CAN_H" />

@@ -19,9 +19,12 @@ The TypeScript API is one input format, not an adoption requirement. Nerve can i
 
 Nerve does not certify a harness or claim compliance with an industry or customer standard. Its reports record the deterministic checks performed on the facts supplied.
 
+The domain boundaries and validation ownership are documented in
+[Harness modeling principles](./docs/modeling-principles.md).
+
 ## What it does
 
-- Runs 34 built-in consistency, electrical, component, and manufacturing checks with stable `HK-*` diagnostic codes.
+- Runs 37 built-in consistency, electrical, component, and manufacturing checks with stable `HK-*` diagnostic codes.
 - Produces a versioned machine-readable review report with HIR fingerprint, built-in rule coverage, findings, and explicit limitations.
 - Accounts for every mapped CSV or Excel row as accepted or rejected, then emits editable Nerve source and HIR.
 - Compares harness connector assignments with a KiCad 6+ board footprint's pad nets or another interface contract.
@@ -123,7 +126,7 @@ const j1 = connector("J1", MolexMicroFit["43025-0800"], {
 | --- | --- |
 | [`@grayhaven/nerve`](./packages/nerve) | Domain model, authoring API, versioned HIR, diagnostics, rules API, and deterministic `compileDesign` |
 | [`@grayhaven/nerve-compiler`](./packages/nerve-compiler) | Trusted local `.harness.ts` loading, configuration, plugins, and fail-closed validation |
-| [`@grayhaven/nerve-rules`](./packages/nerve-rules) | 34 generic built-in rules with stable diagnostic codes |
+| [`@grayhaven/nerve-rules`](./packages/nerve-rules) | 37 generic built-in rules with stable diagnostic codes |
 | [`@grayhaven/nerve-importers`](./packages/nerve-importers) | Deterministic CSV and Excel wire-list migration with source-row accounting |
 | [`@grayhaven/nerve-eval`](./packages/nerve-eval) | Provenance-aware evaluation and stable review-report primitives |
 | [`@grayhaven/nerve-exporters`](./packages/nerve-exporters) | Review, drawing, manufacturing, release, contract, and test artifacts |

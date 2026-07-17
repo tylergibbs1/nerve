@@ -1,6 +1,6 @@
 # @grayhaven/nerve-rules
 
-34 generic validation rules with stable `HK-*` codes: missing ground returns, untwisted differential pairs, ampacity vs. gauge, terminal and seal compatibility, reserved pins, bend radius, bundle capacity, voltage ratings, and more. Includes a derived numeric code mapping for tooling.
+37 generic validation rules with stable `HK-*` codes: missing ground returns, untwisted differential pairs, ampacity vs. gauge, terminal and seal compatibility, cable-conductor identity, continuity-test reachability, reserved pins, bend radius, bundle capacity, voltage ratings, and more. Includes a derived numeric code mapping for tooling.
 
 These checks operate on declared facts. They are not a standards certification or a field-validated failure corpus.
 

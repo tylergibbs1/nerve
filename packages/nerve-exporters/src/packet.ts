@@ -18,7 +18,7 @@ import {
   labelScheduleJsonSatellite,
   renderLayoutJson
 } from "./satellites.js"
-import { generateTestPlan, testPlanJson } from "./test-plan.js"
+import { coverage, generateTestPlan, testPlanJson } from "./test-plan.js"
 import { schematicSvg } from "./svg.js"
 import { boardSvg } from "./board.js"
 import { connectorFacesSvg } from "./faces.js"
@@ -120,4 +120,9 @@ export const buildPacket = async (
 }
 
 /** Release exports must fail closed on validation errors (PRD §15). */
-export const canRelease = (hir: Hir): boolean => !hasErrors(hir.diagnostics)
+export const canRelease = (hir: Hir): boolean => {
+  if (hasErrors(hir.diagnostics)) return false
+  const plan = generateTestPlan(hir)
+  const result = coverage(hir, plan)
+  return result.covered === result.nets
+}

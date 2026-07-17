@@ -174,7 +174,7 @@ export const testPlanTable = (plan: TestPlan): TableData => ({
     t.to.pin,
     t.expected,
     t.net,
-    t.wire
+    t.type === "net-continuity" ? t.wires.join(" + ") : t.wire
   ])
 })
 

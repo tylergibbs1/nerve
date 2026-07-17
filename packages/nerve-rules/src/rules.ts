@@ -419,6 +419,39 @@ export const terminalIncompatible: Rule = rule(
   { code: "HK-CONN-012" }
 )
 
+/** A connector that publishes a terminal allow-list models removable crimp
+ * contacts. Every wired cavity therefore needs an explicit terminal MPN;
+ * connector families without such a list (solder cups, tabs, PCB headers)
+ * are intentionally outside this rule. */
+export const missingTerminal: Rule = rule(
+  "missingTerminal",
+  (ctx) => {
+    const connectorByRef = new Map(ctx.hir.connectors.map((c) => [c.ref, c]))
+    const seen = new Set<string>()
+    for (const w of ctx.hir.wires) {
+      for (const end of [w.from, w.to]) {
+        if (!isPinEndpoint(end)) continue
+        const key = `${end.connector}:${end.pin}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        const connector = connectorByRef.get(end.connector)
+        if (connector?.compatibleTerminals === undefined || connector.compatibleTerminals.length === 0) {
+          continue
+        }
+        const pin = connector.pins.find((p) => p.pin === end.pin)
+        if (pin?.terminal !== undefined) continue
+        ctx.report({
+          severity: Err,
+          message: `Wired pin ${end.connector}.${end.pin} has no terminal; ${connector.mpn} requires one of: ${connector.compatibleTerminals.join(", ")}.`,
+          target: refs.pin(end.connector, end.pin),
+          targets: [refs.wire(w.id)]
+        })
+      }
+    }
+  },
+  { code: "HK-CONN-021" }
+)
+
 export const missingSeal: Rule = rule(
   "missingSeal",
   (ctx) => {
@@ -832,6 +865,24 @@ export const cableConductorOverflow: Rule = rule(
   { code: "HK-MFG-010" }
 )
 
+/** Cable membership without a conductor identity is valid as an early design
+ * sketch, but is ambiguous for cut lists, connector pinouts, and test repair. */
+export const missingCableConductor: Rule = rule(
+  "missingCableConductor",
+  (ctx) => {
+    for (const w of ctx.hir.wires) {
+      if (w.cable === undefined || w.conductor !== undefined) continue
+      ctx.report({
+        severity: Warn,
+        message: `Wire ${w.id} belongs to cable ${w.cable} but does not identify which conductor it uses.`,
+        target: refs.wire(w.id),
+        data: { cable: w.cable }
+      })
+    }
+  },
+  { code: "HK-MFG-011" }
+)
+
 /** A named bus differential half (CAN/RS-485/USB) whose partner appears on no
  * wire. HK-ELEC-001 only fires once BOTH halves exist; this catches the
  * lone-half case. Restricted to strong bus patterns so an incidentally
@@ -981,6 +1032,44 @@ export const overcurrentExceedsConductorWith = (shop?: ShopProfile): Rule => rul
 
 export const overcurrentExceedsConductor: Rule = overcurrentExceedsConductorWith()
 
+/** A continuity test needs two physically accessible connector pins. A net
+ * with fewer points is an incomplete physical topology, even when its splice
+ * graph is electrically connected in the abstract. */
+export const uncoveredNet: Rule = rule(
+  "uncoveredNet",
+  (ctx) => {
+    const byRoot = new Map<
+      string,
+      { name: string; pins: Set<string>; wires: Array<string> }
+    >()
+    for (const w of ctx.hir.wires) {
+      const root = ctx.nets.rootOf(w.from)
+      const entry = byRoot.get(root) ?? {
+        name: ctx.nets.nameOf(w.from) ?? root,
+        pins: new Set<string>(),
+        wires: []
+      }
+      entry.wires.push(w.id)
+      for (const end of [w.from, w.to]) {
+        if (isPinEndpoint(end)) entry.pins.add(refs.pin(end.connector, end.pin))
+      }
+      byRoot.set(root, entry)
+    }
+    for (const entry of [...byRoot.values()].sort((a, b) => a.name.localeCompare(b.name))) {
+      if (entry.pins.size >= 2) continue
+      const wires = [...entry.wires].sort()
+      ctx.report({
+        severity: Err,
+        message: `Net ${entry.name} reaches ${entry.pins.size} accessible connector pin${entry.pins.size === 1 ? "" : "s"}; continuity coverage requires at least 2.`,
+        target: refs.wire(wires[0]!),
+        targets: wires.slice(1).map(refs.wire),
+        data: { accessiblePins: entry.pins.size, wireCount: wires.length }
+      })
+    }
+  },
+  { code: "HK-ELEC-011" }
+)
+
 /**
  * builtinRules with the shop-capability rules parameterized by a profile
  * (PRD §10.5 config: `defineConfig({ shop: { … } })`). Same rule names and
@@ -1018,6 +1107,7 @@ export const builtinRules: ReadonlyArray<Rule> = [
   unconnectedAssignedPin,
   wireSignalMismatch,
   terminalIncompatible,
+  missingTerminal,
   missingSeal,
   sealIncompatible,
   connectorCurrentExceeded,
@@ -1031,9 +1121,11 @@ export const builtinRules: ReadonlyArray<Rule> = [
   nonPositiveWireLength,
   branchParentInvalid,
   cableConductorOverflow,
+  missingCableConductor,
   orphanedDifferentialHalf,
   twistGroupGaugeMismatch,
   emcAggressorVictimShareBranch,
   wireTempBelowAmbient,
-  overcurrentExceedsConductor
+  overcurrentExceedsConductor,
+  uncoveredNet
 ]

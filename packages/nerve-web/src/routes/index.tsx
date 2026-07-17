@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import rulesMeta from "../docs/rules-meta.json"
 
 export const Route = createFileRoute("/")({
   component: Landing
@@ -36,7 +37,7 @@ function Landing() {
         <div className="landing-proof-flow" aria-hidden="true">
           <span>source.yml</span>
           <i />
-          <strong>34 checks</strong>
+          <strong>{rulesMeta.length} checks</strong>
           <i />
           <span>review</span>
         </div>

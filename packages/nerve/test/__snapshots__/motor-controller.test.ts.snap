@@ -25,6 +25,30 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
         "connector:J1",
       ],
     },
+    {
+      "category": "terminal",
+      "mpn": "43030-0007",
+      "quantity": 4,
+      "unitOfMeasure": "ea",
+      "usedBy": [
+        "connector:J1.pin:1",
+        "connector:J1.pin:2",
+        "connector:J1.pin:3",
+        "connector:J1.pin:4",
+      ],
+    },
+    {
+      "category": "terminal",
+      "mpn": "43031-0007",
+      "quantity": 4,
+      "unitOfMeasure": "ea",
+      "usedBy": [
+        "connector:M1.pin:1",
+        "connector:M1.pin:2",
+        "connector:M1.pin:3",
+        "connector:M1.pin:4",
+      ],
+    },
   ],
   "branches": [
     {
@@ -61,18 +85,22 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
         {
           "pin": "1",
           "signal": "VBAT_24V",
+          "terminal": "43030-0007",
         },
         {
           "pin": "2",
           "signal": "GND",
+          "terminal": "43030-0007",
         },
         {
           "pin": "3",
           "signal": "CAN_H",
+          "terminal": "43030-0007",
         },
         {
           "pin": "4",
           "signal": "CAN_L",
+          "terminal": "43030-0007",
         },
         {
           "pin": "5",
@@ -126,18 +154,22 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
         {
           "pin": "1",
           "signal": "VBAT_24V",
+          "terminal": "43031-0007",
         },
         {
           "pin": "2",
           "signal": "GND",
+          "terminal": "43031-0007",
         },
         {
           "pin": "3",
           "signal": "CAN_H",
+          "terminal": "43031-0007",
         },
         {
           "pin": "4",
           "signal": "CAN_L",
+          "terminal": "43031-0007",
         },
         {
           "pin": "5",

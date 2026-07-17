@@ -51,10 +51,12 @@ describe("PRD §9.1 motor-controller harness (golden)", () => {
       offsetFrom: "J1",
       distance: 50
     })
-    // Connector BOM rollup: one housing MPN per side.
+    // Physical BOM includes both housings and every populated terminal.
     expect(hir.bom.map((b) => [b.mpn, b.quantity])).toEqual([
       ["43020-0800", 1],
-      ["43025-0800", 1]
+      ["43025-0800", 1],
+      ["43030-0007", 4],
+      ["43031-0007", 4]
     ])
   })
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { compileDesign, runRules } from "@grayhaven/nerve"
+import { compileDesign, connector, harness, runRules, splice, wire } from "@grayhaven/nerve"
 import { builtinRules } from "@grayhaven/nerve-rules"
 import {
   assemblyInstructions,
@@ -50,6 +50,42 @@ describe("test plan with splices (PRD §9.9)", () => {
   })
 })
 
+describe("test plan across chained splices", () => {
+  const part = { mpn: "P", pinCount: 1 }
+  const a = connector("J1", part, { pins: { 1: "SIG" } })
+  const b = connector("J2", part, { pins: { 1: "SIG" } })
+  const s1 = splice("S1", { type: "crimp" })
+  const s2 = splice("S2", { type: "crimp" })
+  const chained = compileDesign(
+    harness("chained-splices", {
+      revision: "A",
+      units: "mm",
+      connectors: [a, b],
+      splices: [s1, s2],
+      wires: [
+        wire("W1", a.pin(1), s1, { signal: "SIG" }),
+        wire("W2", s1, s2, { signal: "SIG" }),
+        wire("W3", s2, b.pin(1), { signal: "SIG" })
+      ]
+    })
+  ).hir
+
+  it("adds a traceable end-to-end continuity test", () => {
+    const plan = generateTestPlan(chained)
+    expect(plan.tests).toContainEqual({
+      id: "T-001",
+      type: "net-continuity",
+      from: { connector: "J1", pin: "1" },
+      to: { connector: "J2", pin: "1" },
+      expected: "closed",
+      net: "SIG",
+      wires: ["W1", "W2", "W3"],
+      splices: ["S1", "S2"]
+    })
+    expect(coverage(chained, plan)).toEqual({ nets: 1, covered: 1 })
+  })
+})
+
 describe("splice rendering and outputs", () => {
   it("schematic shows splice symbols", () => {
     const svg = schematicSvg(hir)
@@ -69,7 +105,9 @@ describe("splice rendering and outputs", () => {
   it("cut list shows splice endpoints and cable membership", () => {
     const csv = cutListCsv(hir, { defaultWireTolerance: 5 })
     expect(csv).toContain("W2,V5,26AWG,red,,180,180,5,S1,,P1,1")
-    expect(csv).toContain("W7,CAN_H,26AWG,white,,300,300,5,J1,3,P1,3,,,C1")
+    expect(csv).toContain(
+      "W7,CAN_H,26AWG,white,,300,300,5,J1,3,P1,3,SPH-004T-P0.5S,SPH-004T-P0.5S,C1"
+    )
   })
 
   it("assembly instructions include the splice section", () => {

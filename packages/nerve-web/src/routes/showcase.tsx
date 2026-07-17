@@ -316,7 +316,9 @@ function RoverShowcase() {
           </div>
           <div role="row">
             <span role="cell">Wiring diagrams and source-level documentation</span>
-            <span role="cell">34 repeatable checks that can block a release</span>
+            <span role="cell">
+              {JPL_SHOWCASE_SUMMARY.ruleCount} repeatable checks that can block a release
+            </span>
           </div>
           <div role="row">
             <span role="cell">A strong design description</span>

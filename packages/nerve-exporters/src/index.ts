@@ -19,6 +19,8 @@ export {
   type ContinuityTest,
   type HarnessTest,
   type IsolationTest,
+  type NetContinuityTest,
+  type SpliceTest,
   type TestPlan,
   type TestPoint
 } from "./test-plan.js"

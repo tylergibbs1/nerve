@@ -11,7 +11,9 @@ const model: CostModel = {
   longLeadThresholdDays: 60,
   parts: {
     "43025-0800": { unitCost: 0.68, supplier: "Molex" },
-    "43020-0800": { unitCost: 0.72, supplier: "Molex", leadTimeDays: 90, lifecycle: "nrnd" }
+    "43020-0800": { unitCost: 0.72, supplier: "Molex", leadTimeDays: 90, lifecycle: "nrnd" },
+    "43030-0007": { unitCost: 0.08, supplier: "Molex" },
+    "43031-0007": { unitCost: 0.08, supplier: "Molex" }
   },
   wireCostPerMeter: { "20AWG": 0.25, "24AWG": 0.14 },
   sleeveCostPerMeter: 1.4,

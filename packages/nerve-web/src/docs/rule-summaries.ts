@@ -8,8 +8,9 @@ export const RULE_SUMMARIES: Record<string, string> = {
   branchMissingLabel: "Bundle branches should carry a printed label.",
   missingWireGauge: "Every wire must declare a gauge.",
   missingSeal: "Sealed connector families require a seal part on each wired cavity.",
-  sealIncompatible: "Seal part must match the wire gauge it seals.",
-  terminalIncompatible: "Terminal part must accept the wire gauge crimped into it.",
+  sealIncompatible: "Seal MPN must appear in the connector family's compatible-seal list.",
+  terminalIncompatible: "Terminal MPN must appear in the connector family's compatible-terminal list.",
+  missingTerminal: "A wired cavity in a crimp-contact housing needs an explicit terminal MPN.",
   requireApprovedParts: "Parts must come from the approved library (provenance ≠ unverified).",
   gaugeCurrentMismatch: "Wire gauge must carry the declared or estimated current (ampacity table).",
   gaugeOutsideConnectorRange: "Wire gauge must sit inside the connector part's wireGaugeRange.",
@@ -33,9 +34,11 @@ export const RULE_SUMMARIES: Record<string, string> = {
   nonPositiveWireLength: "A wire length must be greater than zero.",
   branchParentInvalid: "A branch's parent must exist and the branch tree must be acyclic.",
   cableConductorOverflow: "A cable can't carry more wires than it has conductors.",
+  missingCableConductor: "Every cable member should identify its physical conductor.",
   orphanedDifferentialHalf: "A bus differential half (CAN/RS-485/USB) needs its partner present.",
   twistGroupGaugeMismatch: "Wires in one twist group should share a gauge to limit skew.",
   emcAggressorVictimShareBranch: "Aggressor and victim wires shouldn't share a bundle.",
   wireTempBelowAmbient: "A wire's temperature rating must meet its branch's ambient.",
-  overcurrentExceedsConductor: "A fuse/breaker rating can't exceed the ampacity of the thinnest wire it protects."
+  overcurrentExceedsConductor: "A fuse/breaker rating can't exceed the ampacity of the thinnest wire it protects.",
+  uncoveredNet: "Every electrical net needs at least two accessible connector pins for continuity testing."
 }

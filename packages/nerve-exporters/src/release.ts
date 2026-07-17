@@ -6,8 +6,8 @@
  * previous release — the engineering/manufacturing/test impact and a
  * change-risk score. Releases fail closed on validation errors (PRD §15).
  */
-import { diffHir, hasErrors, type Hir, type HirDiff } from "@grayhaven/nerve"
-import { generateTestPlan } from "./test-plan.js"
+import { diffHir, type Hir, type HirDiff } from "@grayhaven/nerve"
+import { coverage, generateTestPlan } from "./test-plan.js"
 
 /** FNV-1a 64-bit content fingerprint (integrity check, not cryptographic). */
 export const hirFingerprint = (hir: Hir): string => {
@@ -99,10 +99,14 @@ export interface CreateReleaseOptions {
 
 /** Create a release record. Throws `ReleaseBlockedError` when the HIR has errors. */
 export const createRelease = (hir: Hir, options: CreateReleaseOptions): Release => {
-  if (hasErrors(hir.diagnostics)) {
-    throw new ReleaseBlockedError(
-      hir.diagnostics.filter((d) => d.severity === "error").length
-    )
+  const plan = generateTestPlan(hir)
+  const validationErrors = hir.diagnostics.filter((d) => d.severity === "error")
+  const testCoverage = coverage(hir, plan)
+  const uncoveredDiagnostics = validationErrors.filter((d) => d.code === "HK-ELEC-011").length
+  const uncoveredNets = testCoverage.nets - testCoverage.covered
+  const additionalCoverageErrors = Math.max(0, uncoveredNets - uncoveredDiagnostics)
+  if (validationErrors.length > 0 || additionalCoverageErrors > 0) {
+    throw new ReleaseBlockedError(validationErrors.length + additionalCoverageErrors)
   }
   return {
     releaseId: `${hir.harness.id}@${hir.harness.revision}`,
@@ -114,7 +118,7 @@ export const createRelease = (hir: Hir, options: CreateReleaseOptions): Release 
     counts: {
       connectors: hir.connectors.length,
       wires: hir.wires.length,
-      tests: generateTestPlan(hir).tests.length
+      tests: plan.tests.length
     },
     ...(options.previous !== undefined
       ? {
