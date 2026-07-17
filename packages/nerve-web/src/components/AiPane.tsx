@@ -99,6 +99,7 @@ export function AiPane({ projectId }: { projectId: string }) {
           <Input
             type="password"
             placeholder="sk-…"
+            aria-label="OpenAI API key"
             className="h-9 text-sm"
             value={keyDraft}
             onChange={(e) => setKeyDraft(e.target.value)}
@@ -176,6 +177,7 @@ export function AiPane({ projectId }: { projectId: string }) {
         <Textarea
           rows={2}
           className="min-h-0 flex-1 resize-none px-2.5 py-1.5 text-sm leading-snug"
+          aria-label="Describe a change"
           placeholder={busy ? "Working…" : "Describe a change…"}
           value={input}
           disabled={busy}

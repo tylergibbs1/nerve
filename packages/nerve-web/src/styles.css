@@ -120,7 +120,7 @@ textarea:focus-visible, select:focus-visible {
   color: var(--muted);
 }
 
-.app-shell { display: flex; flex-direction: column; height: 100vh; }
+.app-shell { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 
 .topbar {
   display: flex;
@@ -447,6 +447,7 @@ textarea:focus-visible, select:focus-visible {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.55;
+  text-wrap: pretty;
 }
 .landing-proof-flow {
   display: grid;
@@ -527,7 +528,7 @@ textarea:focus-visible, select:focus-visible {
   letter-spacing: -0.01em;
   text-wrap: balance;
 }
-.project-card p { margin: 0; color: var(--muted); font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+.project-card p { margin: 0; color: var(--muted); font-family: var(--sans); font-size: 14px; line-height: 1.5; text-wrap: pretty; }
 .project-card-featured {
   position: relative;
   padding: 30px 30px 32px;
@@ -794,6 +795,7 @@ textarea:focus-visible, select:focus-visible {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.65;
+  text-wrap: pretty;
 }
 .showcase-drawing, .showcase-conductors, .showcase-artifacts, .showcase-difference {
   margin-top: clamp(76px, 9vw, 128px);
@@ -1309,17 +1311,16 @@ table.data th.sortable:hover { color: var(--text); }
 
 @media (max-width: 680px) {
   .topbar { padding-inline: 16px; }
-  .topbar .brand { gap: 7px; font-size: 11px; }
-  .topnav { gap: 10px; }
-  .topnav a { font-size: 10px; }
+  .topbar .brand { gap: 7px; font-size: 13px; }
+  .topnav { gap: 12px; }
+  .topnav a { font-size: 12px; }
   .landing { padding: 44px 20px 64px; gap: 52px; }
-  .landing h1 { font-size: clamp(36px, 12vw, 52px); }
+  .landing h1 { font-size: clamp(32px, 10vw, 44px); }
   .landing-links { align-items: flex-start; flex-direction: column; gap: 10px; }
   .landing-links .sep { display: none; }
   .landing-proof { padding: 24px; }
-  .landing-proof h2 { margin-top: 46px; }
+  .landing-proof h2 { margin-top: 40px; }
   .landing-proof-flow { grid-template-columns: auto 1fr auto 1fr auto; gap: 7px; }
-  .landing-proof-flow strong { width: 32px; height: 32px; }
   .landing-proof dl { grid-template-columns: 1fr; gap: 12px; }
 
   .showcase { padding: 44px 20px 72px; }
@@ -1337,7 +1338,7 @@ table.data th.sortable:hover { color: var(--text); }
   }
   .showcase-stage { margin-top: 10px; }
   .showcase-panel-head { min-height: 80px; padding: 18px; }
-  .showcase-source pre { min-height: 360px; padding: 18px; font-size: 10px; }
+  .showcase-source pre { min-height: 360px; padding: 18px; font-size: 11px; }
   .showcase-source-foot { padding-inline: 18px; }
   .showcase-ledger { grid-template-columns: 1fr; }
   .showcase-ledger > div { border-right: 0; border-bottom: 1px solid var(--border); }

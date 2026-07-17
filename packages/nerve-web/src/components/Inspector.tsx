@@ -80,7 +80,12 @@ export function Inspector({ hir }: { hir: Hir }) {
     <div className="inspector" role="region" aria-label="Selected object">
       <div className="inspector-head">
         <span className="spec-tag">{sel.kind}</span>
-        <Button variant="ghost" size="xs" onClick={() => setSelection(undefined)}>
+        <Button
+          variant="ghost"
+          size="xs"
+          aria-label="Close inspector"
+          onClick={() => setSelection(undefined)}
+        >
           ✕
         </Button>
       </div>
