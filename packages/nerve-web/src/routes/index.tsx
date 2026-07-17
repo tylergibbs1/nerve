@@ -4,25 +4,21 @@ export const Route = createFileRoute("/")({
   component: Landing
 })
 
-/** Minimal landing — the marketing surface lives inside the app now. */
+/** Minimal landing for the open verification substrate. */
 function Landing() {
   return (
     <div className="landing">
-      <span className="spec-tag">Interconnect Systems</span>
-      <h1>Harnesses as code.</h1>
+      <h1>Check a harness before it reaches the floor.</h1>
       <p className="landing-sub">
-        Typed wiring harnesses, compiled: one source of truth emits the schematics, BOMs, cut
-        lists, labels, continuity tests, and build records that ship the machine. Deterministic,
-        validated, fail-closed.
+        Nerve turns structured harness data into stable findings and reproducible review
+        artifacts. It is an open-source compiler and review gate, not a certification service.
       </p>
       <div className="landing-links">
-        <Link to="/projects/$projectId/diagram" params={{ projectId: "scratch" }} className="landing-cta">
-          Start a harness
+        <Link to="/projects" className="landing-cta">
+          Inspect the examples
         </Link>
         <span className="sep">/</span>
-        <Link to="/projects">Open the demo</Link>
-        <span className="sep">/</span>
-        <Link to="/docs">Read the docs</Link>
+        <Link to="/docs">Run a review</Link>
         <span className="sep">/</span>
         <a href="https://github.com/tylergibbs1/nerve" className="gh-inline">
           <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">

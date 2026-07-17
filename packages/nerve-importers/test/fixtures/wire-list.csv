@@ -1,0 +1,3 @@
+Wire,From,From Pin,To,To Pin,Signal,Gauge,Color,Length,Unit,From MPN,To MPN
+W1,J1,1,J2,1,PWR_12V,18AWG,red,10,in,A-2,B-2
+W2,J1,2,J2,2,GND,18AWG,black,254,mm,A-2,B-2

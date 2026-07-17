@@ -2,9 +2,9 @@
 
 > Harnesses as code. This file embeds every docs page; no further fetches needed. Index: https://nerve-demo.vercel.app/llms.txt
 
-# Harnesses are programs.
+# Review a harness reproducibly
 
-A Nerve harness is a TypeScript module. You describe connectors, wires, splices, and cables once; the compiler validates the design against electrical and manufacturing rules, then emits every artifact a build needs, deterministically.
+Nerve turns structured harness facts into a versioned representation, stable diagnostics, and reproducible review artifacts. TypeScript is one supported input, not a requirement for a future service or API.
 
 ## Install
 
@@ -13,6 +13,7 @@ npm install @grayhaven/nerve @grayhaven/nerve-connectors @grayhaven/nerve-cli
 
 npx --package=@grayhaven/nerve-cli nerve init .
 npx --package=@grayhaven/nerve-cli nerve compile ./src/main.harness.ts
+npx --package=@grayhaven/nerve-cli nerve review  ./src/main.harness.ts
 npx --package=@grayhaven/nerve-cli nerve export  ./src/main.harness.ts
 ```
 
@@ -38,13 +39,15 @@ export default harness("motor-controller-harness", {
 })
 ```
 
-`nerve export` writes `dist/`: the canonical `harness.json` (HIR), schematic and board SVGs, BOM / cut-list / label CSVs, a continuity test plan, assembly instructions, and the PDF manufacturing packet, all byte-identical across runs.
+`nerve review` writes a machine-readable finding report with the HIR fingerprint, built-in rule versions, findings, and limitations. `nerve export` writes the HIR, drawings, tables, test plan, instructions, and PDF packet.
+
+The report is not a certification and does not replace qualified engineering review. A check can use only the facts present in the submitted design and configured part data.
 
 Or skip the install entirely: [the editor in this app](/projects) compiles in your browser as you type.
 
 ## Share a harness
 
-Hit **Share** in the editor and the whole project — every file — is gzipped into the URL fragment. There's no backend: the fragment never leaves your browser, and opening the link recompiles the exact same design, byte for byte. Because the source rides in the link, a share URL *is* a reproducible bug report.
+Use **Share** in the editor to place the project files in the URL fragment. There is no backend for this flow: the fragment stays in the browser, and opening the link recompiles the same design. A share URL can therefore carry a reproducible software example. Do not place restricted customer data in a share URL.
 
 
 ---
@@ -663,7 +666,7 @@ Aliases: `microfit-2x4`, `microfit-2x4-plug`, `microfit-2x8`, `microfit-2x8-plug
 
 ---
 
-# nerve: deterministic, CI-ready.
+# Deterministic review from the command line
 
 Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exits nonzero on validation errors, and every artifact is byte-identical for the same input. With `entry` set in nerve.config.ts, the file argument is optional.
 
@@ -675,15 +678,17 @@ Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exit
 | `nerve dev` | Watch + recompile + live browser preview (schematic/board/faces/pinout). |
 | `nerve snapshot` | Committed visual snapshots, byte-exact; `--update` to accept, `--ci` for pixel diffs. |
 | `nerve validate` | Compile + rules only, the CI gate. Exit code mirrors severity. |
+| `nerve review` | Write a versioned finding report with rule coverage, fingerprint, and limitations. |
+| `nerve eval` | Evaluate a provenance-labeled rule corpus and write its scorecard. |
 | `nerve render` | Schematic / board / faces / pinout SVG (or PNG) from the HIR. |
 | `nerve export` | Everything: HIR, drawings, CSVs, test plan, assembly steps, PDF packet + zip. |
-| `nerve import` | WireViz YAML → Nerve harness source. |
+| `nerve import` | Import WireViz YAML or map CSV/Excel rows into reviewable Nerve output. |
 | `nerve diff` | Semantic diff between two revisions, down to a single pin swap. |
 | `nerve inspect` | Query the HIR (nets, pins, wires) from the terminal. |
 | `nerve quote` | Cost roll-up from the BOM with a pricing model. |
 | `nerve analyze` | Electrical analysis: voltage drop, current per wire. |
 | `nerve machine` | Machine-readable exports for cutting/marking equipment. |
-| `nerve contract` | Manufacturing contract bundle for an external shop. |
+| `nerve contract` | Compare a harness connector with JSON, CSV, tscircuit, or a KiCad board. |
 | `nerve release` | Cut a release: fail-closed validation + frozen artifact set. |
 | `nerve record` | Build record for a completed unit (serials, operators, results). |
 | `nerve redline` | Capture as-built deviations against the released design. |

@@ -1,101 +1,136 @@
 # Grayhaven Nerve
 
-**Harnesses as code for machines that need a nervous system.**
+**The open harness verification compiler.**
 
 [![CI](https://github.com/tylergibbs1/nerve/actions/workflows/ci.yml/badge.svg)](https://github.com/tylergibbs1/nerve/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/%40grayhaven%2Fnerve)](https://www.npmjs.com/package/@grayhaven/nerve)
 [![license](https://img.shields.io/badge/license-Apache--2.0-white)](./LICENSE)
 
-Nerve turns wiring-harness design into a version-controlled, type-safe workflow:
+Nerve turns structured harness data into deterministic review evidence:
 
+```text
+existing data or Nerve source
+  → versioned HIR
+  → stable HK-* findings
+  → review report, diffs, drawings, test plans, and manufacturing artifacts
 ```
-TypeScript DSL → compiler → HIR → 21 validation rules → deterministic rendering → manufacturing packet → test artifacts
-```
 
-**Try it now: [nerve.grayhavenindustries.com](https://nerve.grayhavenindustries.com)** — editor, docs, and three example harnesses, no install.
+The TypeScript API is one input format, not an adoption requirement. Nerve can import WireViz, mapped CSV and Excel wire lists, and connector contracts from KiCad boards, pinout CSV, tscircuit, or its own JSON format.
 
-[![The workspace: source editor, AI copilot, live schematic](./docs/assets/workspace.png)](https://nerve.grayhavenindustries.com/projects/robot-platform/diagram)
+Nerve does not certify a harness or claim compliance with an industry or customer standard. Its reports record the deterministic checks performed on the facts supplied.
 
-## Why
+## What it does
 
-A wiring harness is a program your machine runs on copper. Today it lives in PDFs and tribal knowledge. Nerve makes it source code: diffable in review, validated in CI, rendered into byte-identical manufacturing artifacts every time. The renderer never owns truth — every line in every output traces back to a design object you can `git blame`.
+- Runs 34 built-in consistency, electrical, component, and manufacturing checks with stable `HK-*` diagnostic codes.
+- Produces a versioned machine-readable review report with HIR fingerprint, built-in rule coverage, findings, and explicit limitations.
+- Accounts for every mapped CSV or Excel row as accepted or rejected, then emits editable Nerve source and HIR.
+- Compares harness connector assignments with a KiCad 6+ board footprint's pad nets or another interface contract.
+- Emits reproducible HIR, drawings, BOM, cut list, labels, continuity tests, assembly instructions, PDF packet, and release records.
+- Evaluates rules against a provenance-aware public corpus without presenting synthetic regressions as field evidence.
 
-## What you get
+The browser workspace remains available at [nerve.grayhavenindustries.com](https://nerve.grayhavenindustries.com) for inspecting examples and the authoring API.
 
-- **A typed DSL** — `harness` / `connector` / `wire` / `splice` / `cable` / `branch` / `label` / `variant`, compiled to a versioned intermediate representation (HIR)
-- **21 validation rules with stable `HK-*` codes** — missing ground returns, untwisted differential pairs (CAN/RS-485/USB, bus-indexed), ampacity vs. gauge, pin/signal mismatches, unlabeled branches… each one a potential field failure caught at compile time
-- **Deterministic artifacts** — schematic, connector-face, and harness-board SVGs, BOM / cut-list / label / test-plan CSVs, assembly instructions, a PDF manufacturing packet, and a zip that hashes identically for identical inputs
-- **An interactive web workspace** — compile-on-type in a Web Worker, schematics with net hover-highlighting and zoom, lint gutters that point at the offending wire, full packet export from the browser, and a self-contained interactive HTML viewer you can email to the shop floor
-- **An AI copilot** — describe the change; edits land only after they compile and pass the rules (bring your own OpenAI key)
-- **Agent-ready docs** — [`/llms.txt`](https://nerve.grayhavenindustries.com/llms.txt), per-page markdown mirrors, copy-as-markdown everywhere
-
-The editor catches the classic mistake — a wire carrying `V5` landing on a pin assigned `V9` — as you type:
-
-[![HK-CONN-011 in the lint gutter and diagnostics panel](./docs/assets/diagnostics.png)](https://nerve.grayhavenindustries.com/projects/sensor-splice/diagram)
-
-## Quick start
+## Review a harness
 
 ```bash
 npm install @grayhaven/nerve @grayhaven/nerve-connectors @grayhaven/nerve-cli
 
+npx --package=@grayhaven/nerve-cli nerve review ./src/main.harness.ts
+# dist/review-report.json
+
+npx --package=@grayhaven/nerve-cli nerve eval ./eval-corpus/manifest.json
+# dist/eval/eval-report.json
+```
+
+`review-report.json` includes the harness revision, HIR schema, content fingerprint, tool and rule versions, findings, and limitations. The command exits nonzero when the report contains errors.
+
+## Import an existing wire list
+
+Create an explicit column map:
+
+```json
+{
+  "wireId": "Wire",
+  "fromConnector": "From",
+  "fromPin": "From Pin",
+  "toConnector": "To",
+  "toPin": "To Pin",
+  "signal": "Signal",
+  "gauge": "Gauge",
+  "color": "Color",
+  "length": "Length",
+  "lengthUnit": "Unit"
+}
+```
+
+Then run:
+
+```bash
+npx --package=@grayhaven/nerve-cli nerve import ./wire-list.xlsx \
+  --sheet "Wire List" \
+  --map ./columns.json \
+  --id my-harness \
+  --out ./migration
+```
+
+The output is a complete editable project: `src/main.harness.ts`, `nerve.config.ts`, `package.json`, `tsconfig.json`, the reusable normalized `column-map.json`, `harness.json`, `diagnostics.json`, and `import-report.json`. The CLI immediately compiles the emitted source before reporting success. Unknown connector parts are marked `unverified`; missing signals stay missing; and every accepted or rejected source row remains visible in the report with row/column diagnostics.
+
+## Compare a board connector
+
+```bash
+npx --package=@grayhaven/nerve-cli nerve contract ./src/main.harness.ts \
+  --connector J1 \
+  --against ./controller.kicad_pcb \
+  --component J7 \
+  --out ./dist/contracts
+```
+
+The adapter reads footprint reference properties, pad-to-net assignments, and explicit no-connect pads from a KiCad 6+ board file. It writes `contract-J1.normalized.json` with the board revision, ECAD component, generator/version, and a content fingerprint so the normalized input can be reviewed or committed. It does not infer graphical connectivity from a schematic.
+
+## Authoring quick start
+
+```bash
 npx --package=@grayhaven/nerve-cli nerve init .
 npx --package=@grayhaven/nerve-cli nerve compile ./src/main.harness.ts
-npx --package=@grayhaven/nerve-cli nerve export  ./src/main.harness.ts
-# dist/ → harness.json, schematic.svg + .html, board.svg, BOM/cut-list/label/test CSVs,
-#         assembly instructions, manufacturing-packet.pdf + .zip
+npx --package=@grayhaven/nerve-cli nerve export ./src/main.harness.ts
 ```
 
 ```ts
-import { harness, connector, wire } from "@grayhaven/nerve"
+import { connector, harness, wire } from "@grayhaven/nerve"
 import { MolexMicroFit } from "@grayhaven/nerve-connectors"
 
 const j1 = connector("J1", MolexMicroFit["43025-0800"], {
-  pins: { 1: "VBAT_24V", 2: "GND", 3: "CAN_H", 4: "CAN_L" },
+  pins: { 1: "VBAT_24V", 2: "GND", 3: "CAN_H", 4: "CAN_L" }
 })
-// ...wires, branches, labels — see examples/motor-controller
+
+// See examples/motor-controller for a complete design.
 ```
 
-Full guides: [quickstart](https://nerve.grayhavenindustries.com/docs) · [DSL reference](https://nerve.grayhavenindustries.com/docs/dsl) · [TypeScript SDK](https://nerve.grayhavenindustries.com/docs/sdk) · [rules](https://nerve.grayhavenindustries.com/docs/rules) · [CLI](https://nerve.grayhavenindustries.com/docs/cli) · [artifacts](https://nerve.grayhavenindustries.com/docs/artifacts) · [AI copilot](https://nerve.grayhavenindustries.com/docs/ai)
+## Packages
 
-[![Docs with editor-grammar syntax highlighting](./docs/assets/docs.png)](https://nerve.grayhavenindustries.com/docs/dsl)
-
-## Packages (v6.0.1)
-
-| Package | What it is |
+| Package | Purpose |
 | --- | --- |
-| [`@grayhaven/nerve`](./packages/nerve) | Domain model, DSL, versioned HIR schema (Effect Schema), deterministic `compileDesign`, diagnostics + `rule()` API, `diffHir`, `defineConfig` |
-| [`@grayhaven/nerve-rules`](./packages/nerve-rules) | 24 built-in validation rules with stable `HK-*` codes + a derived numeric code mapping for tooling |
-| [`@grayhaven/nerve-compiler`](./packages/nerve-compiler) | `.harness.ts` loading, config discovery, Effect `CompilerService` + tagged errors, fail-closed gate |
-| [`@grayhaven/nerve-exporters`](./packages/nerve-exporters) | DrawingIR → SVG/PDF/interactive HTML; branch-rail schematic layout with net labels; BOM / cut-list / label CSVs; continuity + splice + no-short test plan; byte-deterministic packet |
-| [`@grayhaven/nerve-wireviz`](./packages/nerve-wireviz) | WireViz YAML import/export adapter with fixture corpus |
-| [`@grayhaven/nerve-cli`](./packages/nerve-cli) | `nerve init/compile/validate/render/export/import/diff/inspect/quote/analyze/machine/contract/release/record/redline` — deterministic, CI-ready exit codes |
-| [`@grayhaven/nerve-web`](./packages/nerve-web) | The web workspace: worker-sandboxed compile, interactive schematics, AI copilot, in-browser packet export, docs |
-| [`@grayhaven/nerve-connectors`](./packages/nerve-connectors) | Verified connector library: 5 families / 21 parts with cavity layouts, mating pairs, provenance + compact `part("microfit-2x8")` specs + the bundled `PartProvider` |
-| [`@grayhaven/nerve-react`](./packages/nerve-react) | Experimental JSX authoring (`<Harness>`, `<Wire from="J1.1">`) — a 2KB custom JSX runtime, no React; compiles to byte-identical HIR vs the function DSL |
-| [`examples/`](./examples) | Golden fixtures: motor-controller (PRD §9.1 verbatim) + variant, sensor-splice (splices/cables), robot-platform (22 connectors, 65 wires, 3-level branch tree) |
+| [`@grayhaven/nerve`](./packages/nerve) | Domain model, authoring API, versioned HIR, diagnostics, rules API, and deterministic `compileDesign` |
+| [`@grayhaven/nerve-compiler`](./packages/nerve-compiler) | Trusted local `.harness.ts` loading, configuration, plugins, and fail-closed validation |
+| [`@grayhaven/nerve-rules`](./packages/nerve-rules) | 34 generic built-in rules with stable diagnostic codes |
+| [`@grayhaven/nerve-importers`](./packages/nerve-importers) | Deterministic CSV and Excel wire-list migration with source-row accounting |
+| [`@grayhaven/nerve-eval`](./packages/nerve-eval) | Provenance-aware evaluation and stable review-report primitives |
+| [`@grayhaven/nerve-exporters`](./packages/nerve-exporters) | Review, drawing, manufacturing, release, contract, and test artifacts |
+| [`@grayhaven/nerve-wireviz`](./packages/nerve-wireviz) | WireViz YAML import and export |
+| [`@grayhaven/nerve-connectors`](./packages/nerve-connectors) | Small connector library with provenance fields and a bundled provider |
+| [`@grayhaven/nerve-cli`](./packages/nerve-cli) | Local and CI workflows for import, review, evaluation, validation, and export |
+| [`@grayhaven/nerve-web`](./packages/nerve-web) | Browser workspace, examples, and documentation |
+| [`@grayhaven/nerve-react`](./packages/nerve-react) | Experimental JSX authoring runtime |
 
-## Testing
-
-Determinism is the product, so the suite tests it from every direction — **226 unit + 9 e2e tests**:
-
-- **Property-based** (fast-check): ~2,000 generated designs per run; rules never throw, diagnostics stay canonical, metamorphic laws hold (adding a ground can only *remove* the missing-ground error)
-- **Layout invariants**: the emitted SVG is parsed and checked spatially — every wire endpoint touches a pin or splice dot, nothing clips, rails are rails
-- **Pixel visual regression**: schematics render to PNG headlessly and diff against committed baselines — visual changes become pictures in code review
-- **Mutation testing** (Stryker, 87.6%): the suite is itself tested
-- **Playwright e2e + axe**: real-browser flows (compile, lint gutter, clipboard, packet download) and WCAG serious/critical as release blockers
-- **Golden corpus**: byte-identical artifact snapshots across every exporter
+## Verification
 
 ```bash
 bun install
-bun run test        # unit/property/layout/visual suites
-bun run typecheck   # strict TS across all packages
-bun run build       # dist builds for every package
-cd packages/nerve-web && bun run e2e   # Playwright + axe (needs chromium)
-bun run --filter @grayhaven/nerve-web dev   # web workspace
+bun run test
+bun run typecheck
+bun run build
 ```
 
-## Status
+The repository also contains property, visual regression, mutation, browser, and accessibility tests. See [the historical delivery record](./GOAL.md) and [the changelog](./CHANGELOG.md) for implementation history.
 
-PRD implemented end to end (M0–M9 + the full expansion tier: Bill of Process, costing, component registry, shop-floor adapters, formboard tiling, engineering analysis, ECO/releases, build records, interface contracts, redlines, plugin SDK). See [`CHANGELOG.md`](./CHANGELOG.md) for release history, [`GOAL.md`](./GOAL.md) for current direction, and [`docs/prd.md`](./docs/prd.md) for the PRD.
-
-**Live**: [nerve.grayhavenindustries.com](https://nerve.grayhavenindustries.com). Licensed under Apache-2.0.
+Licensed under Apache-2.0.

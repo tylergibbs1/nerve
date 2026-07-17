@@ -168,6 +168,70 @@ describe("nerve import / export --target wireviz", () => {
     expect(yml).toContain("J1:")
     expect(yml).toContain("connections:")
   })
+
+  it("imports a mapped CSV into reviewable source with row accounting", async () => {
+    const dir = tmp()
+    const out = join(dir, "out")
+    const csv = join(dir, "wire-list.csv")
+    const mapping = join(dir, "columns.json")
+    writeFileSync(
+      csv,
+      "Wire,From,From Pin,To,To Pin,Signal,Gauge,Color,Length\nW1,J1,1,J2,1,GND,20AWG,black,100\n"
+    )
+    writeFileSync(
+      mapping,
+      JSON.stringify({
+        wireId: "Wire",
+        fromConnector: "From",
+        fromPin: "From Pin",
+        toConnector: "To",
+        toPin: "To Pin",
+        signal: "Signal",
+        gauge: "Gauge",
+        color: "Color",
+        length: "Length"
+      })
+    )
+    expect(
+      await run(["import", csv, "--map", mapping, "--out", out], capture())
+    ).toBe(0)
+    expect(readFileSync(join(out, "src", "main.harness.ts"), "utf8")).toContain(
+      "// source row 2"
+    )
+    for (const file of ["column-map.json", "nerve.config.ts", "package.json", "tsconfig.json"]) {
+      expect(existsSync(join(out, file)), file).toBe(true)
+    }
+    expect(JSON.parse(readFileSync(join(out, "import-report.json"), "utf8"))).toMatchObject({
+      accepted: 1,
+      rejected: 0
+    })
+  })
+})
+
+describe("nerve review / eval", () => {
+  it("writes a stable review report with explicit limitations", async () => {
+    const out = tmp()
+    expect(await run(["review", FIXTURE, "--out", out], capture())).toBe(0)
+    const report = JSON.parse(readFileSync(join(out, "review-report.json"), "utf8"))
+    expect(report).toMatchObject({
+      reportVersion: "0.1.0",
+      reportType: "deterministic-harness-review"
+    })
+    expect(report.engine.rules.codes).toContain("HK-CONN-011")
+    expect(report.limitations).toHaveLength(3)
+  })
+
+  it("evaluates the public corpus and reports provenance", async () => {
+    const out = tmp()
+    const manifest = resolve(import.meta.dirname, "../../../eval-corpus/manifest.json")
+    expect(await run(["eval", manifest, "--out", out], capture())).toBe(0)
+    const report = JSON.parse(readFileSync(join(out, "eval-report.json"), "utf8"))
+    expect(report.summary).toMatchObject({
+      total: 3,
+      passed: 3,
+      byProvenance: { synthetic: 2, "datasheet-derived": 1, "field-verified": 0 }
+    })
+  })
 })
 
 describe("nerve diff", () => {
@@ -529,13 +593,52 @@ describe("nerve contract", () => {
     const contractPath = join(out, "contract-J1.json")
     expect(existsSync(contractPath)).toBe(true)
     const io = capture()
-    expect(await run(["contract", FIXTURE, "--connector", "J1", "--against", contractPath], io)).toBe(0)
+    expect(await run(["contract", FIXTURE, "--connector", "J1", "--against", contractPath, "--out", out], io)).toBe(0)
     expect(io.stdout.join("\n")).toContain("conforms")
+    expect(existsSync(join(out, "contract-J1.normalized.json"))).toBe(true)
   })
 
   it("exits 2 for an unknown connector", async () => {
     const io = capture()
     expect(await run(["contract", FIXTURE, "--connector", "J9", "--out", tmp()], io)).toBe(2)
+  })
+
+  it("checks a harness connector directly against a KiCad board footprint", async () => {
+    const dir = tmp()
+    const board = join(dir, "controller.kicad_pcb")
+    const signals = [
+      "VBAT_24V",
+      "GND",
+      "CAN_H",
+      "CAN_L",
+      "ENC_A",
+      "ENC_B",
+      "MOTOR_TEMP",
+      "SHIELD_DRAIN"
+    ]
+    writeFileSync(
+      board,
+      `(kicad_pcb (version 20250114) (generator pcbnew)
+        (footprint "Connector:MicroFit" (layer "F.Cu")
+          (property "Reference" "BOARD_J7")
+          (property "MPN" "43025-0800")
+          ${signals.map((signal, index) => `(pad "${index + 1}" thru_hole circle (at 0 0) (size 1 1) (layers "*.Cu") (net ${index + 1} "${signal}"))`).join("\n")}
+        ))`
+    )
+    const io = capture()
+    expect(
+      await run(
+        ["contract", FIXTURE, "--connector", "J1", "--against", board, "--component", "BOARD_J7", "--out", dir],
+        io
+      )
+    ).toBe(0)
+    expect(io.stdout.join("\n")).toContain("conforms")
+    const normalized = JSON.parse(readFileSync(join(dir, "contract-J1.normalized.json"), "utf8"))
+    expect(normalized.source).toMatchObject({
+      format: "kicad-pcb",
+      name: "controller.kicad_pcb",
+      component: "BOARD_J7"
+    })
   })
 })
 

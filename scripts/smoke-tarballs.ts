@@ -132,7 +132,14 @@ console.log(`✓ tarball integrity: ${packed.size} packages, pins + artifact pat
 // ----------------------------------------------- 3. consumer install + CLI
 const consumer = mkdtempSync(join(tmpdir(), "nerve-smoke-"))
 const fileSpec = (name: string): string => `file:${packed.get(name)!.tgz}`
-const directDeps = ["@grayhaven/nerve", "@grayhaven/nerve-cli", "@grayhaven/nerve-connectors", "@grayhaven/nerve-react"]
+const directDeps = [
+  "@grayhaven/nerve",
+  "@grayhaven/nerve-cli",
+  "@grayhaven/nerve-connectors",
+  "@grayhaven/nerve-eval",
+  "@grayhaven/nerve-importers",
+  "@grayhaven/nerve-react"
+]
 for (const d of directDeps) {
   if (!packed.has(d)) {
     console.error(`✗ expected tarball for ${d} was not produced`)
@@ -174,6 +181,8 @@ const importCheck = `
 const checks = [
   ["@grayhaven/nerve", ["harness", "connector", "wire", "defineConfig"]],
   ["@grayhaven/nerve-connectors", ["part", "allParts", "partSpecs"]],
+  ["@grayhaven/nerve-eval", ["createReviewReport", "decodeEvalManifest", "evaluateCase"]],
+  ["@grayhaven/nerve-importers", ["importWireList", "parseCsvWireList", "parseXlsxWireList"]],
   ["@grayhaven/nerve-react", ["Harness", "Connector", "Wire"]],
   ["@grayhaven/nerve-react/jsx-runtime", ["jsx"]]
 ]
