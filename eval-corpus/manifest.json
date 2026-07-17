@@ -1,0 +1,48 @@
+{
+  "$schema": "./manifest.schema.json",
+  "corpusVersion": "0.1.0",
+  "cases": [
+    {
+      "id": "synthetic-signal-mismatch",
+      "title": "Wire and connector cavity signal disagree",
+      "fixture": "fixtures/signal-mismatch.harness.ts",
+      "rationale": "Checks that a wire cannot silently carry a different signal than the cavity assignment at either endpoint.",
+      "provenance": {
+        "kind": "synthetic",
+        "source": "Nerve regression case",
+        "rights": "public"
+      },
+      "expectedFindings": [
+        { "code": "HK-CONN-011", "target": "connector:J2.pin:1" }
+      ]
+    },
+    {
+      "id": "datasheet-wire-gauge-range",
+      "title": "Conductor gauge is outside the declared connector range",
+      "fixture": "fixtures/wire-gauge-range.harness.ts",
+      "rationale": "Checks the executable range behavior with a deliberately limited synthetic part. The values model a datasheet constraint but do not identify a commercial part.",
+      "provenance": {
+        "kind": "datasheet-derived",
+        "source": "Synthetic part constrained to 20AWG through 24AWG",
+        "rights": "public"
+      },
+      "expectedFindings": [
+        { "code": "HK-MFG-004", "minimumCount": 2 }
+      ]
+    },
+    {
+      "id": "synthetic-overcurrent-protection",
+      "title": "Overcurrent protection exceeds conductor ampacity",
+      "fixture": "fixtures/overcurrent-protection.harness.ts",
+      "rationale": "Checks that a protection rating above the configured conductor ampacity is reported.",
+      "provenance": {
+        "kind": "synthetic",
+        "source": "Nerve regression case",
+        "rights": "public"
+      },
+      "expectedFindings": [
+        { "code": "HK-ELEC-010", "target": "protection:F1" }
+      ]
+    }
+  ]
+}

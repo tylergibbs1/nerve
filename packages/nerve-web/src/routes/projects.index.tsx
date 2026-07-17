@@ -9,7 +9,6 @@ function ProjectList() {
   return (
     <div className="page">
       <div className="page-header">
-        <span className="spec-tag">Projects</span>
         <h1>Projects</h1>
       </div>
       <Link
@@ -17,9 +16,9 @@ function ProjectList() {
         to="/projects/$projectId/diagram"
         params={{ projectId: "scratch" }}
       >
-        <h3>+ Start a harness</h3>
+        <h3>Open a scratch harness</h3>
         <p>
-          A blank canvas that compiles in your browser as you type. No sign-up — hit Share to keep
+          A blank canvas that compiles in your browser as you type. No sign-up. Use Share to keep
           it (the link is your save).
         </p>
       </Link>

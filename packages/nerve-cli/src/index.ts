@@ -12,7 +12,8 @@
  * All file output is deterministic and CI-suitable.
  */
 import { mkdirSync, readFileSync, writeFileSync, existsSync, statSync } from "node:fs"
-import { dirname, join, resolve } from "node:path"
+import { createRequire } from "node:module"
+import { basename, dirname, extname, join, resolve } from "node:path"
 import { Effect, Exit, Cause } from "effect"
 import {
   compileDesign,
@@ -27,9 +28,24 @@ import {
 import {
   compileFile,
   findConfig,
+  type CompileFileOptions,
   type CompileFileResult
 } from "@grayhaven/nerve-compiler"
 import { exportWireViz, importWireViz } from "@grayhaven/nerve-wireviz"
+import {
+  importWireList,
+  normalizeWireListColumnMap,
+  parseCsvWireList,
+  parseXlsxWireList,
+  wireListColumnMapJson
+} from "@grayhaven/nerve-importers"
+import {
+  createCorpusReport,
+  createReviewReport,
+  decodeEvalManifest,
+  evaluateCase,
+} from "@grayhaven/nerve-eval"
+import { builtinRulesWith } from "@grayhaven/nerve-rules"
 import { startDev } from "./dev.js"
 import { runSnapshot } from "./snapshot.js"
 import { cliVersion, initFiles, setupFiles, writeScaffold } from "./scaffold.js"
@@ -57,6 +73,7 @@ import {
   validateRedlineTarget,
   exportConnectorContract,
   findAdapter,
+  findContractImporter,
   generateQuote,
   importPinoutCsv,
   exportTscircuitCircuitJson,
@@ -69,11 +86,13 @@ import {
   cutListCsv,
   labelScheduleCsv,
   generateTestPlan,
+  hirFingerprint,
   manufacturingPacketPdf,
   pinoutSvg,
   schematicSvg,
   testPlanCsv,
-  testPlanJson
+  testPlanJson,
+  type ConnectorContract
 } from "@grayhaven/nerve-exporters"
 
 export interface Io {
@@ -151,9 +170,10 @@ const summarize = (hir: Hir): string => {
 
 const compileOrExit = async (
   file: string,
-  io: Io
+  io: Io,
+  options: CompileFileOptions = {}
 ): Promise<CompileFileResult | number> => {
-  const exit = await Effect.runPromiseExit(compileFile(file))
+  const exit = await Effect.runPromiseExit(compileFile(file, options))
   if (Exit.isFailure(exit)) {
     const failure = Cause.failureOption(exit.cause)
     io.err(
@@ -202,19 +222,20 @@ const resolveOutDir = (
     : resolve(configDir, config.outputDir ?? "dist")
 
 const writeOutBytes = (dir: string, name: string, bytes: Uint8Array, io: Io): void => {
-  mkdirSync(dir, { recursive: true })
-  writeFileSync(join(dir, name), bytes)
-  io.out(`wrote ${join(dir, name)}`)
+  const path = join(dir, name)
+  mkdirSync(dirname(path), { recursive: true })
+  writeFileSync(path, bytes)
+  io.out(`wrote ${path}`)
 }
 
 const writeOut = (dir: string, name: string, contents: string | Uint8Array, io: Io): void => {
-  mkdirSync(dir, { recursive: true })
   const path = join(dir, name)
+  mkdirSync(dirname(path), { recursive: true })
   writeFileSync(path, contents)
   io.out(`wrote ${path}`)
 }
 
-const USAGE = `nerve — harnesses as code (Grayhaven Nerve)
+const USAGE = `nerve — deterministic harness review (Grayhaven Nerve)
 
 Usage:
   nerve init [dir]
@@ -226,10 +247,13 @@ Usage:
   nerve render   <file.harness.ts> [--format svg] [--view schematic|board|faces|pinout|formboard] [--paper letter|a4] [--out dir]
   nerve export   <file.harness.ts> [--target manufacturing-packet|wireviz] [--out dir]
   nerve import   <file.yml> [--id harness-id] [--out dir]   (WireViz YAML → HIR)
+  nerve import   <file.csv|xlsx> --map columns.json [--sheet name] [--id harness-id] [--out dir]
+  nerve review   <file.harness.ts> [--out dir]   (stable machine-readable finding report)
+  nerve eval     [eval-corpus/manifest.json] [--out dir]   (provenance-aware rule scorecard)
   nerve quote    <file.harness.ts> [--out dir]   (requires costing in nerve.config.ts)
   nerve analyze  <file.harness.ts> [--out dir]   (resistance, drop, bundle, weight §34)
   nerve machine  <adapter-id> <file.harness.ts> [--out dir]   (shop-floor exports §31)
-  nerve contract <file.harness.ts> --connector <ref> [--against contract.json|pinout.csv] [--out dir]
+  nerve contract <file.harness.ts> --connector <ref> [--against contract.json|pinout.csv|board.kicad_pcb] [--component ref] [--out dir]
   nerve release  <file.harness.ts> --eco <id> --reason <text> --date <iso> [--against release.json] [--out dir]
   nerve record   <file.harness.ts> --release <release.json> --serial <sn> --operator <name> --date <iso> --results <measurements.json> [--out dir]
   nerve redline  add <file.harness.ts> --target <hir-ref> --type <type> --description <text> [--value v] [--release id] [--serial sn]
@@ -427,6 +451,79 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
     case "import": {
       const file = positional[0]
       if (file === undefined) return usage(io)
+      const extension = extname(file).toLowerCase()
+      if (extension === ".csv" || extension === ".xlsx" || extension === ".xls") {
+        const mappingPath = flags["map"]
+        if (mappingPath === undefined) {
+          io.err("Wire-list import requires --map <columns.json>.")
+          return 2
+        }
+        try {
+          const mapping = normalizeWireListColumnMap(
+            JSON.parse(readFileSync(resolve(mappingPath), "utf8"))
+          )
+          const bytes = readFileSync(resolve(file))
+          const table =
+            extension === ".csv"
+              ? parseCsvWireList(bytes.toString("utf8"))
+              : parseXlsxWireList(bytes, flags["sheet"])
+          const imported = importWireList(table, mapping, {
+            ...(flags["id"] !== undefined ? { harnessId: flags["id"] } : {}),
+            sourceName: basename(file)
+          })
+          const outDir = resolve(flags["out"] ?? "dist")
+          writeOut(outDir, "column-map.json", wireListColumnMapJson(mapping), io)
+          writeOut(
+            outDir,
+            "import-report.json",
+            JSON.stringify(imported.report, null, 2) + "\n",
+            io
+          )
+          if (imported.design === undefined) {
+            writeOut(
+              outDir,
+              "diagnostics.json",
+              JSON.stringify(imported.diagnostics, null, 2) + "\n",
+              io
+            )
+            printDiagnostics(imported.diagnostics, io)
+            return 1
+          }
+          const scaffoldFiles = new Map(initFiles(cliVersion()))
+          scaffoldFiles.delete("src/main.harness.ts")
+          writeScaffold(outDir, scaffoldFiles, io)
+          writeOut(outDir, "src/main.harness.ts", imported.source, io)
+          const sourcePath = join(outDir, "src", "main.harness.ts")
+          const coreModule = createRequire(import.meta.url).resolve("@grayhaven/nerve")
+          const compiled = await compileOrExit(sourcePath, io, {
+            config: {},
+            moduleAliases: { "@grayhaven/nerve": coreModule }
+          })
+          if (typeof compiled === "number") return compiled
+          const diagnostics = [
+            ...imported.diagnostics,
+            ...compiled.diagnostics
+          ]
+          const full = { ...compiled.hir, diagnostics }
+          writeOut(outDir, "harness.json", JSON.stringify(full, null, 2) + "\n", io)
+          writeOut(
+            outDir,
+            "diagnostics.json",
+            JSON.stringify(diagnostics, null, 2) + "\n",
+            io
+          )
+          printDiagnostics(diagnostics, io)
+          io.out(
+            `${imported.report.accepted} row(s) accepted, ${imported.report.rejected} rejected. Review every unverified part before release.`
+          )
+          return hasErrors(diagnostics) ? 1 : 0
+        } catch (cause) {
+          io.err(
+            `Failed to import ${file}: ${cause instanceof Error ? cause.message : String(cause)}`
+          )
+          return 2
+        }
+      }
       let result
       try {
         result = importWireViz(readFileSync(resolve(file), "utf8"), {
@@ -447,6 +544,76 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       writeOut(outDir, "diagnostics.json", JSON.stringify(diagnostics, null, 2) + "\n", io)
       io.out(summarize(full))
       return hasErrors(diagnostics) ? 1 : 0
+    }
+
+    case "review": {
+      const arg = await resolveHarnessArg(positional)
+      if (arg === undefined) return usage(io)
+      const result = await compileOrExit(arg.file, io)
+      if (typeof result === "number") return result
+      const report = createReviewReport(result.hir, result.diagnostics, {
+        source: { name: basename(arg.file), format: "nerve-typescript" },
+        hirFingerprint: hirFingerprint(result.hir),
+        toolVersion: cliVersion(),
+        rules: {
+          package: "@grayhaven/nerve-rules",
+          version: cliVersion(),
+          codes: builtinRulesWith(result.config.shop).map((rule) => rule.code)
+        },
+        limitations: [
+          "Checks can use only facts present in the submitted design and configured part data.",
+          "The built-in rules are generic consistency and engineering checks, not a standards certification.",
+          "Structural compiler checks and configured plugins may contribute findings beyond the listed built-in rule codes."
+        ]
+      })
+      const outDir = resolveOutDir(flags, result.config, arg.configDir)
+      writeOut(
+        outDir,
+        "review-report.json",
+        JSON.stringify(report, null, 2) + "\n",
+        io
+      )
+      printDiagnostics(result.diagnostics, io)
+      io.out(
+        `${result.hir.harness.id} rev ${result.hir.harness.revision}: ${report.summary.findings} finding(s), fingerprint ${report.harness.fingerprint}`
+      )
+      return report.summary.errors > 0 ? 1 : 0
+    }
+
+    case "eval": {
+      const manifestPath = resolve(positional[0] ?? "eval-corpus/manifest.json")
+      try {
+        const manifest = decodeEvalManifest(
+          JSON.parse(readFileSync(manifestPath, "utf8"))
+        )
+        const caseResults = []
+        for (const testCase of manifest.cases) {
+          const fixturePath = resolve(dirname(manifestPath), testCase.fixture)
+          const compiled = await compileOrExit(fixturePath, io)
+          if (typeof compiled === "number") return compiled
+          caseResults.push(evaluateCase(testCase, compiled.diagnostics))
+        }
+        const report = createCorpusReport(caseResults)
+        const outDir = resolve(flags["out"] ?? "dist/eval")
+        writeOut(
+          outDir,
+          "eval-report.json",
+          JSON.stringify(report, null, 2) + "\n",
+          io
+        )
+        for (const testCase of report.cases) {
+          io.out(`${testCase.passed ? "PASS" : "FAIL"} ${testCase.id} [${testCase.provenance.kind}]`)
+        }
+        io.out(
+          `${report.summary.passed}/${report.summary.total} case(s) passed; ${report.summary.byProvenance["field-verified"]} field-verified case(s).`
+        )
+        return report.summary.failed > 0 ? 1 : 0
+      } catch (cause) {
+        io.err(
+          `Failed to evaluate ${manifestPath}: ${cause instanceof Error ? cause.message : String(cause)}`
+        )
+        return 2
+      }
     }
 
     case "quote": {
@@ -513,11 +680,21 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       if (typeof result === "number") return result
       const against = flags["against"]
       if (against !== undefined) {
-        let contract
+        let contract: ConnectorContract | undefined
         try {
           const raw = readFileSync(resolve(against), "utf8")
           if (against.endsWith(".csv")) {
             contract = importPinoutCsv(raw, { connector: connectorRef })
+          } else if (findContractImporter(against) !== undefined) {
+            contract = findContractImporter(against)!.import(raw, {
+              connector: connectorRef,
+              ...(flags["component"] !== undefined ? { component: flags["component"] } : {}),
+              sourceName: basename(against)
+            })
+            if (contract === undefined) {
+              io.err(`Component ${flags["component"] ?? connectorRef} not found in ${against}.`)
+              return 2
+            }
           } else if (against.endsWith(".circuit.json")) {
             // PRD §37: validate the harness against a tscircuit board.
             contract = importTscircuitPinout(JSON.parse(raw), {
@@ -535,7 +712,18 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
           io.err(`Failed to load contract ${against}: ${cause instanceof Error ? cause.message : String(cause)}`)
           return 2
         }
+        if (contract === undefined) {
+          io.err(`Contract importer did not produce a contract for ${against}.`)
+          return 2
+        }
         const diagnostics = validateContract(result.hir, contract)
+        const outDir = resolve(flags["out"] ?? result.config.outputDir ?? "dist")
+        writeOut(
+          outDir,
+          `contract-${connectorRef}.normalized.json`,
+          contractJson(contract),
+          io
+        )
         printDiagnostics(diagnostics, io)
         io.out(
           diagnostics.length === 0

@@ -38,10 +38,17 @@ const jiti = createJiti(import.meta.url, { interopDefault: true })
  * The module-level `jiti` above CACHES — using it in a watch loop serves
  * stale designs forever.
  */
-const freshJiti = () =>
-  createJiti(import.meta.url, { interopDefault: true, moduleCache: false })
+const freshJiti = (alias?: Readonly<Record<string, string>>) =>
+  createJiti(import.meta.url, {
+    interopDefault: true,
+    moduleCache: false,
+    ...(alias !== undefined ? { alias: { ...alias } } : {})
+  })
 
-const loaderFor = (fresh: boolean) => (fresh ? freshJiti() : jiti)
+const loaderFor = (
+  fresh: boolean,
+  alias?: Readonly<Record<string, string>>
+) => alias !== undefined ? freshJiti(alias) : fresh ? freshJiti() : jiti
 
 export interface CompileFileOptions {
   /** Extra rules to run alongside the built-ins. */
@@ -50,6 +57,8 @@ export interface CompileFileOptions {
   readonly config?: NerveConfig
   /** Bypass the module cache (watch mode): re-read every source file. */
   readonly fresh?: boolean
+  /** Module aliases for compiling generated source before dependencies are installed. */
+  readonly moduleAliases?: Readonly<Record<string, string>>
 }
 
 export interface CompileFileResult {
@@ -68,11 +77,17 @@ const isHarnessDesign = (value: unknown): value is HarnessDesign =>
 /** Load the default-exported design from a `.harness.ts` module. */
 export const loadDesign = (
   file: string,
-  options: { readonly fresh?: boolean } = {}
+  options: {
+    readonly fresh?: boolean
+    readonly moduleAliases?: Readonly<Record<string, string>>
+  } = {}
 ): Effect.Effect<HarnessDesign, CompileError> =>
   Effect.tryPromise({
     try: async () => {
-      const mod = await loaderFor(options.fresh === true).import<unknown>(resolve(file))
+      const mod = await loaderFor(
+        options.fresh === true,
+        options.moduleAliases
+      ).import<unknown>(resolve(file))
       const design =
         isHarnessDesign(mod) ? mod : (mod as { default?: unknown })?.default
       if (!isHarnessDesign(design)) {
@@ -190,7 +205,12 @@ export const compileFile = (
 ): Effect.Effect<CompileFileResult, CompileError> =>
   Effect.gen(function* () {
     const fresh = options.fresh === true
-    const design = yield* loadDesign(file, { fresh })
+    const design = yield* loadDesign(file, {
+      fresh,
+      ...(options.moduleAliases !== undefined
+        ? { moduleAliases: options.moduleAliases }
+        : {})
+    })
     const config =
       options.config ??
       (yield* Effect.map(

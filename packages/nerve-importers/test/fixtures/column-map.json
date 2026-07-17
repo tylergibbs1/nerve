@@ -1,0 +1,14 @@
+{
+  "fromConnector": "From",
+  "fromPin": "From Pin",
+  "toConnector": "To",
+  "toPin": "To Pin",
+  "wireId": "Wire",
+  "signal": "Signal",
+  "gauge": "Gauge",
+  "color": "Color",
+  "length": "Length",
+  "lengthUnit": "Unit",
+  "fromMpn": "From MPN",
+  "toMpn": "To MPN"
+}
