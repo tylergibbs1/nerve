@@ -179,7 +179,6 @@ connections:
     )
     expect(result.diagnostics.every((diagnostic) => diagnostic.severity === "error")).toBe(true)
   })
-
   it("reports dropped connection rows as errors instead of succeeding with zero wires", () => {
     const result = importWireViz(`connectors:
   X1: { pincount: 2 }

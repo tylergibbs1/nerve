@@ -153,7 +153,6 @@ const splitGeneratedName = (
     instance: name.slice(at + separator.length)
   }
 }
-
 export const importWireViz = (
   yamlText: string,
   options: ImportOptions = {}
