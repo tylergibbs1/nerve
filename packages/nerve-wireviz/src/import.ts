@@ -3,9 +3,10 @@
  *
  * Imports the useful subset: connectors (type, subtype, pincount,
  * pinlabels), cables (gauge, length, wirecount, colors, color_code,
- * shield), and connections (alternating connector/cable chains with pin
- * lists or ranges). Anything WireViz expresses that HIR cannot map cleanly
- * produces an actionable diagnostic instead of silent loss.
+ * wirelabels, shield), named template instances, and connections
+ * (alternating connector/cable chains with pin lists, semantic labels, or
+ * ranges). Anything WireViz expresses that HIR cannot map cleanly produces
+ * an actionable diagnostic instead of silent loss.
  */
 import { parse } from "yaml"
 import {
@@ -52,6 +53,7 @@ const SUPPORTED_CABLE_KEYS = new Set([
   "wirecount",
   "colors",
   "color_code",
+  "wirelabels",
   "shield",
   "category",
   "notes"
@@ -127,6 +129,30 @@ const normalizeLengthMm = (length: unknown): number | undefined => {
   return Number.isFinite(value) && factor !== undefined ? Math.round(value * factor) : undefined
 }
 
+const addReference = (
+  references: Map<string, Array<string>>,
+  reference: unknown,
+  value: string
+): void => {
+  if (reference === undefined || reference === null) return
+  const key = String(reference).trim()
+  if (key === "") return
+  const values = references.get(key) ?? []
+  if (!values.includes(value)) values.push(value)
+  references.set(key, values)
+}
+
+const splitGeneratedName = (
+  name: string,
+  separator: string
+): { readonly template: string; readonly instance: string } | undefined => {
+  const at = name.indexOf(separator)
+  if (at <= 0) return undefined
+  return {
+    template: name.slice(0, at),
+    instance: name.slice(at + separator.length)
+  }
+}
 export const importWireViz = (
   yamlText: string,
   options: ImportOptions = {}
@@ -155,7 +181,23 @@ export const importWireViz = (
   const cablesIn = (doc?.["cables"] ?? {}) as Record<string, Record<string, unknown>>
   const connectionsIn = (doc?.["connections"] ?? []) as Array<Array<unknown>>
 
-  for (const section of ["options", "tweak", "additional_bom_items"]) {
+  const optionsIn = (doc?.["options"] ?? {}) as Record<string, unknown>
+  const configuredSeparator = optionsIn["template_separator"]
+  const hasConfiguredSeparator =
+    typeof configuredSeparator === "string" && configuredSeparator.length > 0
+  const templateSeparator =
+    typeof configuredSeparator === "string" && configuredSeparator.length > 0
+      ? configuredSeparator
+      : "."
+  if (configuredSeparator !== undefined && !hasConfiguredSeparator) {
+    warn(`WireViz option "template_separator" must be a non-empty string; using ".".`)
+  }
+  const unsupportedOptions = Object.keys(optionsIn).filter((key) => key !== "template_separator")
+  if (unsupportedOptions.length > 0) {
+    warn(`WireViz options ${unsupportedOptions.map((key) => `"${key}"`).join(", ")} are not imported.`)
+  }
+
+  for (const section of ["tweak", "additional_bom_items"]) {
     if (doc?.[section] !== undefined) {
       warn(`WireViz section "${section}" is not imported.`)
     }
@@ -172,6 +214,8 @@ export const importWireViz = (
   // --- Connectors -----------------------------------------------------------
   const connectors: Array<ConnectorInstance> = []
   const connectorByRef = new Map<string, ConnectorInstance>()
+  const connectorPins = new Map<string, ReadonlySet<string>>()
+  const connectorPinsByLabel = new Map<string, Map<string, Array<string>>>()
   for (const [ref, def] of Object.entries(connectorsIn)) {
     for (const key of Object.keys(def)) {
       if (!SUPPORTED_CONNECTOR_KEYS.has(key)) {
@@ -188,8 +232,13 @@ export const importWireViz = (
         : Math.max(pinlabels.length, pinIds.length)
     const subtype = typeof def["subtype"] === "string" ? def["subtype"].toLowerCase() : undefined
     const pins: Record<string, string> = {}
+    const pinsByLabel = new Map<string, Array<string>>()
     pinlabels.forEach((label, i) => {
-      if (label !== null && label !== undefined) pins[pinIds[i] ?? String(i + 1)] = String(label)
+      if (label !== null && label !== undefined) {
+        const pin = pinIds[i] ?? String(i + 1)
+        pins[pin] = String(label)
+        addReference(pinsByLabel, label, pin)
+      }
     })
     const instance = connector(
       ref,
@@ -210,6 +259,15 @@ export const importWireViz = (
     )
     connectors.push(instance)
     connectorByRef.set(ref, instance)
+    connectorPins.set(
+      ref,
+      new Set(
+        pinIds.length > 0
+          ? pinIds
+          : Array.from({ length: Math.max(pincount, 1) }, (_, index) => String(index + 1))
+      )
+    )
+    connectorPinsByLabel.set(ref, pinsByLabel)
   }
 
   // --- Cables ---------------------------------------------------------------
@@ -218,6 +276,8 @@ export const importWireViz = (
     readonly gauge: string | undefined
     readonly lengthMm: number | undefined
     readonly colors: ReadonlyArray<string>
+    readonly conductorReferences: ReadonlyMap<string, ReadonlyArray<string>>
+    readonly isBundle: boolean
   }
   const cables: Array<CableDef> = []
   const cableInfo = new Map<string, CableInfo>()
@@ -233,16 +293,16 @@ export const importWireViz = (
         : Array.isArray(def["colors"])
           ? (def["colors"] as Array<unknown>).length
           : undefined
-    let colors = Array.isArray(def["colors"])
-      ? (def["colors"] as Array<unknown>).map((c) => colorFromWireViz(String(c)))
+    let colorTokens = Array.isArray(def["colors"])
+      ? (def["colors"] as Array<unknown>).map(String)
       : []
+    let colors = colorTokens.map(colorFromWireViz)
     const colorCode = typeof def["color_code"] === "string" ? def["color_code"].toUpperCase() : undefined
     if (colors.length === 0 && colorCode !== undefined) {
       const cycle = COLOR_CODES[colorCode]
       if (cycle !== undefined && wirecount !== undefined) {
-        colors = Array.from({ length: wirecount }, (_, i) =>
-          colorFromWireViz(cycle[i % cycle.length]!)
-        )
+        colorTokens = Array.from({ length: wirecount }, (_, i) => cycle[i % cycle.length]!)
+        colors = colorTokens.map(colorFromWireViz)
       } else {
         warn(`Cable ${id}: color_code "${colorCode}" is not supported; colors omitted.`, `cable:${id}`)
       }
@@ -262,13 +322,164 @@ export const importWireViz = (
         : {}),
       ...(typeof def["notes"] === "string" ? { notes: def["notes"] } : {})
     })
+    const conductorReferences = new Map<string, Array<string>>()
+    const wirelabels = Array.isArray(def["wirelabels"])
+      ? (def["wirelabels"] as Array<unknown>)
+      : []
+    const referenceCount = Math.max(wirecount ?? 0, colorTokens.length, wirelabels.length)
+    for (let index = 0; index < referenceCount; index++) {
+      const conductor = String(index + 1)
+      addReference(conductorReferences, conductor, conductor)
+      addReference(conductorReferences, wirelabels[index], conductor)
+      addReference(conductorReferences, colorTokens[index], conductor)
+      addReference(conductorReferences, colors[index], conductor)
+    }
     if (!isBundle) cables.push(cableDef)
     cableInfo.set(id, {
       def: cableDef,
       gauge: normalizeGauge(def["gauge"]),
       lengthMm,
-      colors
+      colors,
+      conductorReferences,
+      isBundle
     })
+  }
+
+  const sourceConnectorRefs = new Set(Object.keys(connectorsIn))
+  const sourceCableIds = new Set(Object.keys(cablesIn))
+  const directlyUsedConnectors = new Set<string>()
+  const directlyUsedCables = new Set<string>()
+  const usedConnectorTemplates = new Set<string>()
+  const usedCableTemplates = new Set<string>()
+  const generatedConnectorOrigins = new Map<string, string>()
+  const generatedCableOrigins = new Map<string, string>()
+
+  const resolveConnector = (name: string, row: number): ConnectorInstance | undefined => {
+    const exact = connectorByRef.get(name)
+    if (exact !== undefined) {
+      if (sourceConnectorRefs.has(name)) directlyUsedConnectors.add(name)
+      return exact
+    }
+
+    const generated = splitGeneratedName(name, templateSeparator)
+    if (generated === undefined) return undefined
+    if (generated.instance === "") {
+      error(
+        `Connection row ${row}: unnamed connector autogeneration "${name}" is not representable; assign an explicit designator.`,
+        `connector:${generated.template}`
+      )
+      return undefined
+    }
+    const template = connectorByRef.get(generated.template)
+    if (template === undefined || !sourceConnectorRefs.has(generated.template)) return undefined
+
+    const occupied = connectorByRef.get(generated.instance)
+    if (occupied !== undefined) {
+      if (generatedConnectorOrigins.get(generated.instance) === generated.template) return occupied
+      error(
+        `Connection row ${row}: connector designator ${generated.instance} already exists; cannot instantiate template ${generated.template}.`,
+        `connector:${generated.instance}`
+      )
+      return undefined
+    }
+
+    const instance = connector(generated.instance, template.part, {
+      pins: template.pins,
+      terminals: template.terminals,
+      seals: template.seals
+    })
+    connectors.push(instance)
+    connectorByRef.set(generated.instance, instance)
+    connectorPins.set(generated.instance, connectorPins.get(generated.template) ?? new Set())
+    connectorPinsByLabel.set(
+      generated.instance,
+      connectorPinsByLabel.get(generated.template) ?? new Map()
+    )
+    usedConnectorTemplates.add(generated.template)
+    generatedConnectorOrigins.set(generated.instance, generated.template)
+    return instance
+  }
+
+  const resolveCable = (name: string, row: number): CableInfo | undefined => {
+    const exact = cableInfo.get(name)
+    if (exact !== undefined) {
+      if (sourceCableIds.has(name)) directlyUsedCables.add(name)
+      return exact
+    }
+
+    const generated = splitGeneratedName(name, templateSeparator)
+    if (generated === undefined) return undefined
+    if (generated.instance === "") {
+      error(
+        `Connection row ${row}: unnamed cable autogeneration "${name}" is not representable; assign an explicit designator.`,
+        `cable:${generated.template}`
+      )
+      return undefined
+    }
+    const template = cableInfo.get(generated.template)
+    if (template === undefined || !sourceCableIds.has(generated.template)) return undefined
+
+    const occupied = cableInfo.get(generated.instance)
+    if (occupied !== undefined) {
+      if (generatedCableOrigins.get(generated.instance) === generated.template) return occupied
+      error(
+        `Connection row ${row}: cable designator ${generated.instance} already exists; cannot instantiate template ${generated.template}.`,
+        `cable:${generated.instance}`
+      )
+      return undefined
+    }
+
+    const { id: _id, kind: _kind, ...props } = template.def
+    const instance = cable(generated.instance, props)
+    const info: CableInfo = { ...template, def: instance }
+    cableInfo.set(generated.instance, info)
+    if (!template.isBundle) cables.push(instance)
+    usedCableTemplates.add(generated.template)
+    generatedCableOrigins.set(generated.instance, generated.template)
+    return info
+  }
+
+  const resolveConnectorPin = (
+    instance: ConnectorInstance,
+    reference: string,
+    row: number
+  ): string | undefined => {
+    if (connectorPins.get(instance.ref)?.has(reference) === true) return reference
+    const matches = connectorPinsByLabel.get(instance.ref)?.get(reference) ?? []
+    if (matches.length === 1) return matches[0]
+    if (matches.length > 1) {
+      error(
+        `Connection row ${row}: pin label "${reference}" is ambiguous on connector ${instance.ref}.`,
+        `connector:${instance.ref}`
+      )
+      return undefined
+    }
+    error(
+      `Connection row ${row}: pin "${reference}" does not exist on connector ${instance.ref}.`,
+      `connector:${instance.ref}`
+    )
+    return undefined
+  }
+
+  const resolveConductor = (
+    info: CableInfo,
+    reference: string,
+    row: number
+  ): string | undefined => {
+    const matches = info.conductorReferences.get(reference) ?? []
+    if (matches.length === 1) return matches[0]
+    if (matches.length > 1) {
+      error(
+        `Connection row ${row}: conductor reference "${reference}" is ambiguous on cable ${info.def.id}.`,
+        `cable:${info.def.id}`
+      )
+      return undefined
+    }
+    error(
+      `Connection row ${row}: conductor "${reference}" does not exist on cable ${info.def.id}.`,
+      `cable:${info.def.id}`
+    )
+    return undefined
   }
 
   // --- Connections ------------------------------------------------------------
@@ -295,15 +506,15 @@ export const importWireViz = (
         error(`Connection row ${rowIndex + 1} has an unrecognized entry; skipped.`)
         break
       }
-      const leftConn = connectorByRef.get(left.name)
-      const rightConn = connectorByRef.get(right.name)
+      const leftConn = resolveConnector(left.name, rowIndex + 1)
+      const rightConn = resolveConnector(right.name, rowIndex + 1)
       if (leftConn === undefined || rightConn === undefined) {
         error(
           `Connection row ${rowIndex + 1} references unknown connector ${leftConn === undefined ? left.name : right.name}; skipped.`
         )
         break
       }
-      const info = middle !== undefined ? cableInfo.get(middle.name) : undefined
+      const info = middle !== undefined ? resolveCable(middle.name, rowIndex + 1) : undefined
       if (middle !== undefined && info === undefined) {
         error(`Connection row ${rowIndex + 1} references unknown cable ${middle.name}; skipped.`)
         break
@@ -325,13 +536,20 @@ export const importWireViz = (
         continue
       }
       for (let k = 0; k < count; k++) {
-        const conductor = middle?.pins[k]
+        const fromPin = resolveConnectorPin(leftConn, left.pins[k]!, rowIndex + 1)
+        const toPin = resolveConnectorPin(rightConn, right.pins[k]!, rowIndex + 1)
+        const conductorReference = middle?.pins[k]
+        const conductor =
+          conductorReference !== undefined && info !== undefined
+            ? resolveConductor(info, conductorReference, rowIndex + 1)
+            : undefined
+        if (fromPin === undefined || toPin === undefined) continue
+        if (middle !== undefined && conductor === undefined) continue
+        const cableId = info?.def.id
         const id =
-          middle !== undefined && conductor !== undefined
-            ? `${middle.name}.${conductor}`
+          cableId !== undefined && conductor !== undefined
+            ? `${cableId}.${conductor}`
             : `W${++looseWireCounter}`
-        const fromPin = left.pins[k]!
-        const toPin = right.pins[k]!
         const signal =
           leftConn.pins[fromPin] ?? rightConn.pins[toPin]
         wires.push(
@@ -341,8 +559,8 @@ export const importWireViz = (
             ...(conductor !== undefined && info !== undefined
               ? {
                   color: info.colors[Number(conductor) - 1],
-                  ...(cables.some((c) => c.id === middle!.name)
-                    ? { cable: middle!.name, conductor }
+                  ...(cableId !== undefined && cables.some((c) => c.id === cableId)
+                    ? { cable: cableId, conductor }
                     : {})
                 }
               : {}),
@@ -361,9 +579,14 @@ export const importWireViz = (
     revision: options.revision ?? "A",
     units: "mm",
     metadata: importedMetadata,
-    connectors,
+    connectors: connectors.filter(
+      (instance) =>
+        !usedConnectorTemplates.has(instance.ref) || directlyUsedConnectors.has(instance.ref)
+    ),
     wires,
-    cables
+    cables: cables.filter(
+      (instance) => !usedCableTemplates.has(instance.id) || directlyUsedCables.has(instance.id)
+    )
   })
 
   return { design, diagnostics }

@@ -47,7 +47,7 @@ describe("WireViz import (PRD §27.2)", () => {
   it("warns about unmapped concepts instead of silently dropping them", () => {
     const result = importWireViz(fixture("unsupported.yml"))
     const messages = result.diagnostics.map((d) => d.message)
-    expect(messages.some((m) => m.includes('"options"'))).toBe(true)
+    expect(messages.some((m) => m.includes('"fontname"'))).toBe(true)
     expect(messages.some((m) => m.includes('"image"'))).toBe(true)
     expect(result.design.metadata.sourceTitle).toBe("Demo")
     // Bundle wires import as loose wires with DIN colors, not a cable.
@@ -109,6 +109,76 @@ metadata:
     ])
   })
 
+  it("materializes named WireViz templates and resolves semantic pin and conductor names", () => {
+    const result = importWireViz(`options:
+  template_separator: "."
+connectors:
+  PLUG:
+    type: Control plug
+    subtype: male
+    pinlabels: [VBAT, GND, CAN_H, CAN_L]
+  SOCKET:
+    type: Control socket
+    subtype: female
+    pinlabels: [VBAT, GND, CAN_H, CAN_L]
+cables:
+  LOOM:
+    wirecount: 4
+    wirelabels: [POWER, RETURN, CAN_HIGH, CAN_LOW]
+    colors: [RD, BK, WH, BU]
+    gauge: 22 awg
+    length: 0.4
+connections:
+  - [PLUG.J1: [VBAT, GND, CAN_H, CAN_L], LOOM.CBL1: [POWER, RETURN, CAN_HIGH, CAN_LOW], SOCKET.J2: [VBAT, GND, CAN_H, CAN_L]]
+`)
+    const { hir, diagnostics: structural } = compileDesign(result.design)
+
+    expect(result.diagnostics).toEqual([])
+    expect(structural).toEqual([])
+    expect(hir.connectors.map((connector) => connector.ref)).toEqual(["J1", "J2"])
+    expect(hir.cables.map((cable) => cable.id)).toEqual(["CBL1"])
+    expect(
+      hir.wires.map((wire) => [
+        wire.id,
+        "pin" in wire.from ? wire.from.pin : undefined,
+        wire.conductor,
+        wire.color,
+        wire.signal
+      ])
+    ).toEqual([
+      ["CBL1.1", "1", "1", "red", "VBAT"],
+      ["CBL1.2", "2", "2", "black", "GND"],
+      ["CBL1.3", "3", "3", "white", "CAN_H"],
+      ["CBL1.4", "4", "4", "blue", "CAN_L"]
+    ])
+    expect(hir.bom.some((item) => item.usedBy.includes("connector:PLUG"))).toBe(false)
+    expect(hir.bom.some((item) => item.usedBy.includes("connector:SOCKET"))).toBe(false)
+  })
+
+  it("fails visibly on ambiguous semantic references and unnamed templates", () => {
+    const result = importWireViz(`connectors:
+  X:
+    pinlabels: [SIG, SIG]
+  Y:
+    pinlabels: [SIG, SIG]
+cables:
+  W:
+    colors: [RD, RD]
+connections:
+  - [X.X1: [SIG], W.W1: [RD], Y.Y1: [SIG]]
+  - [X.X2: [1], W.: [1], Y.Y2: [1]]
+`)
+
+    expect(result.design.wires).toEqual([])
+    expect(result.diagnostics.map((diagnostic) => diagnostic.message)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('pin label "SIG" is ambiguous'),
+        expect.stringContaining('conductor reference "RD" is ambiguous'),
+        expect.stringContaining('unnamed cable autogeneration "W."')
+      ])
+    )
+    expect(result.diagnostics.every((diagnostic) => diagnostic.severity === "error")).toBe(true)
+  })
   it("reports dropped connection rows as errors instead of succeeding with zero wires", () => {
     const result = importWireViz(`connectors:
   X1: { pincount: 2 }
