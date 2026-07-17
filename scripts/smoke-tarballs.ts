@@ -17,7 +17,15 @@
  *   bun run build && bun scripts/smoke-tarballs.ts
  */
 import { execFileSync, spawnSync } from "node:child_process"
-import { globSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
+import {
+  copyFileSync,
+  globSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
@@ -138,7 +146,8 @@ const directDeps = [
   "@grayhaven/nerve-connectors",
   "@grayhaven/nerve-eval",
   "@grayhaven/nerve-importers",
-  "@grayhaven/nerve-react"
+  "@grayhaven/nerve-react",
+  "@grayhaven/nerve-wireviz"
 ]
 for (const d of directDeps) {
   if (!packed.has(d)) {
@@ -175,6 +184,44 @@ if (!packet.includes("manufacturing-packet.pdf")) {
   process.exit(1)
 }
 
+// The published CLI must import an untouched, externally sourced WireViz
+// harness with the same prepend semantics used by NASA/JPL's rover corpus.
+const jplCorpus = join(
+  ROOT,
+  "packages/nerve-wireviz/test/fixtures/jpl-open-source-rover"
+)
+copyFileSync(join(jplCorpus, "templates.yml"), join(consumer, "jpl-templates.yml"))
+copyFileSync(join(jplCorpus, "front_encoder.yml"), join(consumer, "jpl-front-encoder.yml"))
+run(
+  "npx",
+  [
+    "nerve",
+    "import",
+    "./jpl-front-encoder.yml",
+    "--prepend-file",
+    "./jpl-templates.yml",
+    "--id",
+    "jpl-front-encoder",
+    "--out",
+    "./jpl-import"
+  ],
+  consumer
+)
+const jplHir = JSON.parse(readFileSync(join(consumer, "jpl-import", "harness.json"), "utf8")) as {
+  harness: { id: string; metadata: Record<string, string> }
+  wires: Array<{ length?: number }>
+}
+if (
+  jplHir.harness.id !== "jpl-front-encoder" ||
+  jplHir.harness.metadata["sourceTitle"] !== "Front Encoder Cable (x2)" ||
+  jplHir.wires.length !== 6 ||
+  jplHir.wires.some((wire) => wire.length === undefined)
+) {
+  console.error("✗ published CLI lost JPL rover harness semantics")
+  process.exit(1)
+}
+console.log("✓ published CLI imports NASA/JPL rover harness semantics")
+
 // Dist exports resolve for every consumer-facing package (would have
 // caught the src-pointing exports shipped through v0.5.0).
 const importCheck = `
@@ -184,7 +231,8 @@ const checks = [
   ["@grayhaven/nerve-eval", ["createReviewReport", "decodeEvalManifest", "evaluateCase"]],
   ["@grayhaven/nerve-importers", ["importWireList", "parseCsvWireList", "parseXlsxWireList"]],
   ["@grayhaven/nerve-react", ["Harness", "Connector", "Wire"]],
-  ["@grayhaven/nerve-react/jsx-runtime", ["jsx"]]
+  ["@grayhaven/nerve-react/jsx-runtime", ["jsx"]],
+  ["@grayhaven/nerve-wireviz", ["importWireViz", "exportWireViz"]]
 ]
 for (const [mod, names] of checks) {
   const m = await import(mod)

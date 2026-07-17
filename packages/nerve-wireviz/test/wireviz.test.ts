@@ -48,12 +48,80 @@ describe("WireViz import (PRD §27.2)", () => {
     const result = importWireViz(fixture("unsupported.yml"))
     const messages = result.diagnostics.map((d) => d.message)
     expect(messages.some((m) => m.includes('"options"'))).toBe(true)
-    expect(messages.some((m) => m.includes('"metadata"'))).toBe(true)
     expect(messages.some((m) => m.includes('"image"'))).toBe(true)
+    expect(result.design.metadata.sourceTitle).toBe("Demo")
     // Bundle wires import as loose wires with DIN colors, not a cable.
     const { hir: h } = compileDesign(result.design)
     expect(h.cables).toEqual([])
     expect(h.wires.map((w) => w.color)).toEqual(["white", "brown"])
+  })
+
+  it("supports prepend files, YAML merges, descending ranges, and explicit length units", () => {
+    const prepend = `templates:
+  connector: &connector
+    type: JST-XH
+    subtype: female
+    pinlabels: [A, B, C, D]
+  cable: &cable
+    colors: [RD, BK, BU, WH]
+    gauge: 22 awg
+`
+    const source = `connectors:
+  X1:
+    <<: *connector
+  X2:
+    <<: *connector
+cables:
+  W1:
+    <<: *cable
+    length: 36 cm
+connections:
+  - [X1: [1-4], W1: [1-4], X2: [4-1]]
+metadata:
+  title: Reversing adapter
+`
+    const result = importWireViz(source, {
+      harnessId: "real-wireviz",
+      prependYaml: [prepend]
+    })
+    const { hir, diagnostics: structural } = compileDesign(result.design)
+
+    expect(result.diagnostics).toEqual([])
+    expect(structural).toEqual([])
+    expect(hir.harness.metadata.sourceTitle).toBe("Reversing adapter")
+    expect(hir.connectors[0]).toMatchObject({
+      family: "JST-XH",
+      gender: "receptacle",
+      pinCount: 4
+    })
+    expect(
+      hir.wires.map((w) => [
+        "pin" in w.from ? w.from.pin : undefined,
+        "pin" in w.to ? w.to.pin : undefined,
+        w.gauge,
+        w.length
+      ])
+    ).toEqual([
+      ["1", "4", "22AWG", 360],
+      ["2", "3", "22AWG", 360],
+      ["3", "2", "22AWG", 360],
+      ["4", "1", "22AWG", 360]
+    ])
+  })
+
+  it("reports dropped connection rows as errors instead of succeeding with zero wires", () => {
+    const result = importWireViz(`connectors:
+  X1: { pincount: 2 }
+cables:
+  W1: { wirecount: 2 }
+connections:
+  - [X1: [1-2], W1: [1-2], [X, X]]
+`)
+
+    expect(result.design.wires).toEqual([])
+    expect(result.diagnostics.map((d) => d.severity)).toEqual(["error", "error"])
+    expect(result.diagnostics[0]?.message).toContain("unrecognized entry")
+    expect(result.diagnostics[1]?.message).toContain("no wires were imported")
   })
 })
 

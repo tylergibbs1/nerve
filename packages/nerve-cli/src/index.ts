@@ -246,7 +246,7 @@ Usage:
   nerve validate <file.harness.ts>
   nerve render   <file.harness.ts> [--format svg] [--view schematic|board|faces|pinout|formboard] [--paper letter|a4] [--out dir]
   nerve export   <file.harness.ts> [--target manufacturing-packet|wireviz] [--out dir]
-  nerve import   <file.yml> [--id harness-id] [--out dir]   (WireViz YAML → HIR)
+  nerve import   <file.yml> [--prepend-file base.yml] [--id harness-id] [--out dir]   (WireViz YAML → HIR)
   nerve import   <file.csv|xlsx> --map columns.json [--sheet name] [--id harness-id] [--out dir]
   nerve review   <file.harness.ts> [--out dir]   (stable machine-readable finding report)
   nerve eval     [eval-corpus/manifest.json] [--out dir]   (provenance-aware rule scorecard)
@@ -527,7 +527,10 @@ export const run = async (argv: ReadonlyArray<string>, io: Io = realIo): Promise
       let result
       try {
         result = importWireViz(readFileSync(resolve(file), "utf8"), {
-          ...(flags["id"] !== undefined ? { harnessId: flags["id"] } : {})
+          ...(flags["id"] !== undefined ? { harnessId: flags["id"] } : {}),
+          ...(flags["prepend-file"] !== undefined
+            ? { prependYaml: [readFileSync(resolve(flags["prepend-file"]), "utf8")] }
+            : {})
         })
       } catch (cause) {
         io.err(
