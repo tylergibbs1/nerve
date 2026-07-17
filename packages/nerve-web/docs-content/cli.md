@@ -26,6 +26,8 @@ Run via `npx --package=@grayhaven/nerve-cli nerve <command>`. Every command exit
 | `nerve redline` | Capture as-built deviations against the released design. |
 | `nerve parts` | Browse the bundled connector library (specs, MPNs, limits; `--json`). |
 
+WireViz imports accept `--prepend-file templates.yml` for projects that keep YAML anchors separately. Named template instances, pin/conductor labels, ranges, and explicit length units are normalized into HIR; lossy constructs remain visible as `HK-WV-001` diagnostics.
+
 ## CI example
 
 ```yaml

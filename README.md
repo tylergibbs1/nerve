@@ -75,6 +75,17 @@ npx --package=@grayhaven/nerve-cli nerve import ./wire-list.xlsx \
 
 The output is a complete editable project: `src/main.harness.ts`, `nerve.config.ts`, `package.json`, `tsconfig.json`, the reusable normalized `column-map.json`, `harness.json`, `diagnostics.json`, and `import-report.json`. The CLI immediately compiles the emitted source before reporting success. Unknown connector parts are marked `unverified`; missing signals stay missing; and every accepted or rejected source row remains visible in the report with row/column diagnostics.
 
+WireViz projects can be reviewed directly, including projects that keep reusable YAML anchors in a separate prepend file:
+
+```bash
+npx --package=@grayhaven/nerve-cli nerve import ./harness.yml \
+  --prepend-file ./templates.yml \
+  --id my-harness \
+  --out ./migration
+```
+
+The adapter resolves named template instances, ranges, pin labels, wire labels, unique color references, and explicit length units. Concepts that cannot be represented without loss remain visible as `HK-WV-001` diagnostics.
+
 ## Compare a board connector
 
 ```bash
