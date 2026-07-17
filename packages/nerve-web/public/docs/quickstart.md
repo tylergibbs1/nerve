@@ -1,8 +1,8 @@
 > Grayhaven Nerve docs index: https://nerve-demo.vercel.app/llms.txt. Fetch it to discover all pages before exploring further.
 
-# Harnesses are programs.
+# Review a harness reproducibly
 
-A Nerve harness is a TypeScript module. You describe connectors, wires, splices, and cables once; the compiler validates the design against electrical and manufacturing rules, then emits every artifact a build needs, deterministically.
+Nerve turns structured harness facts into a versioned representation, stable diagnostics, and reproducible review artifacts. TypeScript is one supported input, not a requirement for a future service or API.
 
 ## Install
 
@@ -11,6 +11,7 @@ npm install @grayhaven/nerve @grayhaven/nerve-connectors @grayhaven/nerve-cli
 
 npx --package=@grayhaven/nerve-cli nerve init .
 npx --package=@grayhaven/nerve-cli nerve compile ./src/main.harness.ts
+npx --package=@grayhaven/nerve-cli nerve review  ./src/main.harness.ts
 npx --package=@grayhaven/nerve-cli nerve export  ./src/main.harness.ts
 ```
 
@@ -36,10 +37,12 @@ export default harness("motor-controller-harness", {
 })
 ```
 
-`nerve export` writes `dist/`: the canonical `harness.json` (HIR), schematic and board SVGs, BOM / cut-list / label CSVs, a continuity test plan, assembly instructions, and the PDF manufacturing packet, all byte-identical across runs.
+`nerve review` writes a machine-readable finding report with the HIR fingerprint, built-in rule versions, findings, and limitations. `nerve export` writes the HIR, drawings, tables, test plan, instructions, and PDF packet.
+
+The report is not a certification and does not replace qualified engineering review. A check can use only the facts present in the submitted design and configured part data.
 
 Or skip the install entirely: [the editor in this app](/projects) compiles in your browser as you type.
 
 ## Share a harness
 
-Hit **Share** in the editor and the whole project — every file — is gzipped into the URL fragment. There's no backend: the fragment never leaves your browser, and opening the link recompiles the exact same design, byte for byte. Because the source rides in the link, a share URL *is* a reproducible bug report.
+Use **Share** in the editor to place the project files in the URL fragment. There is no backend for this flow: the fragment stays in the browser, and opening the link recompiles the same design. A share URL can therefore carry a reproducible software example. Do not place restricted customer data in a share URL.

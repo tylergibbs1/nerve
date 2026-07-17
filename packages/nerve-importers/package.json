@@ -1,0 +1,42 @@
+{
+  "name": "@grayhaven/nerve-importers",
+  "version": "6.1.2",
+  "type": "module",
+  "sideEffects": false,
+  "description": "Deterministic migration adapters that turn existing wire lists into reviewable Nerve source.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@e965/xlsx": "^0.20.3",
+    "@grayhaven/nerve": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylergibbs1/nerve.git",
+    "directory": "packages/nerve-importers"
+  },
+  "homepage": "https://github.com/tylergibbs1/nerve#readme"
+}

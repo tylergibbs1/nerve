@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nerve.grayhavenindustries.com/schemas/eval-manifest-0.1.0.json",
+  "title": "Nerve evaluation manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["corpusVersion", "cases"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "corpusVersion": { "const": "0.1.0" },
+    "cases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "assertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^HK-[A-Z0-9]+-[0-9]{3}$" },
+        "target": { "type": "string", "minLength": 1 },
+        "minimumCount": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "fixture",
+        "rationale",
+        "provenance",
+        "expectedFindings"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "fixture": { "type": "string", "minLength": 1 },
+        "rationale": { "type": "string", "minLength": 1 },
+        "provenance": { "$ref": "#/$defs/provenance" },
+        "expectedFindings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/assertion" }
+        },
+        "forbiddenFindings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/assertion" }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "source", "rights"],
+      "properties": {
+        "kind": { "enum": ["synthetic", "datasheet-derived", "field-verified"] },
+        "source": { "type": "string", "minLength": 1 },
+        "rights": { "enum": ["public", "restricted"] },
+        "reviewedByRole": { "type": "string", "minLength": 1 },
+        "reviewedOn": { "type": "string", "format": "date" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "field-verified" } },
+            "required": ["kind"]
+          },
+          "then": { "required": ["reviewedByRole", "reviewedOn"] }
+        }
+      ]
+    }
+  }
+}

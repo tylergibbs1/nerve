@@ -18,6 +18,7 @@ import {
 } from "../lib/compile-client.js"
 import {
   ENTRY_FILE,
+  getFiles,
   getFileSource,
   hasBundledSource,
   isDirty,
@@ -47,6 +48,9 @@ export function SourcePane({ projectId }: { projectId: string }) {
   const [autoCompile, setAutoCompile] = useState(true)
   const lastCompiled = useRef<string | undefined>(undefined)
   const viewRef = useRef<EditorView | null>(null)
+  // Pre-reset snapshot of every file; present only until the next edit,
+  // project switch, or undo.
+  const [undoSnapshot, setUndoSnapshot] = useState<Readonly<Record<string, string>> | undefined>(undefined)
 
   // Push HK diagnostics into the lint gutter whenever a compile lands.
   const publishDiagnostics = (text: string, diags: ReadonlyArray<{ readonly code: string; readonly severity: string; readonly message: string; readonly target?: string | undefined }>) => {
@@ -60,6 +64,7 @@ export function SourcePane({ projectId }: { projectId: string }) {
     setActiveFile(ENTRY_FILE)
     setLocalSource(getFileSource(projectId, ENTRY_FILE))
     lastCompiled.current = undefined
+    setUndoSnapshot(undefined)
   }, [projectId])
 
   // Reflect writes made elsewhere (the AI pane applying a verified patch).
@@ -136,6 +141,7 @@ export function SourcePane({ projectId }: { projectId: string }) {
   const onChange = (text: string) => {
     setLocalSource(text)
     setFileSource(projectId, activeFile, text)
+    setUndoSnapshot(undefined)
   }
 
   const onSelectFile = (path: string) => {
@@ -156,7 +162,8 @@ export function SourcePane({ projectId }: { projectId: string }) {
           kind: "ok" as const,
           text: (() => {
             const { errors, warnings } = countDiagnostics(compile.data.hir.diagnostics)
-            return `Compiled — ${errors} error(s), ${warnings} warning(s)`
+            const n = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`
+            return `Compiled · ${n(errors, "error")}, ${n(warnings, "warning")}`
           })()
         }
       : undefined
@@ -192,13 +199,15 @@ export function SourcePane({ projectId }: { projectId: string }) {
             checked={autoCompile}
             onChange={(e) => onToggleAuto(e.target.checked)}
           />
-          auto
+          Auto
         </label>
         {hasBundledSource(projectId) && isDirty(projectId) && (
           <Button
             variant="secondary"
             size="xs"
             onClick={() => {
+              const snapshot = getFiles(projectId)
+              setUndoSnapshot(snapshot)
               const text = resetSource(projectId)
               setActiveFile(ENTRY_FILE)
               setLocalSource(text)
@@ -206,6 +215,24 @@ export function SourcePane({ projectId }: { projectId: string }) {
             }}
           >
             Reset
+          </Button>
+        )}
+        {undoSnapshot !== undefined && (
+          <Button
+            variant="secondary"
+            size="xs"
+            onClick={() => {
+              for (const [path, text] of Object.entries(undoSnapshot)) {
+                setFileSource(projectId, path, text)
+              }
+              setActiveFile(ENTRY_FILE)
+              setLocalSource(undoSnapshot[ENTRY_FILE] ?? "")
+              lastCompiled.current = undefined
+              compile.mutate({ path: ENTRY_FILE, text: undoSnapshot[ENTRY_FILE] ?? "" })
+              setUndoSnapshot(undefined)
+            }}
+          >
+            Undo reset
           </Button>
         )}
         <span

@@ -9,17 +9,24 @@ function ProjectList() {
   return (
     <div className="page">
       <div className="page-header">
-        <span className="spec-tag">Projects</span>
         <h1>Projects</h1>
       </div>
+      <Link className="project-card project-card-featured" to="/showcase">
+        <span className="project-card-label">Imported from real hardware</span>
+        <h3>NASA/JPL Open Source Rover</h3>
+        <p>
+          Six rover harnesses imported from their original WireViz files, with the wires, findings,
+          test plan, and build packet Nerve produced from them.
+        </p>
+      </Link>
       <Link
         className="project-card project-card-new"
         to="/projects/$projectId/diagram"
         params={{ projectId: "scratch" }}
       >
-        <h3>+ Start a harness</h3>
+        <h3>Open a scratch harness</h3>
         <p>
-          A blank canvas that compiles in your browser as you type. No sign-up — hit Share to keep
+          A blank canvas that compiles in your browser as you type. No sign-up. Use Share to keep
           it (the link is your save).
         </p>
       </Link>

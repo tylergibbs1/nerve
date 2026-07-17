@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/nasa-jpl/open-source-rover",
+  "commit": "50dca639560b4b8cebf1852e6c7c2048ac770762",
+  "path": "electrical/wiring/wireviz",
+  "license": "Apache-2.0",
+  "copyright": "California Institute of Technology (Caltech)",
+  "note": "Upstream YAML is vendored as an external compatibility corpus with non-semantic whitespace normalized."
+}

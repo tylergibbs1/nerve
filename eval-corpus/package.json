@@ -1,0 +1,8 @@
+{
+  "name": "@grayhaven/nerve-public-eval-corpus",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@grayhaven/nerve": "workspace:*"
+  }
+}

@@ -90,14 +90,16 @@ export function AiPane({ projectId }: { projectId: string }) {
     return (
       <div className="ai-pane">
         <div className="ai-setup">
-          <span className="spec-tag">AI Copilot</span>
+          <span className="spec-tag">Assistant</span>
           <p>
-            Edits your harness through compile-verified patches. Calls go directly from your
-            browser to OpenAI — the key is stored locally and sent nowhere else.
+            Edits your harness for you; every change is compiled and checked before it lands.
+            Requests go directly from your browser to OpenAI. The key is stored locally and
+            sent nowhere else.
           </p>
           <Input
             type="password"
             placeholder="sk-…"
+            aria-label="OpenAI API key"
             className="h-9 text-sm"
             value={keyDraft}
             onChange={(e) => setKeyDraft(e.target.value)}
@@ -126,18 +128,17 @@ export function AiPane({ projectId }: { projectId: string }) {
   return (
     <div className="ai-pane">
       <div className="ai-header">
-        <span className="spec-tag">AI Copilot</span>
+        <span className="spec-tag">Assistant</span>
         <Button
           variant="ghost"
           size="xs"
-          className="h-auto p-0 text-[10px]"
-          title="Forget API key"
+          className="h-auto p-0 text-[11px]"
           onClick={() => {
             setApiKey("")
             setHasKey(false)
           }}
         >
-          key ✕
+          Forget key
         </Button>
       </div>
       <div className="ai-thread" ref={threadRef}>
@@ -176,6 +177,7 @@ export function AiPane({ projectId }: { projectId: string }) {
         <Textarea
           rows={2}
           className="min-h-0 flex-1 resize-none px-2.5 py-1.5 text-sm leading-snug"
+          aria-label="Describe a change"
           placeholder={busy ? "Working…" : "Describe a change…"}
           value={input}
           disabled={busy}

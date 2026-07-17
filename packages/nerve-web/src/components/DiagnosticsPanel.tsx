@@ -12,9 +12,9 @@ export function DiagnosticsPanel({
       // axe scrollable-region-focusable: keyboard users scroll the list.
       tabIndex={0}
       role="region"
-      aria-label="Diagnostics"
+      aria-label="Issues"
     >
-      <h3>Diagnostics ({diagnostics.length})</h3>
+      <h3>Issues ({diagnostics.length})</h3>
       {diagnostics.length === 0 && <div className="diag">No issues found.</div>}
       {diagnostics.map((d, i) => {
         const sel = d.target !== undefined ? selectionFromTarget(d.target) : undefined

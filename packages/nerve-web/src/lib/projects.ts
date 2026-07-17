@@ -12,7 +12,7 @@ export interface ProjectMeta {
 export const SHARED_PROJECT: ProjectMeta = {
   id: "shared",
   name: "Shared Harness",
-  description: "Opened from a share link — source lives in the URL fragment, nowhere else"
+  description: "Opened from a share link. The source lives in the link itself, nowhere else"
 }
 
 /** The in-browser scratch pad (the "New harness" action). Baseline is a
@@ -20,7 +20,7 @@ export const SHARED_PROJECT: ProjectMeta = {
 export const SCRATCH_PROJECT: ProjectMeta = {
   id: "scratch",
   name: "New Harness",
-  description: "A blank in-browser harness — Share to keep it (the link is your save)"
+  description: "A blank harness in your browser. Share to keep it; the link is your save"
 }
 
 export const projectMeta = (id: string): ProjectMeta | undefined =>
@@ -34,7 +34,7 @@ export const PROJECTS: ReadonlyArray<ProjectMeta> = [
   {
     id: "motor-controller",
     name: "Motor Controller Harness",
-    description: "PRD §9.1 example — J1 controller to M1 motor, power + CAN"
+    description: "A controller wired to a motor: power and CAN over two connectors"
   },
   {
     id: "sensor-splice",
@@ -44,6 +44,6 @@ export const PROJECTS: ReadonlyArray<ProjectMeta> = [
   {
     id: "robot-platform",
     name: "Robot Platform Harness",
-    description: "GH-R1 mobile platform — 22 connectors, CAN trunk with splice taps, 4 drive modules"
+    description: "A mobile platform: 22 connectors, a CAN trunk with splice taps, 4 drive modules"
   }
 ]

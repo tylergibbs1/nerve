@@ -27,16 +27,9 @@
   font-weight: 600;
   font-display: swap;
 }
-@font-face {
-  font-family: "Chakra Petch";
-  src: url("/fonts/ChakraPetch-600.woff2") format("woff2");
-  font-weight: 600;
-  font-display: swap;
-}
-
 /* Tailwind theme bridge: the reference repo's shadcn-style semantic tokens
    (globals.css + tailwind.config.ts) mapped onto Tailwind v4. The ported
-   ui/ components consume these via bg-foreground, tracking-spec-wide, etc. */
+   ui/ components consume these via bg-foreground etc. */
 @theme static {
   --color-background: #000000;
   --color-foreground: #ffffff;
@@ -50,25 +43,16 @@
   --color-ring: #ffffff;
   --font-sans: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
-  --font-display: "Chakra Petch", "Archivo", sans-serif;
-  --tracking-spec-tight: -0.01em;
-  --tracking-spec-normal: 0.025em;
-  --tracking-spec-wide: 0.04em;
-  --tracking-spec-wider: 0.05em;
-  --tracking-spec-widest: 0.08em;
   --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-/* Grayhaven Industries brand — Mach monochrome, exact tokens + doctrine from
-   /Users/tylergibbs/grayhavenindustries/app/globals.css: true-black ground,
-   panels step up, white signal, signature gray, 14%-white hairlines.
-   No brand hues; severity colors are functional only.
-   Bracket doctrine: ONE CSS-generated spec-tag eyebrow per screen (accent
-   brackets, muted label). Nav brands, panel headings, buttons, telemetry
-   are deliberately unbracketed. */
+/* Grayhaven monochrome: true-black ground, panels step up, white signal,
+   signature gray, 14%-white hairlines. No brand hues; severity colors are
+   functional only. Hierarchy comes from weight and color, not from caps or
+   letterspacing — mono is reserved for code, IDs, and numbers. */
 :root {
   /* Legacy aliases — single source of truth is the @theme block above
      (Tailwind v4 emits @theme static tokens as runtime custom properties). */
@@ -86,7 +70,6 @@
   --ok: #4ade80;
   --mono: var(--font-mono);
   --sans: var(--font-sans);
-  --display: var(--font-display);
 }
 
 * { box-sizing: border-box; }
@@ -94,6 +77,7 @@
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-synthesis: none;
 }
 
 body {
@@ -128,18 +112,15 @@ textarea:focus-visible, select:focus-visible {
 }
 ::selection { background: rgb(255 255 255 / 0.3); }
 
-/* The one sanctioned eyebrow: CSS-generated accent brackets, muted label. */
+/* Quiet section label: sentence-case sans, muted — hierarchy from color,
+   not caps or brackets. */
 .spec-tag {
-  font-family: var(--mono);
   font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.01em;
   color: var(--muted);
 }
-.spec-tag::before { content: "["; color: var(--accent); }
-.spec-tag::after { content: "]"; color: var(--accent); }
 
-.app-shell { display: flex; flex-direction: column; height: 100vh; }
+.app-shell { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 
 .topbar {
   display: flex;
@@ -151,28 +132,22 @@ textarea:focus-visible, select:focus-visible {
   border-bottom: 1px solid var(--border);
   color: var(--text);
 }
-/* Brand wordmark: bare mono uppercase tracked — the reference nav voice,
-   never bracketed (components/logo.tsx). */
 .topbar .brand {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  font-family: var(--mono);
-  font-weight: 400;
-  letter-spacing: 0.05em;
+  flex-shrink: 0;
+  font-weight: 500;
   font-size: 14px;
   color: var(--text);
-  text-transform: uppercase;
+  white-space: nowrap;
   transition: color 200ms var(--ease-default);
 }
 .topbar .brand svg { flex-shrink: 0; }
 .topbar .brand:hover { color: var(--accent-hover); }
 .topnav { margin-left: auto; display: flex; gap: 18px; }
 .topnav a {
-  font-family: var(--mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 13px;
   color: var(--muted);
   transition: color 200ms var(--ease-default);
 }
@@ -202,10 +177,7 @@ textarea:focus-visible, select:focus-visible {
 }
 .docs-nav a {
   padding: 6px 24px;
-  font-family: var(--mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 13px;
   color: var(--muted);
   border-left: 2px solid transparent;
   transition: color 200ms var(--ease-default), border-color 200ms var(--ease-default);
@@ -223,21 +195,19 @@ textarea:focus-visible, select:focus-visible {
 /* Centered measure column inside the scroll area. */
 .docs-content { max-width: 760px; margin: 0 auto; }
 .docs-body h1 {
-  font-family: var(--display);
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
   margin: 16px 0 0;
 }
 .docs-body h2 {
   font-size: 16px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
+  letter-spacing: -0.01em;
   margin: 36px 0 0;
 }
-.docs-body p { font-size: 14px; line-height: 1.7; color: var(--muted); margin: 16px 0 0; max-width: 620px; }
+.docs-body p { font-size: 14px; line-height: 1.7; color: var(--muted); margin: 16px 0 0; max-width: 620px; text-wrap: pretty; }
 .docs-body p code, .docs-body td code {
   font-family: var(--mono);
   font-size: 12.5px;
@@ -250,10 +220,8 @@ textarea:focus-visible, select:focus-visible {
 .docs-group { display: flex; flex-direction: column; gap: 2px; margin-bottom: 16px; }
 .docs-group-label {
   padding: 0 24px 4px;
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-size: 11px;
+  letter-spacing: 0.01em;
   /* WCAG AA: was muted@60% (~2.8:1 on black, axe-serious); hsl 58% ≈ 5:1
      keeps the quiet-gray doctrine while passing. */
   color: hsl(0 0% 58%);
@@ -261,10 +229,9 @@ textarea:focus-visible, select:focus-visible {
 .docs-llms {
   margin-top: auto;
   padding: 12px 24px 0;
+  /* Filename — mono is for code and IDs. */
   font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 11px;
   /* WCAG AA on true black (axe-serious at muted@70%). */
   color: hsl(0 0% 58%);
 }
@@ -275,14 +242,11 @@ textarea:focus-visible, select:focus-visible {
   align-items: center;
   gap: 10px;
 }
-.docs-md-actions .sep { font-family: var(--mono); font-size: 10px; color: color-mix(in srgb, var(--muted) 50%, transparent); }
-.docs-action { height: auto; padding: 0 0 1px; font-size: 10px; border-bottom: 1px solid var(--border); }
+.docs-md-actions .sep { font-size: 11px; color: color-mix(in srgb, var(--muted) 50%, transparent); }
+.docs-action { height: auto; padding: 0 0 1px; font-size: 11px; border-bottom: 1px solid var(--border); }
 .docs-action:hover { border-color: var(--muted); }
 .docs-md-link {
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 11px;
   color: var(--muted);
   border-bottom: 1px solid var(--border);
   transition: color 200ms var(--ease-default), border-color 200ms var(--ease-default);
@@ -319,12 +283,9 @@ textarea:focus-visible, select:focus-visible {
   padding: 8px 16px 8px 0;
   border-bottom: 1px solid var(--border);
   text-align: left;
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 12px;
   color: var(--muted);
-  font-weight: 400;
+  font-weight: 500;
 }
 .docs-body table td {
   padding: 10px 16px 10px 0;
@@ -370,19 +331,15 @@ textarea:focus-visible, select:focus-visible {
   flex-direction: column;
   gap: 4px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text);
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
   transition: color 200ms var(--ease-default);
 }
 .pager-link:hover { color: var(--accent-hover); }
 .pager-link.next { text-align: right; align-items: flex-end; }
 .pager-dir {
-  font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 400;
-  letter-spacing: 0.04em;
   color: var(--muted);
 }
 
@@ -407,36 +364,33 @@ textarea:focus-visible, select:focus-visible {
   .docs-body { padding: 40px; }
 }
 
-/* Minimal landing at / — the marketing surface inside the app. */
+/* Landing: the product thesis on the left, inspectable corpus proof on the right. */
 .landing {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  max-width: 880px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.92fr);
+  align-items: center;
+  gap: clamp(56px, 8vw, 112px);
+  max-width: 1180px;
   margin: 0 auto;
   width: 100%;
-  padding: 48px 24px;
+  padding: clamp(56px, 8vw, 104px) 32px;
 }
+.landing-copy { min-width: 0; }
 .landing h1 {
-  font-family: var(--display);
-  font-size: clamp(28px, 4.5vw, 48px);
+  font-size: clamp(30px, 3.8vw, 48px);
   font-weight: 600;
-  text-transform: uppercase;
-  line-height: 1.05;
-  letter-spacing: -0.01em;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
   text-wrap: balance;
   margin: 20px 0 0;
 }
 .landing-sub {
-  font-family: var(--mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  font-size: 15px;
   color: var(--muted);
-  line-height: 1.8;
+  line-height: 1.6;
   max-width: 560px;
-  margin: 24px 0 0;
+  margin: 20px 0 0;
   text-wrap: pretty;
 }
 .landing-links {
@@ -445,11 +399,10 @@ textarea:focus-visible, select:focus-visible {
   align-items: center;
   gap: 14px;
   margin-top: 40px;
-  font-family: var(--mono);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 14px;
 }
+/* The npm command is code — the one mono moment on the landing. */
+.landing-links a.cmd { font-family: var(--mono); font-size: 13px; }
 .landing-links a {
   color: var(--text);
   border-bottom: 1px solid var(--text);
@@ -461,22 +414,91 @@ textarea:focus-visible, select:focus-visible {
 .landing-links a.landing-cta { color: var(--accent); border-color: var(--accent); }
 .landing-links a.landing-cta:hover { color: var(--accent-hover); border-color: var(--accent-hover); }
 .landing-links .sep { color: color-mix(in srgb, var(--muted) 50%, transparent); }
+
+.landing-proof {
+  position: relative;
+  display: block;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: clamp(24px, 4vw, 40px);
+  overflow: hidden;
+  transition: border-color 220ms var(--ease-default), transform 220ms var(--ease-out);
+}
+.landing-proof:hover { border-color: var(--muted); transform: translateY(-3px); }
+.landing-proof-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.landing-proof h2 {
+  margin: 48px 0 0;
+  font-size: clamp(24px, 2.8vw, 34px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+.landing-proof > p {
+  max-width: 330px;
+  margin: 13px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.landing-proof-flow {
+  display: grid;
+  grid-template-columns: auto 1fr auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 44px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.landing-proof-flow span:first-child { font-family: var(--mono); }
+.landing-proof-flow i { height: 1px; background: var(--border); }
+.landing-proof-flow strong {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+}
+.landing-proof dl {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 28px 0 0;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--border);
+}
+.landing-proof dl div { padding-right: 12px; }
+.landing-proof dt {
+  font-size: 11px;
+  color: var(--muted);
+}
+.landing-proof dd {
+  margin: 5px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
 @keyframes spec-rise {
   from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
   to { opacity: 1; transform: none; filter: blur(0); }
 }
-.landing > * { animation: spec-rise 0.5s var(--ease-out) both; }
-.landing > h1 { animation-delay: 90ms; }
-.landing > .landing-sub { animation-delay: 180ms; }
-.landing > .landing-links { animation-delay: 270ms; }
+.landing-copy > *, .landing-proof { animation: spec-rise 0.5s var(--ease-out) both; }
+.landing-copy > h1 { animation-delay: 90ms; }
+.landing-copy > .landing-sub { animation-delay: 180ms; }
+.landing-copy > .landing-links { animation-delay: 270ms; }
+.landing-proof { animation-delay: 180ms; }
 
 .page { padding: 48px 24px; overflow: auto; max-width: 720px; margin: 0 auto; width: 100%; }
 .page h1 {
-  font-family: var(--sans);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   font-weight: 600;
-  font-size: 30px;
+  font-size: 26px;
+  letter-spacing: -0.02em;
   margin: 8px 0 0;
 }
 .page-header { margin-bottom: 32px; }
@@ -501,48 +523,407 @@ textarea:focus-visible, select:focus-visible {
 .project-card-new h3 { color: var(--accent); }
 .project-card h3 {
   margin: 0 0 4px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
-.project-card p { margin: 0; color: var(--muted); font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+.project-card p { margin: 0; color: var(--muted); font-family: var(--sans); font-size: 14px; line-height: 1.5; text-wrap: pretty; }
+.project-card-featured {
+  position: relative;
+  padding: 30px 30px 32px;
+  margin-bottom: 28px;
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+.project-card-featured:hover { border-color: var(--text); }
+.project-card-featured h3 { color: var(--bg); margin-top: 14px; }
+.project-card-featured p { color: hsl(0 0% 24%); max-width: 560px; }
+.project-card-label {
+  font-size: 12px;
+  color: hsl(0 0% 32%);
+}
+
+/* NASA/JPL rover corpus proof — source and evidence share one inspection surface. */
+.showcase {
+  flex: 1;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(52px, 7vw, 96px) clamp(24px, 5vw, 72px) 96px;
+  overflow: auto;
+}
+.showcase-hero { max-width: 1120px; }
+.showcase-hero h1 {
+  margin: 22px 0 0;
+  font-size: clamp(36px, 4.8vw, 64px);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.showcase-hero h1 span { color: hsl(0 0% 56%); }
+.showcase-hero > p {
+  max-width: 740px;
+  margin: 28px 0 0;
+  color: var(--muted);
+  font-size: clamp(15px, 1.5vw, 18px);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+.showcase-provenance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 34px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.showcase-provenance a {
+  color: var(--text);
+  border-bottom: 1px solid var(--text);
+}
+.showcase-provenance a:hover { color: var(--accent-hover); border-color: var(--accent-hover); }
+
+.showcase-picker {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin-top: clamp(60px, 8vw, 104px);
+  border: 1px solid var(--border);
+}
+.showcase-picker button {
+  min-width: 0;
+  padding: 16px 14px 15px;
+  background: var(--panel);
+  color: var(--muted);
+  border: 0;
+  border-right: 1px solid var(--border);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 180ms var(--ease-default), color 180ms var(--ease-default);
+}
+.showcase-picker button:last-child { border-right: 0; }
+.showcase-picker button:hover { color: var(--text); background: var(--muted-bg); }
+.showcase-picker button[aria-pressed="true"] { color: var(--bg); background: var(--text); }
+.showcase-picker button span {
+  display: block;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.showcase-picker button small {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: hsl(0 0% 58%);
+}
+.showcase-picker button[aria-pressed="true"] small { color: hsl(0 0% 30%); }
+
+.showcase-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 78px minmax(0, 1fr);
+  min-height: 620px;
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+}
+.showcase-source, .showcase-evidence { min-width: 0; }
+.showcase-source { display: flex; flex-direction: column; }
+.showcase-panel-head {
+  min-height: 88px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--border);
+}
+.showcase-panel-head h2 {
+  margin: 6px 0 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.showcase-kicker {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+/* Filenames are code — the mono voice. */
+.showcase-file {
+  flex: 0 0 auto;
+  padding-top: 2px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.showcase-source pre {
+  flex: 1;
+  max-height: 500px;
+  margin: 0;
+  padding: 22px;
+  overflow: auto;
+  background: var(--bg);
+  color: hsl(0 0% 76%);
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.65;
+  white-space: pre;
+}
+.showcase-source-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 22px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.showcase-transform {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: var(--bg);
+  border-inline: 1px solid var(--border);
+}
+.showcase-transform span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 11px;
+  color: var(--muted);
+}
+.showcase-transform div { width: 1px; height: 92px; background: var(--border); }
+.showcase-transform strong { font-family: var(--mono); font-size: 18px; font-weight: 400; }
+
+.showcase-evidence { background: var(--panel); }
+/* Status reads through color and weight alone; no box. The page's only
+   pill-shaped chrome was here and it made every other mono label read as
+   a badge too. */
+.showcase-gate {
+  flex: 0 0 auto;
+  padding-top: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.gate-blocked { color: var(--error); }
+.gate-clear { color: var(--ok); }
+.showcase-ledger {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+.showcase-ledger > div {
+  min-width: 0;
+  padding: 18px 20px 20px;
+  border-right: 1px solid var(--border);
+}
+.showcase-ledger > div:last-child { border-right: 0; }
+.showcase-ledger span, .showcase-ledger small {
+  display: block;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+/* Ledger values are counts and IDs — mono, tabular. */
+.showcase-ledger strong {
+  display: block;
+  margin: 8px 0 6px;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.showcase-findings { margin: 0; padding: 0; list-style: none; }
+.showcase-finding {
+  padding: 19px 22px 20px;
+  border-bottom: 1px solid var(--border);
+}
+/* Rule codes and targets are IDs (mono); the severity word is plain text. */
+.showcase-finding-code {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 11px;
+}
+.showcase-finding-code span:first-child { font-family: var(--mono); }
+.showcase-finding-code span:last-child { color: var(--error); }
+.showcase-finding p { margin: 10px 0 0; font-size: 13px; line-height: 1.55; color: var(--text); }
+.showcase-finding > code {
+  display: block;
+  margin-top: 9px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.showcase-no-findings { padding: 30px 22px; border-bottom: 1px solid var(--border); }
+.showcase-no-findings strong { font-size: 14px; }
+.showcase-no-findings p { max-width: 440px; margin: 8px 0 0; color: var(--muted); line-height: 1.55; }
+.showcase-import-notes { padding: 16px 22px; }
+.showcase-import-notes summary {
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.showcase-import-notes ul { margin: 14px 0 0; padding: 0 0 0 18px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+.showcase-section-head { max-width: 760px; }
+.showcase-section-head h2 {
+  margin: 10px 0 0;
+  font-size: clamp(22px, 2.6vw, 32px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.showcase-section-head p {
+  max-width: 670px;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+.showcase-drawing, .showcase-conductors, .showcase-artifacts, .showcase-difference {
+  margin-top: clamp(76px, 9vw, 128px);
+}
+.showcase-drawing .sheet-wrap { margin-top: 30px; }
+.showcase-drawing .diagram-pane { max-height: 640px; }
+.showcase-drawing .diagram-pane svg { min-width: 760px; height: auto; }
+
+.showcase-table-wrap {
+  margin-top: 30px;
+  overflow: auto;
+  border-block: 1px solid var(--border);
+}
+.showcase-wire-table { width: 100%; min-width: 860px; border-collapse: collapse; }
+.showcase-wire-table th {
+  padding: 11px 18px 11px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+  color: var(--muted);
+}
+.showcase-wire-table td {
+  padding: 14px 18px 14px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: hsl(0 0% 74%);
+  white-space: nowrap;
+}
+.showcase-wire-table tbody tr:last-child td { border-bottom: 0; }
+.showcase-wire-table th:first-child, .showcase-wire-table td:first-child { padding-left: 16px; color: var(--text); }
+.showcase-color { display: inline-flex; align-items: center; gap: 8px; }
+.showcase-color i { width: 9px; height: 9px; border: 1px solid hsl(0 0% 36%); }
+
+.showcase-artifact-rail {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 34px;
+  border-block: 1px solid var(--border);
+}
+.showcase-artifact-rail > div { padding: 22px 22px 24px 0; border-right: 1px solid var(--border); }
+.showcase-artifact-rail > div:not(:first-child) { padding-left: 22px; }
+.showcase-artifact-rail > div:last-child { border-right: 0; }
+.showcase-artifact-rail span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+}
+.showcase-artifact-rail strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.showcase-export { display: flex; align-items: center; gap: 18px; margin-top: 24px; }
+.showcase-export > span { font-size: 12px; color: var(--muted); }
+
+.showcase-comparison {
+  min-width: 640px;
+  margin-top: 34px;
+  border-top: 1px solid var(--border);
+}
+.showcase-comparison > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+}
+.showcase-comparison span { padding: 18px 24px 18px 0; font-size: 13px; line-height: 1.55; color: var(--muted); }
+.showcase-comparison span + span { padding-left: 24px; border-left: 1px solid var(--border); color: var(--text); }
+.showcase-comparison .comparison-head span {
+  padding-block: 11px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.showcase-difference { overflow-x: auto; }
+.showcase-difference .showcase-section-head { position: sticky; left: 0; }
+.showcase-caveat {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.35fr) minmax(0, 1fr);
+  gap: 40px;
+  margin-top: clamp(76px, 9vw, 128px);
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.showcase-caveat strong {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.showcase-caveat p { max-width: 760px; margin: 0; color: var(--muted); line-height: 1.65; }
+.showcase-caveat code { color: var(--text); font-family: var(--mono); font-size: 12px; }
 
 .workspace { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 
 .workspace-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 8px 16px;
   padding: 10px 20px;
   background: var(--panel);
   border-bottom: 1px solid var(--border);
 }
+/* The harness id is an ID — mono, as written in source. */
 .workspace-header h2 {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   font-family: var(--mono);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  white-space: nowrap;
 }
 .workspace-header .meta {
   color: var(--muted);
-  font-size: 10px;
-  font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .tabs { display: flex; gap: 2px; margin-left: auto; }
 .tabs a {
   padding: 6px 12px;
   color: var(--muted);
-  font-family: var(--mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 13px;
+  white-space: nowrap;
   border: 1px solid transparent;
   transition: color 200ms var(--ease-default), border-color 200ms var(--ease-default),
     background-color 200ms var(--ease-default), scale 200ms var(--ease-default);
@@ -586,7 +967,7 @@ textarea:focus-visible, select:focus-visible {
   white-space: pre-wrap;
 }
 .ai-msg.assistant .ai-text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: var(--text); }
-.ai-text.thinking { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+.ai-text.thinking { color: var(--muted); font-size: 12px; }
 .ai-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
 .ai-pill-running { animation: ai-pulse 1.2s var(--ease-smooth) infinite; }
 @keyframes ai-pulse { 50% { opacity: 0.45; } }
@@ -642,10 +1023,7 @@ textarea:focus-visible, select:focus-visible {
 .sheet-actions .docs-action { border-bottom: none; }
 .sheet-hint {
   margin-left: auto;
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 11px;
   /* WCAG AA on true black (axe: 3.28:1 at muted@70%). */
   color: hsl(0 0% 58%);
 }
@@ -682,7 +1060,7 @@ textarea:focus-visible, select:focus-visible {
 .inspector-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .inspector dl { margin: 0 0 8px; display: flex; flex-direction: column; gap: 3px; }
 .inspector dl div { display: flex; gap: 8px; }
-.inspector dt { width: 64px; color: var(--muted); text-transform: uppercase; font-size: 9px; letter-spacing: 0.04em; padding-top: 1px; }
+.inspector dt { width: 64px; color: var(--muted); font-family: var(--sans); font-size: 11px; }
 .inspector dd { margin: 0; color: var(--text); word-break: break-all; }
 
 /* Search. */
@@ -770,12 +1148,9 @@ table.data th {
   padding: 8px 16px 8px 0;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 12px;
   color: var(--muted);
-  font-weight: 400;
+  font-weight: 500;
   position: sticky;
   top: 0;
 }
@@ -784,7 +1159,6 @@ table.data td {
   border-bottom: 1px solid hsl(0 0% 14% / 0.6);
   font-variant-numeric: tabular-nums;
 }
-table.data td.mono, table.data th.mono { font-family: var(--mono); }
 /* Column voices: codes/IDs mono, numerics tabular muted, prose sans. */
 table.data td.cell-code { font-family: var(--mono); font-size: 12px; }
 table.data td.cell-num { color: var(--muted); }
@@ -794,8 +1168,7 @@ table.data td.cell-text { white-space: normal; }
   background: var(--panel);
   padding: 32px 16px;
   text-align: center;
-  font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
 }
 
@@ -806,35 +1179,30 @@ table.data td.cell-text { white-space: normal; }
   overflow: auto;
   padding: 8px 20px;
 }
-/* Panel heading: bare mono uppercase muted — the reference table-header
-   voice. Never bracketed (one spec-tag per screen). */
 .diagnostics-panel h3 {
   margin: 4px 0 8px;
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--muted);
 }
+/* Rule codes and refs are IDs (mono); the message itself is prose (sans). */
 .diag {
   display: flex;
   gap: 10px;
   padding: 6px 0;
   border-bottom: 1px solid hsl(0 0% 14% / 0.5);
-  font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
 }
 .diag:last-child { border-bottom: 0; }
-.diag .code { min-width: 110px; font-weight: 600; }
+.diag .code { min-width: 110px; font-family: var(--mono); font-size: 11px; font-weight: 600; }
 /* Errors are the one licensed alarm hue; warnings = white "needs your
    action", info descends to muted (monochrome doctrine). */
 .diag.error .code { color: var(--error); }
 .diag.warning .code { color: var(--accent); }
 .diag.info .code { color: var(--muted); }
-.diag .target { min-width: 180px; color: var(--muted); }
+.diag .target { min-width: 180px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
 
-.status { padding: 24px; color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.status { padding: 24px; color: var(--muted); font-size: 13px; }
 .status.error { color: var(--error); }
 
 
@@ -859,11 +1227,7 @@ table.data td.cell-text { white-space: normal; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--mono);
   font-size: 12px;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   color: var(--muted);
   cursor: pointer;
 }
@@ -905,8 +1269,8 @@ table.data th.sortable:hover { color: var(--text); }
   transition-duration: 300ms;
   transition-timing-function: var(--ease-out);
 }
-.compile-error { color: var(--error); font-family: var(--mono); font-size: 11px; }
-.compile-ok { color: var(--ok); font-family: var(--mono); font-size: 11px; }
+.compile-error { color: var(--error); font-size: 12px; }
+.compile-ok { color: var(--ok); font-size: 12px; }
 
 /* Scoped view transitions (reference vt timings): tab clicks animate ONLY
    the render pane — the editor, AI pane, and chrome stay still. The root
@@ -917,6 +1281,80 @@ table.data th.sortable:hover { color: var(--text); }
 .render-pane { view-transition-name: render-pane; }
 ::view-transition-old(render-pane) { animation: vt-out 150ms var(--ease-in) both; }
 ::view-transition-new(render-pane) { animation: vt-in 210ms var(--ease-out) 150ms both; }
+
+@media (max-width: 1080px) {
+  .landing {
+    grid-template-columns: 1fr;
+    align-content: center;
+    max-width: 760px;
+  }
+  .landing-proof { max-width: 620px; }
+  .showcase-picker { grid-template-columns: repeat(3, 1fr); }
+  .showcase-picker button:nth-child(3) { border-right: 0; }
+  .showcase-picker button:nth-child(-n + 3) { border-bottom: 1px solid var(--border); }
+  .showcase-stage { grid-template-columns: 1fr; }
+  .showcase-transform {
+    min-height: 64px;
+    flex-direction: row;
+    border-inline: 0;
+    border-block: 1px solid var(--border);
+  }
+  .showcase-transform span { writing-mode: horizontal-tb; transform: none; }
+  .showcase-transform div { width: 92px; height: 1px; }
+  .showcase-transform strong { transform: rotate(90deg); }
+  .showcase-source pre { min-height: 420px; }
+  .showcase-artifact-rail { grid-template-columns: repeat(2, 1fr); }
+  .showcase-artifact-rail > div:nth-child(2) { border-right: 0; }
+  .showcase-artifact-rail > div:nth-child(-n + 2) { border-bottom: 1px solid var(--border); }
+  .showcase-artifact-rail > div:nth-child(3) { padding-left: 0; }
+}
+
+@media (max-width: 680px) {
+  .topbar { padding-inline: 16px; }
+  .topbar .brand { gap: 7px; font-size: 13px; }
+  .topnav { gap: 12px; }
+  .topnav a { font-size: 12px; }
+  .landing { padding: 44px 20px 64px; gap: 52px; }
+  .landing h1 { font-size: clamp(32px, 10vw, 44px); }
+  .landing-links { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .landing-links .sep { display: none; }
+  .landing-proof { padding: 24px; }
+  .landing-proof h2 { margin-top: 40px; }
+  .landing-proof-flow { grid-template-columns: auto 1fr auto 1fr auto; gap: 7px; }
+  .landing-proof dl { grid-template-columns: 1fr; gap: 12px; }
+
+  .showcase { padding: 44px 20px 72px; }
+  .showcase-hero h1 { font-size: clamp(39px, 13vw, 60px); }
+  .showcase-provenance { flex-direction: column; gap: 7px; }
+  .showcase-picker {
+    display: flex;
+    overflow-x: auto;
+    border-right: 0;
+  }
+  .showcase-picker button {
+    flex: 0 0 160px;
+    border-bottom: 0 !important;
+    border-right: 1px solid var(--border) !important;
+  }
+  .showcase-stage { margin-top: 10px; }
+  .showcase-panel-head { min-height: 80px; padding: 18px; }
+  .showcase-source pre { min-height: 360px; padding: 18px; font-size: 11px; }
+  .showcase-source-foot { padding-inline: 18px; }
+  .showcase-ledger { grid-template-columns: 1fr; }
+  .showcase-ledger > div { border-right: 0; border-bottom: 1px solid var(--border); }
+  .showcase-ledger > div:last-child { border-bottom: 0; }
+  .showcase-finding, .showcase-import-notes { padding-inline: 18px; }
+  .showcase-drawing .diagram-pane svg { min-width: 680px; }
+  .showcase-artifact-rail { grid-template-columns: 1fr; }
+  .showcase-artifact-rail > div {
+    padding: 18px 0 !important;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .showcase-artifact-rail > div:last-child { border-bottom: 0; }
+  .showcase-export { align-items: flex-start; flex-direction: column; }
+  .showcase-caveat { grid-template-columns: 1fr; gap: 14px; }
+}
 
 /* Motion kill switch (reference globals.css pattern). */
 @media (prefers-reduced-motion: reduce) {

@@ -4,35 +4,57 @@ export const Route = createFileRoute("/")({
   component: Landing
 })
 
-/** Minimal landing — the marketing surface lives inside the app now. */
+/** Minimal landing: the pitch on the left, the rover import on the right. */
 function Landing() {
   return (
     <div className="landing">
-      <span className="spec-tag">Interconnect Systems</span>
-      <h1>Harnesses as code.</h1>
-      <p className="landing-sub">
-        Typed wiring harnesses, compiled: one source of truth emits the schematics, BOMs, cut
-        lists, labels, continuity tests, and build records that ship the machine. Deterministic,
-        validated, fail-closed.
-      </p>
-      <div className="landing-links">
-        <Link to="/projects/$projectId/diagram" params={{ projectId: "scratch" }} className="landing-cta">
-          Start a harness
-        </Link>
-        <span className="sep">/</span>
-        <Link to="/projects">Open the demo</Link>
-        <span className="sep">/</span>
-        <Link to="/docs">Read the docs</Link>
-        <span className="sep">/</span>
-        <a href="https://github.com/tylergibbs1/nerve" className="gh-inline">
-          <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true">
-            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
-          </svg>
-          Read the source
-        </a>
-        <span className="sep">/</span>
-        <a href="https://www.npmjs.com/package/@grayhaven/nerve">npm i @grayhaven/nerve</a>
-      </div>
+      <section className="landing-copy">
+        <h1>Check a harness before it reaches the floor.</h1>
+        <p className="landing-sub">
+          Nerve is an open-source compiler for wiring harnesses. Bring in a design and it produces
+          the diagrams, parts lists, and checks a review needs. A review tool, not a certification
+          service.
+        </p>
+        <div className="landing-links">
+          <Link to="/showcase" className="landing-cta">
+            See it on real harnesses
+          </Link>
+          <span className="sep">/</span>
+          <Link to="/projects">Browse the examples</Link>
+          <span className="sep">/</span>
+          <Link to="/docs">Read the docs</Link>
+        </div>
+      </section>
+
+      <Link to="/showcase" className="landing-proof" aria-label="See the NASA JPL rover harness import">
+        <div className="landing-proof-head">
+          <span>Real-world test</span>
+          <span>NASA JPL open-source rover</span>
+        </div>
+        <h2>WireViz → Nerve</h2>
+        <p>Six real rover harnesses, imported from their original files. Nothing retyped.</p>
+        <div className="landing-proof-flow" aria-hidden="true">
+          <span>source.yml</span>
+          <i />
+          <strong>34 checks</strong>
+          <i />
+          <span>review</span>
+        </div>
+        <dl>
+          <div>
+            <dt>Import</dt>
+            <dd>0 errors</dd>
+          </div>
+          <div>
+            <dt>Front encoder</dt>
+            <dd>2 findings</dd>
+          </div>
+          <div>
+            <dt>Output</dt>
+            <dd>22 files</dd>
+          </div>
+        </dl>
+      </Link>
     </div>
   )
 }

@@ -1,0 +1,5 @@
+To Pin,Signal,From,Wire,To,From Pin,Gauge,Color,Length,Unit,From MPN,To MPN
+01,SIG,J1,W-A,J2,A1,20AWG,white,100,mm,A-2,B-2
+02,SIG,J1,W-A,J2,A2,20AWG,white,101,mm,A-2,B-2
+B7,,J10,W-C,J20,3A,22AWG,blue,8,in,C-4,D-8
+4,GND,J1,W-D,J2,,20AWG,black,90,mm,A-2,B-2
