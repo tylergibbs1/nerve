@@ -24,6 +24,7 @@
     "@grayhaven/nerve-connectors": "workspace:*",
     "@grayhaven/nerve-exporters": "workspace:*",
     "@grayhaven/nerve-rules": "workspace:*",
+    "@grayhaven/nerve-wireviz": "workspace:*",
     "@lezer/highlight": "^1.2.3",
     "@lezer/javascript": "^1.5.4",
     "@radix-ui/react-slot": "^1.2.5",
