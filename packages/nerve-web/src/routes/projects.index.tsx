@@ -12,11 +12,11 @@ function ProjectList() {
         <h1>Projects</h1>
       </div>
       <Link className="project-card project-card-featured" to="/showcase">
-        <span className="project-card-label">Featured field proof</span>
+        <span className="project-card-label">Imported from real hardware</span>
         <h3>NASA/JPL Open Source Rover</h3>
         <p>
-          Compare the original WireViz YAML with Nerve's normalized conductors, review findings,
-          test plan, and 22-file evidence packet.
+          Six rover harnesses imported from their original WireViz files, with the wires, findings,
+          test plan, and build packet Nerve produced from them.
         </p>
       </Link>
       <Link

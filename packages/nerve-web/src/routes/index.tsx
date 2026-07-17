@@ -4,41 +4,41 @@ export const Route = createFileRoute("/")({
   component: Landing
 })
 
-/** Landing for the open verification substrate and its inspectable corpus proof. */
+/** Minimal landing: the pitch on the left, the rover import on the right. */
 function Landing() {
   return (
     <div className="landing">
       <section className="landing-copy">
-        <span className="spec-tag">Open harness verification compiler</span>
         <h1>Check a harness before it reaches the floor.</h1>
         <p className="landing-sub">
-          Nerve turns existing harness data into stable findings and reproducible review evidence.
-          Keep the source tool. Add the gate.
+          Nerve is an open-source compiler for wiring harnesses. Bring in a design and it produces
+          the diagrams, parts lists, and checks a review needs. A review tool, not a certification
+          service.
         </p>
         <div className="landing-links">
           <Link to="/showcase" className="landing-cta">
-            Inspect the rover proof
+            See it on real harnesses
           </Link>
           <span className="sep">/</span>
-          <Link to="/projects">Open the workspace</Link>
+          <Link to="/projects">Browse the examples</Link>
           <span className="sep">/</span>
-          <Link to="/docs">Run a review</Link>
+          <Link to="/docs">Read the docs</Link>
         </div>
       </section>
 
-      <Link to="/showcase" className="landing-proof" aria-label="Inspect the NASA/JPL rover harness proof">
+      <Link to="/showcase" className="landing-proof" aria-label="See the NASA JPL rover harness import">
         <div className="landing-proof-head">
-          <span>Open corpus / proof 01</span>
-          <span>NASA/JPL source ↗</span>
+          <span>Real-world test</span>
+          <span>NASA JPL open-source rover</span>
         </div>
         <h2>WireViz → Nerve</h2>
-        <p>Six real rover harnesses. Original YAML in. Review evidence out.</p>
+        <p>Six real rover harnesses, imported from their original files. Nothing retyped.</p>
         <div className="landing-proof-flow" aria-hidden="true">
           <span>source.yml</span>
           <i />
-          <strong>34×</strong>
+          <strong>34 checks</strong>
           <i />
-          <span>review gate</span>
+          <span>review</span>
         </div>
         <dl>
           <div>

@@ -56,11 +56,11 @@ function RootLayout() {
       <header className="topbar">
         <Link to="/" className="brand">
           <GrayhavenMark />
-          GRAYHAVEN NERVE
+          Grayhaven Nerve
         </Link>
         <nav className="topnav">
           <Link to="/showcase" activeProps={{ className: "active" }}>
-            Proof
+            Showcase
           </Link>
           <Link to="/projects" activeProps={{ className: "active" }}>
             Projects

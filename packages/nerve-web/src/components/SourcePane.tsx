@@ -156,7 +156,8 @@ export function SourcePane({ projectId }: { projectId: string }) {
           kind: "ok" as const,
           text: (() => {
             const { errors, warnings } = countDiagnostics(compile.data.hir.diagnostics)
-            return `Compiled — ${errors} error(s), ${warnings} warning(s)`
+            const n = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`
+            return `Compiled · ${n(errors, "error")}, ${n(warnings, "warning")}`
           })()
         }
       : undefined
@@ -192,7 +193,7 @@ export function SourcePane({ projectId }: { projectId: string }) {
             checked={autoCompile}
             onChange={(e) => onToggleAuto(e.target.checked)}
           />
-          auto
+          Auto
         </label>
         {hasBundledSource(projectId) && isDirty(projectId) && (
           <Button

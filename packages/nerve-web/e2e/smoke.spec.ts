@@ -23,16 +23,16 @@ test("rover proof imports real WireViz data and exposes Nerve's review delta", a
   await expect(page.locator(".showcase-wire-table")).toContainText("530 mm")
 
   await page.locator(".showcase-picker button", { hasText: "Front servo" }).click()
-  await expect(page.locator(".showcase-gate")).toHaveText("Gate clear")
+  await expect(page.locator(".showcase-gate")).toHaveText("No blockers")
   await expect(page.locator(".showcase-wire-table tbody tr")).toHaveCount(3)
 })
 
-test("rover proof downloads a generated evidence packet", async ({ page }) => {
+test("rover showcase downloads a generated packet", async ({ page }) => {
   await page.goto("/showcase")
   const download = page.waitForEvent("download", { timeout: 30_000 })
-  await page.getByRole("button", { name: /Download 22-file evidence packet/i }).click()
+  await page.getByRole("button", { name: /Download the packet/i }).click()
   const file = await download
-  expect(file.suggestedFilename()).toBe("jpl-front-encoder-evidence-packet.zip")
+  expect(file.suggestedFilename()).toBe("jpl-front-encoder-packet.zip")
 })
 
 test("a broken harness surfaces HK diagnostics + lint gutter", async ({ page }) => {

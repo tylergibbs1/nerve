@@ -45,7 +45,7 @@ function ProofStage({ proof }: { proof: JplHarnessProof }) {
       <div className="showcase-source">
         <div className="showcase-panel-head">
           <div>
-            <span className="showcase-kicker">Input / WireViz YAML</span>
+            <span className="showcase-kicker">WireViz source</span>
             <h2>{proof.title}</h2>
           </div>
           <span className="showcase-file">{proof.slug.replaceAll("-", "_")}.yml</span>
@@ -68,7 +68,7 @@ function ProofStage({ proof }: { proof: JplHarnessProof }) {
       <div className="showcase-evidence">
         <div className="showcase-panel-head">
           <div>
-            <span className="showcase-kicker">Output / Nerve review</span>
+            <span className="showcase-kicker">Nerve review</span>
             <h2>What the review found</h2>
           </div>
           <span className={`showcase-gate ${proof.releaseReady ? "gate-clear" : "gate-blocked"}`}>
@@ -172,7 +172,7 @@ function ArtifactRail({ proof }: { proof: JplHarnessProof }) {
       const url = URL.createObjectURL(new Blob([bytes.buffer], { type: "application/zip" }))
       const link = document.createElement("a")
       link.href = url
-      link.download = `${proof.hir.harness.id}-evidence-packet.zip`
+      link.download = `${proof.hir.harness.id}-packet.zip`
       link.click()
       URL.revokeObjectURL(url)
       setExportState("done")
@@ -214,7 +214,7 @@ function ArtifactRail({ proof }: { proof: JplHarnessProof }) {
             ? "Building packet…"
             : exportState === "done"
               ? "Packet downloaded ✓"
-              : "Download 22-file evidence packet"}
+              : "Download the packet (22 files)"}
         </Button>
         <span>
           {exportState === "error"
@@ -233,7 +233,7 @@ function RoverShowcase() {
   return (
     <article className="showcase">
       <header className="showcase-hero">
-        <span className="spec-tag">Proof 01 / NASA JPL rover</span>
+        <span className="spec-tag">Real harnesses from the NASA JPL open-source rover</span>
         <h1>
           WireViz describes it.
           <br />
@@ -330,7 +330,7 @@ function RoverShowcase() {
       </section>
 
       <footer className="showcase-caveat">
-        <strong>What this proof does and does not say.</strong>
+        <strong>What this does and does not say.</strong>
         <p>
           Nerve imported the original open-source files exactly as published and checked what they
           state. Findings are prompts for an engineer to review, not a claim that the physical rover

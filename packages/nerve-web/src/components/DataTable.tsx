@@ -61,7 +61,7 @@ export function DataTable<T>({
               const canSort = sortable && header.column.getCanSort()
               const dir = header.column.getIsSorted()
               return (
-                <th key={header.id} className={`mono${canSort ? " sortable" : ""}`}>
+                <th key={header.id} className={canSort ? "sortable" : undefined}>
                   {canSort ? (
                     <button
                       type="button"

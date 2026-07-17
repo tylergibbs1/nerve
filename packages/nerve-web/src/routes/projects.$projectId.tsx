@@ -24,7 +24,7 @@ export const Route = createFileRoute("/projects/$projectId")({
   // before the click; staleTime: Infinity makes the preload stick.
   loader: ({ context, params }) =>
     context.queryClient.ensureQueryData(compileQueryOptions(params.projectId)),
-  pendingComponent: () => <div className="status">Compiling in worker…</div>,
+  pendingComponent: () => <div className="status">Compiling…</div>,
   errorComponent: ({ error }) => (
     <div className="status error">Compile failed: {String(error)}</div>
   ),
@@ -113,7 +113,7 @@ function ProjectWorkspace() {
             ? `${errors} error${errors === 1 ? "" : "s"}`
             : warnings > 0
               ? `${warnings} warning${warnings === 1 ? "" : "s"}`
-              : "valid"}
+              : "No issues"}
         </Badge>
         <SearchBox hir={data.hir} projectId={projectId} />
         <ShareButton projectId={projectId} />
