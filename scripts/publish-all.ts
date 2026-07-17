@@ -20,6 +20,8 @@ import { join } from "node:path"
 const PACKAGES = [
   "nerve",
   "nerve-rules",
+  "nerve-eval",
+  "nerve-importers",
   "nerve-compiler",
   "nerve-exporters",
   "nerve-wireviz",
