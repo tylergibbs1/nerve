@@ -77,4 +77,3 @@ an electrical net with `N` accessible pins, the closed-circuit tests must form
 a connected graph over all `N` points; merely emitting one test with the net's
 name is not coverage. Nets with fewer than two accessible points are invalid
 for point-to-point continuity testing and block release.
-
