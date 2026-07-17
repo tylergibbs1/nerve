@@ -58,7 +58,7 @@
     },
     "packages/nerve": {
       "name": "@grayhaven/nerve",
-      "version": "6.1.1",
+      "version": "6.1.2",
       "dependencies": {
         "effect": "^3.16.0",
       },
@@ -70,7 +70,7 @@
     },
     "packages/nerve-cli": {
       "name": "@grayhaven/nerve-cli",
-      "version": "6.1.1",
+      "version": "6.1.2",
       "bin": {
         "nerve": "./bin/nerve.js",
       },
@@ -98,7 +98,7 @@
     },
     "packages/nerve-compiler": {
       "name": "@grayhaven/nerve-compiler",
-      "version": "6.1.1",
+      "version": "6.1.2",
       "dependencies": {
         "@grayhaven/nerve": "workspace:*",
         "@grayhaven/nerve-rules": "workspace:*",
@@ -114,7 +114,7 @@
     },
     "packages/nerve-connectors": {
       "name": "@grayhaven/nerve-connectors",
-      "version": "6.1.1",
+      "version": "6.1.2",
       "dependencies": {
         "@grayhaven/nerve": "workspace:*",
       },
@@ -125,7 +125,7 @@
     },
     "packages/nerve-eval": {
       "name": "@grayhaven/nerve-eval",
-      "version": "6.1.1",
+      "version": "6.1.2",
       "dependencies": {
         "@grayhaven/nerve": "workspace:*",
       },
@@ -136,7 +136,7 @@
     },
     "packages/nerve-exporters": {
       "name": "@grayhaven/nerve-exporters",
-      "version": "6.1.1",
+      "version": "6.1.2",
       "dependencies": {
         "@grayhaven/nerve": "workspace:*",
         "effect": "^3.16.0",
@@ -155,7 +155,7 @@
     },
     "packages/nerve-importers": {
       "name": "@grayhaven/nerve-importers",
-      "version": "6.1.1",
+      "version": "6.1.2",
       "dependencies": {
         "@e965/xlsx": "^0.20.3",
         "@grayhaven/nerve": "workspace:*",
@@ -167,7 +167,7 @@
     },
     "packages/nerve-react": {
       "name": "@grayhaven/nerve-react",
-      "version": "6.1.1",
+      "version": "6.1.2",
       "dependencies": {
         "@grayhaven/nerve": "workspace:*",
       },
@@ -179,7 +179,7 @@
     },
     "packages/nerve-rules": {
       "name": "@grayhaven/nerve-rules",
-      "version": "6.1.1",
+      "version": "6.1.2",
       "dependencies": {
         "@grayhaven/nerve": "workspace:*",
       },
@@ -246,7 +246,7 @@
     },
     "packages/nerve-wireviz": {
       "name": "@grayhaven/nerve-wireviz",
-      "version": "6.1.1",
+      "version": "6.1.2",
       "dependencies": {
         "@grayhaven/nerve": "workspace:*",
         "yaml": "^2.7.0",
