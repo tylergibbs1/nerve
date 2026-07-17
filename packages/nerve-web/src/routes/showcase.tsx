@@ -68,29 +68,29 @@ function ProofStage({ proof }: { proof: JplHarnessProof }) {
       <div className="showcase-evidence">
         <div className="showcase-panel-head">
           <div>
-            <span className="showcase-kicker">Output / Nerve review gate</span>
-            <h2>Inspectable evidence</h2>
+            <span className="showcase-kicker">Output / Nerve review</span>
+            <h2>What the review found</h2>
           </div>
           <span className={`showcase-gate ${proof.releaseReady ? "gate-clear" : "gate-blocked"}`}>
-            {proof.releaseReady ? "Gate clear" : "Review blocked"}
+            {proof.releaseReady ? "No blockers" : "Release blocked"}
           </span>
         </div>
 
         <div className="showcase-ledger">
           <div>
-            <span>Import integrity</span>
+            <span>Import</span>
             <strong>{importErrors} errors</strong>
-            <small>{proof.hir.wires.length} conductors normalized</small>
+            <small>{proof.hir.wires.length} wires imported</small>
           </div>
           <div>
-            <span>Rule review</span>
+            <span>Checks</span>
             <strong>{reviewErrors} findings</strong>
-            <small>{JPL_SHOWCASE_SUMMARY.ruleCount} stable checks evaluated</small>
+            <small>{JPL_SHOWCASE_SUMMARY.ruleCount} checks run</small>
           </div>
           <div>
-            <span>Release identity</span>
+            <span>Fingerprint</span>
             <strong>{proof.fingerprint.slice(0, 8)}</strong>
-            <small>versioned HIR fingerprint</small>
+            <small>stable ID for this exact design</small>
           </div>
         </div>
 
@@ -102,13 +102,13 @@ function ProofStage({ proof }: { proof: JplHarnessProof }) {
           </ol>
         ) : (
           <div className="showcase-no-findings">
-            <strong>No rule findings on the supplied facts.</strong>
-            <p>The design still requires the normal engineering review and source-data checks.</p>
+            <strong>No checks flagged anything in this design.</strong>
+            <p>It still needs a normal engineering review of the design and its source data.</p>
           </div>
         )}
 
         <details className="showcase-import-notes">
-          <summary>{importWarnings} transparent import note{importWarnings === 1 ? "" : "s"}</summary>
+          <summary>{importWarnings} import note{importWarnings === 1 ? "" : "s"}</summary>
           <ul>
             {proof.importDiagnostics
               .filter((diagnostic) => diagnostic.severity === "warning")
@@ -124,7 +124,7 @@ function ProofStage({ proof }: { proof: JplHarnessProof }) {
 
 function ConductorTable({ proof }: { proof: JplHarnessProof }) {
   return (
-    <div className="showcase-table-wrap" tabIndex={0} role="region" aria-label="Imported conductor data">
+    <div className="showcase-table-wrap" tabIndex={0} role="region" aria-label="Imported wire data">
       <table className="showcase-wire-table">
         <thead>
           <tr>
@@ -184,17 +184,16 @@ function ArtifactRail({ proof }: { proof: JplHarnessProof }) {
   return (
     <section className="showcase-artifacts">
       <div className="showcase-section-head">
-        <span className="showcase-kicker">What Nerve adds</span>
-        <h2>One source becomes a review surface and a build packet.</h2>
+        <h2>One source file becomes a review page and a build packet.</h2>
         <p>
-          These are generated from the normalized design—not manually prepared examples. The packet
-          carries the findings with it, even when the release gate is blocked.
+          Everything here is generated from the imported design, not prepared by hand. The packet
+          carries the findings with it, even when release is blocked.
         </p>
       </div>
       <div className="showcase-artifact-rail">
         <div>
           <span>Inspect</span>
-          <strong>HIR · diagnostics · graph</strong>
+          <strong>design data · findings · graph</strong>
         </div>
         <div>
           <span>Build</span>
@@ -206,7 +205,7 @@ function ArtifactRail({ proof }: { proof: JplHarnessProof }) {
         </div>
         <div>
           <span>Communicate</span>
-          <strong>SVG · HTML · PDF · machine JSON</strong>
+          <strong>SVG · HTML · PDF · machine-readable JSON</strong>
         </div>
       </div>
       <div className="showcase-export">
@@ -234,7 +233,7 @@ function RoverShowcase() {
   return (
     <article className="showcase">
       <header className="showcase-hero">
-        <span className="spec-tag">Open corpus / proof 01</span>
+        <span className="spec-tag">Proof 01 / NASA JPL rover</span>
         <h1>
           WireViz describes it.
           <br />
@@ -242,15 +241,15 @@ function RoverShowcase() {
         </h1>
         <p>
           Six real harness designs from the NASA/JPL Open Source Rover, imported from their original
-          WireViz YAML. No re-entry. No cleaned-up demo data. Every finding remains visible.
+          WireViz YAML. Nothing retyped. No cleaned-up demo data. Every finding remains visible.
         </p>
         <div className="showcase-provenance">
           <a href={sourceUrl} target="_blank" rel="noreferrer">
-            View pinned upstream source ↗
+            View the original files ↗
           </a>
           <span>{JPL_SOURCE.license}</span>
           <span>commit {JPL_SOURCE.commit.slice(0, 8)}</span>
-          <span>{JPL_SHOWCASE_SUMMARY.conductors} conductors across the corpus</span>
+          <span>{JPL_SHOWCASE_SUMMARY.conductors} wires across six harnesses</span>
         </div>
       </header>
 
@@ -274,9 +273,8 @@ function RoverShowcase() {
 
       <section className="showcase-drawing">
         <div className="showcase-section-head">
-          <span className="showcase-kicker">Normalized drawing</span>
           <h2>The same facts, now traceable.</h2>
-          <p>Hover a conductor to follow it. The SVG is generated directly from Nerve’s versioned HIR.</p>
+          <p>Hover a wire to follow it. The SVG is generated straight from the imported design data.</p>
         </div>
         <SchematicSheet
           svg={proof.schematic}
@@ -288,11 +286,10 @@ function RoverShowcase() {
 
       <section className="showcase-conductors">
         <div className="showcase-section-head">
-          <span className="showcase-kicker">Preserved manufacturing facts</span>
-          <h2>Pin by pin. Conductor by conductor.</h2>
+          <h2>Pin by pin. Wire by wire.</h2>
           <p>
-            The importer retains endpoints, signals, gauges, colors, and explicit length units so the
-            review evidence can be checked against the original YAML.
+            The importer keeps endpoints, signals, gauges, colors, and lengths so everything can be
+            checked against the original YAML.
           </p>
         </div>
         <ConductorTable proof={proof} />
@@ -302,11 +299,10 @@ function RoverShowcase() {
 
       <section className="showcase-difference">
         <div className="showcase-section-head">
-          <span className="showcase-kicker">Different jobs, one workflow</span>
-          <h2>WireViz is the source. Nerve is the downstream review gate.</h2>
+          <h2>WireViz is the source. Nerve is the review step after it.</h2>
           <p>
-            This is not a replacement pitch. WireViz gives engineers concise wiring documentation and
-            diagrams. Nerve ingests those facts and adds deterministic review and release evidence.
+            This is not a replacement pitch. WireViz gives engineers concise wiring docs and
+            diagrams. Nerve reads those files and adds repeatable checks and a reviewable record.
           </p>
         </div>
         <div className="showcase-comparison" role="table" aria-label="WireViz and Nerve comparison">
@@ -316,15 +312,15 @@ function RoverShowcase() {
           </div>
           <div role="row">
             <span role="cell">Readable YAML for connectors, cables, and connections</span>
-            <span role="cell">Versioned HIR with a stable content fingerprint</span>
+            <span role="cell">A typed model of the design with a stable fingerprint</span>
           </div>
           <div role="row">
             <span role="cell">Wiring diagrams and source-level documentation</span>
-            <span role="cell">34 stable HK checks with explicit review blockers</span>
+            <span role="cell">34 repeatable checks that can block a release</span>
           </div>
           <div role="row">
             <span role="cell">A strong design description</span>
-            <span role="cell">BOM, cut list, labels, test plan, PDF, and machine artifacts</span>
+            <span role="cell">BOM, cut list, labels, test plan, PDF, and machine-readable files</span>
           </div>
           <div role="row">
             <span role="cell">The facts the author supplied</span>
@@ -334,12 +330,13 @@ function RoverShowcase() {
       </section>
 
       <footer className="showcase-caveat">
-        <strong>What this proof does—and does not—say.</strong>
+        <strong>What this proof does and does not say.</strong>
         <p>
-          Nerve imported the pinned open-source corpus and evaluated the supplied semantics. Findings are
-          deterministic review prompts, not a claim that the physical rover harness is unsafe, not a
-          certification, and not an endorsement by NASA or JPL. For example, <code>G</code> versus{" "}
-          <code>GND</code> may be an intentional alias that an engineer should explicitly disposition.
+          Nerve imported the original open-source files exactly as published and checked what they
+          state. Findings are prompts for an engineer to review, not a claim that the physical rover
+          harness is unsafe, not a certification, and not an endorsement by NASA or JPL. For example,{" "}
+          <code>G</code> versus <code>GND</code> may be an intentional alias that an engineer should
+          confirm and record.
         </p>
       </footer>
     </article>
