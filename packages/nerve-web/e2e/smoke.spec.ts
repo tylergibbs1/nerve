@@ -128,6 +128,52 @@ test("docs render with copy-as-markdown and highlighted code", async ({ page }) 
   await expect(page.getByRole("button", { name: /copy.*markdown/i }).first()).toBeVisible()
 })
 
+test("reset is undoable: Undo reset restores pre-reset edits", async ({ page }) => {
+  await page.goto("/projects/motor-controller/diagram")
+  await expect(page.locator(".diagram-pane svg")).toBeVisible({ timeout: 15_000 })
+  // Drive a real editor transaction through the automation hook (CodeMirror
+  // virtualizes the DOM, so scraping text is lossy).
+  const seeded = await page.evaluate(() => {
+    const view = (window as unknown as {
+      __nerveEditor?: {
+        state: { doc: { toString(): string } }
+        dispatch(spec: { changes: { from: number; to: number; insert: string } }): void
+      }
+    }).__nerveEditor
+    if (view === undefined) return false
+    view.dispatch({ changes: { from: 0, to: 0, insert: "// undo-me\n" } })
+    return true
+  })
+  test.skip(!seeded, "editor hook missing")
+  const resetButton = page.getByRole("button", { name: "Reset", exact: true })
+  const undoButton = page.getByRole("button", { name: "Undo reset" })
+  await expect(resetButton).toBeVisible({ timeout: 15_000 })
+  await resetButton.click()
+  // Reset discards the edit and offers a one-shot undo in the toolbar.
+  await expect(undoButton).toBeVisible({ timeout: 15_000 })
+  await expect.poll(
+    async () =>
+      page.evaluate(() =>
+        (window as unknown as { __nerveEditor: { state: { doc: { toString(): string } } } })
+          .__nerveEditor.state.doc.toString()
+      ),
+    { timeout: 15_000 }
+  ).not.toContain("// undo-me")
+  await undoButton.click()
+  // Undo restores every file's pre-reset content; the button is one-shot.
+  await expect.poll(
+    async () =>
+      page.evaluate(() =>
+        (window as unknown as { __nerveEditor: { state: { doc: { toString(): string } } } })
+          .__nerveEditor.state.doc.toString()
+      ),
+    { timeout: 15_000 }
+  ).toContain("// undo-me")
+  await expect(undoButton).not.toBeVisible()
+  // The project is dirty again, so Reset reappears.
+  await expect(resetButton).toBeVisible({ timeout: 15_000 })
+})
+
 test("traceability: click a wire -> inspector; search navigates and selects", async ({ page }) => {
   await page.goto("/projects/motor-controller/diagram")
   await expect(page.locator(".diagram-pane svg")).toBeVisible({ timeout: 15_000 })
