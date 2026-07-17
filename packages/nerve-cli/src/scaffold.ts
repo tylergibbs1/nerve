@@ -42,12 +42,15 @@ export default defineConfig({
 const INIT_HARNESS = `import { harness, connector, wire } from "@grayhaven/nerve"
 import { part } from "@grayhaven/nerve-connectors"
 
+// PH housings take removable crimp contacts; SPH-004T-P0.5S covers 26AWG.
 const j1 = connector("J1", part("ph-2"), {
   pins: { 1: "PWR_12V", 2: "GND" },
+  terminals: "SPH-004T-P0.5S",
 })
 
 const j2 = connector("J2", part("ph-2"), {
   pins: { 1: "PWR_12V", 2: "GND" },
+  terminals: "SPH-004T-P0.5S",
 })
 
 export default harness("my-first-harness", {
