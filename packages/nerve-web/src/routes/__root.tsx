@@ -59,6 +59,9 @@ function RootLayout() {
           GRAYHAVEN NERVE
         </Link>
         <nav className="topnav">
+          <Link to="/showcase" activeProps={{ className: "active" }}>
+            Proof
+          </Link>
           <Link to="/projects" activeProps={{ className: "active" }}>
             Projects
           </Link>

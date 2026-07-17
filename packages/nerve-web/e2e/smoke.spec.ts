@@ -13,6 +13,28 @@ test("landing -> projects -> workspace compiles and renders the schematic", asyn
   await expect(page.locator("[data-wire]").first()).toBeAttached()
 })
 
+test("rover proof imports real WireViz data and exposes Nerve's review delta", async ({ page }) => {
+  await page.goto("/showcase")
+  await expect(page.getByRole("heading", { name: /WireViz describes it/i })).toBeVisible()
+  await expect(page.locator(".showcase-ledger")).toContainText("0 errors")
+  await expect(page.locator(".showcase-findings .showcase-finding")).toHaveCount(2)
+  await expect(page.locator(".showcase-wire-table tbody tr")).toHaveCount(6)
+  await expect(page.locator(".showcase-wire-table")).toContainText("540 mm")
+  await expect(page.locator(".showcase-wire-table")).toContainText("530 mm")
+
+  await page.locator(".showcase-picker button", { hasText: "Front servo" }).click()
+  await expect(page.locator(".showcase-gate")).toHaveText("Gate clear")
+  await expect(page.locator(".showcase-wire-table tbody tr")).toHaveCount(3)
+})
+
+test("rover proof downloads a generated evidence packet", async ({ page }) => {
+  await page.goto("/showcase")
+  const download = page.waitForEvent("download", { timeout: 30_000 })
+  await page.getByRole("button", { name: /Download 22-file evidence packet/i }).click()
+  const file = await download
+  expect(file.suggestedFilename()).toBe("jpl-front-encoder-evidence-packet.zip")
+})
+
 test("a broken harness surfaces HK diagnostics + lint gutter", async ({ page }) => {
   // Seed a broken source (the canonical PRD §12 V5->V9 edit) via storage —
   // exactly what a returning user with bad edits sees on load. Contexts are
