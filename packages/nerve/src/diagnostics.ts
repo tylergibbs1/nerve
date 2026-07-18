@@ -40,6 +40,7 @@ export const Codes = {
   UndefinedConnectorRef: "HK-CONN-002",
   UndefinedPinRef: "HK-CONN-003",
   InvalidConnectorQuantity: "HK-CONN-004",
+  InvalidPinElectrical: "HK-CONN-005",
   DuplicateWireId: "HK-WIRE-001",
   WireEndpointsIdentical: "HK-WIRE-002",
   InvalidWireQuantity: "HK-WIRE-003",

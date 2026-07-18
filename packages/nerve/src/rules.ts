@@ -6,6 +6,10 @@
  * custom rules with `rule()` and package them like any other TypeScript.
  */
 import type { Diagnostic, DiagnosticSeverity } from "./diagnostics.js"
+import {
+  analyzeElectricalConstraints,
+  type ElectricalAnalysis
+} from "./electrical.js"
 import type { Hir } from "./hir/schema.js"
 import { computeNets, type HarnessNets } from "./nets.js"
 
@@ -28,6 +32,8 @@ export interface RuleContext {
    * the test plan and graph.json use. Computed lazily, once per run.
    */
   readonly nets: HarnessNets
+  /** Typed electrical semantics and constraint findings, computed on demand. */
+  readonly electrical: ElectricalAnalysis
   report(report: RuleReport): void
 }
 
@@ -73,6 +79,9 @@ export const runRules = (
   // all see one computation.
   let netsCache: HarnessNets | undefined
   const nets = (): HarnessNets => (netsCache ??= computeNets(hir))
+  let electricalCache: ElectricalAnalysis | undefined
+  const electrical = (): ElectricalAnalysis =>
+    (electricalCache ??= analyzeElectricalConstraints(hir))
   for (const r of rules) {
     const override = config[r.name]
     if (override === "off") continue
@@ -80,6 +89,9 @@ export const runRules = (
       hir,
       get nets() {
         return nets()
+      },
+      get electrical() {
+        return electrical()
       },
       report: ({ severity, message, target, targets, data, code }) => {
         diagnostics.push({

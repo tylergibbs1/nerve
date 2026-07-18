@@ -85,6 +85,39 @@ export type WireEndpoint = PinRef | SpliceRef
 /** Map of pin number/name to assigned signal name. */
 export type PinAssignments = Readonly<Record<string | number, string>>
 
+/** Electrical behavior a connector pin contributes to its net. */
+export type ElectricalRole =
+  | "source"
+  | "sink"
+  | "bidirectional"
+  | "passive"
+  | "ground"
+
+export type DifferentialPolarity = "positive" | "negative"
+
+export interface VoltageRange {
+  readonly minV?: number
+  readonly maxV?: number
+}
+
+export interface DifferentialSemantics {
+  readonly pair: string
+  readonly polarity: DifferentialPolarity
+}
+
+export interface PinElectrical {
+  readonly role?: ElectricalRole
+  readonly voltage?: VoltageRange
+  /** Role-relative: source capacity or sink demand. */
+  readonly currentA?: number
+  readonly protocol?: string
+  readonly differential?: DifferentialSemantics
+}
+
+export type PinElectricalAssignments = Readonly<
+  Record<string | number, PinElectrical>
+>
+
 /** A connector instance placed in a harness, e.g. `connector("J1", part, {...})`. */
 export interface ConnectorInstance {
   readonly kind: "connector"
@@ -95,6 +128,8 @@ export interface ConnectorInstance {
   readonly terminals: Readonly<Record<string, string>>
   /** Seal MPN per pin. */
   readonly seals: Readonly<Record<string, string>>
+  /** Optional electrical semantics per assigned pin. */
+  readonly electrical: Readonly<Record<string, PinElectrical>>
   /** Build a `PinRef` for a pin on this connector. */
   pin(pin: string | number): PinRef
 }

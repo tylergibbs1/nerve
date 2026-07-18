@@ -24,6 +24,20 @@ const controller = connector("J1", MolexMicroFit["43025-0800"], {
     3: "43030-0007",
     4: "43030-0007",
   },
+  electrical: {
+    1: { role: "source", voltage: { minV: 22, maxV: 26 }, currentA: 5 },
+    2: { role: "ground", voltage: { minV: 0, maxV: 0 } },
+    3: {
+      role: "bidirectional",
+      protocol: "CAN",
+      differential: { pair: "CAN", polarity: "positive" },
+    },
+    4: {
+      role: "bidirectional",
+      protocol: "CAN",
+      differential: { pair: "CAN", polarity: "negative" },
+    },
+  },
 });
 
 const motor = connector("M1", MolexMicroFit["43020-0800"], {
@@ -42,6 +56,20 @@ const motor = connector("M1", MolexMicroFit["43020-0800"], {
     2: "43031-0007",
     3: "43031-0007",
     4: "43031-0007",
+  },
+  electrical: {
+    1: { role: "sink", voltage: { minV: 18, maxV: 30 }, currentA: 4 },
+    2: { role: "ground", voltage: { minV: 0, maxV: 0 } },
+    3: {
+      role: "bidirectional",
+      protocol: "CAN",
+      differential: { pair: "CAN", polarity: "positive" },
+    },
+    4: {
+      role: "bidirectional",
+      protocol: "CAN",
+      differential: { pair: "CAN", polarity: "negative" },
+    },
   },
 });
 

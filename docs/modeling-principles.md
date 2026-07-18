@@ -4,6 +4,12 @@ Nerve models a physical electrical assembly and the evidence needed to build,
 inspect, test, and release it. A harness is not merely a schematic graph and
 not merely a drawing.
 
+From first principles, a harness is a labeled multigraph. Connector pins and
+splices are nodes, physical conductor segments are edges, and electrically
+common nodes form nets. Labels carry the facts needed to manufacture and reason
+about that topology without confusing logical equivalence with physical
+identity.
+
 ## The five layers
 
 1. **Electrical intent** — signals, voltage/current expectations, differential
@@ -38,6 +44,24 @@ These distinctions prevent category errors such as treating two wires with
 the same signal name as one physical conductor, assigning two wires to the
 same cable conductor, or claiming continuity coverage for an inaccessible
 splice-only net.
+
+## Optional port constraints
+
+Connector pins may declare electrical port semantics: source, sink,
+bidirectional, passive, or ground; accepted voltage ranges; source capacity or
+sink demand; protocol identity; and differential-pair identity and polarity.
+These are optional constraints over the graph, not values inferred from signal
+names. Nerve propagates only facts that were declared and reports contradictions
+such as incompatible voltage domains, multiple sources, undriven loads,
+protocol disagreement, differential-semantic conflicts, and demand above source
+capacity.
+
+Missing semantics remain unknown. Unknown facts can limit what a rule can prove,
+but they never become implicit evidence that a design is safe or compatible.
+An undriven-load conclusion requires every wired connector-pin role on the net
+to be known; any unknown peer role suppresses that conclusion.
+Constraint findings are deterministic review evidence over the supplied model;
+they are not standards certification.
 
 ## Unknown, absent, and invalid
 

@@ -204,6 +204,62 @@
                   },
                   "seal": {
                     "type": "string"
+                  },
+                  "electrical": {
+                    "type": "object",
+                    "required": [],
+                    "properties": {
+                      "role": {
+                        "type": "string",
+                        "enum": [
+                          "source",
+                          "sink",
+                          "bidirectional",
+                          "passive",
+                          "ground"
+                        ]
+                      },
+                      "voltage": {
+                        "type": "object",
+                        "required": [],
+                        "properties": {
+                          "minV": {
+                            "type": "number"
+                          },
+                          "maxV": {
+                            "type": "number"
+                          }
+                        },
+                        "additionalProperties": false
+                      },
+                      "currentA": {
+                        "type": "number"
+                      },
+                      "protocol": {
+                        "type": "string"
+                      },
+                      "differential": {
+                        "type": "object",
+                        "required": [
+                          "pair",
+                          "polarity"
+                        ],
+                        "properties": {
+                          "pair": {
+                            "type": "string"
+                          },
+                          "polarity": {
+                            "type": "string",
+                            "enum": [
+                              "positive",
+                              "negative"
+                            ]
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "additionalProperties": false
                   }
                 },
                 "additionalProperties": false

@@ -49,7 +49,14 @@ const INTERFACES: ReadonlyArray<{ file: string; names: ReadonlyArray<string> }> 
     file: "domain.ts",
     names: [
       "HarnessProps",
-      "ConnectorPart",
+      "ConnectorPart"
+    ]
+  },
+  { file: "dsl.ts", names: ["ConnectorProps"] },
+  {
+    file: "domain.ts",
+    names: [
+      "PinElectrical",
       "WireProps",
       "SpliceProps",
       "CableProps",

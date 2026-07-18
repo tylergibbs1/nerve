@@ -1,6 +1,6 @@
 > Grayhaven Nerve docs index: https://nerve.grayhavenindustries.com/llms.txt. Fetch it to discover all pages before exploring further.
 
-# 37 built-in validation rules.
+# 43 built-in validation rules.
 
 Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated from the shipped `builtinRules` array in `@grayhaven/nerve-rules`; it cannot drift from the code. Custom rules use the same `rule()` API and get their own codes.
 
@@ -43,6 +43,12 @@ Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated
 | `HK-ELEC-009` | `wireTempBelowAmbient` | A wire's temperature rating must meet its branch's ambient. |
 | `HK-ELEC-010` | `overcurrentExceedsConductor` | A fuse/breaker rating can't exceed the ampacity of the thinnest wire it protects. |
 | `HK-ELEC-011` | `uncoveredNet` | Every electrical net needs at least two accessible connector pins for continuity testing. |
+| `HK-ELEC-012` | `multipleElectricalSources` | A net must not join multiple declared electrical sources. |
+| `HK-ELEC-013` | `undrivenElectricalLoad` | Only a fully role-typed net can be undriven; each sink needs a source or bidirectional driver. |
+| `HK-ELEC-014` | `voltageDomainMismatch` | A source output range must be wholly accepted by connected typed ports; explicitly incompatible complete ranges are rejected. |
+| `HK-ELEC-015` | `protocolMismatch` | Declared protocol identities must agree across an electrical net. |
+| `HK-ELEC-016` | `differentialSemanticConflict` | A differential pair must preserve its declared pair identity and polarity semantics. |
+| `HK-ELEC-017` | `sourceCurrentExceeded` | The total declared sink demand on a net must not exceed its source capacity. |
 
 ## Example diagnostic
 
