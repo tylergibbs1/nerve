@@ -577,13 +577,14 @@ textarea:focus-visible, select:focus-visible {
 }
 .showcase-provenance a:hover { color: var(--accent-hover); border-color: var(--accent-hover); }
 
+/* Nine border edges used to draw this strip (an outer frame plus five inner
+   rules). The panel fill already separates the buttons — a small gap lets the
+   canvas do the dividing, so the chrome is the background, not a cage. */
 .showcase-picker {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2px;
   margin-top: clamp(60px, 8vw, 104px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  overflow: hidden;
 }
 .showcase-picker button {
   min-width: 0;
@@ -591,12 +592,13 @@ textarea:focus-visible, select:focus-visible {
   background: var(--panel);
   color: var(--muted);
   border: 0;
-  border-right: 1px solid var(--border);
+  border-radius: 4px;
   text-align: left;
   cursor: pointer;
   transition: background-color 180ms var(--ease-default), color 180ms var(--ease-default);
 }
-.showcase-picker button:last-child { border-right: 0; }
+.showcase-picker button:first-child { border-start-start-radius: var(--radius-card); border-end-start-radius: var(--radius-card); }
+.showcase-picker button:last-child { border-start-end-radius: var(--radius-card); border-end-end-radius: var(--radius-card); }
 .showcase-picker button:hover { color: var(--text); background: var(--muted-bg); }
 .showcase-picker button[aria-pressed="true"] { color: var(--bg); background: var(--text); }
 .showcase-picker button span {
@@ -618,7 +620,7 @@ textarea:focus-visible, select:focus-visible {
 
 .showcase-stage {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 78px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   min-height: 620px;
   margin-top: 16px;
   background: var(--panel);
@@ -680,25 +682,10 @@ textarea:focus-visible, select:focus-visible {
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
-.showcase-transform {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  background: var(--bg);
-  border-inline: 1px solid var(--border);
-}
-.showcase-transform span {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 11px;
-  color: var(--muted);
-}
-.showcase-transform div { width: 1px; height: 92px; background: var(--border); }
-.showcase-transform strong { font-family: var(--mono); font-size: 18px; font-weight: 400; }
-
-.showcase-evidence { background: var(--panel); }
+/* The source and the review sit side by side; a labelled arrow between them
+   was the page describing its own layout. The two panel heads already say
+   "WireViz source" and "Nerve review". */
+.showcase-evidence { background: var(--panel); border-left: 1px solid var(--border); }
 /* Status reads through color and weight alone; no box. The page's only
    pill-shaped chrome was here and it made every other mono label read as
    a badge too. */
@@ -843,15 +830,16 @@ textarea:focus-visible, select:focus-visible {
 .showcase-color { display: inline-flex; align-items: center; gap: 8px; }
 .showcase-color i { width: 9px; height: 9px; border: 1px solid hsl(0 0% 36%); }
 
+/* Four capability groups, not a table — the column rules and the top/bottom
+   frame were drawing a grid around content that reads fine on the canvas.
+   Spacing separates them now. */
 .showcase-artifact-rail {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
   margin-top: 34px;
-  border-block: 1px solid var(--border);
 }
-.showcase-artifact-rail > div { padding: 22px 22px 24px 0; border-right: 1px solid var(--border); }
-.showcase-artifact-rail > div:not(:first-child) { padding-left: 22px; }
-.showcase-artifact-rail > div:last-child { border-right: 0; }
+.showcase-artifact-rail > div { padding: 0; }
 .showcase-artifact-rail span {
   display: block;
   font-size: 11px;
@@ -867,37 +855,22 @@ textarea:focus-visible, select:focus-visible {
 .showcase-export { display: flex; align-items: center; gap: 18px; margin-top: 24px; }
 .showcase-export > span { font-size: 12px; color: var(--muted); }
 
-.showcase-comparison {
-  width: 100%;
-  min-width: 640px;
-  margin-top: 34px;
-  border-collapse: collapse;
-  border-top: 1px solid var(--border);
+/* What Nerve adds, as a list. This was a two-column table scoring Nerve
+   against WireViz; a comparison grid argues with the thing it depends on. */
+.showcase-adds {
+  max-width: 640px;
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
 }
-.showcase-comparison tr { border-bottom: 1px solid var(--border); }
-.showcase-comparison th, .showcase-comparison td {
-  width: 50%;
-  padding: 18px 24px 18px 0;
-  font-size: 13px;
-  line-height: 1.55;
-  text-align: left;
-  vertical-align: top;
-  color: var(--muted);
-  font-weight: 400;
-}
-.showcase-comparison th + th, .showcase-comparison td + td {
-  padding-left: 24px;
-  border-left: 1px solid var(--border);
+.showcase-adds li {
+  padding: 13px 0;
+  font-size: 14px;
+  line-height: 1.6;
   color: var(--text);
+  text-wrap: pretty;
 }
-.showcase-comparison thead th {
-  padding-block: 11px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
-}
-.showcase-difference { overflow-x: auto; }
-.showcase-difference .showcase-section-head { position: sticky; left: 0; }
+.showcase-adds li + li { border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent); }
 .showcase-caveat {
   display: grid;
   grid-template-columns: minmax(180px, 0.35fr) minmax(0, 1fr);
@@ -1420,22 +1393,12 @@ table.data th.sortable:hover { color: var(--text); }
 
 @media (max-width: 1080px) {
   .showcase-picker { grid-template-columns: repeat(3, 1fr); }
-  .showcase-picker button:nth-child(3) { border-right: 0; }
-  .showcase-picker button:nth-child(-n + 3) { border-bottom: 1px solid var(--border); }
+  .showcase-picker button { border-radius: 4px !important; }
   .showcase-stage { grid-template-columns: 1fr; }
-  .showcase-transform {
-    min-height: 64px;
-    flex-direction: row;
-    border-inline: 0;
-    border-block: 1px solid var(--border);
-  }
-  .showcase-transform span { writing-mode: horizontal-tb; transform: none; }
-  .showcase-transform div { width: 92px; height: 1px; }
-  .showcase-transform strong { transform: rotate(90deg); }
+  /* Stacked: the divider between source and review becomes a horizontal one. */
+  .showcase-evidence { border-left: 0; border-top: 1px solid var(--border); }
   .showcase-source pre { min-height: 420px; }
-  .showcase-artifact-rail { grid-template-columns: repeat(2, 1fr); }
-  .showcase-artifact-rail > div:nth-child(2) { border-right: 0; }
-  .showcase-artifact-rail > div:nth-child(-n + 2) { border-bottom: 1px solid var(--border); }
+  .showcase-artifact-rail { grid-template-columns: repeat(2, 1fr); gap: 28px 32px; }
   .showcase-artifact-rail > div:nth-child(3) { padding-left: 0; }
 }
 
@@ -1473,13 +1436,9 @@ table.data th.sortable:hover { color: var(--text); }
   .showcase-picker {
     display: flex;
     overflow-x: auto;
-    border-right: 0;
+    overscroll-behavior-x: contain;
   }
-  .showcase-picker button {
-    flex: 0 0 160px;
-    border-bottom: 0 !important;
-    border-right: 1px solid var(--border) !important;
-  }
+  .showcase-picker button { flex: 0 0 160px; }
   .showcase-stage { margin-top: 10px; }
   .showcase-panel-head { min-height: 80px; padding: 18px; }
   .showcase-source pre { min-height: 360px; padding: 18px; font-size: 11px; }
@@ -1489,13 +1448,7 @@ table.data th.sortable:hover { color: var(--text); }
   .showcase-ledger > div:last-child { border-bottom: 0; }
   .showcase-finding, .showcase-import-notes { padding-inline: 18px; }
   .showcase-drawing .diagram-pane svg { min-width: 680px; }
-  .showcase-artifact-rail { grid-template-columns: 1fr; }
-  .showcase-artifact-rail > div {
-    padding: 18px 0 !important;
-    border-right: 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .showcase-artifact-rail > div:last-child { border-bottom: 0; }
+  .showcase-artifact-rail { grid-template-columns: 1fr; gap: 24px; }
   .showcase-export { align-items: flex-start; flex-direction: column; }
   .showcase-caveat { grid-template-columns: 1fr; gap: 14px; }
 }
