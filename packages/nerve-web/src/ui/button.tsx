@@ -12,7 +12,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../lib/utils.js"
 
 const buttonVariants = cva(
-  "relative inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium select-none transition-[color,background-color,border-color,transform] duration-200 motion-safe:active:scale-[0.96] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border aria-invalid:border-destructive after:absolute after:inset-0 after:content-[''] pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-full pointer-coarse:after:min-h-11 pointer-coarse:after:min-w-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer",
+  "relative inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium select-none transition-[color,background-color,border-color,transform] duration-200 [transition-duration:200ms,200ms,200ms,100ms] motion-safe:active:scale-[0.96] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border aria-invalid:border-destructive after:absolute after:inset-0 after:content-[''] pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-full pointer-coarse:after:min-h-11 pointer-coarse:after:min-w-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer",
   {
     variants: {
       variant: {

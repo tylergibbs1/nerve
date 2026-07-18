@@ -889,8 +889,9 @@ textarea:focus-visible, select:focus-visible {
   font-size: 13px;
   white-space: nowrap;
   border-radius: 9999px;
+  /* Press feedback is instant (100ms); color settles at the house 200ms. */
   transition: color 200ms var(--ease-default),
-    background-color 200ms var(--ease-default), scale 200ms var(--ease-default);
+    background-color 200ms var(--ease-default), scale 100ms var(--ease-out);
 }
 .tabs a:hover { color: var(--text); background: var(--muted-bg); }
 .tabs a:active { scale: 0.96; }
@@ -1315,6 +1316,22 @@ table.data th.sortable:hover { color: var(--text); }
   .showcase-artifact-rail > div:last-child { border-bottom: 0; }
   .showcase-export { align-items: flex-start; flex-direction: column; }
   .showcase-caveat { grid-template-columns: 1fr; gap: 14px; }
+}
+
+/* Higher contrast: luminance-step surfaces normally have no border — give
+   them a defined hairline edge when the viewer asks for more contrast. */
+@media (prefers-contrast: more) {
+  .project-card,
+  .landing-proof,
+  .showcase-stage,
+  .search-results,
+  .inspector,
+  .table-empty,
+  .diagram-pane,
+  .docs-body pre,
+  .doc-code {
+    border: 1px solid var(--border);
+  }
 }
 
 /* Motion kill switch (reference globals.css pattern). */
