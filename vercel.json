@@ -1,3 +1,4 @@
 {
-  "outputDirectory": "packages/nerve-web/dist"
+  "outputDirectory": "packages/nerve-web/dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
