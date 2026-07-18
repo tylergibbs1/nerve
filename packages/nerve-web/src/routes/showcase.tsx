@@ -270,7 +270,7 @@ function RoverShowcase() {
       <ProofStage proof={proof} />
 
       <section className="showcase-drawing">
-        <div className="showcase-section-head">
+        <div className="showcase-subhead">
           <h2>The same facts, now traceable.</h2>
           <p>Hover a wire to follow it. The SVG is generated straight from the imported design data.</p>
         </div>
@@ -283,7 +283,7 @@ function RoverShowcase() {
       </section>
 
       <section className="showcase-conductors">
-        <div className="showcase-section-head">
+        <div className="showcase-subhead">
           <h2>Pin by pin. Wire by wire.</h2>
           <p>
             The importer keeps endpoints, signals, gauges, colors, and lengths so everything can be

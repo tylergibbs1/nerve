@@ -766,15 +766,33 @@ textarea:focus-visible, select:focus-visible {
   line-height: 1.65;
   text-wrap: pretty;
 }
-.showcase-drawing, .showcase-conductors, .showcase-artifacts, .showcase-difference {
+/* The stage, drawing, and wire table all belong to the picked harness:
+   they read as one region (tight rhythm, quiet sub-headers). The page-level
+   story sections below keep the big editorial gaps. */
+.showcase-drawing, .showcase-conductors { margin-top: 28px; }
+.showcase-artifacts, .showcase-difference {
   margin-top: clamp(76px, 9vw, 128px);
 }
-.showcase-drawing .sheet-wrap { margin-top: 30px; }
+.showcase-subhead h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.showcase-subhead p {
+  max-width: 670px;
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.showcase-drawing .sheet-wrap { margin-top: 14px; }
 .showcase-drawing .diagram-pane { max-height: 640px; }
 .showcase-drawing .diagram-pane svg { min-width: 760px; height: auto; }
 
 .showcase-table-wrap {
-  margin-top: 30px;
+  margin-top: 14px;
   overflow: auto;
   border-block: 1px solid var(--border);
 }
