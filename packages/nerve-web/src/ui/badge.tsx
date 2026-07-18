@@ -1,12 +1,13 @@
-// Ported from grayhavenindustries/components/ui/badge.tsx.
+// shadcn/ui structure with tokenbase's two-tier badge system: colored
+// STATUS pills (soft tint: border/30 + bg/10 + solid text) signal health —
+// the thing you act on; muted META tags mark properties with no value color.
 import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../lib/utils.js"
 
-// Two-tier badge system (tokenbase): colored STATUS pills signal health —
-// the thing you act on; muted META tags mark properties with no value color.
 const badgeVariants = cva(
-  "inline-flex items-center whitespace-nowrap rounded-full border border-transparent px-2 py-0.5 text-[11px] font-medium select-none transition-colors focus:outline-hidden focus:ring-1 focus:ring-ring",
+  "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden whitespace-nowrap rounded-full border border-transparent px-2 py-0.5 text-[11px] font-medium select-none transition-[color,background-color] [&>svg]:pointer-events-none [&>svg]:size-3",
   {
     variants: {
       variant: {
@@ -25,11 +26,21 @@ const badgeVariants = cva(
 )
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+  extends React.ComponentProps<"span">,
+    VariantProps<typeof badgeVariants> {
+  asChild?: boolean
+}
 
-function Badge({ className, variant, ...props }: BadgeProps) {
-  return <div className={cn(badgeVariants({ variant }), className)} {...props} />
+function Badge({ className, variant = "default", asChild = false, ...props }: BadgeProps) {
+  const Comp = asChild ? Slot : "span"
+  return (
+    <Comp
+      data-slot="badge"
+      data-variant={variant}
+      className={cn(badgeVariants({ variant }), className)}
+      {...props}
+    />
+  )
 }
 
 export { Badge, badgeVariants }
