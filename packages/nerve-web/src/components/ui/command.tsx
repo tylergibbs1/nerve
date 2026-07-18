@@ -48,10 +48,6 @@ function CommandDialog({
 }) {
   return (
     <Dialog {...props}>
-      <DialogHeader className="sr-only">
-        <DialogTitle>{title}</DialogTitle>
-        <DialogDescription>{description}</DialogDescription>
-      </DialogHeader>
       <DialogContent
         className={cn(
           "top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0",
@@ -59,6 +55,14 @@ function CommandDialog({
         )}
         showCloseButton={showCloseButton}
       >
+        {/* Inside DialogContent, matching upstream shadcn. As a sibling of
+            DialogContent it sat under the Dialog root, which renders
+            unconditionally — so the sr-only <h2> stayed in the document
+            outline of every page even with the palette closed. */}
+        <DialogHeader className="sr-only">
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
         {children}
       </DialogContent>
     </Dialog>

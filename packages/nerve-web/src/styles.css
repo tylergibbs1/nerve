@@ -1125,19 +1125,18 @@ textarea:focus-visible, select:focus-visible {
 .diagram-pane.has-sel svg [data-wire]:not(.sel):not(.hl) { opacity: 0.45; }
 
 /* Inspector overlay card. */
+/* Placement and voice only — the surface (fill, radius, padding) is shadcn
+   Card's now. Leaving those here would double the padding, because this file
+   is unlayered and beats Tailwind's layered utilities. */
 .inspector {
   position: absolute;
   top: 44px;
   right: 12px;
   z-index: 5;
   width: 240px;
-  background: var(--popover);
-  border-radius: 8px;
-  padding: 10px 12px 12px;
   font-family: var(--mono);
   font-size: 11px;
 }
-.inspector-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .inspector dl { margin: 0 0 8px; display: flex; flex-direction: column; gap: 3px; }
 .inspector dl div { display: flex; gap: 8px; }
 .inspector dt { width: 64px; color: var(--fg-muted); font-family: var(--sans); font-size: 11px; }
@@ -1161,19 +1160,19 @@ textarea:focus-visible, select:focus-visible {
 .search-results .hit-detail { color: var(--fg-muted); }
 
 /* Project file tabs (§9.6 multi-file). */
-.source-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); background: var(--muted-bg); }
+/* The strip is shadcn Tabs now: layout, hover, and the active underline all
+   come from TabsList/TabsTrigger. Kept here because the trigger supplies
+   none of it — filenames are code (mono, 11px; the trigger would render
+   14px sans), and Tailwind v4 preflight sets buttons to cursor: default. */
+[data-slot="tabs-list"].source-tabs {
+  border-bottom: 1px solid var(--border);
+  background: var(--muted-bg);
+}
 .source-tab {
   font-family: var(--mono);
   font-size: 11px;
-  padding: 4px 10px;
-  border: none;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: var(--fg-muted);
   cursor: pointer;
 }
-.source-tab:hover { color: var(--text); }
-.source-tab.active { color: var(--text); border-bottom-color: var(--text); }
 
 /* Structured diagnostic detail: involved refs + measured-value chips. */
 .diagnostics-panel .diag-detail { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
@@ -1468,45 +1467,6 @@ table.data th.sortable:hover { color: var(--text); }
   .tabs a:active { scale: none; }
 }
 
-/* Command palette */
-.palette-scrim {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  background: rgb(0 0 0 / 0.5);
-}
-.palette-panel {
-  position: fixed;
-  z-index: 41;
-  left: 50%;
-  top: 15vh;
-  transform: translateX(-50%);
-  width: min(560px, calc(100vw - 32px));
-  /* Never taller than what's left below the 15vh offset, so a long result
-     list scrolls inside the panel instead of running off the screen. */
-  max-height: calc(85dvh - max(env(safe-area-inset-bottom), 0px) - 16px);
-  overflow: auto;
-  background: var(--popover);
-  border-radius: var(--radius-card);
-  padding: 8px;
-  animation: palette-in var(--motion-moderate) var(--ease-out);
-}
-.palette-item {
-  font-family: var(--sans);
-  font-size: 13px;
-  padding: 8px 10px;
-}
-@keyframes palette-in {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-  }
-}
-
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;
@@ -1528,9 +1488,14 @@ table.data th.sortable:hover { color: var(--text); }
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--fg-accent);
+  /* These two map Tailwind's utilities to shadcn's BACKGROUND tokens. The
+     migration's --muted/--accent -> --fg-muted/--fg-accent rename must not
+     reach into this block: pointing them at the foreground tokens made every
+     bg-muted / bg-accent surface in every shadcn component render as light
+     grey text colour on the dark canvas. */
+  --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--fg-muted);
+  --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);

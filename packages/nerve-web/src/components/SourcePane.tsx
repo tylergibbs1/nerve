@@ -31,6 +31,12 @@ import {
 } from "../lib/sources.js"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+// The single CodeMirror instance every tab drives. It lives outside the Tabs
+// root on purpose (see the tab strip below), so the triggers point at it by id
+// rather than at a Tabs.Content panel.
+const EDITOR_ID = "source-editor"
 
 /**
  * Persistent source editor (PRD §11.1 left pane). Auto-compiles on type;
@@ -194,21 +200,25 @@ export function SourcePane({ projectId }: { projectId: string }) {
 
   return (
     <div className="source-pane">
+      {/*
+        Trigger strip only (@radix-ui/react-tabs 1.1.17, via radix-ui 1.6.2):
+        Tabs.Root owns selection, but there is no Tabs.Content — the editor
+        below is a single shared CodeMirror instance and mounting it under a
+        panel would remount it on every switch, dropping the undo history.
+        Radix spreads caller props after its own attributes, so aria-controls
+        below replaces the id of the panel that deliberately does not exist and
+        points at the editor the tabs actually control.
+      */}
       {files.length > 1 && (
-        <div className="source-tabs" role="tablist" aria-label="Project files">
-          {files.map((path) => (
-            <button
-              key={path}
-              type="button"
-              role="tab"
-              aria-selected={path === activeFile}
-              className={`source-tab${path === activeFile ? " active" : ""}`}
-              onClick={() => onSelectFile(path)}
-            >
-              {path.slice(1)}
-            </button>
-          ))}
-        </div>
+        <Tabs value={activeFile} onValueChange={onSelectFile}>
+          <TabsList variant="line" aria-label="Project files" className="source-tabs">
+            {files.map((path) => (
+              <TabsTrigger key={path} value={path} className="source-tab" aria-controls={EDITOR_ID}>
+                {path.slice(1)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       )}
       <div className="source-toolbar">
         <Button size="xs" disabled={compile.isPending} onClick={() => compile.mutate({ path: activeFile, text: source })}>
@@ -267,6 +277,7 @@ export function SourcePane({ projectId }: { projectId: string }) {
         </span>
       </div>
       <CodeMirror
+        id={EDITOR_ID}
         value={source}
         height="100%"
         extensions={[

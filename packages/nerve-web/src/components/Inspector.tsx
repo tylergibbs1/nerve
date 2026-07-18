@@ -5,6 +5,10 @@
 import { useEffect } from "react"
 import type { Hir } from "@grayhaven/nerve"
 import { Button } from "@/components/ui/button"
+// shadcn/ui 4.13.1, "radix-nova" style: Card owns the surface, radius, and
+// padding; CardHeader switches to a [1fr_auto] grid when a CardAction is
+// present, which is what used to be the hand-rolled .inspector-head flex row.
+import { Card, CardAction, CardContent, CardHeader } from "@/components/ui/card"
 import { jumpToSource } from "../lib/editor-registry.js"
 import { setSelection, useSelection, type Selection } from "../lib/selection.js"
 
@@ -79,29 +83,42 @@ export function Inspector({ hir }: { hir: Hir }) {
   if (data.length === 0) return null
   const sourceId = sel.kind === "pin" ? sel.ref : sel.ref
   return (
-    <div className="inspector" role="region" aria-label="Selected object">
-      <div className="inspector-head">
+    // size="sm" keeps --card-spacing at 3 (12px) so the overlay stays compact.
+    // bg-popover holds the raised surface .inspector used to set by hand —
+    // Card's own bg-card is one luminance step lower than a floating overlay
+    // wants. No CardTitle: the kind label is a quiet .spec-tag, not a heading.
+    <Card
+      size="sm"
+      className="inspector bg-popover"
+      role="region"
+      aria-label="Selected object"
+    >
+      <CardHeader>
         <span className="spec-tag">{sel.kind}</span>
-        <Button
-          variant="ghost"
-          size="xs"
-          aria-label="Close inspector"
-          onClick={() => setSelection(undefined)}
-        >
-          ✕
+        <CardAction>
+          <Button
+            variant="ghost"
+            size="xs"
+            aria-label="Close inspector"
+            onClick={() => setSelection(undefined)}
+          >
+            ✕
+          </Button>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <dl>
+          {data.map(([k, v]) => (
+            <div key={k + v}>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))}
+        </dl>
+        <Button variant="ghost" size="xs" onClick={() => jumpToSource(sourceId)}>
+          View source ↗
         </Button>
-      </div>
-      <dl>
-        {data.map(([k, v]) => (
-          <div key={k + v}>
-            <dt>{k}</dt>
-            <dd>{v}</dd>
-          </div>
-        ))}
-      </dl>
-      <Button variant="ghost" size="xs" onClick={() => jumpToSource(sourceId)}>
-        View source ↗
-      </Button>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
