@@ -10,6 +10,7 @@ import { dslCompletions } from "../lib/dsl-completions.js"
 import { toEditorDiagnostics } from "../lib/editor-lint.js"
 import { grayscaleTheme } from "../lib/cm-theme.js"
 import { useMinimumLoading } from "../lib/useMinimumLoading.js"
+import { announce } from "../lib/announce.js"
 import {
   compileKeys,
   compileProjectFile,
@@ -202,6 +203,15 @@ export function SourcePane({ projectId }: { projectId: string }) {
   const [retainedStatus, setRetainedStatus] = useState(status)
   if (status !== undefined && status !== retainedStatus) setRetainedStatus(status)
   const shown = status ?? retainedStatus
+
+  // Speak the compile result. Keyed on the TEXT, not the mutation: auto-
+  // compile fires on every typing pause, and a result identical to the last
+  // one is not news — re-announcing it would talk over the user continuously.
+  // A changed error/warning count is in the text, so that still speaks.
+  const statusText = status?.text
+  useEffect(() => {
+    if (statusText !== undefined) announce(statusText)
+  }, [statusText])
 
   return (
     <div className="source-pane">

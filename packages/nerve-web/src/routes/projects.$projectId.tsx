@@ -13,6 +13,7 @@ import { AiPane } from "../components/AiPane.js"
 import { useIsDirty } from "../lib/useSources.js"
 import { useMediaQuery } from "../lib/useMediaQuery.js"
 import { projectMeta } from "../lib/projects.js"
+import { announce } from "../lib/announce.js"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 
 export const Route = createFileRoute("/projects/$projectId")({
@@ -81,6 +82,7 @@ const TABS = [
 function ExportButton({ projectId }: { projectId: string }) {
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [cause, setCause] = useState<string | undefined>(undefined)
   const run = async () => {
     setBusy(true)
     setFailed(false)
@@ -92,8 +94,14 @@ function ExportButton({ projectId }: { projectId: string }) {
       a.download = `${projectId}-packet.zip`
       a.click()
       URL.revokeObjectURL(url)
-    } catch {
+      announce("Packet downloaded.")
+    } catch (error) {
+      // Was a bare `catch {}`: the real cause was discarded, so an export
+      // failure was undiagnosable from the console or a bug report.
+      console.error("Export packet failed", error)
+      setCause(error instanceof Error ? error.message : String(error))
       setFailed(true)
+      announce("Export failed.")
     } finally {
       setBusy(false)
     }
@@ -103,7 +111,11 @@ function ExportButton({ projectId }: { projectId: string }) {
       <Button variant="secondary" size="xs" disabled={busy} onClick={() => void run()}>
         {busy ? "Exporting…" : "Export packet"}
       </Button>
-      {failed && <span className="compile-error">Export failed. Try again.</span>}
+      {failed && (
+        <span className="compile-error" title={cause}>
+          Export failed. Try again.
+        </span>
+      )}
     </>
   )
 }
@@ -124,11 +136,16 @@ function ShareButton({ projectId }: { projectId: string }) {
       await navigator.clipboard.writeText(url)
       setFallbackUrl(undefined)
       setCopied(true)
+      announce("Share link copied to clipboard.")
       setTimeout(() => setCopied(false), 2000)
     } catch {
       // Safari can reject writeText once the user-gesture window expires
       // during the awaits above; show the link for manual copy instead.
       setFallbackUrl(url)
+      // This branch is the one a screen-reader user is most likely to hit and
+      // least likely to notice: the button label does not change, and a new
+      // input simply appears.
+      announce("Couldn't copy automatically. A share link field is now shown — copy it manually.")
     }
   }
   return (
