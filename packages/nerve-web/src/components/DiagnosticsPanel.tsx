@@ -26,42 +26,33 @@ export function DiagnosticsPanel({
       {diagnostics.length === 0 && <div className="diag">No issues found.</div>}
       {diagnostics.map((d, i) => {
         const sel = d.target !== undefined ? selectionFromTarget(d.target) : undefined
-        // Multi-entity findings get per-ref chips; rows with chips must NOT
-        // be buttons themselves (axe: no focusable descendants inside
-        // role="button"), so the primary target becomes the first chip.
         const refChips =
           d.targets !== undefined
             ? [...new Set([d.target, ...d.targets])].filter((t): t is string => t !== undefined)
             : []
-        const rowClickable = sel !== undefined && refChips.length === 0
         return (
-          <div
-            key={i}
-            className={`diag ${d.severity}${rowClickable ? " selectable" : ""}`}
-            // §11.3: clicking a diagnostic selects its object everywhere.
-            {...(rowClickable
-              ? {
-                  role: "button" as const,
-                  tabIndex: 0,
-                  onClick: () => setSelection(sel),
-                  onKeyDown: (e: React.KeyboardEvent) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault()
-                      setSelection(sel)
-                    }
-                  }
-                }
-              : {})}
-          >
-            <Link
-              to="/docs/rules"
-              className="code"
-              title={ruleSummaries.get(d.code)}
-              onClick={(e) => e.stopPropagation()}
-            >
+          // The row itself is never interactive (the code link inside it is
+          // focusable, and axe forbids nested interactive controls) — the
+          // target becomes a real button instead (§11.3: selecting a
+          // diagnostic selects its object everywhere).
+          <div key={i} className={`diag ${d.severity}`}>
+            <Link to="/docs/rules" className="code" title={ruleSummaries.get(d.code)}>
               {d.code}
             </Link>
-            <span className="target">{d.target ?? ""}</span>
+            {sel !== undefined && refChips.length === 0 && d.target !== undefined ? (
+              <button
+                type="button"
+                className="target"
+                onClick={() => {
+                  setSelection(sel)
+                  jumpToSource(d.target ?? "")
+                }}
+              >
+                {d.target}
+              </button>
+            ) : (
+              <span className="target">{d.target ?? ""}</span>
+            )}
             <span className="message">{d.message}</span>
             {(refChips.length > 0 || d.data !== undefined) && (
               <span className="diag-detail">
