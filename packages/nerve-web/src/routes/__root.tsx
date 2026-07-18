@@ -10,6 +10,7 @@ import type { QueryClient } from "@tanstack/react-query"
 import { warmCompiler } from "../lib/compile-client.js"
 import { Button } from "@/components/ui/button"
 import { CommandPalette } from "../components/CommandPalette.js"
+import { LiveRegion } from "../lib/announce.js"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 
 interface RouterContext {
@@ -104,6 +105,8 @@ function RootLayout() {
         <Outlet />
       </main>
       <CommandPalette />
+      {/* One live region for the whole app; see lib/announce.tsx. */}
+      <LiveRegion />
     </div>
   )
 }
