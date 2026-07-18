@@ -9,39 +9,34 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ShowcaseRouteImport } from './routes/showcase'
-import { Route as SharedRouteImport } from './routes/shared'
-import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as SharedRouteImport } from './routes/shared'
+import { Route as ShowcaseRouteImport } from './routes/showcase'
 import { Route as DocsIndexRouteImport } from './routes/docs.index'
-import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
-import { Route as DocsSdkRouteImport } from './routes/docs.sdk'
-import { Route as DocsRulesRouteImport } from './routes/docs.rules'
-import { Route as DocsLifecycleRouteImport } from './routes/docs.lifecycle'
-import { Route as DocsLibraryRouteImport } from './routes/docs.library'
-import { Route as DocsHirRouteImport } from './routes/docs.hir'
-import { Route as DocsDslRouteImport } from './routes/docs.dsl'
-import { Route as DocsCliRouteImport } from './routes/docs.cli'
-import { Route as DocsArtifactsRouteImport } from './routes/docs.artifacts'
 import { Route as DocsAiRouteImport } from './routes/docs.ai'
+import { Route as DocsArtifactsRouteImport } from './routes/docs.artifacts'
+import { Route as DocsCliRouteImport } from './routes/docs.cli'
+import { Route as DocsDslRouteImport } from './routes/docs.dsl'
+import { Route as DocsHirRouteImport } from './routes/docs.hir'
+import { Route as DocsLibraryRouteImport } from './routes/docs.library'
+import { Route as DocsLifecycleRouteImport } from './routes/docs.lifecycle'
+import { Route as DocsRulesRouteImport } from './routes/docs.rules'
+import { Route as DocsSdkRouteImport } from './routes/docs.sdk'
+import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
+import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
 import { Route as ProjectsProjectIdIndexRouteImport } from './routes/projects.$projectId.index'
-import { Route as ProjectsProjectIdTestsRouteImport } from './routes/projects.$projectId.tests'
-import { Route as ProjectsProjectIdLabelsRouteImport } from './routes/projects.$projectId.labels'
-import { Route as ProjectsProjectIdDiagramRouteImport } from './routes/projects.$projectId.diagram'
-import { Route as ProjectsProjectIdCutListRouteImport } from './routes/projects.$projectId.cut-list'
-import { Route as ProjectsProjectIdConnectorsRouteImport } from './routes/projects.$projectId.connectors'
-import { Route as ProjectsProjectIdBomRouteImport } from './routes/projects.$projectId.bom'
 import { Route as ProjectsProjectIdBoardRouteImport } from './routes/projects.$projectId.board'
+import { Route as ProjectsProjectIdBomRouteImport } from './routes/projects.$projectId.bom'
+import { Route as ProjectsProjectIdConnectorsRouteImport } from './routes/projects.$projectId.connectors'
+import { Route as ProjectsProjectIdCutListRouteImport } from './routes/projects.$projectId.cut-list'
+import { Route as ProjectsProjectIdDiagramRouteImport } from './routes/projects.$projectId.diagram'
+import { Route as ProjectsProjectIdLabelsRouteImport } from './routes/projects.$projectId.labels'
+import { Route as ProjectsProjectIdTestsRouteImport } from './routes/projects.$projectId.tests'
 
-const ShowcaseRoute = ShowcaseRouteImport.update({
-  id: '/showcase',
-  path: '/showcase',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SharedRoute = SharedRouteImport.update({
-  id: '/shared',
-  path: '/shared',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsRoute = DocsRouteImport.update({
@@ -49,14 +44,14 @@ const DocsRoute = DocsRouteImport.update({
   path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const SharedRoute = SharedRouteImport.update({
+  id: '/shared',
+  path: '/shared',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
-  id: '/projects/',
-  path: '/projects/',
+const ShowcaseRoute = ShowcaseRouteImport.update({
+  id: '/showcase',
+  path: '/showcase',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsIndexRoute = DocsIndexRouteImport.update({
@@ -64,44 +59,9 @@ const DocsIndexRoute = DocsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DocsRoute,
 } as any)
-const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
-  id: '/projects/$projectId',
-  path: '/projects/$projectId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocsSdkRoute = DocsSdkRouteImport.update({
-  id: '/sdk',
-  path: '/sdk',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsRulesRoute = DocsRulesRouteImport.update({
-  id: '/rules',
-  path: '/rules',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsLifecycleRoute = DocsLifecycleRouteImport.update({
-  id: '/lifecycle',
-  path: '/lifecycle',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsLibraryRoute = DocsLibraryRouteImport.update({
-  id: '/library',
-  path: '/library',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsHirRoute = DocsHirRouteImport.update({
-  id: '/hir',
-  path: '/hir',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsDslRoute = DocsDslRouteImport.update({
-  id: '/dsl',
-  path: '/dsl',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsCliRoute = DocsCliRouteImport.update({
-  id: '/cli',
-  path: '/cli',
+const DocsAiRoute = DocsAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => DocsRoute,
 } as any)
 const DocsArtifactsRoute = DocsArtifactsRouteImport.update({
@@ -109,30 +69,70 @@ const DocsArtifactsRoute = DocsArtifactsRouteImport.update({
   path: '/artifacts',
   getParentRoute: () => DocsRoute,
 } as any)
-const DocsAiRoute = DocsAiRouteImport.update({
-  id: '/ai',
-  path: '/ai',
+const DocsCliRoute = DocsCliRouteImport.update({
+  id: '/cli',
+  path: '/cli',
   getParentRoute: () => DocsRoute,
+} as any)
+const DocsDslRoute = DocsDslRouteImport.update({
+  id: '/dsl',
+  path: '/dsl',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsHirRoute = DocsHirRouteImport.update({
+  id: '/hir',
+  path: '/hir',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsLibraryRoute = DocsLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsLifecycleRoute = DocsLifecycleRouteImport.update({
+  id: '/lifecycle',
+  path: '/lifecycle',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsRulesRoute = DocsRulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsSdkRoute = DocsSdkRouteImport.update({
+  id: '/sdk',
+  path: '/sdk',
+  getParentRoute: () => DocsRoute,
+} as any)
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
+  id: '/projects/$projectId',
+  path: '/projects/$projectId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectsProjectIdIndexRoute = ProjectsProjectIdIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ProjectsProjectIdRoute,
 } as any)
-const ProjectsProjectIdTestsRoute = ProjectsProjectIdTestsRouteImport.update({
-  id: '/tests',
-  path: '/tests',
+const ProjectsProjectIdBoardRoute = ProjectsProjectIdBoardRouteImport.update({
+  id: '/board',
+  path: '/board',
   getParentRoute: () => ProjectsProjectIdRoute,
 } as any)
-const ProjectsProjectIdLabelsRoute = ProjectsProjectIdLabelsRouteImport.update({
-  id: '/labels',
-  path: '/labels',
+const ProjectsProjectIdBomRoute = ProjectsProjectIdBomRouteImport.update({
+  id: '/bom',
+  path: '/bom',
   getParentRoute: () => ProjectsProjectIdRoute,
 } as any)
-const ProjectsProjectIdDiagramRoute =
-  ProjectsProjectIdDiagramRouteImport.update({
-    id: '/diagram',
-    path: '/diagram',
+const ProjectsProjectIdConnectorsRoute =
+  ProjectsProjectIdConnectorsRouteImport.update({
+    id: '/connectors',
+    path: '/connectors',
     getParentRoute: () => ProjectsProjectIdRoute,
   } as any)
 const ProjectsProjectIdCutListRoute =
@@ -141,20 +141,20 @@ const ProjectsProjectIdCutListRoute =
     path: '/cut-list',
     getParentRoute: () => ProjectsProjectIdRoute,
   } as any)
-const ProjectsProjectIdConnectorsRoute =
-  ProjectsProjectIdConnectorsRouteImport.update({
-    id: '/connectors',
-    path: '/connectors',
+const ProjectsProjectIdDiagramRoute =
+  ProjectsProjectIdDiagramRouteImport.update({
+    id: '/diagram',
+    path: '/diagram',
     getParentRoute: () => ProjectsProjectIdRoute,
   } as any)
-const ProjectsProjectIdBomRoute = ProjectsProjectIdBomRouteImport.update({
-  id: '/bom',
-  path: '/bom',
+const ProjectsProjectIdLabelsRoute = ProjectsProjectIdLabelsRouteImport.update({
+  id: '/labels',
+  path: '/labels',
   getParentRoute: () => ProjectsProjectIdRoute,
 } as any)
-const ProjectsProjectIdBoardRoute = ProjectsProjectIdBoardRouteImport.update({
-  id: '/board',
-  path: '/board',
+const ProjectsProjectIdTestsRoute = ProjectsProjectIdTestsRouteImport.update({
+  id: '/tests',
+  path: '/tests',
   getParentRoute: () => ProjectsProjectIdRoute,
 } as any)
 
@@ -325,18 +325,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/showcase': {
-      id: '/showcase'
-      path: '/showcase'
-      fullPath: '/showcase'
-      preLoaderRoute: typeof ShowcaseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/shared': {
-      id: '/shared'
-      path: '/shared'
-      fullPath: '/shared'
-      preLoaderRoute: typeof SharedRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs': {
@@ -346,18 +339,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/shared': {
+      id: '/shared'
+      path: '/shared'
+      fullPath: '/shared'
+      preLoaderRoute: typeof SharedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/projects/': {
-      id: '/projects/'
-      path: '/projects'
-      fullPath: '/projects/'
-      preLoaderRoute: typeof ProjectsIndexRouteImport
+    '/showcase': {
+      id: '/showcase'
+      path: '/showcase'
+      fullPath: '/showcase'
+      preLoaderRoute: typeof ShowcaseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs/': {
@@ -367,60 +360,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof DocsRoute
     }
-    '/projects/$projectId': {
-      id: '/projects/$projectId'
-      path: '/projects/$projectId'
-      fullPath: '/projects/$projectId'
-      preLoaderRoute: typeof ProjectsProjectIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/docs/sdk': {
-      id: '/docs/sdk'
-      path: '/sdk'
-      fullPath: '/docs/sdk'
-      preLoaderRoute: typeof DocsSdkRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/rules': {
-      id: '/docs/rules'
-      path: '/rules'
-      fullPath: '/docs/rules'
-      preLoaderRoute: typeof DocsRulesRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/lifecycle': {
-      id: '/docs/lifecycle'
-      path: '/lifecycle'
-      fullPath: '/docs/lifecycle'
-      preLoaderRoute: typeof DocsLifecycleRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/library': {
-      id: '/docs/library'
-      path: '/library'
-      fullPath: '/docs/library'
-      preLoaderRoute: typeof DocsLibraryRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/hir': {
-      id: '/docs/hir'
-      path: '/hir'
-      fullPath: '/docs/hir'
-      preLoaderRoute: typeof DocsHirRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/dsl': {
-      id: '/docs/dsl'
-      path: '/dsl'
-      fullPath: '/docs/dsl'
-      preLoaderRoute: typeof DocsDslRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/cli': {
-      id: '/docs/cli'
-      path: '/cli'
-      fullPath: '/docs/cli'
-      preLoaderRoute: typeof DocsCliRouteImport
+    '/docs/ai': {
+      id: '/docs/ai'
+      path: '/ai'
+      fullPath: '/docs/ai'
+      preLoaderRoute: typeof DocsAiRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/artifacts': {
@@ -430,12 +374,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsArtifactsRouteImport
       parentRoute: typeof DocsRoute
     }
-    '/docs/ai': {
-      id: '/docs/ai'
-      path: '/ai'
-      fullPath: '/docs/ai'
-      preLoaderRoute: typeof DocsAiRouteImport
+    '/docs/cli': {
+      id: '/docs/cli'
+      path: '/cli'
+      fullPath: '/docs/cli'
+      preLoaderRoute: typeof DocsCliRouteImport
       parentRoute: typeof DocsRoute
+    }
+    '/docs/dsl': {
+      id: '/docs/dsl'
+      path: '/dsl'
+      fullPath: '/docs/dsl'
+      preLoaderRoute: typeof DocsDslRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/hir': {
+      id: '/docs/hir'
+      path: '/hir'
+      fullPath: '/docs/hir'
+      preLoaderRoute: typeof DocsHirRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/library': {
+      id: '/docs/library'
+      path: '/library'
+      fullPath: '/docs/library'
+      preLoaderRoute: typeof DocsLibraryRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/lifecycle': {
+      id: '/docs/lifecycle'
+      path: '/lifecycle'
+      fullPath: '/docs/lifecycle'
+      preLoaderRoute: typeof DocsLifecycleRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/rules': {
+      id: '/docs/rules'
+      path: '/rules'
+      fullPath: '/docs/rules'
+      preLoaderRoute: typeof DocsRulesRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/sdk': {
+      id: '/docs/sdk'
+      path: '/sdk'
+      fullPath: '/docs/sdk'
+      preLoaderRoute: typeof DocsSdkRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/projects/': {
+      id: '/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects/$projectId': {
+      id: '/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof ProjectsProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/projects/$projectId/': {
       id: '/projects/$projectId/'
@@ -444,39 +444,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsProjectIdIndexRouteImport
       parentRoute: typeof ProjectsProjectIdRoute
     }
-    '/projects/$projectId/tests': {
-      id: '/projects/$projectId/tests'
-      path: '/tests'
-      fullPath: '/projects/$projectId/tests'
-      preLoaderRoute: typeof ProjectsProjectIdTestsRouteImport
-      parentRoute: typeof ProjectsProjectIdRoute
-    }
-    '/projects/$projectId/labels': {
-      id: '/projects/$projectId/labels'
-      path: '/labels'
-      fullPath: '/projects/$projectId/labels'
-      preLoaderRoute: typeof ProjectsProjectIdLabelsRouteImport
-      parentRoute: typeof ProjectsProjectIdRoute
-    }
-    '/projects/$projectId/diagram': {
-      id: '/projects/$projectId/diagram'
-      path: '/diagram'
-      fullPath: '/projects/$projectId/diagram'
-      preLoaderRoute: typeof ProjectsProjectIdDiagramRouteImport
-      parentRoute: typeof ProjectsProjectIdRoute
-    }
-    '/projects/$projectId/cut-list': {
-      id: '/projects/$projectId/cut-list'
-      path: '/cut-list'
-      fullPath: '/projects/$projectId/cut-list'
-      preLoaderRoute: typeof ProjectsProjectIdCutListRouteImport
-      parentRoute: typeof ProjectsProjectIdRoute
-    }
-    '/projects/$projectId/connectors': {
-      id: '/projects/$projectId/connectors'
-      path: '/connectors'
-      fullPath: '/projects/$projectId/connectors'
-      preLoaderRoute: typeof ProjectsProjectIdConnectorsRouteImport
+    '/projects/$projectId/board': {
+      id: '/projects/$projectId/board'
+      path: '/board'
+      fullPath: '/projects/$projectId/board'
+      preLoaderRoute: typeof ProjectsProjectIdBoardRouteImport
       parentRoute: typeof ProjectsProjectIdRoute
     }
     '/projects/$projectId/bom': {
@@ -486,11 +458,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsProjectIdBomRouteImport
       parentRoute: typeof ProjectsProjectIdRoute
     }
-    '/projects/$projectId/board': {
-      id: '/projects/$projectId/board'
-      path: '/board'
-      fullPath: '/projects/$projectId/board'
-      preLoaderRoute: typeof ProjectsProjectIdBoardRouteImport
+    '/projects/$projectId/connectors': {
+      id: '/projects/$projectId/connectors'
+      path: '/connectors'
+      fullPath: '/projects/$projectId/connectors'
+      preLoaderRoute: typeof ProjectsProjectIdConnectorsRouteImport
+      parentRoute: typeof ProjectsProjectIdRoute
+    }
+    '/projects/$projectId/cut-list': {
+      id: '/projects/$projectId/cut-list'
+      path: '/cut-list'
+      fullPath: '/projects/$projectId/cut-list'
+      preLoaderRoute: typeof ProjectsProjectIdCutListRouteImport
+      parentRoute: typeof ProjectsProjectIdRoute
+    }
+    '/projects/$projectId/diagram': {
+      id: '/projects/$projectId/diagram'
+      path: '/diagram'
+      fullPath: '/projects/$projectId/diagram'
+      preLoaderRoute: typeof ProjectsProjectIdDiagramRouteImport
+      parentRoute: typeof ProjectsProjectIdRoute
+    }
+    '/projects/$projectId/labels': {
+      id: '/projects/$projectId/labels'
+      path: '/labels'
+      fullPath: '/projects/$projectId/labels'
+      preLoaderRoute: typeof ProjectsProjectIdLabelsRouteImport
+      parentRoute: typeof ProjectsProjectIdRoute
+    }
+    '/projects/$projectId/tests': {
+      id: '/projects/$projectId/tests'
+      path: '/tests'
+      fullPath: '/projects/$projectId/tests'
+      preLoaderRoute: typeof ProjectsProjectIdTestsRouteImport
       parentRoute: typeof ProjectsProjectIdRoute
     }
   }

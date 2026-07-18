@@ -1380,3 +1380,38 @@ table.data th.sortable:hover { color: var(--text); }
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
   .tabs a:active { scale: none; }
 }
+
+/* Command palette */
+.palette-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(0 0 0 / 0.5);
+}
+.palette-panel {
+  position: fixed;
+  z-index: 41;
+  left: 50%;
+  top: 15vh;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 32px));
+  background: var(--popover);
+  border-radius: var(--radius-card);
+  padding: 8px;
+  animation: palette-in var(--motion-moderate) var(--ease-out);
+}
+.palette-item {
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 8px 10px;
+}
+@keyframes palette-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}

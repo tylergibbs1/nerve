@@ -1,4 +1,18 @@
 {
   "outputDirectory": "packages/nerve-web/dist",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "nerve-demo.vercel.app" }],
+      "destination": "https://nerve.grayhavenindustries.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "nerve-demo-grayhaven.vercel.app" }],
+      "destination": "https://nerve.grayhavenindustries.com/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

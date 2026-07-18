@@ -68,15 +68,11 @@ export function SearchBox({ hir, projectId }: { hir: Hir; projectId: string }) {
   const navigate = useNavigate()
   const hits = useMemo(() => (query.length >= 2 ? findHits(hir, query) : []), [hir, query])
 
-  // Global focus shortcut: ⌘K/Ctrl+K always; "/" only outside editable
-  // targets (the CodeMirror editor is contentEditable).
+  // Global focus shortcut: "/" only outside editable targets (the
+  // CodeMirror editor is contentEditable). ⌘K belongs to the command
+  // palette.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault()
-        inputRef.current?.focus()
-        return
-      }
       if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey) {
         const t = e.target
         const editable =
@@ -110,7 +106,7 @@ export function SearchBox({ hir, projectId }: { hir: Hir; projectId: string }) {
       <Command shouldFilter={false} label="Search the harness" className="overflow-visible">
         <CommandInput
           ref={inputRef}
-          placeholder="Search… ⌘K"
+          placeholder="Search…  /"
           className="h-7 w-52 text-xs"
           value={query}
           onValueChange={setQuery}

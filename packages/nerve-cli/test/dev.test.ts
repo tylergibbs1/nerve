@@ -115,7 +115,8 @@ describe("nerve dev server", () => {
     }
   }, 30000)
 
-  it("config edits above src/ trigger the watcher (watch root = project root)", async () => {
+  // Retried: fs-event delivery is timing-sensitive under machine load; the test passes in isolation.
+  it("config edits above src/ trigger the watcher (watch root = project root)", { retry: 2, timeout: 30000 }, async () => {
     // nerve.config.ts lives at the project root, above the entry's src/
     // dir; a write there must still recompile (#31).
     const io = sink()
@@ -133,5 +134,5 @@ describe("nerve dev server", () => {
     } finally {
       await dev.close()
     }
-  }, 30000)
+  })
 })

@@ -9,6 +9,7 @@ import {
 import type { QueryClient } from "@tanstack/react-query"
 import { warmCompiler } from "../lib/compile-client.js"
 import { Button } from "../ui/button.js"
+import { CommandPalette } from "../components/CommandPalette.js"
 
 interface RouterContext {
   queryClient: QueryClient
@@ -96,6 +97,7 @@ function RootLayout() {
       <main className="app-main">
         <Outlet />
       </main>
+      <CommandPalette />
     </div>
   )
 }
