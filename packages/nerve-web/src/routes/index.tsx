@@ -4,7 +4,7 @@ export const Route = createFileRoute("/")({
   component: Landing
 })
 
-/** Minimal landing: the pitch on the left, the rover import on the right. */
+/** Minimal landing: the pitch, and the three ways in. */
 function Landing() {
   return (
     <div className="landing">
@@ -24,26 +24,6 @@ function Landing() {
           <Link to="/docs">Read the docs</Link>
         </div>
       </section>
-
-      <Link to="/showcase" className="landing-proof" aria-label="See the NASA JPL rover harness import">
-        <span className="landing-proof-head">Tested on NASA JPL's open-source rover</span>
-        <h2>WireViz → Nerve</h2>
-        <p>Six real rover harnesses, imported from their original files. Nothing retyped.</p>
-        <dl>
-          <div>
-            <dt>Import</dt>
-            <dd>0 errors</dd>
-          </div>
-          <div>
-            <dt>Review</dt>
-            <dd>2 findings</dd>
-          </div>
-          <div>
-            <dt>Output</dt>
-            <dd>22 files</dd>
-          </div>
-        </dl>
-      </Link>
     </div>
   )
 }

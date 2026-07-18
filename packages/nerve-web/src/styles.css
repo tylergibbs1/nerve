@@ -424,14 +424,13 @@ textarea:focus-visible, select:focus-visible {
   }
 }
 
-/* Landing: the product thesis on the left, inspectable corpus proof on the right. */
+/* Landing: the product thesis, and nothing competing with it. */
 .landing {
   flex: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(380px, 0.92fr);
-  align-items: center;
-  gap: clamp(56px, 8vw, 112px);
-  max-width: 1180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 760px;
   margin: 0 auto;
   width: 100%;
   padding: clamp(56px, 8vw, 104px) 32px;
@@ -475,65 +474,14 @@ textarea:focus-visible, select:focus-visible {
 .landing-links a.landing-cta:hover { color: var(--accent-hover); border-color: var(--accent-hover); }
 .landing-links .sep { color: color-mix(in srgb, var(--muted) 50%, transparent); }
 
-.landing-proof {
-  position: relative;
-  display: block;
-  color: var(--text);
-  background: var(--panel);
-  border-radius: var(--radius-card);
-  padding: clamp(24px, 4vw, 40px);
-  overflow: hidden;
-  transition: background-color var(--motion-moderate) var(--ease-out), transform var(--motion-moderate) var(--ease-out);
-}
-.landing-proof:hover { background: var(--popover); transform: translateY(-3px); }
-.landing-proof-head {
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--muted);
-}
-.landing-proof h2 {
-  margin: 40px 0 0;
-  font-size: clamp(24px, 2.8vw, 34px);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-}
-.landing-proof > p {
-  max-width: 330px;
-  margin: 13px 0 0;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.55;
-  text-wrap: pretty;
-}
-.landing-proof dl {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin: 28px 0 0;
-  padding: 18px 0 0;
-  border-top: 1px solid var(--border);
-}
-.landing-proof dl div { padding-right: 12px; }
-.landing-proof dt {
-  font-size: 11px;
-  color: var(--muted);
-}
-.landing-proof dd {
-  margin: 5px 0 0;
-  font-size: 13px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
-}
 @keyframes spec-rise {
   from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
   to { opacity: 1; transform: none; filter: blur(0); }
 }
-.landing-copy > *, .landing-proof { animation: spec-rise 0.5s var(--ease-out) both; }
+.landing-copy > * { animation: spec-rise 0.5s var(--ease-out) both; }
 .landing-copy > h1 { animation-delay: 90ms; }
 .landing-copy > .landing-sub { animation-delay: 180ms; }
 .landing-copy > .landing-links { animation-delay: 270ms; }
-.landing-proof { animation-delay: 180ms; }
 
 .page { padding: 48px 24px; overflow: auto; max-width: 720px; margin: 0 auto; width: 100%; }
 .page h1 {
@@ -1471,12 +1419,6 @@ table.data th.sortable:hover { color: var(--text); }
 ::view-transition-new(render-pane) { animation: vt-in 210ms var(--ease-out) 150ms both; }
 
 @media (max-width: 1080px) {
-  .landing {
-    grid-template-columns: 1fr;
-    align-content: center;
-    max-width: 760px;
-  }
-  .landing-proof { max-width: 620px; }
   .showcase-picker { grid-template-columns: repeat(3, 1fr); }
   .showcase-picker button:nth-child(3) { border-right: 0; }
   .showcase-picker button:nth-child(-n + 3) { border-bottom: 1px solid var(--border); }
@@ -1511,13 +1453,10 @@ table.data th.sortable:hover { color: var(--text); }
   /* 12px left the grown touch boxes overlapping their neighbours. */
   .topnav { gap: 16px; }
   .topnav a { font-size: 12px; }
-  .landing { padding: 44px 20px 64px; gap: 52px; }
+  .landing { padding: 44px 20px 64px; }
   .landing h1 { font-size: clamp(32px, 10vw, 44px); }
   .landing-links { align-items: flex-start; flex-direction: column; gap: 10px; }
   .landing-links .sep { display: none; }
-  .landing-proof { padding: 24px; }
-  .landing-proof h2 { margin-top: 32px; }
-  .landing-proof dl { grid-template-columns: 1fr; gap: 12px; }
 
   /* The header wrapped to four rows and took a quarter of the screen off the
      panes below it. Tighter gutters, plus a search field that gives up its
@@ -1565,7 +1504,6 @@ table.data th.sortable:hover { color: var(--text); }
    them a defined hairline edge when the viewer asks for more contrast. */
 @media (prefers-contrast: more) {
   .project-card,
-  .landing-proof,
   .showcase-stage,
   .search-results,
   .inspector,
