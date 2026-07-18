@@ -28,6 +28,7 @@ import {
   subscribeSource
 } from "../lib/sources.js"
 import { Button } from "../ui/button.js"
+import { Checkbox } from "../ui/checkbox.js"
 
 /**
  * Persistent source editor (PRD §11.1 left pane). Auto-compiles on type;
@@ -193,14 +194,16 @@ export function SourcePane({ projectId }: { projectId: string }) {
         <Button size="xs" disabled={compile.isPending} onClick={() => compile.mutate({ path: activeFile, text: source })}>
           {showBusy ? "Compiling…" : "Compile"}
         </Button>
-        <label className="auto-toggle">
-          <input
-            type="checkbox"
+        <span className="auto-toggle-group">
+          <Checkbox
+            id="auto-compile"
             checked={autoCompile}
-            onChange={(e) => onToggleAuto(e.target.checked)}
+            onCheckedChange={(checked) => onToggleAuto(checked === true)}
           />
-          Auto
-        </label>
+          <label className="auto-toggle" htmlFor="auto-compile">
+            Auto
+          </label>
+        </span>
         {hasBundledSource(projectId) && isDirty(projectId) && (
           <Button
             variant="secondary"

@@ -186,6 +186,6 @@ test("traceability: click a wire -> inspector; search navigates and selects", as
   await expect(page.locator(".diagram-pane svg .sel").first()).toBeAttached()
   // Search: signal query finds the pin and navigates.
   await page.getByLabel("Search the harness").fill("CAN_H")
-  await page.locator(".search-results button").first().click()
+  await page.locator(".search-results [cmdk-item]").first().click()
   await expect(page.locator(".inspector")).toBeVisible()
 })

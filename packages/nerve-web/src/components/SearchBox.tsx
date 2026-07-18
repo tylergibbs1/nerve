@@ -6,7 +6,7 @@
 import { useMemo, useState } from "react"
 import { useNavigate } from "@tanstack/react-router"
 import type { Hir } from "@grayhaven/nerve"
-import { Input } from "../ui/input.js"
+import { Command, CommandInput, CommandItem, CommandList } from "../ui/command.js"
 import { setSelection, type Selection } from "../lib/selection.js"
 
 interface Hit {
@@ -65,38 +65,41 @@ export function SearchBox({ hir, projectId }: { hir: Hir; projectId: string }) {
   const [query, setQuery] = useState("")
   const navigate = useNavigate()
   const hits = useMemo(() => (query.length >= 2 ? findHits(hir, query) : []), [hir, query])
+  const go = (h: Hit) => {
+    setSelection(h.sel)
+    setQuery("")
+    void navigate({
+      to: `/projects/$projectId/${h.tab}`,
+      params: { projectId }
+    })
+  }
   return (
     <div className="searchbox">
-      <Input
-        type="search"
-        placeholder="Search wires, signals, parts…"
-        aria-label="Search the harness"
-        className="h-7 w-52 text-xs"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      {hits.length > 0 && (
-        <ul className="search-results" role="listbox">
+      {/* findHits already filters; cmdk owns arrow keys + enter. The label
+          prop is the input's accessible name (cmdk wires aria-labelledby,
+          which would override a plain aria-label). */}
+      <Command shouldFilter={false} label="Search the harness" className="overflow-visible">
+        <CommandInput
+          placeholder="Search wires, signals, parts…"
+          className="h-7 w-52 text-xs"
+          value={query}
+          onValueChange={setQuery}
+        />
+        {/* Always mounted so the input's aria-controls resolves; hidden
+            (not unmounted) when there is nothing to show. */}
+        <CommandList className="search-results" hidden={hits.length === 0}>
           {hits.map((h) => (
-            <li key={h.sel.kind + h.label}>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelection(h.sel)
-                  setQuery("")
-                  void navigate({
-                    to: `/projects/$projectId/${h.tab}`,
-                    params: { projectId }
-                  })
-                }}
-              >
-                <span className="hit-label">{h.label}</span>
-                <span className="hit-detail">{h.detail}</span>
-              </button>
-            </li>
+            <CommandItem
+              key={h.sel.kind + h.label}
+              value={h.sel.kind + h.label}
+              onSelect={() => go(h)}
+            >
+              <span className="hit-label">{h.label}</span>
+              <span className="hit-detail">{h.detail}</span>
+            </CommandItem>
           ))}
-        </ul>
-      )}
+        </CommandList>
+      </Command>
     </div>
   )
 }
