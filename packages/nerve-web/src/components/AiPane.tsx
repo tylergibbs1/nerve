@@ -116,6 +116,9 @@ export function AiPane({ projectId }: { projectId: string }) {
         return next
       })
       if (e.type === "done" || e.type === "error") setBusy(false)
+      // A failed turn gives the prompt back for editing and resend, unless
+      // the user already started typing something new.
+      if (e.type === "error") setInput((current) => (current === "" ? text : current))
     }
 
     void runAgentTurn(projectId, history, text, onEvent, (result) => {

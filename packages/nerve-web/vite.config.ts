@@ -36,18 +36,30 @@ export default defineConfig({
       output: {
         // Vendor groups: framework bytes change far less often than app
         // code — splitting keeps them cache-stable across deploys.
-        manualChunks(id: string) {
-          if (id.includes("node_modules")) {
+        // Rolldown groups, not manualChunks: the compat shim collapses a
+        // manualChunks function into ONE group, whose dependency pull
+        // dragged react + jsx-runtime (deps of @uiw/react-codemirror) into
+        // vendor-editor — so the entry statically imported 505KB of
+        // CodeMirror on the landing page. Priorities make the claim order
+        // explicit: react is taken before the editor group can pull it.
+        codeSplitting: {
+          groups: [
+            { name: "vendor-react", test: /node_modules\/(react|react-dom|scheduler)\//, priority: 50 },
+            { name: "vendor-editor", test: /node_modules\/(@?codemirror|@lezer|@uiw)/, priority: 40 },
             // Table/pacer/devtools stay OUT of the modulepreloaded vendor
             // chunk: only the lazy data routes use them.
-            if (/@tanstack\/(table-core|react-table|pacer|react-pacer|devtools)/.test(id)) return undefined
-            if (/codemirror|@lezer|@uiw/.test(id)) return "vendor-editor"
-            if (/react-dom|\/react\//.test(id)) return "vendor-react"
-            if (/@tanstack/.test(id)) return "vendor-tanstack"
-            if (/tailwind-merge|@radix-ui|clsx|class-variance-authority/.test(id)) return "vendor-ui"
-            if (/\/marked\//.test(id)) return "vendor-markdown"
-          }
-          return undefined
+            {
+              name: "vendor-tanstack",
+              test: /node_modules\/@tanstack\/(?!table-core|react-table|pacer|react-pacer|devtools)/,
+              priority: 30
+            },
+            {
+              name: "vendor-ui",
+              test: /node_modules\/(tailwind-merge|@radix-ui|clsx|class-variance-authority)/,
+              priority: 20
+            },
+            { name: "vendor-markdown", test: /node_modules\/marked\//, priority: 10 }
+          ]
         }
       }
     }

@@ -14,8 +14,10 @@ import {
   compileKeys,
   compileProjectFile,
   countDiagnostics,
+  setActiveEntrypoint,
   setCompileResult
 } from "../lib/compile-client.js"
+import { registerEditor } from "../lib/editor-registry.js"
 import {
   ENTRY_FILE,
   getFiles,
@@ -69,10 +71,14 @@ export function SourcePane({ projectId }: { projectId: string }) {
   // Re-seed when switching projects (the pane persists across them).
   useEffect(() => {
     setActiveFile(ENTRY_FILE)
+    setActiveEntrypoint(projectId, ENTRY_FILE)
     setLocalSource(getFileSource(projectId, ENTRY_FILE))
     lastCompiled.current = undefined
     setUndoSnapshot(undefined)
   }, [projectId])
+
+  // Unregister the editor view when the pane unmounts.
+  useEffect(() => () => registerEditor(null), [])
 
   // Reflect writes made elsewhere (the AI pane applying a verified patch).
   // AI edits arrive already compiled, so mark them as lastCompiled to keep
@@ -273,6 +279,7 @@ export function SourcePane({ projectId }: { projectId: string }) {
         theme={grayscaleTheme}
         onCreateEditor={(view) => {
           viewRef.current = view
+          registerEditor(view)
           // Automation hook: e2e tests and agent tooling drive real editor
           // transactions through this instead of poking minified internals.
           ;(window as unknown as { __nerveEditor?: EditorView }).__nerveEditor = view

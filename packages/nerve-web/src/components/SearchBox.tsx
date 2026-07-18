@@ -3,7 +3,7 @@
  * ref/mpn/family, splices by id. Selecting a result sets the global
  * selection and navigates to the sheet that shows it.
  */
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "@tanstack/react-router"
 import type { Hir } from "@grayhaven/nerve"
 import { Command, CommandInput, CommandItem, CommandList } from "../ui/command.js"
@@ -63,8 +63,37 @@ const findHits = (hir: Hir, query: string): Array<Hit> => {
 
 export function SearchBox({ hir, projectId }: { hir: Hir; projectId: string }) {
   const [query, setQuery] = useState("")
+  const [focused, setFocused] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   const hits = useMemo(() => (query.length >= 2 ? findHits(hir, query) : []), [hir, query])
+
+  // Global focus shortcut: ⌘K/Ctrl+K always; "/" only outside editable
+  // targets (the CodeMirror editor is contentEditable).
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault()
+        inputRef.current?.focus()
+        return
+      }
+      if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const t = e.target
+        const editable =
+          t instanceof HTMLElement &&
+          (t instanceof HTMLInputElement ||
+            t instanceof HTMLTextAreaElement ||
+            t instanceof HTMLSelectElement ||
+            t.isContentEditable)
+        if (!editable) {
+          e.preventDefault()
+          inputRef.current?.focus()
+        }
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [])
   const go = (h: Hit) => {
     setSelection(h.sel)
     setQuery("")
@@ -80,14 +109,29 @@ export function SearchBox({ hir, projectId }: { hir: Hir; projectId: string }) {
           which would override a plain aria-label). */}
       <Command shouldFilter={false} label="Search the harness" className="overflow-visible">
         <CommandInput
-          placeholder="Search wires, signals, parts…"
+          ref={inputRef}
+          placeholder="Search… ⌘K"
           className="h-7 w-52 text-xs"
           value={query}
           onValueChange={setQuery}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          onKeyDown={(e) => {
+            if (e.key !== "Escape") return
+            e.preventDefault()
+            if (query.length > 0) setQuery("")
+            else inputRef.current?.blur()
+          }}
         />
         {/* Always mounted so the input's aria-controls resolves; hidden
-            (not unmounted) when there is nothing to show. */}
-        <CommandList className="search-results" hidden={hits.length === 0}>
+            (not unmounted) when unfocused or there is nothing to show.
+            mousedown is prevented so clicking a result doesn't blur the
+            input (and hide the list) before onSelect fires on click. */}
+        <CommandList
+          className="search-results"
+          hidden={!focused || hits.length === 0}
+          onMouseDown={(e) => e.preventDefault()}
+        >
           {hits.map((h) => (
             <CommandItem
               key={h.sel.kind + h.label}

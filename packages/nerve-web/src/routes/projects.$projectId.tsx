@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query"
 import { compileQueryOptions, exportPacket } from "../lib/compile-client.js"
 import { useRef, useState } from "react"
 import { Button } from "../ui/button.js"
+import { Input } from "../ui/input.js"
 import { SearchBox } from "../components/SearchBox.js"
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js"
 import { SourcePane } from "../components/SourcePane.js"
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/projects/$projectId")({
   beforeLoad: ({ params }) => {
     if (projectMeta(params.projectId) === undefined) throw notFound()
   },
+  head: ({ params }) => ({ meta: [{ title: `${params.projectId} · Grayhaven Nerve` }] }),
   // Intent preloading (hover a project card) compiles in the worker
   // before the click; staleTime: Infinity makes the preload stick.
   loader: ({ context, params }) =>
@@ -50,8 +52,10 @@ const TABS = [
 
 function ExportButton({ projectId }: { projectId: string }) {
   const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState(false)
   const run = async () => {
     setBusy(true)
+    setFailed(false)
     try {
       const zip = await exportPacket(projectId)
       const url = URL.createObjectURL(new Blob([zip as BlobPart], { type: "application/zip" }))
@@ -60,20 +64,26 @@ function ExportButton({ projectId }: { projectId: string }) {
       a.download = `${projectId}-packet.zip`
       a.click()
       URL.revokeObjectURL(url)
+    } catch {
+      setFailed(true)
     } finally {
       setBusy(false)
     }
   }
   return (
-    <Button variant="secondary" size="xs" disabled={busy} onClick={() => void run()}>
-      {busy ? "Exporting…" : "Export packet"}
-    </Button>
+    <>
+      <Button variant="secondary" size="xs" disabled={busy} onClick={() => void run()}>
+        {busy ? "Exporting…" : "Export packet"}
+      </Button>
+      {failed && <span className="compile-error">Export failed. Try again.</span>}
+    </>
   )
 }
 
 /** Copy a zero-backend share link: the source gzipped into the fragment. */
 function ShareButton({ projectId }: { projectId: string }) {
   const [copied, setCopied] = useState(false)
+  const [fallbackUrl, setFallbackUrl] = useState<string | undefined>(undefined)
   const run = async () => {
     const [{ shareUrl }, { getFiles }] = await Promise.all([
       import("../lib/share.js"),
@@ -81,14 +91,33 @@ function ShareButton({ projectId }: { projectId: string }) {
     ])
     // Encode the whole project so multi-file projects don't lose their
     // extra files; single-entry projects still get a compact v1 link.
-    await navigator.clipboard.writeText(shareUrl(getFiles(projectId)))
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    const url = shareUrl(getFiles(projectId))
+    try {
+      await navigator.clipboard.writeText(url)
+      setFallbackUrl(undefined)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Safari can reject writeText once the user-gesture window expires
+      // during the awaits above; show the link for manual copy instead.
+      setFallbackUrl(url)
+    }
   }
   return (
-    <Button variant="secondary" size="xs" onClick={() => void run()}>
-      {copied ? "Link copied ✓" : "Share"}
-    </Button>
+    <>
+      <Button variant="secondary" size="xs" onClick={() => void run()}>
+        {copied ? "Link copied ✓" : "Share"}
+      </Button>
+      {fallbackUrl !== undefined && (
+        <Input
+          readOnly
+          value={fallbackUrl}
+          aria-label="Share link"
+          className="h-7 w-56 text-xs"
+          onFocus={(e) => e.currentTarget.select()}
+        />
+      )}
+    </>
   )
 }
 

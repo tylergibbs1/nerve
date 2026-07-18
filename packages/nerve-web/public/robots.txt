@@ -1,0 +1,5 @@
+# Agents: machine-readable docs index at https://nerve.grayhavenindustries.com/llms.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://nerve.grayhavenindustries.com/sitemap.xml

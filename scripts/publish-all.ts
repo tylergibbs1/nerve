@@ -50,6 +50,23 @@ for (const name of PACKAGES) {
   const pkg = JSON.parse(original) as Record<string, unknown>
   const publishConfig = (pkg["publishConfig"] ?? {}) as Record<string, unknown>
 
+  // Idempotency: skip anything the registry already has at this exact
+  // version, so re-running after a mid-list failure just publishes the
+  // remainder — no more hand-editing the PACKAGES prefix. Only a positive
+  // registry confirmation skips; a network error (or 404) falls through to
+  // the publish attempt, which fails loudly on a real conflict anyway.
+  if (!packOnly) {
+    const npmName = pkg["name"] as string
+    const version = pkg["version"] as string
+    const view = spawnSync("bun", ["pm", "view", `${npmName}@${version}`, "version"], {
+      encoding: "utf8"
+    })
+    if (view.status === 0 && view.stdout.trim() === version) {
+      console.log(`↷ ${name}: ${npmName}@${version} already published — skipping`)
+      continue
+    }
+  }
+
   if (publishConfig["exports"] === undefined) {
     console.error(`✗ ${name}: no publishConfig.exports — refusing to publish src-pointing exports`)
     failed = true

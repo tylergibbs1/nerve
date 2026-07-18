@@ -6,6 +6,7 @@ import rulesMeta from "../docs/rules-meta.json"
 import { RULE_SUMMARIES } from "../docs/rule-summaries.js"
 
 export const Route = createFileRoute("/docs/rules")({
+  head: () => ({ meta: [{ title: "Validation rules · Grayhaven Nerve" }] }),
   component: RulesReference
 })
 

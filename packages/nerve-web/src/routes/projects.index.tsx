@@ -2,6 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router"
 import { PROJECTS } from "../lib/projects.js"
 
 export const Route = createFileRoute("/projects/")({
+  head: () => ({
+    meta: [
+      { title: "Projects · Grayhaven Nerve" },
+      {
+        name: "description",
+        content: "Example harnesses and a scratch project that compile in your browser."
+      }
+    ]
+  }),
   component: ProjectList
 })
 

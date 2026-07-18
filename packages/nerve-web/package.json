@@ -6,7 +6,7 @@
   "description": "Grayhaven Nerve web editor: Vite + React + TanStack, worker-based compile.",
   "scripts": {
     "dev": "vite",
-    "build": "bun scripts/gen-llms.ts && vite build",
+    "build": "bun scripts/gen-jpl-proofs.ts && bun scripts/gen-llms.ts && vite build",
     "preview": "vite preview",
     "e2e": "playwright test"
   },

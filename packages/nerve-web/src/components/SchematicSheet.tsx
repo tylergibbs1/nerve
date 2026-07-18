@@ -77,9 +77,31 @@ export function SchematicSheet({
     const click = (e: MouseEvent) => {
       setSelection(selectionFromElement(e.target as Element))
     }
+    // Keyboard parity for the focusable pane: ± zoom, 0 resets, Escape
+    // clears the selection. Same clamp as the wheel handler.
+    const keydown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault()
+        setSelection(undefined)
+        return
+      }
+      if (e.key === "0") {
+        e.preventDefault()
+        zoomRef.current = 1
+        applyZoom(1)
+        return
+      }
+      const factor = e.key === "+" || e.key === "=" ? 1.15 : e.key === "-" ? 1 / 1.15 : undefined
+      if (factor === undefined) return
+      e.preventDefault()
+      const next = Math.min(4, Math.max(0.4, zoomRef.current * factor))
+      zoomRef.current = next
+      applyZoom(next)
+    }
     pane.addEventListener("pointerover", over)
     pane.addEventListener("pointerleave", clear)
     pane.addEventListener("click", click)
+    pane.addEventListener("keydown", keydown)
     pane.addEventListener("wheel", wheel, { passive: false })
     applyZoom(zoomRef.current)
     // React 19 ref cleanup: colocated teardown.
@@ -87,6 +109,7 @@ export function SchematicSheet({
       pane.removeEventListener("pointerover", over)
       pane.removeEventListener("pointerleave", clear)
       pane.removeEventListener("click", click)
+      pane.removeEventListener("keydown", keydown)
       pane.removeEventListener("wheel", wheel)
     }
   }, [])
@@ -144,7 +167,7 @@ export function SchematicSheet({
         <Button variant="ghost" size="xs" onClick={() => void downloadHtml()}>
           Download HTML
         </Button>
-        <span className="sheet-hint">⌘+scroll to zoom · hover a wire</span>
+        <span className="sheet-hint">⌘+scroll or ± to zoom · hover a wire</span>
       </div>
       <Inspector hir={hir} />
       <div

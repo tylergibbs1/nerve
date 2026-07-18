@@ -1,0 +1,4362 @@
+{
+  "harnesses": [
+    {
+      "slug": "front-encoder",
+      "name": "Front encoder",
+      "source": "connectors:\n  Molex-to-PCB:\n    <<: *molex\n  M+-to-Molex:\n    <<: *bullet\n    pinlabels: [M+]\n  M--to-Molex:\n    <<: *bullet\n    pinlabels: [M-]\n  Encoder-to-Molex:\n    <<: *femDP4\n\ncables:\n  W1:\n    <<: *motor\n    length: 54 cm\n\n  W2:\n    <<: *enc\n    length: 53 cm\n\nconnections:\n  -\n    - Molex-to-PCB: [1]\n    - W1: [1]\n    - M+-to-Molex: [1]\n  -\n    - Molex-to-PCB: [2]\n    - W1: [2]\n    - M--to-Molex: [1]\n  -\n    - Molex-to-PCB: [4, 3, 5, 6]\n    - W2: [1-4]\n    - Encoder-to-Molex: [1, 2, 3, 4]\n\nmetadata:\n  title: Front Encoder Cable (x2)\n",
+      "title": "Front Encoder Cable (x2)",
+      "hir": {
+        "schemaVersion": "0.1.0",
+        "harness": {
+          "id": "jpl-front-encoder",
+          "revision": "A",
+          "units": "mm",
+          "metadata": {
+            "importedFrom": "wireviz",
+            "sourceTitle": "Front Encoder Cable (x2)"
+          }
+        },
+        "connectors": [
+          {
+            "ref": "Encoder-to-Molex",
+            "mpn": "DuPont",
+            "family": "DuPont",
+            "gender": "receptacle",
+            "pinCount": 4,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "5V"
+              },
+              {
+                "pin": "2",
+                "signal": "GND"
+              },
+              {
+                "pin": "3",
+                "signal": "EnA"
+              },
+              {
+                "pin": "4",
+                "signal": "EnB"
+              }
+            ]
+          },
+          {
+            "ref": "M+-to-Molex",
+            "mpn": "Bullet",
+            "family": "Bullet",
+            "pinCount": 1,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "M+"
+              }
+            ]
+          },
+          {
+            "ref": "M--to-Molex",
+            "mpn": "Bullet",
+            "family": "Bullet",
+            "pinCount": 1,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "M-"
+              }
+            ]
+          },
+          {
+            "ref": "Molex-to-PCB",
+            "mpn": "Molex Mini-Fit Jr.",
+            "family": "Molex Mini-Fit Jr.",
+            "gender": "receptacle",
+            "pinCount": 6,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "M+"
+              },
+              {
+                "pin": "2",
+                "signal": "M-"
+              },
+              {
+                "pin": "3",
+                "signal": "G"
+              },
+              {
+                "pin": "4",
+                "signal": "5V"
+              },
+              {
+                "pin": "5",
+                "signal": "EnA"
+              },
+              {
+                "pin": "6",
+                "signal": "EnB"
+              }
+            ]
+          }
+        ],
+        "wires": [
+          {
+            "id": "W1.1",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "M+-to-Molex",
+              "pin": "1"
+            },
+            "gauge": "18AWG",
+            "color": "red",
+            "length": 540,
+            "signal": "M+",
+            "cable": "W1",
+            "conductor": "1"
+          },
+          {
+            "id": "W1.2",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "M--to-Molex",
+              "pin": "1"
+            },
+            "gauge": "18AWG",
+            "color": "black",
+            "length": 540,
+            "signal": "M-",
+            "cable": "W1",
+            "conductor": "2"
+          },
+          {
+            "id": "W2.1",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "gauge": "22AWG",
+            "color": "red",
+            "length": 530,
+            "signal": "5V",
+            "cable": "W2",
+            "conductor": "1"
+          },
+          {
+            "id": "W2.2",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "gauge": "22AWG",
+            "color": "black",
+            "length": 530,
+            "signal": "G",
+            "cable": "W2",
+            "conductor": "2"
+          },
+          {
+            "id": "W2.3",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "gauge": "22AWG",
+            "color": "blue",
+            "length": 530,
+            "signal": "EnA",
+            "cable": "W2",
+            "conductor": "3"
+          },
+          {
+            "id": "W2.4",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "gauge": "22AWG",
+            "color": "white",
+            "length": 530,
+            "signal": "EnB",
+            "cable": "W2",
+            "conductor": "4"
+          }
+        ],
+        "cables": [
+          {
+            "id": "W1",
+            "type": "2x18 awg",
+            "conductors": 2,
+            "cutLength": 540,
+            "wires": [
+              "W1.1",
+              "W1.2"
+            ]
+          },
+          {
+            "id": "W2",
+            "type": "4x22 awg",
+            "conductors": 4,
+            "cutLength": 530,
+            "wires": [
+              "W2.1",
+              "W2.2",
+              "W2.3",
+              "W2.4"
+            ]
+          }
+        ],
+        "branches": [],
+        "splices": [],
+        "labels": [],
+        "bom": [
+          {
+            "mpn": "Bullet",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 2,
+            "usedBy": [
+              "connector:M+-to-Molex",
+              "connector:M--to-Molex"
+            ]
+          },
+          {
+            "mpn": "DuPont",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 1,
+            "usedBy": [
+              "connector:Encoder-to-Molex"
+            ]
+          },
+          {
+            "mpn": "Molex Mini-Fit Jr.",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 1,
+            "usedBy": [
+              "connector:Molex-to-PCB"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Molex-to-PCB: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:Molex-to-PCB"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Molex-to-PCB: WireViz key \"image\" is not imported.",
+            "target": "connector:Molex-to-PCB"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector M+-to-Molex: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:M+-to-Molex"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector M--to-Molex: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:M--to-Molex"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Encoder-to-Molex: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:Encoder-to-Molex"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Encoder-to-Molex: WireViz key \"image\" is not imported.",
+            "target": "connector:Encoder-to-Molex"
+          },
+          {
+            "code": "HK-ELEC-003",
+            "severity": "error",
+            "message": "Power signals (5V) have no ground return wire."
+          },
+          {
+            "code": "HK-CONN-011",
+            "severity": "error",
+            "message": "Wire W2.2 carries G but pin Encoder-to-Molex.2 is assigned GND.",
+            "target": "connector:Encoder-to-Molex.pin:2",
+            "targets": [
+              "wire:W2.2"
+            ],
+            "data": {
+              "wireSignal": "G",
+              "pinSignal": "GND"
+            }
+          }
+        ],
+        "layoutHints": [],
+        "exports": {}
+      },
+      "schematic": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"888\" height=\"444\" viewBox=\"0 0 888 444\" font-family=\"ui-monospace, SFMono-Regular, Menlo, monospace\" font-size=\"12\">\n<rect width=\"888\" height=\"444\" fill=\"#fafafa\"/>\n<text x=\"48\" y=\"28\" font-size=\"18\" font-weight=\"bold\" fill=\"#111\">jpl-front-encoder</text>\n<text x=\"48\" y=\"48\" fill=\"#555\">rev A · units mm · HIR 0.1.0</text>\n<path data-wire=\"W1.1\" d=\"M 634 278 C 574 278, 574 162, 634 162\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/>\n<text data-wire=\"W1.1\" x=\"634\" y=\"214\" fill=\"#333\" text-anchor=\"middle\">W1.1 · 18AWG</text>\n<path data-wire=\"W1.2\" d=\"M 634 298 C 507.3333333333333 298, 380.6666666666667 338, 254 338\" fill=\"none\" stroke=\"#222222\" stroke-width=\"2\"/>\n<text data-wire=\"W1.2\" x=\"444\" y=\"312\" fill=\"#333\" text-anchor=\"middle\">W1.2 · 18AWG</text>\n<path data-wire=\"W2.1\" d=\"M 634 338 C 507.3333333333333 338, 380.6666666666667 162, 254 162\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/>\n<text data-wire=\"W2.1\" x=\"444\" y=\"244\" fill=\"#333\" text-anchor=\"middle\">W2.1 · 22AWG</text>\n<path data-wire=\"W2.2\" d=\"M 634 318 C 507.3333333333333 318, 380.6666666666667 182, 254 182\" fill=\"none\" stroke=\"#d11\" stroke-width=\"2\" stroke-dasharray=\"6 3\"/>\n<text data-wire=\"W2.2\" x=\"444\" y=\"244\" fill=\"#d11\" text-anchor=\"middle\">W2.2 · 22AWG</text>\n<path data-wire=\"W2.3\" d=\"M 634 358 C 507.3333333333333 358, 380.6666666666667 202, 254 202\" fill=\"none\" stroke=\"blue\" stroke-width=\"2\"/>\n<text data-wire=\"W2.3\" x=\"444\" y=\"274\" fill=\"#333\" text-anchor=\"middle\">W2.3 · 22AWG</text>\n<path data-wire=\"W2.4\" d=\"M 634 378 C 507.3333333333333 378, 380.6666666666667 222, 254 222\" fill=\"none\" stroke=\"#b8b8b8\" stroke-width=\"2\"/>\n<text data-wire=\"W2.4\" x=\"444\" y=\"294\" fill=\"#333\" text-anchor=\"middle\">W2.4 · 22AWG</text>\n<rect data-connector=\"Encoder-to-Molex\" x=\"48\" y=\"112\" width=\"206\" height=\"128\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"58\" y=\"130\" font-weight=\"bold\" fill=\"#111\">Encoder-to-Molex</text>\n<text x=\"58\" y=\"145\" font-size=\"10\" fill=\"#777\">DuPont · receptacle</text>\n<line x1=\"48\" y1=\"150\" x2=\"254\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"1\" cx=\"254\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"82\" y=\"166\" fill=\"#555\">5V</text>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"2\" cx=\"254\" cy=\"182\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"186\" fill=\"#111\">2</text>\n<text x=\"82\" y=\"186\" fill=\"#555\">GND</text>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"3\" cx=\"254\" cy=\"202\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"206\" fill=\"#111\">3</text>\n<text x=\"82\" y=\"206\" fill=\"#555\">EnA</text>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"4\" cx=\"254\" cy=\"222\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"226\" fill=\"#111\">4</text>\n<text x=\"82\" y=\"226\" fill=\"#555\">EnB</text>\n<rect data-connector=\"M+-to-Molex\" x=\"634\" y=\"112\" width=\"206\" height=\"68\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"644\" y=\"130\" font-weight=\"bold\" fill=\"#111\">M+-to-Molex</text>\n<text x=\"644\" y=\"145\" font-size=\"10\" fill=\"#777\">Bullet</text>\n<line x1=\"634\" y1=\"150\" x2=\"840\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"M+-to-Molex\" data-pin=\"1\" cx=\"634\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"668\" y=\"166\" fill=\"#555\">M+</text>\n<rect data-connector=\"M--to-Molex\" x=\"48\" y=\"288\" width=\"206\" height=\"68\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"58\" y=\"306\" font-weight=\"bold\" fill=\"#111\">M--to-Molex</text>\n<text x=\"58\" y=\"321\" font-size=\"10\" fill=\"#777\">Bullet</text>\n<line x1=\"48\" y1=\"326\" x2=\"254\" y2=\"326\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"M--to-Molex\" data-pin=\"1\" cx=\"254\" cy=\"338\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"342\" fill=\"#111\">1</text>\n<text x=\"82\" y=\"342\" fill=\"#555\">M-</text>\n<rect data-connector=\"Molex-to-PCB\" x=\"634\" y=\"228\" width=\"206\" height=\"168\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"644\" y=\"246\" font-weight=\"bold\" fill=\"#111\">Molex-to-PCB</text>\n<text x=\"644\" y=\"261\" font-size=\"10\" fill=\"#777\">Molex Mini-Fit Jr. · receptacle</text>\n<line x1=\"634\" y1=\"266\" x2=\"840\" y2=\"266\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"1\" cx=\"634\" cy=\"278\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"282\" fill=\"#111\">1</text>\n<text x=\"668\" y=\"282\" fill=\"#555\">M+</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"2\" cx=\"634\" cy=\"298\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"302\" fill=\"#111\">2</text>\n<text x=\"668\" y=\"302\" fill=\"#555\">M-</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"3\" cx=\"634\" cy=\"318\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"322\" fill=\"#111\">3</text>\n<text x=\"668\" y=\"322\" fill=\"#555\">G</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"4\" cx=\"634\" cy=\"338\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"342\" fill=\"#111\">4</text>\n<text x=\"668\" y=\"342\" fill=\"#555\">5V</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"5\" cx=\"634\" cy=\"358\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"362\" fill=\"#111\">5</text>\n<text x=\"668\" y=\"362\" fill=\"#555\">EnA</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"6\" cx=\"634\" cy=\"378\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"382\" fill=\"#111\">6</text>\n<text x=\"668\" y=\"382\" fill=\"#555\">EnB</text>\n<circle data-connector=\"Molex-to-PCB\" data-diagnostic=\"HK-WV-001\" cx=\"852\" cy=\"240\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"Molex-to-PCB\" data-diagnostic=\"HK-WV-001\" x=\"852\" y=\"243.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">2</text>\n<circle data-connector=\"M+-to-Molex\" data-diagnostic=\"HK-WV-001\" cx=\"852\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"M+-to-Molex\" data-diagnostic=\"HK-WV-001\" x=\"852\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">!</text>\n<circle data-connector=\"M--to-Molex\" data-diagnostic=\"HK-WV-001\" cx=\"36\" cy=\"300\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"M--to-Molex\" data-diagnostic=\"HK-WV-001\" x=\"36\" y=\"303.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">!</text>\n<circle data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-WV-001\" cx=\"36\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-WV-001\" x=\"36\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">2</text>\n<circle data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-CONN-011\" data-pin=\"2\" cx=\"36\" cy=\"182\" r=\"7\" fill=\"#d11\"/>\n<text data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-CONN-011\" data-pin=\"2\" x=\"36\" y=\"185.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">!</text>\n</svg>\n",
+      "fingerprint": "b3a249a92456b7a1",
+      "importDiagnostics": [
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Molex-to-PCB: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:Molex-to-PCB"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Molex-to-PCB: WireViz key \"image\" is not imported.",
+          "target": "connector:Molex-to-PCB"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector M+-to-Molex: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:M+-to-Molex"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector M--to-Molex: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:M--to-Molex"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Encoder-to-Molex: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:Encoder-to-Molex"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Encoder-to-Molex: WireViz key \"image\" is not imported.",
+          "target": "connector:Encoder-to-Molex"
+        }
+      ],
+      "reviewDiagnostics": [
+        {
+          "code": "HK-ELEC-003",
+          "severity": "error",
+          "message": "Power signals (5V) have no ground return wire."
+        },
+        {
+          "code": "HK-CONN-011",
+          "severity": "error",
+          "message": "Wire W2.2 carries G but pin Encoder-to-Molex.2 is assigned GND.",
+          "target": "connector:Encoder-to-Molex.pin:2",
+          "targets": [
+            "wire:W2.2"
+          ],
+          "data": {
+            "wireSignal": "G",
+            "pinSignal": "GND"
+          }
+        }
+      ],
+      "bom": {
+        "headers": [
+          "Item number",
+          "Quantity",
+          "Unit of measure",
+          "Internal part number",
+          "Manufacturer",
+          "Manufacturer part number",
+          "Description",
+          "Category",
+          "Used by",
+          "Approved alternates",
+          "Notes"
+        ],
+        "rows": [
+          [
+            1,
+            2,
+            "ea",
+            null,
+            null,
+            "Bullet",
+            null,
+            "connector",
+            "connector:M+-to-Molex; connector:M--to-Molex",
+            "",
+            null
+          ],
+          [
+            2,
+            1,
+            "ea",
+            null,
+            null,
+            "DuPont",
+            null,
+            "connector",
+            "connector:Encoder-to-Molex",
+            "",
+            null
+          ],
+          [
+            3,
+            1,
+            "ea",
+            null,
+            null,
+            "Molex Mini-Fit Jr.",
+            null,
+            "connector",
+            "connector:Molex-to-PCB",
+            "",
+            null
+          ]
+        ]
+      },
+      "cutList": {
+        "headers": [
+          "Wire ID",
+          "Signal",
+          "Gauge",
+          "Color",
+          "Stripe",
+          "Cut length",
+          "Finished length",
+          "Tolerance",
+          "From connector",
+          "From pin",
+          "To connector",
+          "To pin",
+          "Terminal A",
+          "Terminal B",
+          "Branch",
+          "Notes"
+        ],
+        "rows": [
+          [
+            "W1.1",
+            "M+",
+            "18AWG",
+            "red",
+            null,
+            540,
+            540,
+            null,
+            "Molex-to-PCB",
+            "1",
+            "M+-to-Molex",
+            "1",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W1.2",
+            "M-",
+            "18AWG",
+            "black",
+            null,
+            540,
+            540,
+            null,
+            "Molex-to-PCB",
+            "2",
+            "M--to-Molex",
+            "1",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W2.1",
+            "5V",
+            "22AWG",
+            "red",
+            null,
+            530,
+            530,
+            null,
+            "Molex-to-PCB",
+            "4",
+            "Encoder-to-Molex",
+            "1",
+            "",
+            "",
+            "W2",
+            null
+          ],
+          [
+            "W2.2",
+            "G",
+            "22AWG",
+            "black",
+            null,
+            530,
+            530,
+            null,
+            "Molex-to-PCB",
+            "3",
+            "Encoder-to-Molex",
+            "2",
+            "",
+            "",
+            "W2",
+            null
+          ],
+          [
+            "W2.3",
+            "EnA",
+            "22AWG",
+            "blue",
+            null,
+            530,
+            530,
+            null,
+            "Molex-to-PCB",
+            "5",
+            "Encoder-to-Molex",
+            "3",
+            "",
+            "",
+            "W2",
+            null
+          ],
+          [
+            "W2.4",
+            "EnB",
+            "22AWG",
+            "white",
+            null,
+            530,
+            530,
+            null,
+            "Molex-to-PCB",
+            "6",
+            "Encoder-to-Molex",
+            "4",
+            "",
+            "",
+            "W2",
+            null
+          ]
+        ]
+      },
+      "testPlan": {
+        "harness": {
+          "id": "jpl-front-encoder",
+          "revision": "A"
+        },
+        "tests": [
+          {
+            "id": "T-001",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "M+-to-Molex",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "M+",
+            "wire": "W1.1"
+          },
+          {
+            "id": "T-002",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "M--to-Molex",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "M-",
+            "wire": "W1.2"
+          },
+          {
+            "id": "T-003",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "5V",
+            "wire": "W2.1"
+          },
+          {
+            "id": "T-004",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "expected": "closed",
+            "net": "G",
+            "wire": "W2.2"
+          },
+          {
+            "id": "T-005",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "expected": "closed",
+            "net": "EnA",
+            "wire": "W2.3"
+          },
+          {
+            "id": "T-006",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "expected": "closed",
+            "net": "EnB",
+            "wire": "W2.4"
+          },
+          {
+            "id": "T-007",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "5V <-> EnA"
+          },
+          {
+            "id": "T-008",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "expected": "open",
+            "net": "5V <-> EnB"
+          },
+          {
+            "id": "T-009",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "5V <-> G"
+          },
+          {
+            "id": "T-010",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "expected": "open",
+            "net": "EnA <-> EnB"
+          },
+          {
+            "id": "T-011",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnA <-> G"
+          },
+          {
+            "id": "T-012",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnB <-> G"
+          },
+          {
+            "id": "T-013",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "expected": "open",
+            "net": "5V <-> EnA"
+          },
+          {
+            "id": "T-014",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "expected": "open",
+            "net": "5V <-> EnB"
+          },
+          {
+            "id": "T-015",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "5V <-> G"
+          },
+          {
+            "id": "T-016",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "5V <-> M+"
+          },
+          {
+            "id": "T-017",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "5V <-> M-"
+          },
+          {
+            "id": "T-018",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "expected": "open",
+            "net": "EnA <-> EnB"
+          },
+          {
+            "id": "T-019",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "EnA <-> G"
+          },
+          {
+            "id": "T-020",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "EnA <-> M+"
+          },
+          {
+            "id": "T-021",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnA <-> M-"
+          },
+          {
+            "id": "T-022",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "EnB <-> G"
+          },
+          {
+            "id": "T-023",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "EnB <-> M+"
+          },
+          {
+            "id": "T-024",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnB <-> M-"
+          },
+          {
+            "id": "T-025",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "G <-> M+"
+          },
+          {
+            "id": "T-026",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "G <-> M-"
+          },
+          {
+            "id": "T-027",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "M+ <-> M-"
+          }
+        ]
+      },
+      "releaseReady": false
+    },
+    {
+      "slug": "front-servo",
+      "name": "Front servo",
+      "source": "connectors:\n  Dupont-to-Board:\n    <<: *femDP3\n  Dupont-to-Servo:\n    <<: *maleDP3\n\ncables:\n  W1:\n    <<: *servo\n    length: 41 cm\n\nconnections:\n  -\n    - Dupont-to-Board: [1-3]\n    - W1: [1-3]\n    - Dupont-to-Servo: [1-3]\n\nmetadata:\n  title: Front Servo Cable (x2)\n",
+      "title": "Front Servo Cable (x2)",
+      "hir": {
+        "schemaVersion": "0.1.0",
+        "harness": {
+          "id": "jpl-front-servo",
+          "revision": "A",
+          "units": "mm",
+          "metadata": {
+            "importedFrom": "wireviz",
+            "sourceTitle": "Front Servo Cable (x2)"
+          }
+        },
+        "connectors": [
+          {
+            "ref": "Dupont-to-Board",
+            "mpn": "DuPont",
+            "family": "DuPont",
+            "gender": "receptacle",
+            "pinCount": 3,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "PWM"
+              },
+              {
+                "pin": "2",
+                "signal": "+"
+              },
+              {
+                "pin": "3",
+                "signal": "GND"
+              }
+            ]
+          },
+          {
+            "ref": "Dupont-to-Servo",
+            "mpn": "DuPont",
+            "family": "DuPont",
+            "gender": "plug",
+            "pinCount": 3,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "PWM"
+              },
+              {
+                "pin": "2",
+                "signal": "+"
+              },
+              {
+                "pin": "3",
+                "signal": "GND"
+              }
+            ]
+          }
+        ],
+        "wires": [
+          {
+            "id": "W1.1",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "1"
+            },
+            "gauge": "20AWG",
+            "color": "white",
+            "length": 410,
+            "signal": "PWM",
+            "cable": "W1",
+            "conductor": "1"
+          },
+          {
+            "id": "W1.2",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "2"
+            },
+            "gauge": "20AWG",
+            "color": "red",
+            "length": 410,
+            "signal": "+",
+            "cable": "W1",
+            "conductor": "2"
+          },
+          {
+            "id": "W1.3",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "3"
+            },
+            "gauge": "20AWG",
+            "color": "black",
+            "length": 410,
+            "signal": "GND",
+            "cable": "W1",
+            "conductor": "3"
+          }
+        ],
+        "cables": [
+          {
+            "id": "W1",
+            "type": "3x20 awg",
+            "conductors": 3,
+            "cutLength": 410,
+            "wires": [
+              "W1.1",
+              "W1.2",
+              "W1.3"
+            ]
+          }
+        ],
+        "branches": [],
+        "splices": [],
+        "labels": [],
+        "bom": [
+          {
+            "mpn": "DuPont",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 2,
+            "usedBy": [
+              "connector:Dupont-to-Board",
+              "connector:Dupont-to-Servo"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Dupont-to-Board: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:Dupont-to-Board"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Dupont-to-Board: WireViz key \"image\" is not imported.",
+            "target": "connector:Dupont-to-Board"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Dupont-to-Servo: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:Dupont-to-Servo"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Dupont-to-Servo: WireViz key \"image\" is not imported.",
+            "target": "connector:Dupont-to-Servo"
+          }
+        ],
+        "layoutHints": [],
+        "exports": {}
+      },
+      "schematic": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"836\" height=\"268\" viewBox=\"0 0 836 268\" font-family=\"ui-monospace, SFMono-Regular, Menlo, monospace\" font-size=\"12\">\n<rect width=\"836\" height=\"268\" fill=\"#fafafa\"/>\n<text x=\"48\" y=\"28\" font-size=\"18\" font-weight=\"bold\" fill=\"#111\">jpl-front-servo</text>\n<text x=\"48\" y=\"48\" fill=\"#555\">rev A · units mm · HIR 0.1.0</text>\n<path data-wire=\"W1.1\" d=\"M 228 162 C 354.6666666666667 162, 481.3333333333333 162, 608 162\" fill=\"none\" stroke=\"#b8b8b8\" stroke-width=\"2\"/>\n<text data-wire=\"W1.1\" x=\"418\" y=\"156\" fill=\"#333\" text-anchor=\"middle\">W1.1 · 20AWG</text>\n<path data-wire=\"W1.2\" d=\"M 228 182 C 354.6666666666667 182, 481.3333333333333 182, 608 182\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/>\n<text data-wire=\"W1.2\" x=\"418\" y=\"176\" fill=\"#333\" text-anchor=\"middle\">W1.2 · 20AWG</text>\n<path data-wire=\"W1.3\" d=\"M 228 202 C 354.6666666666667 202, 481.3333333333333 202, 608 202\" fill=\"none\" stroke=\"#222222\" stroke-width=\"2\"/>\n<text data-wire=\"W1.3\" x=\"418\" y=\"196\" fill=\"#333\" text-anchor=\"middle\">W1.3 · 20AWG</text>\n<rect data-connector=\"Dupont-to-Board\" x=\"48\" y=\"112\" width=\"180\" height=\"108\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"58\" y=\"130\" font-weight=\"bold\" fill=\"#111\">Dupont-to-Board</text>\n<text x=\"58\" y=\"145\" font-size=\"10\" fill=\"#777\">DuPont · receptacle</text>\n<line x1=\"48\" y1=\"150\" x2=\"228\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"Dupont-to-Board\" data-pin=\"1\" cx=\"228\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"82\" y=\"166\" fill=\"#555\">PWM</text>\n<circle data-connector=\"Dupont-to-Board\" data-pin=\"2\" cx=\"228\" cy=\"182\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"186\" fill=\"#111\">2</text>\n<text x=\"82\" y=\"186\" fill=\"#555\">+</text>\n<circle data-connector=\"Dupont-to-Board\" data-pin=\"3\" cx=\"228\" cy=\"202\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"206\" fill=\"#111\">3</text>\n<text x=\"82\" y=\"206\" fill=\"#555\">GND</text>\n<rect data-connector=\"Dupont-to-Servo\" x=\"608\" y=\"112\" width=\"180\" height=\"108\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"618\" y=\"130\" font-weight=\"bold\" fill=\"#111\">Dupont-to-Servo</text>\n<text x=\"618\" y=\"145\" font-size=\"10\" fill=\"#777\">DuPont · plug</text>\n<line x1=\"608\" y1=\"150\" x2=\"788\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"Dupont-to-Servo\" data-pin=\"1\" cx=\"608\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"618\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"642\" y=\"166\" fill=\"#555\">PWM</text>\n<circle data-connector=\"Dupont-to-Servo\" data-pin=\"2\" cx=\"608\" cy=\"182\" r=\"3\" fill=\"#333\"/>\n<text x=\"618\" y=\"186\" fill=\"#111\">2</text>\n<text x=\"642\" y=\"186\" fill=\"#555\">+</text>\n<circle data-connector=\"Dupont-to-Servo\" data-pin=\"3\" cx=\"608\" cy=\"202\" r=\"3\" fill=\"#333\"/>\n<text x=\"618\" y=\"206\" fill=\"#111\">3</text>\n<text x=\"642\" y=\"206\" fill=\"#555\">GND</text>\n<circle data-connector=\"Dupont-to-Board\" data-diagnostic=\"HK-WV-001\" cx=\"36\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"Dupont-to-Board\" data-diagnostic=\"HK-WV-001\" x=\"36\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">2</text>\n<circle data-connector=\"Dupont-to-Servo\" data-diagnostic=\"HK-WV-001\" cx=\"800\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"Dupont-to-Servo\" data-diagnostic=\"HK-WV-001\" x=\"800\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">2</text>\n</svg>\n",
+      "fingerprint": "605e81c9a4d870cf",
+      "importDiagnostics": [
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Dupont-to-Board: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:Dupont-to-Board"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Dupont-to-Board: WireViz key \"image\" is not imported.",
+          "target": "connector:Dupont-to-Board"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Dupont-to-Servo: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:Dupont-to-Servo"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Dupont-to-Servo: WireViz key \"image\" is not imported.",
+          "target": "connector:Dupont-to-Servo"
+        }
+      ],
+      "reviewDiagnostics": [],
+      "bom": {
+        "headers": [
+          "Item number",
+          "Quantity",
+          "Unit of measure",
+          "Internal part number",
+          "Manufacturer",
+          "Manufacturer part number",
+          "Description",
+          "Category",
+          "Used by",
+          "Approved alternates",
+          "Notes"
+        ],
+        "rows": [
+          [
+            1,
+            2,
+            "ea",
+            null,
+            null,
+            "DuPont",
+            null,
+            "connector",
+            "connector:Dupont-to-Board; connector:Dupont-to-Servo",
+            "",
+            null
+          ]
+        ]
+      },
+      "cutList": {
+        "headers": [
+          "Wire ID",
+          "Signal",
+          "Gauge",
+          "Color",
+          "Stripe",
+          "Cut length",
+          "Finished length",
+          "Tolerance",
+          "From connector",
+          "From pin",
+          "To connector",
+          "To pin",
+          "Terminal A",
+          "Terminal B",
+          "Branch",
+          "Notes"
+        ],
+        "rows": [
+          [
+            "W1.1",
+            "PWM",
+            "20AWG",
+            "white",
+            null,
+            410,
+            410,
+            null,
+            "Dupont-to-Board",
+            "1",
+            "Dupont-to-Servo",
+            "1",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W1.2",
+            "+",
+            "20AWG",
+            "red",
+            null,
+            410,
+            410,
+            null,
+            "Dupont-to-Board",
+            "2",
+            "Dupont-to-Servo",
+            "2",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W1.3",
+            "GND",
+            "20AWG",
+            "black",
+            null,
+            410,
+            410,
+            null,
+            "Dupont-to-Board",
+            "3",
+            "Dupont-to-Servo",
+            "3",
+            "",
+            "",
+            "W1",
+            null
+          ]
+        ]
+      },
+      "testPlan": {
+        "harness": {
+          "id": "jpl-front-servo",
+          "revision": "A"
+        },
+        "tests": [
+          {
+            "id": "T-001",
+            "type": "continuity",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "PWM",
+            "wire": "W1.1"
+          },
+          {
+            "id": "T-002",
+            "type": "continuity",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "2"
+            },
+            "expected": "closed",
+            "net": "+",
+            "wire": "W1.2"
+          },
+          {
+            "id": "T-003",
+            "type": "continuity",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "3"
+            },
+            "expected": "closed",
+            "net": "GND",
+            "wire": "W1.3"
+          },
+          {
+            "id": "T-004",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Board",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "+ <-> GND"
+          },
+          {
+            "id": "T-005",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Board",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "+ <-> PWM"
+          },
+          {
+            "id": "T-006",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Dupont-to-Board",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "GND <-> PWM"
+          },
+          {
+            "id": "T-007",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Servo",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "+ <-> GND"
+          },
+          {
+            "id": "T-008",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Servo",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "+ <-> PWM"
+          },
+          {
+            "id": "T-009",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Servo",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "GND <-> PWM"
+          }
+        ]
+      },
+      "releaseReady": true
+    },
+    {
+      "slug": "middle-encoder",
+      "name": "Middle encoder",
+      "source": "connectors:\n  Molex-to-PCB:\n    <<: *molex\n  M+-to-Molex:\n    <<: *bullet\n    pinlabels: [M+]\n  M--to-Molex:\n    <<: *bullet\n    pinlabels: [M-]\n  Encoder-to-Molex:\n    <<: *jst_xh4\n\ncables:\n  W1:\n    <<: *motor\n    length: 3 cm\n\n  W2:\n    <<: *enc\n    length: 44 cm\n\nconnections:\n  -\n    - Molex-to-PCB: [1]\n    - W1: [1]\n    - M+-to-Molex: [1]\n  -\n    - Molex-to-PCB: [2]\n    - W1: [2]\n    - M--to-Molex: [1]\n  -\n    - Molex-to-PCB: [4, 3, 5, 6]\n    - W2: [1-4]\n    - Encoder-to-Molex: [4, 3, 2, 1]\n\nmetadata:\n  title: Middle Encoder Cable (x2)\n",
+      "title": "Middle Encoder Cable (x2)",
+      "hir": {
+        "schemaVersion": "0.1.0",
+        "harness": {
+          "id": "jpl-middle-encoder",
+          "revision": "A",
+          "units": "mm",
+          "metadata": {
+            "importedFrom": "wireviz",
+            "sourceTitle": "Middle Encoder Cable (x2)"
+          }
+        },
+        "connectors": [
+          {
+            "ref": "Encoder-to-Molex",
+            "mpn": "JST-XH",
+            "family": "JST-XH",
+            "gender": "receptacle",
+            "pinCount": 4,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "EnB"
+              },
+              {
+                "pin": "2",
+                "signal": "EnA"
+              },
+              {
+                "pin": "3",
+                "signal": "GND"
+              },
+              {
+                "pin": "4",
+                "signal": "5V"
+              }
+            ]
+          },
+          {
+            "ref": "M+-to-Molex",
+            "mpn": "Bullet",
+            "family": "Bullet",
+            "pinCount": 1,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "M+"
+              }
+            ]
+          },
+          {
+            "ref": "M--to-Molex",
+            "mpn": "Bullet",
+            "family": "Bullet",
+            "pinCount": 1,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "M-"
+              }
+            ]
+          },
+          {
+            "ref": "Molex-to-PCB",
+            "mpn": "Molex Mini-Fit Jr.",
+            "family": "Molex Mini-Fit Jr.",
+            "gender": "receptacle",
+            "pinCount": 6,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "M+"
+              },
+              {
+                "pin": "2",
+                "signal": "M-"
+              },
+              {
+                "pin": "3",
+                "signal": "G"
+              },
+              {
+                "pin": "4",
+                "signal": "5V"
+              },
+              {
+                "pin": "5",
+                "signal": "EnA"
+              },
+              {
+                "pin": "6",
+                "signal": "EnB"
+              }
+            ]
+          }
+        ],
+        "wires": [
+          {
+            "id": "W1.1",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "M+-to-Molex",
+              "pin": "1"
+            },
+            "gauge": "18AWG",
+            "color": "red",
+            "length": 30,
+            "signal": "M+",
+            "cable": "W1",
+            "conductor": "1"
+          },
+          {
+            "id": "W1.2",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "M--to-Molex",
+              "pin": "1"
+            },
+            "gauge": "18AWG",
+            "color": "black",
+            "length": 30,
+            "signal": "M-",
+            "cable": "W1",
+            "conductor": "2"
+          },
+          {
+            "id": "W2.1",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "gauge": "22AWG",
+            "color": "red",
+            "length": 440,
+            "signal": "5V",
+            "cable": "W2",
+            "conductor": "1"
+          },
+          {
+            "id": "W2.2",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "gauge": "22AWG",
+            "color": "black",
+            "length": 440,
+            "signal": "G",
+            "cable": "W2",
+            "conductor": "2"
+          },
+          {
+            "id": "W2.3",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "gauge": "22AWG",
+            "color": "blue",
+            "length": 440,
+            "signal": "EnA",
+            "cable": "W2",
+            "conductor": "3"
+          },
+          {
+            "id": "W2.4",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "gauge": "22AWG",
+            "color": "white",
+            "length": 440,
+            "signal": "EnB",
+            "cable": "W2",
+            "conductor": "4"
+          }
+        ],
+        "cables": [
+          {
+            "id": "W1",
+            "type": "2x18 awg",
+            "conductors": 2,
+            "cutLength": 30,
+            "wires": [
+              "W1.1",
+              "W1.2"
+            ]
+          },
+          {
+            "id": "W2",
+            "type": "4x22 awg",
+            "conductors": 4,
+            "cutLength": 440,
+            "wires": [
+              "W2.1",
+              "W2.2",
+              "W2.3",
+              "W2.4"
+            ]
+          }
+        ],
+        "branches": [],
+        "splices": [],
+        "labels": [],
+        "bom": [
+          {
+            "mpn": "Bullet",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 2,
+            "usedBy": [
+              "connector:M+-to-Molex",
+              "connector:M--to-Molex"
+            ]
+          },
+          {
+            "mpn": "JST-XH",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 1,
+            "usedBy": [
+              "connector:Encoder-to-Molex"
+            ]
+          },
+          {
+            "mpn": "Molex Mini-Fit Jr.",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 1,
+            "usedBy": [
+              "connector:Molex-to-PCB"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Molex-to-PCB: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:Molex-to-PCB"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Molex-to-PCB: WireViz key \"image\" is not imported.",
+            "target": "connector:Molex-to-PCB"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector M+-to-Molex: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:M+-to-Molex"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector M--to-Molex: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:M--to-Molex"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Encoder-to-Molex: WireViz key \"image\" is not imported.",
+            "target": "connector:Encoder-to-Molex"
+          },
+          {
+            "code": "HK-ELEC-003",
+            "severity": "error",
+            "message": "Power signals (5V) have no ground return wire."
+          },
+          {
+            "code": "HK-CONN-011",
+            "severity": "error",
+            "message": "Wire W2.2 carries G but pin Encoder-to-Molex.3 is assigned GND.",
+            "target": "connector:Encoder-to-Molex.pin:3",
+            "targets": [
+              "wire:W2.2"
+            ],
+            "data": {
+              "wireSignal": "G",
+              "pinSignal": "GND"
+            }
+          }
+        ],
+        "layoutHints": [],
+        "exports": {}
+      },
+      "schematic": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"888\" height=\"444\" viewBox=\"0 0 888 444\" font-family=\"ui-monospace, SFMono-Regular, Menlo, monospace\" font-size=\"12\">\n<rect width=\"888\" height=\"444\" fill=\"#fafafa\"/>\n<text x=\"48\" y=\"28\" font-size=\"18\" font-weight=\"bold\" fill=\"#111\">jpl-middle-encoder</text>\n<text x=\"48\" y=\"48\" fill=\"#555\">rev A · units mm · HIR 0.1.0</text>\n<path data-wire=\"W1.1\" d=\"M 634 278 C 574 278, 574 162, 634 162\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/>\n<text data-wire=\"W1.1\" x=\"634\" y=\"214\" fill=\"#333\" text-anchor=\"middle\">W1.1 · 18AWG</text>\n<path data-wire=\"W1.2\" d=\"M 634 298 C 507.3333333333333 298, 380.6666666666667 338, 254 338\" fill=\"none\" stroke=\"#222222\" stroke-width=\"2\"/>\n<text data-wire=\"W1.2\" x=\"444\" y=\"312\" fill=\"#333\" text-anchor=\"middle\">W1.2 · 18AWG</text>\n<path data-wire=\"W2.1\" d=\"M 634 338 C 507.3333333333333 338, 380.6666666666667 222, 254 222\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/>\n<text data-wire=\"W2.1\" x=\"444\" y=\"274\" fill=\"#333\" text-anchor=\"middle\">W2.1 · 22AWG</text>\n<path data-wire=\"W2.2\" d=\"M 634 318 C 507.3333333333333 318, 380.6666666666667 202, 254 202\" fill=\"none\" stroke=\"#d11\" stroke-width=\"2\" stroke-dasharray=\"6 3\"/>\n<text data-wire=\"W2.2\" x=\"444\" y=\"254\" fill=\"#d11\" text-anchor=\"middle\">W2.2 · 22AWG</text>\n<path data-wire=\"W2.3\" d=\"M 634 358 C 507.3333333333333 358, 380.6666666666667 182, 254 182\" fill=\"none\" stroke=\"blue\" stroke-width=\"2\"/>\n<text data-wire=\"W2.3\" x=\"444\" y=\"264\" fill=\"#333\" text-anchor=\"middle\">W2.3 · 22AWG</text>\n<path data-wire=\"W2.4\" d=\"M 634 378 C 507.3333333333333 378, 380.6666666666667 162, 254 162\" fill=\"none\" stroke=\"#b8b8b8\" stroke-width=\"2\"/>\n<text data-wire=\"W2.4\" x=\"444\" y=\"264\" fill=\"#333\" text-anchor=\"middle\">W2.4 · 22AWG</text>\n<rect data-connector=\"Encoder-to-Molex\" x=\"48\" y=\"112\" width=\"206\" height=\"128\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"58\" y=\"130\" font-weight=\"bold\" fill=\"#111\">Encoder-to-Molex</text>\n<text x=\"58\" y=\"145\" font-size=\"10\" fill=\"#777\">JST-XH · receptacle</text>\n<line x1=\"48\" y1=\"150\" x2=\"254\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"1\" cx=\"254\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"82\" y=\"166\" fill=\"#555\">EnB</text>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"2\" cx=\"254\" cy=\"182\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"186\" fill=\"#111\">2</text>\n<text x=\"82\" y=\"186\" fill=\"#555\">EnA</text>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"3\" cx=\"254\" cy=\"202\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"206\" fill=\"#111\">3</text>\n<text x=\"82\" y=\"206\" fill=\"#555\">GND</text>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"4\" cx=\"254\" cy=\"222\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"226\" fill=\"#111\">4</text>\n<text x=\"82\" y=\"226\" fill=\"#555\">5V</text>\n<rect data-connector=\"M+-to-Molex\" x=\"634\" y=\"112\" width=\"206\" height=\"68\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"644\" y=\"130\" font-weight=\"bold\" fill=\"#111\">M+-to-Molex</text>\n<text x=\"644\" y=\"145\" font-size=\"10\" fill=\"#777\">Bullet</text>\n<line x1=\"634\" y1=\"150\" x2=\"840\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"M+-to-Molex\" data-pin=\"1\" cx=\"634\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"668\" y=\"166\" fill=\"#555\">M+</text>\n<rect data-connector=\"M--to-Molex\" x=\"48\" y=\"288\" width=\"206\" height=\"68\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"58\" y=\"306\" font-weight=\"bold\" fill=\"#111\">M--to-Molex</text>\n<text x=\"58\" y=\"321\" font-size=\"10\" fill=\"#777\">Bullet</text>\n<line x1=\"48\" y1=\"326\" x2=\"254\" y2=\"326\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"M--to-Molex\" data-pin=\"1\" cx=\"254\" cy=\"338\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"342\" fill=\"#111\">1</text>\n<text x=\"82\" y=\"342\" fill=\"#555\">M-</text>\n<rect data-connector=\"Molex-to-PCB\" x=\"634\" y=\"228\" width=\"206\" height=\"168\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"644\" y=\"246\" font-weight=\"bold\" fill=\"#111\">Molex-to-PCB</text>\n<text x=\"644\" y=\"261\" font-size=\"10\" fill=\"#777\">Molex Mini-Fit Jr. · receptacle</text>\n<line x1=\"634\" y1=\"266\" x2=\"840\" y2=\"266\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"1\" cx=\"634\" cy=\"278\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"282\" fill=\"#111\">1</text>\n<text x=\"668\" y=\"282\" fill=\"#555\">M+</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"2\" cx=\"634\" cy=\"298\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"302\" fill=\"#111\">2</text>\n<text x=\"668\" y=\"302\" fill=\"#555\">M-</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"3\" cx=\"634\" cy=\"318\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"322\" fill=\"#111\">3</text>\n<text x=\"668\" y=\"322\" fill=\"#555\">G</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"4\" cx=\"634\" cy=\"338\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"342\" fill=\"#111\">4</text>\n<text x=\"668\" y=\"342\" fill=\"#555\">5V</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"5\" cx=\"634\" cy=\"358\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"362\" fill=\"#111\">5</text>\n<text x=\"668\" y=\"362\" fill=\"#555\">EnA</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"6\" cx=\"634\" cy=\"378\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"382\" fill=\"#111\">6</text>\n<text x=\"668\" y=\"382\" fill=\"#555\">EnB</text>\n<circle data-connector=\"Molex-to-PCB\" data-diagnostic=\"HK-WV-001\" cx=\"852\" cy=\"240\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"Molex-to-PCB\" data-diagnostic=\"HK-WV-001\" x=\"852\" y=\"243.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">2</text>\n<circle data-connector=\"M+-to-Molex\" data-diagnostic=\"HK-WV-001\" cx=\"852\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"M+-to-Molex\" data-diagnostic=\"HK-WV-001\" x=\"852\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">!</text>\n<circle data-connector=\"M--to-Molex\" data-diagnostic=\"HK-WV-001\" cx=\"36\" cy=\"300\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"M--to-Molex\" data-diagnostic=\"HK-WV-001\" x=\"36\" y=\"303.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">!</text>\n<circle data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-WV-001\" cx=\"36\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-WV-001\" x=\"36\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">!</text>\n<circle data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-CONN-011\" data-pin=\"3\" cx=\"36\" cy=\"202\" r=\"7\" fill=\"#d11\"/>\n<text data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-CONN-011\" data-pin=\"3\" x=\"36\" y=\"205.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">!</text>\n</svg>\n",
+      "fingerprint": "204231a47dc7e4ba",
+      "importDiagnostics": [
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Molex-to-PCB: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:Molex-to-PCB"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Molex-to-PCB: WireViz key \"image\" is not imported.",
+          "target": "connector:Molex-to-PCB"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector M+-to-Molex: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:M+-to-Molex"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector M--to-Molex: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:M--to-Molex"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Encoder-to-Molex: WireViz key \"image\" is not imported.",
+          "target": "connector:Encoder-to-Molex"
+        }
+      ],
+      "reviewDiagnostics": [
+        {
+          "code": "HK-ELEC-003",
+          "severity": "error",
+          "message": "Power signals (5V) have no ground return wire."
+        },
+        {
+          "code": "HK-CONN-011",
+          "severity": "error",
+          "message": "Wire W2.2 carries G but pin Encoder-to-Molex.3 is assigned GND.",
+          "target": "connector:Encoder-to-Molex.pin:3",
+          "targets": [
+            "wire:W2.2"
+          ],
+          "data": {
+            "wireSignal": "G",
+            "pinSignal": "GND"
+          }
+        }
+      ],
+      "bom": {
+        "headers": [
+          "Item number",
+          "Quantity",
+          "Unit of measure",
+          "Internal part number",
+          "Manufacturer",
+          "Manufacturer part number",
+          "Description",
+          "Category",
+          "Used by",
+          "Approved alternates",
+          "Notes"
+        ],
+        "rows": [
+          [
+            1,
+            2,
+            "ea",
+            null,
+            null,
+            "Bullet",
+            null,
+            "connector",
+            "connector:M+-to-Molex; connector:M--to-Molex",
+            "",
+            null
+          ],
+          [
+            2,
+            1,
+            "ea",
+            null,
+            null,
+            "JST-XH",
+            null,
+            "connector",
+            "connector:Encoder-to-Molex",
+            "",
+            null
+          ],
+          [
+            3,
+            1,
+            "ea",
+            null,
+            null,
+            "Molex Mini-Fit Jr.",
+            null,
+            "connector",
+            "connector:Molex-to-PCB",
+            "",
+            null
+          ]
+        ]
+      },
+      "cutList": {
+        "headers": [
+          "Wire ID",
+          "Signal",
+          "Gauge",
+          "Color",
+          "Stripe",
+          "Cut length",
+          "Finished length",
+          "Tolerance",
+          "From connector",
+          "From pin",
+          "To connector",
+          "To pin",
+          "Terminal A",
+          "Terminal B",
+          "Branch",
+          "Notes"
+        ],
+        "rows": [
+          [
+            "W1.1",
+            "M+",
+            "18AWG",
+            "red",
+            null,
+            30,
+            30,
+            null,
+            "Molex-to-PCB",
+            "1",
+            "M+-to-Molex",
+            "1",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W1.2",
+            "M-",
+            "18AWG",
+            "black",
+            null,
+            30,
+            30,
+            null,
+            "Molex-to-PCB",
+            "2",
+            "M--to-Molex",
+            "1",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W2.1",
+            "5V",
+            "22AWG",
+            "red",
+            null,
+            440,
+            440,
+            null,
+            "Molex-to-PCB",
+            "4",
+            "Encoder-to-Molex",
+            "4",
+            "",
+            "",
+            "W2",
+            null
+          ],
+          [
+            "W2.2",
+            "G",
+            "22AWG",
+            "black",
+            null,
+            440,
+            440,
+            null,
+            "Molex-to-PCB",
+            "3",
+            "Encoder-to-Molex",
+            "3",
+            "",
+            "",
+            "W2",
+            null
+          ],
+          [
+            "W2.3",
+            "EnA",
+            "22AWG",
+            "blue",
+            null,
+            440,
+            440,
+            null,
+            "Molex-to-PCB",
+            "5",
+            "Encoder-to-Molex",
+            "2",
+            "",
+            "",
+            "W2",
+            null
+          ],
+          [
+            "W2.4",
+            "EnB",
+            "22AWG",
+            "white",
+            null,
+            440,
+            440,
+            null,
+            "Molex-to-PCB",
+            "6",
+            "Encoder-to-Molex",
+            "1",
+            "",
+            "",
+            "W2",
+            null
+          ]
+        ]
+      },
+      "testPlan": {
+        "harness": {
+          "id": "jpl-middle-encoder",
+          "revision": "A"
+        },
+        "tests": [
+          {
+            "id": "T-001",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "M+-to-Molex",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "M+",
+            "wire": "W1.1"
+          },
+          {
+            "id": "T-002",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "M--to-Molex",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "M-",
+            "wire": "W1.2"
+          },
+          {
+            "id": "T-003",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "expected": "closed",
+            "net": "5V",
+            "wire": "W2.1"
+          },
+          {
+            "id": "T-004",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "expected": "closed",
+            "net": "G",
+            "wire": "W2.2"
+          },
+          {
+            "id": "T-005",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "expected": "closed",
+            "net": "EnA",
+            "wire": "W2.3"
+          },
+          {
+            "id": "T-006",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "EnB",
+            "wire": "W2.4"
+          },
+          {
+            "id": "T-007",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "5V <-> EnA"
+          },
+          {
+            "id": "T-008",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "5V <-> EnB"
+          },
+          {
+            "id": "T-009",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "5V <-> G"
+          },
+          {
+            "id": "T-010",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "EnA <-> EnB"
+          },
+          {
+            "id": "T-011",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "EnA <-> G"
+          },
+          {
+            "id": "T-012",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "EnB <-> G"
+          },
+          {
+            "id": "T-013",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "expected": "open",
+            "net": "5V <-> EnA"
+          },
+          {
+            "id": "T-014",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "expected": "open",
+            "net": "5V <-> EnB"
+          },
+          {
+            "id": "T-015",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "5V <-> G"
+          },
+          {
+            "id": "T-016",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "5V <-> M+"
+          },
+          {
+            "id": "T-017",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "5V <-> M-"
+          },
+          {
+            "id": "T-018",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "expected": "open",
+            "net": "EnA <-> EnB"
+          },
+          {
+            "id": "T-019",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "EnA <-> G"
+          },
+          {
+            "id": "T-020",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "EnA <-> M+"
+          },
+          {
+            "id": "T-021",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnA <-> M-"
+          },
+          {
+            "id": "T-022",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "EnB <-> G"
+          },
+          {
+            "id": "T-023",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "EnB <-> M+"
+          },
+          {
+            "id": "T-024",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnB <-> M-"
+          },
+          {
+            "id": "T-025",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "G <-> M+"
+          },
+          {
+            "id": "T-026",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "G <-> M-"
+          },
+          {
+            "id": "T-027",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "M+ <-> M-"
+          }
+        ]
+      },
+      "releaseReady": false
+    },
+    {
+      "slug": "back-encoder",
+      "name": "Back encoder",
+      "source": "connectors:\n  Molex-to-PCB:\n    <<: *molex\n  M+-to-Molex:\n    <<: *bullet\n    pinlabels: [M+]\n  M--to-Molex:\n    <<: *bullet\n    pinlabels: [M-]\n  Encoder-to-Molex:\n    <<: *femDP4\n\ncables:\n  W1:\n    <<: *motor\n    length: 41 cm\n\n  W2:\n    <<: *enc\n    length: 46 cm\n\nconnections:\n  -\n    - Molex-to-PCB: [1]\n    - W1: [1]\n    - M+-to-Molex: [1]\n  -\n    - Molex-to-PCB: [2]\n    - W1: [2]\n    - M--to-Molex: [1]\n  -\n    - Molex-to-PCB: [4, 3, 5, 6]\n    - W2: [1-4]\n    - Encoder-to-Molex: [1, 2, 3, 4]\n\nmetadata:\n  title: Back Encoder Cable (x2)\n",
+      "title": "Back Encoder Cable (x2)",
+      "hir": {
+        "schemaVersion": "0.1.0",
+        "harness": {
+          "id": "jpl-back-encoder",
+          "revision": "A",
+          "units": "mm",
+          "metadata": {
+            "importedFrom": "wireviz",
+            "sourceTitle": "Back Encoder Cable (x2)"
+          }
+        },
+        "connectors": [
+          {
+            "ref": "Encoder-to-Molex",
+            "mpn": "DuPont",
+            "family": "DuPont",
+            "gender": "receptacle",
+            "pinCount": 4,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "5V"
+              },
+              {
+                "pin": "2",
+                "signal": "GND"
+              },
+              {
+                "pin": "3",
+                "signal": "EnA"
+              },
+              {
+                "pin": "4",
+                "signal": "EnB"
+              }
+            ]
+          },
+          {
+            "ref": "M+-to-Molex",
+            "mpn": "Bullet",
+            "family": "Bullet",
+            "pinCount": 1,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "M+"
+              }
+            ]
+          },
+          {
+            "ref": "M--to-Molex",
+            "mpn": "Bullet",
+            "family": "Bullet",
+            "pinCount": 1,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "M-"
+              }
+            ]
+          },
+          {
+            "ref": "Molex-to-PCB",
+            "mpn": "Molex Mini-Fit Jr.",
+            "family": "Molex Mini-Fit Jr.",
+            "gender": "receptacle",
+            "pinCount": 6,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "M+"
+              },
+              {
+                "pin": "2",
+                "signal": "M-"
+              },
+              {
+                "pin": "3",
+                "signal": "G"
+              },
+              {
+                "pin": "4",
+                "signal": "5V"
+              },
+              {
+                "pin": "5",
+                "signal": "EnA"
+              },
+              {
+                "pin": "6",
+                "signal": "EnB"
+              }
+            ]
+          }
+        ],
+        "wires": [
+          {
+            "id": "W1.1",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "M+-to-Molex",
+              "pin": "1"
+            },
+            "gauge": "18AWG",
+            "color": "red",
+            "length": 410,
+            "signal": "M+",
+            "cable": "W1",
+            "conductor": "1"
+          },
+          {
+            "id": "W1.2",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "M--to-Molex",
+              "pin": "1"
+            },
+            "gauge": "18AWG",
+            "color": "black",
+            "length": 410,
+            "signal": "M-",
+            "cable": "W1",
+            "conductor": "2"
+          },
+          {
+            "id": "W2.1",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "gauge": "22AWG",
+            "color": "red",
+            "length": 460,
+            "signal": "5V",
+            "cable": "W2",
+            "conductor": "1"
+          },
+          {
+            "id": "W2.2",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "gauge": "22AWG",
+            "color": "black",
+            "length": 460,
+            "signal": "G",
+            "cable": "W2",
+            "conductor": "2"
+          },
+          {
+            "id": "W2.3",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "gauge": "22AWG",
+            "color": "blue",
+            "length": 460,
+            "signal": "EnA",
+            "cable": "W2",
+            "conductor": "3"
+          },
+          {
+            "id": "W2.4",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "gauge": "22AWG",
+            "color": "white",
+            "length": 460,
+            "signal": "EnB",
+            "cable": "W2",
+            "conductor": "4"
+          }
+        ],
+        "cables": [
+          {
+            "id": "W1",
+            "type": "2x18 awg",
+            "conductors": 2,
+            "cutLength": 410,
+            "wires": [
+              "W1.1",
+              "W1.2"
+            ]
+          },
+          {
+            "id": "W2",
+            "type": "4x22 awg",
+            "conductors": 4,
+            "cutLength": 460,
+            "wires": [
+              "W2.1",
+              "W2.2",
+              "W2.3",
+              "W2.4"
+            ]
+          }
+        ],
+        "branches": [],
+        "splices": [],
+        "labels": [],
+        "bom": [
+          {
+            "mpn": "Bullet",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 2,
+            "usedBy": [
+              "connector:M+-to-Molex",
+              "connector:M--to-Molex"
+            ]
+          },
+          {
+            "mpn": "DuPont",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 1,
+            "usedBy": [
+              "connector:Encoder-to-Molex"
+            ]
+          },
+          {
+            "mpn": "Molex Mini-Fit Jr.",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 1,
+            "usedBy": [
+              "connector:Molex-to-PCB"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Molex-to-PCB: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:Molex-to-PCB"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Molex-to-PCB: WireViz key \"image\" is not imported.",
+            "target": "connector:Molex-to-PCB"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector M+-to-Molex: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:M+-to-Molex"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector M--to-Molex: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:M--to-Molex"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Encoder-to-Molex: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:Encoder-to-Molex"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Encoder-to-Molex: WireViz key \"image\" is not imported.",
+            "target": "connector:Encoder-to-Molex"
+          },
+          {
+            "code": "HK-ELEC-003",
+            "severity": "error",
+            "message": "Power signals (5V) have no ground return wire."
+          },
+          {
+            "code": "HK-CONN-011",
+            "severity": "error",
+            "message": "Wire W2.2 carries G but pin Encoder-to-Molex.2 is assigned GND.",
+            "target": "connector:Encoder-to-Molex.pin:2",
+            "targets": [
+              "wire:W2.2"
+            ],
+            "data": {
+              "wireSignal": "G",
+              "pinSignal": "GND"
+            }
+          }
+        ],
+        "layoutHints": [],
+        "exports": {}
+      },
+      "schematic": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"888\" height=\"444\" viewBox=\"0 0 888 444\" font-family=\"ui-monospace, SFMono-Regular, Menlo, monospace\" font-size=\"12\">\n<rect width=\"888\" height=\"444\" fill=\"#fafafa\"/>\n<text x=\"48\" y=\"28\" font-size=\"18\" font-weight=\"bold\" fill=\"#111\">jpl-back-encoder</text>\n<text x=\"48\" y=\"48\" fill=\"#555\">rev A · units mm · HIR 0.1.0</text>\n<path data-wire=\"W1.1\" d=\"M 634 278 C 574 278, 574 162, 634 162\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/>\n<text data-wire=\"W1.1\" x=\"634\" y=\"214\" fill=\"#333\" text-anchor=\"middle\">W1.1 · 18AWG</text>\n<path data-wire=\"W1.2\" d=\"M 634 298 C 507.3333333333333 298, 380.6666666666667 338, 254 338\" fill=\"none\" stroke=\"#222222\" stroke-width=\"2\"/>\n<text data-wire=\"W1.2\" x=\"444\" y=\"312\" fill=\"#333\" text-anchor=\"middle\">W1.2 · 18AWG</text>\n<path data-wire=\"W2.1\" d=\"M 634 338 C 507.3333333333333 338, 380.6666666666667 162, 254 162\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/>\n<text data-wire=\"W2.1\" x=\"444\" y=\"244\" fill=\"#333\" text-anchor=\"middle\">W2.1 · 22AWG</text>\n<path data-wire=\"W2.2\" d=\"M 634 318 C 507.3333333333333 318, 380.6666666666667 182, 254 182\" fill=\"none\" stroke=\"#d11\" stroke-width=\"2\" stroke-dasharray=\"6 3\"/>\n<text data-wire=\"W2.2\" x=\"444\" y=\"244\" fill=\"#d11\" text-anchor=\"middle\">W2.2 · 22AWG</text>\n<path data-wire=\"W2.3\" d=\"M 634 358 C 507.3333333333333 358, 380.6666666666667 202, 254 202\" fill=\"none\" stroke=\"blue\" stroke-width=\"2\"/>\n<text data-wire=\"W2.3\" x=\"444\" y=\"274\" fill=\"#333\" text-anchor=\"middle\">W2.3 · 22AWG</text>\n<path data-wire=\"W2.4\" d=\"M 634 378 C 507.3333333333333 378, 380.6666666666667 222, 254 222\" fill=\"none\" stroke=\"#b8b8b8\" stroke-width=\"2\"/>\n<text data-wire=\"W2.4\" x=\"444\" y=\"294\" fill=\"#333\" text-anchor=\"middle\">W2.4 · 22AWG</text>\n<rect data-connector=\"Encoder-to-Molex\" x=\"48\" y=\"112\" width=\"206\" height=\"128\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"58\" y=\"130\" font-weight=\"bold\" fill=\"#111\">Encoder-to-Molex</text>\n<text x=\"58\" y=\"145\" font-size=\"10\" fill=\"#777\">DuPont · receptacle</text>\n<line x1=\"48\" y1=\"150\" x2=\"254\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"1\" cx=\"254\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"82\" y=\"166\" fill=\"#555\">5V</text>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"2\" cx=\"254\" cy=\"182\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"186\" fill=\"#111\">2</text>\n<text x=\"82\" y=\"186\" fill=\"#555\">GND</text>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"3\" cx=\"254\" cy=\"202\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"206\" fill=\"#111\">3</text>\n<text x=\"82\" y=\"206\" fill=\"#555\">EnA</text>\n<circle data-connector=\"Encoder-to-Molex\" data-pin=\"4\" cx=\"254\" cy=\"222\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"226\" fill=\"#111\">4</text>\n<text x=\"82\" y=\"226\" fill=\"#555\">EnB</text>\n<rect data-connector=\"M+-to-Molex\" x=\"634\" y=\"112\" width=\"206\" height=\"68\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"644\" y=\"130\" font-weight=\"bold\" fill=\"#111\">M+-to-Molex</text>\n<text x=\"644\" y=\"145\" font-size=\"10\" fill=\"#777\">Bullet</text>\n<line x1=\"634\" y1=\"150\" x2=\"840\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"M+-to-Molex\" data-pin=\"1\" cx=\"634\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"668\" y=\"166\" fill=\"#555\">M+</text>\n<rect data-connector=\"M--to-Molex\" x=\"48\" y=\"288\" width=\"206\" height=\"68\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"58\" y=\"306\" font-weight=\"bold\" fill=\"#111\">M--to-Molex</text>\n<text x=\"58\" y=\"321\" font-size=\"10\" fill=\"#777\">Bullet</text>\n<line x1=\"48\" y1=\"326\" x2=\"254\" y2=\"326\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"M--to-Molex\" data-pin=\"1\" cx=\"254\" cy=\"338\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"342\" fill=\"#111\">1</text>\n<text x=\"82\" y=\"342\" fill=\"#555\">M-</text>\n<rect data-connector=\"Molex-to-PCB\" x=\"634\" y=\"228\" width=\"206\" height=\"168\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"644\" y=\"246\" font-weight=\"bold\" fill=\"#111\">Molex-to-PCB</text>\n<text x=\"644\" y=\"261\" font-size=\"10\" fill=\"#777\">Molex Mini-Fit Jr. · receptacle</text>\n<line x1=\"634\" y1=\"266\" x2=\"840\" y2=\"266\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"1\" cx=\"634\" cy=\"278\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"282\" fill=\"#111\">1</text>\n<text x=\"668\" y=\"282\" fill=\"#555\">M+</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"2\" cx=\"634\" cy=\"298\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"302\" fill=\"#111\">2</text>\n<text x=\"668\" y=\"302\" fill=\"#555\">M-</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"3\" cx=\"634\" cy=\"318\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"322\" fill=\"#111\">3</text>\n<text x=\"668\" y=\"322\" fill=\"#555\">G</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"4\" cx=\"634\" cy=\"338\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"342\" fill=\"#111\">4</text>\n<text x=\"668\" y=\"342\" fill=\"#555\">5V</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"5\" cx=\"634\" cy=\"358\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"362\" fill=\"#111\">5</text>\n<text x=\"668\" y=\"362\" fill=\"#555\">EnA</text>\n<circle data-connector=\"Molex-to-PCB\" data-pin=\"6\" cx=\"634\" cy=\"378\" r=\"3\" fill=\"#333\"/>\n<text x=\"644\" y=\"382\" fill=\"#111\">6</text>\n<text x=\"668\" y=\"382\" fill=\"#555\">EnB</text>\n<circle data-connector=\"Molex-to-PCB\" data-diagnostic=\"HK-WV-001\" cx=\"852\" cy=\"240\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"Molex-to-PCB\" data-diagnostic=\"HK-WV-001\" x=\"852\" y=\"243.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">2</text>\n<circle data-connector=\"M+-to-Molex\" data-diagnostic=\"HK-WV-001\" cx=\"852\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"M+-to-Molex\" data-diagnostic=\"HK-WV-001\" x=\"852\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">!</text>\n<circle data-connector=\"M--to-Molex\" data-diagnostic=\"HK-WV-001\" cx=\"36\" cy=\"300\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"M--to-Molex\" data-diagnostic=\"HK-WV-001\" x=\"36\" y=\"303.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">!</text>\n<circle data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-WV-001\" cx=\"36\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-WV-001\" x=\"36\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">2</text>\n<circle data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-CONN-011\" data-pin=\"2\" cx=\"36\" cy=\"182\" r=\"7\" fill=\"#d11\"/>\n<text data-connector=\"Encoder-to-Molex\" data-diagnostic=\"HK-CONN-011\" data-pin=\"2\" x=\"36\" y=\"185.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">!</text>\n</svg>\n",
+      "fingerprint": "6e742c1fb260305d",
+      "importDiagnostics": [
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Molex-to-PCB: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:Molex-to-PCB"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Molex-to-PCB: WireViz key \"image\" is not imported.",
+          "target": "connector:Molex-to-PCB"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector M+-to-Molex: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:M+-to-Molex"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector M--to-Molex: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:M--to-Molex"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Encoder-to-Molex: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:Encoder-to-Molex"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Encoder-to-Molex: WireViz key \"image\" is not imported.",
+          "target": "connector:Encoder-to-Molex"
+        }
+      ],
+      "reviewDiagnostics": [
+        {
+          "code": "HK-ELEC-003",
+          "severity": "error",
+          "message": "Power signals (5V) have no ground return wire."
+        },
+        {
+          "code": "HK-CONN-011",
+          "severity": "error",
+          "message": "Wire W2.2 carries G but pin Encoder-to-Molex.2 is assigned GND.",
+          "target": "connector:Encoder-to-Molex.pin:2",
+          "targets": [
+            "wire:W2.2"
+          ],
+          "data": {
+            "wireSignal": "G",
+            "pinSignal": "GND"
+          }
+        }
+      ],
+      "bom": {
+        "headers": [
+          "Item number",
+          "Quantity",
+          "Unit of measure",
+          "Internal part number",
+          "Manufacturer",
+          "Manufacturer part number",
+          "Description",
+          "Category",
+          "Used by",
+          "Approved alternates",
+          "Notes"
+        ],
+        "rows": [
+          [
+            1,
+            2,
+            "ea",
+            null,
+            null,
+            "Bullet",
+            null,
+            "connector",
+            "connector:M+-to-Molex; connector:M--to-Molex",
+            "",
+            null
+          ],
+          [
+            2,
+            1,
+            "ea",
+            null,
+            null,
+            "DuPont",
+            null,
+            "connector",
+            "connector:Encoder-to-Molex",
+            "",
+            null
+          ],
+          [
+            3,
+            1,
+            "ea",
+            null,
+            null,
+            "Molex Mini-Fit Jr.",
+            null,
+            "connector",
+            "connector:Molex-to-PCB",
+            "",
+            null
+          ]
+        ]
+      },
+      "cutList": {
+        "headers": [
+          "Wire ID",
+          "Signal",
+          "Gauge",
+          "Color",
+          "Stripe",
+          "Cut length",
+          "Finished length",
+          "Tolerance",
+          "From connector",
+          "From pin",
+          "To connector",
+          "To pin",
+          "Terminal A",
+          "Terminal B",
+          "Branch",
+          "Notes"
+        ],
+        "rows": [
+          [
+            "W1.1",
+            "M+",
+            "18AWG",
+            "red",
+            null,
+            410,
+            410,
+            null,
+            "Molex-to-PCB",
+            "1",
+            "M+-to-Molex",
+            "1",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W1.2",
+            "M-",
+            "18AWG",
+            "black",
+            null,
+            410,
+            410,
+            null,
+            "Molex-to-PCB",
+            "2",
+            "M--to-Molex",
+            "1",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W2.1",
+            "5V",
+            "22AWG",
+            "red",
+            null,
+            460,
+            460,
+            null,
+            "Molex-to-PCB",
+            "4",
+            "Encoder-to-Molex",
+            "1",
+            "",
+            "",
+            "W2",
+            null
+          ],
+          [
+            "W2.2",
+            "G",
+            "22AWG",
+            "black",
+            null,
+            460,
+            460,
+            null,
+            "Molex-to-PCB",
+            "3",
+            "Encoder-to-Molex",
+            "2",
+            "",
+            "",
+            "W2",
+            null
+          ],
+          [
+            "W2.3",
+            "EnA",
+            "22AWG",
+            "blue",
+            null,
+            460,
+            460,
+            null,
+            "Molex-to-PCB",
+            "5",
+            "Encoder-to-Molex",
+            "3",
+            "",
+            "",
+            "W2",
+            null
+          ],
+          [
+            "W2.4",
+            "EnB",
+            "22AWG",
+            "white",
+            null,
+            460,
+            460,
+            null,
+            "Molex-to-PCB",
+            "6",
+            "Encoder-to-Molex",
+            "4",
+            "",
+            "",
+            "W2",
+            null
+          ]
+        ]
+      },
+      "testPlan": {
+        "harness": {
+          "id": "jpl-back-encoder",
+          "revision": "A"
+        },
+        "tests": [
+          {
+            "id": "T-001",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "M+-to-Molex",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "M+",
+            "wire": "W1.1"
+          },
+          {
+            "id": "T-002",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "M--to-Molex",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "M-",
+            "wire": "W1.2"
+          },
+          {
+            "id": "T-003",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "5V",
+            "wire": "W2.1"
+          },
+          {
+            "id": "T-004",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "expected": "closed",
+            "net": "G",
+            "wire": "W2.2"
+          },
+          {
+            "id": "T-005",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "expected": "closed",
+            "net": "EnA",
+            "wire": "W2.3"
+          },
+          {
+            "id": "T-006",
+            "type": "continuity",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "expected": "closed",
+            "net": "EnB",
+            "wire": "W2.4"
+          },
+          {
+            "id": "T-007",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "5V <-> EnA"
+          },
+          {
+            "id": "T-008",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "expected": "open",
+            "net": "5V <-> EnB"
+          },
+          {
+            "id": "T-009",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "5V <-> G"
+          },
+          {
+            "id": "T-010",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "expected": "open",
+            "net": "EnA <-> EnB"
+          },
+          {
+            "id": "T-011",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnA <-> G"
+          },
+          {
+            "id": "T-012",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-to-Molex",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-to-Molex",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnB <-> G"
+          },
+          {
+            "id": "T-013",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "expected": "open",
+            "net": "5V <-> EnA"
+          },
+          {
+            "id": "T-014",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "expected": "open",
+            "net": "5V <-> EnB"
+          },
+          {
+            "id": "T-015",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "5V <-> G"
+          },
+          {
+            "id": "T-016",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "5V <-> M+"
+          },
+          {
+            "id": "T-017",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "5V <-> M-"
+          },
+          {
+            "id": "T-018",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "expected": "open",
+            "net": "EnA <-> EnB"
+          },
+          {
+            "id": "T-019",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "EnA <-> G"
+          },
+          {
+            "id": "T-020",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "EnA <-> M+"
+          },
+          {
+            "id": "T-021",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "5"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnA <-> M-"
+          },
+          {
+            "id": "T-022",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "EnB <-> G"
+          },
+          {
+            "id": "T-023",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "EnB <-> M+"
+          },
+          {
+            "id": "T-024",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "6"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnB <-> M-"
+          },
+          {
+            "id": "T-025",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "G <-> M+"
+          },
+          {
+            "id": "T-026",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "G <-> M-"
+          },
+          {
+            "id": "T-027",
+            "type": "no-short",
+            "from": {
+              "connector": "Molex-to-PCB",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Molex-to-PCB",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "M+ <-> M-"
+          }
+        ]
+      },
+      "releaseReady": false
+    },
+    {
+      "slug": "back-servo",
+      "name": "Back servo",
+      "source": "connectors:\n  Dupont-to-Board:\n    <<: *femDP3\n  Dupont-to-Servo:\n    <<: *maleDP3\n\ncables:\n  W1:\n    <<: *servo\n    length: 54 cm\n\nconnections:\n  -\n    - Dupont-to-Board: [1-3]\n    - W1: [1-3]\n    - Dupont-to-Servo: [1-3]\n\nmetadata:\n  title: Back Servo Cable (x2)\n",
+      "title": "Back Servo Cable (x2)",
+      "hir": {
+        "schemaVersion": "0.1.0",
+        "harness": {
+          "id": "jpl-back-servo",
+          "revision": "A",
+          "units": "mm",
+          "metadata": {
+            "importedFrom": "wireviz",
+            "sourceTitle": "Back Servo Cable (x2)"
+          }
+        },
+        "connectors": [
+          {
+            "ref": "Dupont-to-Board",
+            "mpn": "DuPont",
+            "family": "DuPont",
+            "gender": "receptacle",
+            "pinCount": 3,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "PWM"
+              },
+              {
+                "pin": "2",
+                "signal": "+"
+              },
+              {
+                "pin": "3",
+                "signal": "GND"
+              }
+            ]
+          },
+          {
+            "ref": "Dupont-to-Servo",
+            "mpn": "DuPont",
+            "family": "DuPont",
+            "gender": "plug",
+            "pinCount": 3,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "PWM"
+              },
+              {
+                "pin": "2",
+                "signal": "+"
+              },
+              {
+                "pin": "3",
+                "signal": "GND"
+              }
+            ]
+          }
+        ],
+        "wires": [
+          {
+            "id": "W1.1",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "1"
+            },
+            "gauge": "20AWG",
+            "color": "white",
+            "length": 540,
+            "signal": "PWM",
+            "cable": "W1",
+            "conductor": "1"
+          },
+          {
+            "id": "W1.2",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "2"
+            },
+            "gauge": "20AWG",
+            "color": "red",
+            "length": 540,
+            "signal": "+",
+            "cable": "W1",
+            "conductor": "2"
+          },
+          {
+            "id": "W1.3",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "3"
+            },
+            "gauge": "20AWG",
+            "color": "black",
+            "length": 540,
+            "signal": "GND",
+            "cable": "W1",
+            "conductor": "3"
+          }
+        ],
+        "cables": [
+          {
+            "id": "W1",
+            "type": "3x20 awg",
+            "conductors": 3,
+            "cutLength": 540,
+            "wires": [
+              "W1.1",
+              "W1.2",
+              "W1.3"
+            ]
+          }
+        ],
+        "branches": [],
+        "splices": [],
+        "labels": [],
+        "bom": [
+          {
+            "mpn": "DuPont",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 2,
+            "usedBy": [
+              "connector:Dupont-to-Board",
+              "connector:Dupont-to-Servo"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Dupont-to-Board: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:Dupont-to-Board"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Dupont-to-Board: WireViz key \"image\" is not imported.",
+            "target": "connector:Dupont-to-Board"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Dupont-to-Servo: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:Dupont-to-Servo"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Dupont-to-Servo: WireViz key \"image\" is not imported.",
+            "target": "connector:Dupont-to-Servo"
+          }
+        ],
+        "layoutHints": [],
+        "exports": {}
+      },
+      "schematic": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"836\" height=\"268\" viewBox=\"0 0 836 268\" font-family=\"ui-monospace, SFMono-Regular, Menlo, monospace\" font-size=\"12\">\n<rect width=\"836\" height=\"268\" fill=\"#fafafa\"/>\n<text x=\"48\" y=\"28\" font-size=\"18\" font-weight=\"bold\" fill=\"#111\">jpl-back-servo</text>\n<text x=\"48\" y=\"48\" fill=\"#555\">rev A · units mm · HIR 0.1.0</text>\n<path data-wire=\"W1.1\" d=\"M 228 162 C 354.6666666666667 162, 481.3333333333333 162, 608 162\" fill=\"none\" stroke=\"#b8b8b8\" stroke-width=\"2\"/>\n<text data-wire=\"W1.1\" x=\"418\" y=\"156\" fill=\"#333\" text-anchor=\"middle\">W1.1 · 20AWG</text>\n<path data-wire=\"W1.2\" d=\"M 228 182 C 354.6666666666667 182, 481.3333333333333 182, 608 182\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/>\n<text data-wire=\"W1.2\" x=\"418\" y=\"176\" fill=\"#333\" text-anchor=\"middle\">W1.2 · 20AWG</text>\n<path data-wire=\"W1.3\" d=\"M 228 202 C 354.6666666666667 202, 481.3333333333333 202, 608 202\" fill=\"none\" stroke=\"#222222\" stroke-width=\"2\"/>\n<text data-wire=\"W1.3\" x=\"418\" y=\"196\" fill=\"#333\" text-anchor=\"middle\">W1.3 · 20AWG</text>\n<rect data-connector=\"Dupont-to-Board\" x=\"48\" y=\"112\" width=\"180\" height=\"108\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"58\" y=\"130\" font-weight=\"bold\" fill=\"#111\">Dupont-to-Board</text>\n<text x=\"58\" y=\"145\" font-size=\"10\" fill=\"#777\">DuPont · receptacle</text>\n<line x1=\"48\" y1=\"150\" x2=\"228\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"Dupont-to-Board\" data-pin=\"1\" cx=\"228\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"82\" y=\"166\" fill=\"#555\">PWM</text>\n<circle data-connector=\"Dupont-to-Board\" data-pin=\"2\" cx=\"228\" cy=\"182\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"186\" fill=\"#111\">2</text>\n<text x=\"82\" y=\"186\" fill=\"#555\">+</text>\n<circle data-connector=\"Dupont-to-Board\" data-pin=\"3\" cx=\"228\" cy=\"202\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"206\" fill=\"#111\">3</text>\n<text x=\"82\" y=\"206\" fill=\"#555\">GND</text>\n<rect data-connector=\"Dupont-to-Servo\" x=\"608\" y=\"112\" width=\"180\" height=\"108\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"618\" y=\"130\" font-weight=\"bold\" fill=\"#111\">Dupont-to-Servo</text>\n<text x=\"618\" y=\"145\" font-size=\"10\" fill=\"#777\">DuPont · plug</text>\n<line x1=\"608\" y1=\"150\" x2=\"788\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"Dupont-to-Servo\" data-pin=\"1\" cx=\"608\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"618\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"642\" y=\"166\" fill=\"#555\">PWM</text>\n<circle data-connector=\"Dupont-to-Servo\" data-pin=\"2\" cx=\"608\" cy=\"182\" r=\"3\" fill=\"#333\"/>\n<text x=\"618\" y=\"186\" fill=\"#111\">2</text>\n<text x=\"642\" y=\"186\" fill=\"#555\">+</text>\n<circle data-connector=\"Dupont-to-Servo\" data-pin=\"3\" cx=\"608\" cy=\"202\" r=\"3\" fill=\"#333\"/>\n<text x=\"618\" y=\"206\" fill=\"#111\">3</text>\n<text x=\"642\" y=\"206\" fill=\"#555\">GND</text>\n<circle data-connector=\"Dupont-to-Board\" data-diagnostic=\"HK-WV-001\" cx=\"36\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"Dupont-to-Board\" data-diagnostic=\"HK-WV-001\" x=\"36\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">2</text>\n<circle data-connector=\"Dupont-to-Servo\" data-diagnostic=\"HK-WV-001\" cx=\"800\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"Dupont-to-Servo\" data-diagnostic=\"HK-WV-001\" x=\"800\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">2</text>\n</svg>\n",
+      "fingerprint": "d581df72bb5b1605",
+      "importDiagnostics": [
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Dupont-to-Board: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:Dupont-to-Board"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Dupont-to-Board: WireViz key \"image\" is not imported.",
+          "target": "connector:Dupont-to-Board"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Dupont-to-Servo: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:Dupont-to-Servo"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Dupont-to-Servo: WireViz key \"image\" is not imported.",
+          "target": "connector:Dupont-to-Servo"
+        }
+      ],
+      "reviewDiagnostics": [],
+      "bom": {
+        "headers": [
+          "Item number",
+          "Quantity",
+          "Unit of measure",
+          "Internal part number",
+          "Manufacturer",
+          "Manufacturer part number",
+          "Description",
+          "Category",
+          "Used by",
+          "Approved alternates",
+          "Notes"
+        ],
+        "rows": [
+          [
+            1,
+            2,
+            "ea",
+            null,
+            null,
+            "DuPont",
+            null,
+            "connector",
+            "connector:Dupont-to-Board; connector:Dupont-to-Servo",
+            "",
+            null
+          ]
+        ]
+      },
+      "cutList": {
+        "headers": [
+          "Wire ID",
+          "Signal",
+          "Gauge",
+          "Color",
+          "Stripe",
+          "Cut length",
+          "Finished length",
+          "Tolerance",
+          "From connector",
+          "From pin",
+          "To connector",
+          "To pin",
+          "Terminal A",
+          "Terminal B",
+          "Branch",
+          "Notes"
+        ],
+        "rows": [
+          [
+            "W1.1",
+            "PWM",
+            "20AWG",
+            "white",
+            null,
+            540,
+            540,
+            null,
+            "Dupont-to-Board",
+            "1",
+            "Dupont-to-Servo",
+            "1",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W1.2",
+            "+",
+            "20AWG",
+            "red",
+            null,
+            540,
+            540,
+            null,
+            "Dupont-to-Board",
+            "2",
+            "Dupont-to-Servo",
+            "2",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W1.3",
+            "GND",
+            "20AWG",
+            "black",
+            null,
+            540,
+            540,
+            null,
+            "Dupont-to-Board",
+            "3",
+            "Dupont-to-Servo",
+            "3",
+            "",
+            "",
+            "W1",
+            null
+          ]
+        ]
+      },
+      "testPlan": {
+        "harness": {
+          "id": "jpl-back-servo",
+          "revision": "A"
+        },
+        "tests": [
+          {
+            "id": "T-001",
+            "type": "continuity",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "PWM",
+            "wire": "W1.1"
+          },
+          {
+            "id": "T-002",
+            "type": "continuity",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "2"
+            },
+            "expected": "closed",
+            "net": "+",
+            "wire": "W1.2"
+          },
+          {
+            "id": "T-003",
+            "type": "continuity",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "3"
+            },
+            "expected": "closed",
+            "net": "GND",
+            "wire": "W1.3"
+          },
+          {
+            "id": "T-004",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Board",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "+ <-> GND"
+          },
+          {
+            "id": "T-005",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Board",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "+ <-> PWM"
+          },
+          {
+            "id": "T-006",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Board",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Dupont-to-Board",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "GND <-> PWM"
+          },
+          {
+            "id": "T-007",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Servo",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "+ <-> GND"
+          },
+          {
+            "id": "T-008",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Servo",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "+ <-> PWM"
+          },
+          {
+            "id": "T-009",
+            "type": "no-short",
+            "from": {
+              "connector": "Dupont-to-Servo",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Dupont-to-Servo",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "GND <-> PWM"
+          }
+        ]
+      },
+      "releaseReady": true
+    },
+    {
+      "slug": "encoder-extension",
+      "name": "Encoder extension",
+      "source": "connectors:\n  DuPont:\n    <<: *maleDP4\n  Encoder-JST:\n    <<: *jst_xh4\n\ncables:\n  W1:\n    <<: *enc\n    length: 36 cm\n\nconnections:\n  -\n    - DuPont: [1-4]\n    - W1: [1-4]\n    - Encoder-JST: [4-1]\n\nmetadata:\n  title: Corner Encoder Extension Cable (x4)\n",
+      "title": "Corner Encoder Extension Cable (x4)",
+      "hir": {
+        "schemaVersion": "0.1.0",
+        "harness": {
+          "id": "jpl-encoder-extension",
+          "revision": "A",
+          "units": "mm",
+          "metadata": {
+            "importedFrom": "wireviz",
+            "sourceTitle": "Corner Encoder Extension Cable (x4)"
+          }
+        },
+        "connectors": [
+          {
+            "ref": "DuPont",
+            "mpn": "DuPont",
+            "family": "DuPont",
+            "gender": "plug",
+            "pinCount": 4,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "5V"
+              },
+              {
+                "pin": "2",
+                "signal": "GND"
+              },
+              {
+                "pin": "3",
+                "signal": "EnA"
+              },
+              {
+                "pin": "4",
+                "signal": "EnB"
+              }
+            ]
+          },
+          {
+            "ref": "Encoder-JST",
+            "mpn": "JST-XH",
+            "family": "JST-XH",
+            "gender": "receptacle",
+            "pinCount": 4,
+            "pins": [
+              {
+                "pin": "1",
+                "signal": "EnB"
+              },
+              {
+                "pin": "2",
+                "signal": "EnA"
+              },
+              {
+                "pin": "3",
+                "signal": "GND"
+              },
+              {
+                "pin": "4",
+                "signal": "5V"
+              }
+            ]
+          }
+        ],
+        "wires": [
+          {
+            "id": "W1.1",
+            "from": {
+              "connector": "DuPont",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "4"
+            },
+            "gauge": "22AWG",
+            "color": "red",
+            "length": 360,
+            "signal": "5V",
+            "cable": "W1",
+            "conductor": "1"
+          },
+          {
+            "id": "W1.2",
+            "from": {
+              "connector": "DuPont",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "3"
+            },
+            "gauge": "22AWG",
+            "color": "black",
+            "length": 360,
+            "signal": "GND",
+            "cable": "W1",
+            "conductor": "2"
+          },
+          {
+            "id": "W1.3",
+            "from": {
+              "connector": "DuPont",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "2"
+            },
+            "gauge": "22AWG",
+            "color": "blue",
+            "length": 360,
+            "signal": "EnA",
+            "cable": "W1",
+            "conductor": "3"
+          },
+          {
+            "id": "W1.4",
+            "from": {
+              "connector": "DuPont",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "1"
+            },
+            "gauge": "22AWG",
+            "color": "white",
+            "length": 360,
+            "signal": "EnB",
+            "cable": "W1",
+            "conductor": "4"
+          }
+        ],
+        "cables": [
+          {
+            "id": "W1",
+            "type": "4x22 awg",
+            "conductors": 4,
+            "cutLength": 360,
+            "wires": [
+              "W1.1",
+              "W1.2",
+              "W1.3",
+              "W1.4"
+            ]
+          }
+        ],
+        "branches": [],
+        "splices": [],
+        "labels": [],
+        "bom": [
+          {
+            "mpn": "DuPont",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 1,
+            "usedBy": [
+              "connector:DuPont"
+            ]
+          },
+          {
+            "mpn": "JST-XH",
+            "category": "connector",
+            "unitOfMeasure": "ea",
+            "quantity": 1,
+            "usedBy": [
+              "connector:Encoder-JST"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector DuPont: WireViz key \"show_pincount\" is not imported.",
+            "target": "connector:DuPont"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector DuPont: WireViz key \"image\" is not imported.",
+            "target": "connector:DuPont"
+          },
+          {
+            "code": "HK-WV-001",
+            "severity": "warning",
+            "message": "Connector Encoder-JST: WireViz key \"image\" is not imported.",
+            "target": "connector:Encoder-JST"
+          }
+        ],
+        "layoutHints": [],
+        "exports": {}
+      },
+      "schematic": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"836\" height=\"288\" viewBox=\"0 0 836 288\" font-family=\"ui-monospace, SFMono-Regular, Menlo, monospace\" font-size=\"12\">\n<rect width=\"836\" height=\"288\" fill=\"#fafafa\"/>\n<text x=\"48\" y=\"28\" font-size=\"18\" font-weight=\"bold\" fill=\"#111\">jpl-encoder-extension</text>\n<text x=\"48\" y=\"48\" fill=\"#555\">rev A · units mm · HIR 0.1.0</text>\n<path data-wire=\"W1.1\" d=\"M 228 162 C 354.6666666666667 162, 481.3333333333333 222, 608 222\" fill=\"none\" stroke=\"red\" stroke-width=\"2\"/>\n<text data-wire=\"W1.1\" x=\"418\" y=\"186\" fill=\"#333\" text-anchor=\"middle\">W1.1 · 22AWG</text>\n<path data-wire=\"W1.2\" d=\"M 228 182 C 354.6666666666667 182, 481.3333333333333 202, 608 202\" fill=\"none\" stroke=\"#222222\" stroke-width=\"2\"/>\n<text data-wire=\"W1.2\" x=\"418\" y=\"186\" fill=\"#333\" text-anchor=\"middle\">W1.2 · 22AWG</text>\n<path data-wire=\"W1.3\" d=\"M 228 202 C 354.6666666666667 202, 481.3333333333333 182, 608 182\" fill=\"none\" stroke=\"blue\" stroke-width=\"2\"/>\n<text data-wire=\"W1.3\" x=\"418\" y=\"186\" fill=\"#333\" text-anchor=\"middle\">W1.3 · 22AWG</text>\n<path data-wire=\"W1.4\" d=\"M 228 222 C 354.6666666666667 222, 481.3333333333333 162, 608 162\" fill=\"none\" stroke=\"#b8b8b8\" stroke-width=\"2\"/>\n<text data-wire=\"W1.4\" x=\"418\" y=\"186\" fill=\"#333\" text-anchor=\"middle\">W1.4 · 22AWG</text>\n<rect data-connector=\"DuPont\" x=\"48\" y=\"112\" width=\"180\" height=\"128\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"58\" y=\"130\" font-weight=\"bold\" fill=\"#111\">DuPont</text>\n<text x=\"58\" y=\"145\" font-size=\"10\" fill=\"#777\">DuPont · plug</text>\n<line x1=\"48\" y1=\"150\" x2=\"228\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"DuPont\" data-pin=\"1\" cx=\"228\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"82\" y=\"166\" fill=\"#555\">5V</text>\n<circle data-connector=\"DuPont\" data-pin=\"2\" cx=\"228\" cy=\"182\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"186\" fill=\"#111\">2</text>\n<text x=\"82\" y=\"186\" fill=\"#555\">GND</text>\n<circle data-connector=\"DuPont\" data-pin=\"3\" cx=\"228\" cy=\"202\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"206\" fill=\"#111\">3</text>\n<text x=\"82\" y=\"206\" fill=\"#555\">EnA</text>\n<circle data-connector=\"DuPont\" data-pin=\"4\" cx=\"228\" cy=\"222\" r=\"3\" fill=\"#333\"/>\n<text x=\"58\" y=\"226\" fill=\"#111\">4</text>\n<text x=\"82\" y=\"226\" fill=\"#555\">EnB</text>\n<rect data-connector=\"Encoder-JST\" x=\"608\" y=\"112\" width=\"180\" height=\"128\" rx=\"6\" fill=\"#ffffff\" stroke=\"#333\" stroke-width=\"1.5\"/>\n<text x=\"618\" y=\"130\" font-weight=\"bold\" fill=\"#111\">Encoder-JST</text>\n<text x=\"618\" y=\"145\" font-size=\"10\" fill=\"#777\">JST-XH · receptacle</text>\n<line x1=\"608\" y1=\"150\" x2=\"788\" y2=\"150\" stroke=\"#ddd\" stroke-width=\"1\"/>\n<circle data-connector=\"Encoder-JST\" data-pin=\"1\" cx=\"608\" cy=\"162\" r=\"3\" fill=\"#333\"/>\n<text x=\"618\" y=\"166\" fill=\"#111\">1</text>\n<text x=\"642\" y=\"166\" fill=\"#555\">EnB</text>\n<circle data-connector=\"Encoder-JST\" data-pin=\"2\" cx=\"608\" cy=\"182\" r=\"3\" fill=\"#333\"/>\n<text x=\"618\" y=\"186\" fill=\"#111\">2</text>\n<text x=\"642\" y=\"186\" fill=\"#555\">EnA</text>\n<circle data-connector=\"Encoder-JST\" data-pin=\"3\" cx=\"608\" cy=\"202\" r=\"3\" fill=\"#333\"/>\n<text x=\"618\" y=\"206\" fill=\"#111\">3</text>\n<text x=\"642\" y=\"206\" fill=\"#555\">GND</text>\n<circle data-connector=\"Encoder-JST\" data-pin=\"4\" cx=\"608\" cy=\"222\" r=\"3\" fill=\"#333\"/>\n<text x=\"618\" y=\"226\" fill=\"#111\">4</text>\n<text x=\"642\" y=\"226\" fill=\"#555\">5V</text>\n<circle data-connector=\"DuPont\" data-diagnostic=\"HK-WV-001\" cx=\"36\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"DuPont\" data-diagnostic=\"HK-WV-001\" x=\"36\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">2</text>\n<circle data-connector=\"Encoder-JST\" data-diagnostic=\"HK-WV-001\" cx=\"800\" cy=\"124\" r=\"7\" fill=\"#d97706\"/>\n<text data-connector=\"Encoder-JST\" data-diagnostic=\"HK-WV-001\" x=\"800\" y=\"127.5\" font-size=\"10\" font-weight=\"bold\" fill=\"#ffffff\" text-anchor=\"middle\">!</text>\n</svg>\n",
+      "fingerprint": "a0edcd752c25204f",
+      "importDiagnostics": [
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector DuPont: WireViz key \"show_pincount\" is not imported.",
+          "target": "connector:DuPont"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector DuPont: WireViz key \"image\" is not imported.",
+          "target": "connector:DuPont"
+        },
+        {
+          "code": "HK-WV-001",
+          "severity": "warning",
+          "message": "Connector Encoder-JST: WireViz key \"image\" is not imported.",
+          "target": "connector:Encoder-JST"
+        }
+      ],
+      "reviewDiagnostics": [],
+      "bom": {
+        "headers": [
+          "Item number",
+          "Quantity",
+          "Unit of measure",
+          "Internal part number",
+          "Manufacturer",
+          "Manufacturer part number",
+          "Description",
+          "Category",
+          "Used by",
+          "Approved alternates",
+          "Notes"
+        ],
+        "rows": [
+          [
+            1,
+            1,
+            "ea",
+            null,
+            null,
+            "DuPont",
+            null,
+            "connector",
+            "connector:DuPont",
+            "",
+            null
+          ],
+          [
+            2,
+            1,
+            "ea",
+            null,
+            null,
+            "JST-XH",
+            null,
+            "connector",
+            "connector:Encoder-JST",
+            "",
+            null
+          ]
+        ]
+      },
+      "cutList": {
+        "headers": [
+          "Wire ID",
+          "Signal",
+          "Gauge",
+          "Color",
+          "Stripe",
+          "Cut length",
+          "Finished length",
+          "Tolerance",
+          "From connector",
+          "From pin",
+          "To connector",
+          "To pin",
+          "Terminal A",
+          "Terminal B",
+          "Branch",
+          "Notes"
+        ],
+        "rows": [
+          [
+            "W1.1",
+            "5V",
+            "22AWG",
+            "red",
+            null,
+            360,
+            360,
+            null,
+            "DuPont",
+            "1",
+            "Encoder-JST",
+            "4",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W1.2",
+            "GND",
+            "22AWG",
+            "black",
+            null,
+            360,
+            360,
+            null,
+            "DuPont",
+            "2",
+            "Encoder-JST",
+            "3",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W1.3",
+            "EnA",
+            "22AWG",
+            "blue",
+            null,
+            360,
+            360,
+            null,
+            "DuPont",
+            "3",
+            "Encoder-JST",
+            "2",
+            "",
+            "",
+            "W1",
+            null
+          ],
+          [
+            "W1.4",
+            "EnB",
+            "22AWG",
+            "white",
+            null,
+            360,
+            360,
+            null,
+            "DuPont",
+            "4",
+            "Encoder-JST",
+            "1",
+            "",
+            "",
+            "W1",
+            null
+          ]
+        ]
+      },
+      "testPlan": {
+        "harness": {
+          "id": "jpl-encoder-extension",
+          "revision": "A"
+        },
+        "tests": [
+          {
+            "id": "T-001",
+            "type": "continuity",
+            "from": {
+              "connector": "DuPont",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "4"
+            },
+            "expected": "closed",
+            "net": "5V",
+            "wire": "W1.1"
+          },
+          {
+            "id": "T-002",
+            "type": "continuity",
+            "from": {
+              "connector": "DuPont",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "3"
+            },
+            "expected": "closed",
+            "net": "GND",
+            "wire": "W1.2"
+          },
+          {
+            "id": "T-003",
+            "type": "continuity",
+            "from": {
+              "connector": "DuPont",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "2"
+            },
+            "expected": "closed",
+            "net": "EnA",
+            "wire": "W1.3"
+          },
+          {
+            "id": "T-004",
+            "type": "continuity",
+            "from": {
+              "connector": "DuPont",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "1"
+            },
+            "expected": "closed",
+            "net": "EnB",
+            "wire": "W1.4"
+          },
+          {
+            "id": "T-005",
+            "type": "no-short",
+            "from": {
+              "connector": "DuPont",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "DuPont",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "5V <-> EnA"
+          },
+          {
+            "id": "T-006",
+            "type": "no-short",
+            "from": {
+              "connector": "DuPont",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "DuPont",
+              "pin": "4"
+            },
+            "expected": "open",
+            "net": "5V <-> EnB"
+          },
+          {
+            "id": "T-007",
+            "type": "no-short",
+            "from": {
+              "connector": "DuPont",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "DuPont",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "5V <-> GND"
+          },
+          {
+            "id": "T-008",
+            "type": "no-short",
+            "from": {
+              "connector": "DuPont",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "DuPont",
+              "pin": "4"
+            },
+            "expected": "open",
+            "net": "EnA <-> EnB"
+          },
+          {
+            "id": "T-009",
+            "type": "no-short",
+            "from": {
+              "connector": "DuPont",
+              "pin": "3"
+            },
+            "to": {
+              "connector": "DuPont",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnA <-> GND"
+          },
+          {
+            "id": "T-010",
+            "type": "no-short",
+            "from": {
+              "connector": "DuPont",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "DuPont",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "EnB <-> GND"
+          },
+          {
+            "id": "T-011",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-JST",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "2"
+            },
+            "expected": "open",
+            "net": "5V <-> EnA"
+          },
+          {
+            "id": "T-012",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-JST",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "5V <-> EnB"
+          },
+          {
+            "id": "T-013",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-JST",
+              "pin": "4"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "5V <-> GND"
+          },
+          {
+            "id": "T-014",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-JST",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "1"
+            },
+            "expected": "open",
+            "net": "EnA <-> EnB"
+          },
+          {
+            "id": "T-015",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-JST",
+              "pin": "2"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "EnA <-> GND"
+          },
+          {
+            "id": "T-016",
+            "type": "no-short",
+            "from": {
+              "connector": "Encoder-JST",
+              "pin": "1"
+            },
+            "to": {
+              "connector": "Encoder-JST",
+              "pin": "3"
+            },
+            "expected": "open",
+            "net": "EnB <-> GND"
+          }
+        ]
+      },
+      "releaseReady": true
+    }
+  ],
+  "summary": {
+    "designs": 6,
+    "conductors": 28,
+    "ruleCount": 37,
+    "packetFiles": 22
+  }
+}

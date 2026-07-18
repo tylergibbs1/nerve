@@ -3,11 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "changeset": "changeset",
+    "version-packages": "changeset version && bun install",
     "test": "vitest run",
     "typecheck": "for p in packages/* examples/*; do (cd $p && bunx tsc -p . --noEmit) || exit 1; done",
     "build": "bun run --filter './packages/*' build"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^25.9.2",
     "@types/pngjs": "^6.0.5",
@@ -23,5 +26,10 @@
     "packages/*",
     "examples/*",
     "eval-corpus"
-  ]
+  ],
+  "dependencies": {
+    "esbuild": "^0.28.1",
+    "qs": "^6.15.3",
+    "undici": "^8.7.0"
+  }
 }

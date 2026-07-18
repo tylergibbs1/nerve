@@ -1,10 +1,13 @@
+import { useEffect } from "react"
 import {
   createRootRouteWithContext,
+  HeadContent,
   Link,
   Outlet,
   type ErrorComponentProps
 } from "@tanstack/react-router"
 import type { QueryClient } from "@tanstack/react-query"
+import { warmCompiler } from "../lib/compile-client.js"
 import { Button } from "../ui/button.js"
 
 interface RouterContext {
@@ -12,6 +15,7 @@ interface RouterContext {
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
+  head: () => ({ meta: [{ title: "Grayhaven Nerve — Harnesses as code" }] }),
   component: RootLayout,
   errorComponent: RootError
 })
@@ -51,8 +55,18 @@ function RootError({ error, reset }: ErrorComponentProps) {
 }
 
 function RootLayout() {
+  useEffect(() => {
+    if ("requestIdleCallback" in window) {
+      const id = requestIdleCallback(() => warmCompiler())
+      return () => cancelIdleCallback(id)
+    }
+    const id = setTimeout(warmCompiler, 2000)
+    return () => clearTimeout(id)
+  }, [])
+
   return (
     <div className="app-shell">
+      <HeadContent />
       <header className="topbar">
         <Link to="/" className="brand">
           <GrayhavenMark />

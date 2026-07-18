@@ -1,0 +1,20 @@
+{
+  "name": "Grayhaven Nerve",
+  "short_name": "Nerve",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "/icon.png",
+      "type": "image/png",
+      "sizes": "96x96"
+    }
+  ]
+}

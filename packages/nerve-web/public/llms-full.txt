@@ -1,6 +1,6 @@
 # Grayhaven Nerve: complete documentation
 
-> Harnesses as code. This file embeds every docs page; no further fetches needed. Index: https://nerve-demo.vercel.app/llms.txt
+> Harnesses as code. This file embeds every docs page; no further fetches needed. Index: https://nerve.grayhavenindustries.com/llms.txt
 
 # Review a harness reproducibly
 

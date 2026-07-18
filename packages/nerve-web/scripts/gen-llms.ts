@@ -283,6 +283,15 @@ const full = `# Grayhaven Nerve: complete documentation
 ${fullParts.join("\n\n---\n\n")}
 `
 writeFileSync(join(OUT, "llms-full.txt"), full)
+
+// ── Sitemap: core routes + docs pages, all under the canonical domain ────
+const sitemapPaths = ["/", "/docs", "/showcase", "/projects", ...PAGES.map((p) => `/docs/${p.slug}`)]
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${sitemapPaths.map((p) => `  <url><loc>${SITE}${p}</loc></url>`).join("\n")}
+</urlset>
+`
+writeFileSync(join(OUT, "sitemap.xml"), sitemap)
 // Effect-free rules metadata for the docs page (importing builtinRules in
 // the client would drag the effect runtime into the route chunk).
 writeFileSync(
@@ -292,4 +301,4 @@ writeFileSync(
 // Count what was actually written rather than trusting a hand-kept
 // formula (it drifted to "+1" while the script grew rules/hir/library).
 const mirrorCount = readdirSync(join(OUT, "docs")).filter((f) => f.endsWith(".md")).length
-console.log(`generated llms.txt, llms-full.txt, ${mirrorCount} page mirrors`)
+console.log(`generated llms.txt, llms-full.txt, sitemap.xml, ${mirrorCount} page mirrors`)

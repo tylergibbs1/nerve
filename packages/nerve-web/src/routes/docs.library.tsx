@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import partsMeta from "../docs/parts-meta.json"
 
 export const Route = createFileRoute("/docs/library")({
+  head: () => ({ meta: [{ title: "Part library · Grayhaven Nerve" }] }),
   component: LibraryReference
 })
 

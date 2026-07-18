@@ -1,5 +1,13 @@
 import type { Diagnostic } from "@grayhaven/nerve"
+import { Link } from "@tanstack/react-router"
+import rulesMeta from "../docs/rules-meta.json"
+import { RULE_SUMMARIES } from "../docs/rule-summaries.js"
+import { jumpToSource } from "../lib/editor-registry.js"
 import { selectionFromTarget, setSelection } from "../lib/selection.js"
+
+// Inline remedy per HK code: the JSON carries code -> rule name, the
+// one-line summaries are keyed by name (same join as the rules reference).
+const ruleSummaries = new Map(rulesMeta.map((r) => [r.code, RULE_SUMMARIES[r.name] ?? r.name]))
 
 export function DiagnosticsPanel({
   diagnostics
@@ -37,12 +45,22 @@ export function DiagnosticsPanel({
                   tabIndex: 0,
                   onClick: () => setSelection(sel),
                   onKeyDown: (e: React.KeyboardEvent) => {
-                    if (e.key === "Enter") setSelection(sel)
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      setSelection(sel)
+                    }
                   }
                 }
               : {})}
           >
-            <span className="code">{d.code}</span>
+            <Link
+              to="/docs/rules"
+              className="code"
+              title={ruleSummaries.get(d.code)}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {d.code}
+            </Link>
             <span className="target">{d.target ?? ""}</span>
             <span className="message">{d.message}</span>
             {(refChips.length > 0 || d.data !== undefined) && (
@@ -58,6 +76,7 @@ export function DiagnosticsPanel({
                       disabled={tSel === undefined}
                       onClick={() => {
                         if (tSel !== undefined) setSelection(tSel)
+                        jumpToSource(t)
                       }}
                     >
                       {t}

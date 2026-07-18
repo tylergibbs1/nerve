@@ -13,7 +13,7 @@
  *   every pending request instead of stranding queries in `pending` forever.
  */
 import { queryOptions, type QueryClient } from "@tanstack/react-query"
-import { ENTRY_FILE, getFiles, getSource, isDirty } from "./sources.js"
+import { ENTRY_FILE, getFiles, getFileSource, getSource, isDirty } from "./sources.js"
 import { PROJECTS } from "./projects.js"
 import type { CompileRequest, CompileResponse, CompileResult } from "./compile-types.js"
 
@@ -27,6 +27,11 @@ const pendingExports = new Map<
   number,
   { resolve: (zip: Uint8Array) => void; reject: (e: Error) => void }
 >()
+
+/** Spawn the compile worker ahead of the first compile (idle warm-up). */
+export const warmCompiler = (): void => {
+  getWorker()
+}
 
 const getWorker = (): Worker => {
   if (worker === undefined) {
@@ -106,6 +111,22 @@ export const compileSource = (
 }
 
 /**
+ * Which file each project is currently compiling as its entrypoint. The
+ * compile query KEY stays ['compile', projectId]; this map (written by
+ * `compileProjectFile`, the single compile-a-file path) tells the queryFn
+ * which file to recompile on invalidation, so a refetch can never revert a
+ * variants/long.ts view to the entry-file SKU.
+ */
+const activeEntrypoints = new Map<string, string>()
+
+export const setActiveEntrypoint = (projectId: string, path: string): void => {
+  activeEntrypoints.set(projectId, path)
+}
+
+const activeEntrypoint = (projectId: string): string =>
+  activeEntrypoints.get(projectId) ?? ENTRY_FILE
+
+/**
  * Compile a specific project file as the ENTRYPOINT — "compile what I'm
  * looking at": opening variants/long.ts renders the long SKU. `text`
  * overrides that file's source.
@@ -115,12 +136,14 @@ export const compileProjectFile = (
   path: string,
   text: string,
   signal?: AbortSignal
-): Promise<CompileResult> =>
-  requestCompile(
+): Promise<CompileResult> => {
+  setActiveEntrypoint(projectId, path)
+  return requestCompile(
     projectId,
     { fsMap: { ...getFiles(projectId), [path]: text }, entrypoint: path },
     signal
   )
+}
 
 /** Build the full manufacturing packet (zip) in the worker. Byte-identical
  * to `nerve export` because it runs the same pure exporters on the same HIR. */
@@ -145,12 +168,18 @@ export const compileKeys = {
 export const compileQueryOptions = (projectId: string) =>
   queryOptions({
     queryKey: compileKeys.project(projectId),
-    // Compiles the *current* state: edited source when dirty (isDirty is
-    // re-evaluated at refetch time, so a refetch can never revert an editor
-    // compile), undefined otherwise so the worker uses its bundled design
-    // and skips loading the sucrase transform entirely.
-    queryFn: ({ signal }) =>
-      compileSource(projectId, isDirty(projectId) ? getSource(projectId) : undefined, signal),
+    // Compiles the *current* state: the active entrypoint (what the user is
+    // viewing — tab switches and AI edits record it via compileProjectFile)
+    // with that file's current source, both re-read at refetch time so a
+    // refetch can never revert an editor compile. On the entry file the
+    // bundled-design fast path is kept: undefined source when clean lets the
+    // worker skip loading the sucrase transform entirely.
+    queryFn: ({ signal }) => {
+      const path = activeEntrypoint(projectId)
+      return path === ENTRY_FILE
+        ? compileSource(projectId, isDirty(projectId) ? getSource(projectId) : undefined, signal)
+        : compileProjectFile(projectId, path, getFileSource(projectId, path), signal)
+    },
     staleTime: Infinity
   })
 

@@ -11,6 +11,16 @@ import {
 import { Button } from "../ui/button.js"
 
 export const Route = createFileRoute("/showcase")({
+  head: () => ({
+    meta: [
+      { title: "Showcase · Grayhaven Nerve" },
+      {
+        name: "description",
+        content:
+          "Six NASA/JPL Open Source Rover harnesses imported from WireViz and rebuilt with Nerve."
+      }
+    ]
+  }),
   component: RoverShowcase
 })
 

@@ -2,27 +2,11 @@
  * Selected-object inspector (PRD §11.3): a quiet overlay card describing
  * whatever is selected in any sheet, with a jump to its source definition.
  */
+import { useEffect } from "react"
 import type { Hir } from "@grayhaven/nerve"
 import { Button } from "../ui/button.js"
+import { jumpToSource } from "../lib/editor-registry.js"
 import { setSelection, useSelection, type Selection } from "../lib/selection.js"
-
-const jumpToSource = (id: string): void => {
-  const view = (window as unknown as {
-    __nerveEditor?: {
-      state: { doc: { toString(): string } }
-      dispatch(spec: object): void
-      focus(): void
-    }
-  }).__nerveEditor
-  if (view === undefined) return
-  const idx = view.state.doc.toString().indexOf(`"${id}"`)
-  if (idx === -1) return
-  view.dispatch({
-    selection: { anchor: idx + 1, head: idx + 1 + id.length },
-    scrollIntoView: true
-  })
-  view.focus()
-}
 
 const rows = (hir: Hir, sel: Selection): Array<readonly [string, string]> => {
   if (sel.kind === "wire") {
@@ -72,6 +56,24 @@ const rows = (hir: Hir, sel: Selection): Array<readonly [string, string]> => {
 
 export function Inspector({ hir }: { hir: Hir }) {
   const sel = useSelection()
+  // Escape clears the selection while the inspector is showing — unless a
+  // text field has focus (Escape there belongs to the field/editor).
+  useEffect(() => {
+    if (sel === undefined) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return
+      const t = e.target
+      if (
+        t instanceof HTMLElement &&
+        (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)
+      ) {
+        return
+      }
+      setSelection(undefined)
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [sel])
   if (sel === undefined) return null
   const data = rows(hir, sel)
   if (data.length === 0) return null

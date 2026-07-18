@@ -3,6 +3,7 @@ import { Markdown } from "../components/Markdown.js"
 import { docsContent } from "../docs/content.js"
 
 export const Route = createFileRoute("/docs/")({
+  head: () => ({ meta: [{ title: "Quickstart docs · Grayhaven Nerve" }] }),
   component: Page
 })
 

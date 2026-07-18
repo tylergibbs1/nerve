@@ -4,7 +4,9 @@
  * the initial map — motor-controller ships with its real variants/long.ts,
  * which only multi-file evaluation can open. Edits persist to localStorage
  * through a debounced writer (t3code's debounced-storage pattern) so a
- * reload never loses work.
+ * reload never loses work. The ephemeral "shared" project persists to
+ * sessionStorage instead: edits survive a reload but die with the tab,
+ * honoring the share-link contract.
  *
  * The entry file is "/main.harness.ts"; getSource/setSource keep their
  * original single-string contract by operating on it (the AI pane and
@@ -62,17 +64,19 @@ const editKey = (projectId: string, path: string): string => `${projectId} ${pat
 const storageKey = (projectId: string, path: string): string =>
   path === ENTRY_FILE ? `nerve:source:${projectId}` : `nerve:source:${projectId}:${path}`
 
+// The shared project is ephemeral — localStorage would keep it on disk
+// forever, contradicting the share-link contract. sessionStorage survives
+// a reload but dies with the tab, so shared edits go there instead.
+const store = (projectId: string): Storage =>
+  projectId === "shared" ? sessionStorage : localStorage
+
 const writePersist = (projectId: string, path: string, source: string): void => {
-  // The shared project is ephemeral — its source lives in the URL
-  // fragment, not localStorage. Persisting it would leave it on disk
-  // forever, contradicting the share-link contract.
-  if (projectId === "shared") return
   try {
     // Edits matching the bundled source don't need persisting.
     if (source === initial[projectId]?.[path]) {
-      localStorage.removeItem(storageKey(projectId, path))
+      store(projectId).removeItem(storageKey(projectId, path))
     } else {
-      localStorage.setItem(storageKey(projectId, path), source)
+      store(projectId).setItem(storageKey(projectId, path), source)
     }
   } catch {
     // Quota/privacy-mode failures degrade to session-only edits.
@@ -96,7 +100,7 @@ const persist = (projectId: string, path: string, source: string): void => {
 
 const fromStorage = (projectId: string, path: string): string | undefined => {
   try {
-    return localStorage.getItem(storageKey(projectId, path)) ?? undefined
+    return store(projectId).getItem(storageKey(projectId, path)) ?? undefined
   } catch {
     return undefined
   }
@@ -112,6 +116,25 @@ export const hasBundledSource = (projectId: string): boolean =>
 // link) register their file set here so tabs/compile see every file.
 const registered = new Map<string, ReadonlyArray<string>>()
 
+// The shared project's registered file list also lives in sessionStorage,
+// so a reload (which drops the in-memory map) can restore the tab set.
+const SHARED_FILES_KEY = "nerve:files:shared"
+let sharedHydrated = false
+const hydrateShared = (): void => {
+  if (sharedHydrated) return
+  sharedHydrated = true
+  try {
+    const raw = sessionStorage.getItem(SHARED_FILES_KEY)
+    if (raw === null) return
+    const paths = JSON.parse(raw) as unknown
+    if (Array.isArray(paths) && paths.every((p): p is string => typeof p === "string")) {
+      registered.set("shared", paths)
+    }
+  } catch {
+    // Privacy-mode/parse failures degrade to the pre-reload behavior.
+  }
+}
+
 /** Seed a project from a decoded share link: write each file's source and
  * record its file list (so listFiles shows all the tabs). */
 export const registerProjectFiles = (
@@ -120,10 +143,23 @@ export const registerProjectFiles = (
 ): void => {
   for (const [path, source] of Object.entries(files)) edited.set(editKey(projectId, path), source)
   registered.set(projectId, Object.keys(files))
+  if (projectId === "shared") {
+    // A fresh registration supersedes anything a previous link left behind.
+    sharedHydrated = true
+    try {
+      for (const [path, source] of Object.entries(files)) {
+        sessionStorage.setItem(storageKey(projectId, path), source)
+      }
+      sessionStorage.setItem(SHARED_FILES_KEY, JSON.stringify(Object.keys(files)))
+    } catch {
+      // Quota/privacy-mode failures degrade to session-only (no reload survival).
+    }
+  }
 }
 
 /** Project file listing, entry first (stable order for tabs). */
 export const listFiles = (projectId: string): ReadonlyArray<string> => {
+  if (projectId === "shared") hydrateShared()
   const paths = Object.keys(initial[projectId] ?? {})
   const registeredPaths = registered.get(projectId) ?? []
   const all = new Set([ENTRY_FILE, ...paths, ...registeredPaths])
@@ -194,7 +230,7 @@ export const resetSource = (projectId: string): string => {
   for (const path of listFiles(projectId)) {
     edited.delete(editKey(projectId, path))
     try {
-      localStorage.removeItem(storageKey(projectId, path))
+      store(projectId).removeItem(storageKey(projectId, path))
     } catch {
       // ignore
     }

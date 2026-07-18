@@ -15,6 +15,23 @@ import { gzipSync, gunzipSync, strFromU8, strToU8 } from "fflate"
 const VERSION = "v1"
 const ENTRY = "/main.harness.ts"
 
+// Decompression bomb defense: a few hundred KB of crafted fragment can
+// expand to hundreds of MB synchronously. The gzip trailer's ISIZE field
+// (last 4 bytes, little-endian, uncompressed size mod 2^32) tells us the
+// output size BEFORE inflating, so oversized payloads are rejected without
+// allocating anything.
+const MAX_DECODED_BYTES = 4 * 1024 * 1024
+
+const gunzipCapped = (bytes: Uint8Array): Uint8Array => {
+  // Minimum well-formed gzip: 10-byte header + 8-byte trailer.
+  if (bytes.length < 18) throw new Error("Share link too small")
+  const n = bytes.length
+  const isize =
+    (bytes[n - 4]! | (bytes[n - 3]! << 8) | (bytes[n - 2]! << 16) | (bytes[n - 1]! << 24)) >>> 0
+  if (isize > MAX_DECODED_BYTES) throw new Error("Share link too large")
+  return gunzipSync(bytes)
+}
+
 const toBase64Url = (bytes: Uint8Array): string => {
   let bin = ""
   for (const b of bytes) bin += String.fromCharCode(b)
@@ -37,7 +54,7 @@ export const decodeShareHash = (hash: string): string | undefined => {
   const payload = hash.startsWith("#") ? hash.slice(1) : hash
   if (!payload.startsWith(`${VERSION}.`)) return undefined
   try {
-    return strFromU8(gunzipSync(fromBase64Url(payload.slice(VERSION.length + 1))))
+    return strFromU8(gunzipCapped(fromBase64Url(payload.slice(VERSION.length + 1))))
   } catch {
     return undefined
   }
@@ -55,7 +72,7 @@ export const decodeShareFiles = (hash: string): Record<string, string> | undefin
   const payload = hash.startsWith("#") ? hash.slice(1) : hash
   if (payload.startsWith("v2.")) {
     try {
-      const obj = JSON.parse(strFromU8(gunzipSync(fromBase64Url(payload.slice(3))))) as unknown
+      const obj = JSON.parse(strFromU8(gunzipCapped(fromBase64Url(payload.slice(3))))) as unknown
       if (obj === null || typeof obj !== "object" || Array.isArray(obj)) return undefined
       const files: Record<string, string> = {}
       for (const [k, v] of Object.entries(obj)) {

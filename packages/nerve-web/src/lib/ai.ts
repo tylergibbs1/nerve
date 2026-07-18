@@ -15,8 +15,8 @@
 // The SDK loads lazily on the first agent turn (dynamic import below), so
 // none of it ships in the route chunk. Type-only imports are erased.
 import type { FunctionTool, Response, ResponseInputItem } from "openai/resources/responses/responses"
-import { compileSource, countDiagnostics } from "./compile-client.js"
-import { getSource, setSource } from "./sources.js"
+import { compileProjectFile, compileSource, countDiagnostics } from "./compile-client.js"
+import { ENTRY_FILE, getFiles, setFileSource } from "./sources.js"
 import type { CompileResult } from "./compile-types.js"
 import dslMeta from "../docs/dsl-meta.json"
 
@@ -46,20 +46,25 @@ const TOOLS: FunctionTool[] = [
     type: "function",
     name: "edit_harness_source",
     description:
-      "Apply a surgical patch to the current harness source. Use for focused changes. " +
-      "old_string must appear EXACTLY ONCE in the source (include surrounding lines to disambiguate). " +
+      "Apply a surgical patch to a project source file. Use for focused changes. " +
+      "old_string must appear EXACTLY ONCE in the file (include surrounding lines to disambiguate). " +
       "The result is compiled immediately; you get back the diagnostics.",
     strict: true,
     parameters: {
       type: "object",
       properties: {
+        path: {
+          // Nullable-and-required is strict mode's encoding of "optional".
+          type: ["string", "null"],
+          description: "Project file to modify, defaults to the entry file"
+        },
         old_string: {
           type: "string",
-          description: "Exact text to replace — must be unique in the source"
+          description: "Exact text to replace — must be unique in the file"
         },
         new_string: { type: "string", description: "Replacement text" }
       },
-      required: ["old_string", "new_string"],
+      required: ["path", "old_string", "new_string"],
       additionalProperties: false
     }
   },
@@ -67,15 +72,20 @@ const TOOLS: FunctionTool[] = [
     type: "function",
     name: "rewrite_harness_source",
     description:
-      "Replace the entire harness source. Use only when changes are too extensive for patches " +
-      "(roughly >30% of the file). The result is compiled immediately; you get back the diagnostics.",
+      "Replace the entire contents of a project source file. Use only when changes are too " +
+      "extensive for patches (roughly >30% of the file). The result is compiled immediately; " +
+      "you get back the diagnostics.",
     strict: true,
     parameters: {
       type: "object",
       properties: {
-        source: { type: "string", description: "The complete new TypeScript harness source" }
+        path: {
+          type: ["string", "null"],
+          description: "Project file to modify, defaults to the entry file"
+        },
+        source: { type: "string", description: "The complete new TypeScript file source" }
       },
-      required: ["source"],
+      required: ["path", "source"],
       additionalProperties: false
     }
   }
@@ -101,7 +111,7 @@ ${dslSurface()}
 Endpoints are written "CONNECTOR.pin" (e.g. "J1.3") or "SPLICE" for splice nodes. Gauges are strings like "20AWG". Connector parts declare wireGaugeRange {min, max} — wires must fit within it.
 
 Rules of engagement:
-- Each turn you receive the CURRENT source and its diagnostics. Make the user's change with the smallest edit that works: prefer edit_harness_source; rewrite only for sweeping changes.
+- Each turn you receive EVERY project file (labeled by path) and the current diagnostics. Make the user's change with the smallest edit that works: prefer edit_harness_source; rewrite only for sweeping changes. Edits target the entry file (${ENTRY_FILE}) unless you pass \`path\`.
 - Every tool call compiles immediately in a local worker and returns diagnostics. If your edit introduces errors (HK-* codes), fix them before finishing — you may not leave the harness worse than you found it. Pre-existing warnings you weren't asked to fix may remain.
 - The user watches the diagram update live as your edits land. Keep your prose to one or two sentences per turn; the diff and the diagram speak for themselves.
 - Current project: ${projectId}. Do not invent connector part numbers — reuse parts already defined in the source unless asked to add new ones.`
@@ -117,6 +127,16 @@ export interface ChatTurn {
   readonly role: "user" | "assistant"
   readonly text: string
   readonly tools?: ReadonlyArray<{ name: string; status: "ok" | "failed"; detail?: string }>
+}
+
+/** The whole project as turn context: every path listed, every file's full
+ * contents labeled by path (they are small TS files). */
+const projectContext = (projectId: string): string => {
+  const files = getFiles(projectId)
+  return [
+    `Files: ${Object.keys(files).join(", ")}`,
+    ...Object.entries(files).map(([path, source]) => `<file path="${path}">\n${source}\n</file>`)
+  ].join("\n")
 }
 
 const diagnosticsReport = (result: CompileResult): string => {
@@ -152,20 +172,45 @@ export const applyPatch = (
   return { ok: false, report: `Unknown tool: ${name}` }
 }
 
+/** Resolve the tool call's target file and patch it. Pure over the project's
+ * files map (exported for tests, like applyPatch): `path` defaults to the
+ * entry file; an unknown path is refused with the valid paths named. */
+export const applyProjectPatch = (
+  files: Readonly<Record<string, string>>,
+  name: string,
+  input: unknown
+): { ok: true; path: string; next: string } | { ok: false; report: string } => {
+  const path = (input as { path?: string | null }).path ?? ENTRY_FILE
+  const current = files[path]
+  if (current === undefined) {
+    return {
+      ok: false,
+      report: `Unknown path: ${path}. Valid paths: ${Object.keys(files).join(", ")}`
+    }
+  }
+  const patched = applyPatch(current, name, input)
+  return patched.ok ? { ok: true, path, next: patched.next } : patched
+}
+
 /** Apply a tool call, compile-verify it, and return the function output. */
 const applyTool = async (
   projectId: string,
   name: string,
   input: unknown
 ): Promise<{ ok: boolean; report: string; result?: CompileResult }> => {
-  const patched = applyPatch(getSource(projectId), name, input)
+  const patched = applyProjectPatch(getFiles(projectId), name, input)
   if (!patched.ok) return { ok: false, report: patched.report }
-  const next = patched.next
+  const { path, next } = patched
 
   try {
-    const result = await compileSource(projectId, next)
+    // Non-entry edits verify with the edited file as the entrypoint (so the
+    // user sees the SKU they're editing); entry edits keep the original path.
+    const result =
+      path === ENTRY_FILE
+        ? await compileSource(projectId, next)
+        : await compileProjectFile(projectId, path, next)
     // The edit compiles — land it (PRD §12: reviewable, live, rule-checked).
-    setSource(projectId, next)
+    setFileSource(projectId, path, next)
     return { ok: true, report: diagnosticsReport(result), result }
   } catch (e) {
     return {
@@ -204,7 +249,7 @@ export const runAgentTurn = async (
     ),
     {
       role: "user",
-      content: `${userMessage}\n\n<current_source>\n${getSource(projectId)}\n</current_source>`
+      content: `${userMessage}\n\n<project_files>\n${projectContext(projectId)}\n</project_files>`
     }
   ]
   let previousResponseId: string | undefined

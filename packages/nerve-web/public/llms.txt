@@ -4,18 +4,18 @@
 
 ## Docs
 
-- [Quickstart](https://nerve-demo.vercel.app/docs/quickstart.md)
-- [DSL Reference](https://nerve-demo.vercel.app/docs/dsl.md)
-- [TypeScript SDK](https://nerve-demo.vercel.app/docs/sdk.md)
-- [Validation Rules](https://nerve-demo.vercel.app/docs/rules.md) (generated from the shipped rule set)
-- [HIR Schema](https://nerve-demo.vercel.app/docs/hir.md) (generated from the live Effect schema)
-- [Part Library](https://nerve-demo.vercel.app/docs/library.md) (generated from the shipped connector library)
-- [CLI](https://nerve-demo.vercel.app/docs/cli.md)
-- [Artifacts](https://nerve-demo.vercel.app/docs/artifacts.md)
-- [AI Copilot](https://nerve-demo.vercel.app/docs/ai.md)
-- [Production Lifecycle](https://nerve-demo.vercel.app/docs/lifecycle.md)
+- [Quickstart](https://nerve.grayhavenindustries.com/docs/quickstart.md)
+- [DSL Reference](https://nerve.grayhavenindustries.com/docs/dsl.md)
+- [TypeScript SDK](https://nerve.grayhavenindustries.com/docs/sdk.md)
+- [Validation Rules](https://nerve.grayhavenindustries.com/docs/rules.md) (generated from the shipped rule set)
+- [HIR Schema](https://nerve.grayhavenindustries.com/docs/hir.md) (generated from the live Effect schema)
+- [Part Library](https://nerve.grayhavenindustries.com/docs/library.md) (generated from the shipped connector library)
+- [CLI](https://nerve.grayhavenindustries.com/docs/cli.md)
+- [Artifacts](https://nerve.grayhavenindustries.com/docs/artifacts.md)
+- [AI Copilot](https://nerve.grayhavenindustries.com/docs/ai.md)
+- [Production Lifecycle](https://nerve.grayhavenindustries.com/docs/lifecycle.md)
 
-Everything above embedded in one file: https://nerve-demo.vercel.app/llms-full.txt
+Everything above embedded in one file: https://nerve.grayhavenindustries.com/llms-full.txt
 
 ## Packages (npm)
 
@@ -30,4 +30,4 @@ Everything above embedded in one file: https://nerve-demo.vercel.app/llms-full.t
 ## Source
 
 - [GitHub repository](https://github.com/tylergibbs1/nerve): Apache-2.0, monorepo with golden-fixture examples
-- [Live editor](https://nerve-demo.vercel.app/projects): compiles in the browser (note: the app routes are client-rendered; use the .md variants above)
+- [Live editor](https://nerve.grayhavenindustries.com/projects): compiles in the browser (note: the app routes are client-rendered; use the .md variants above)
