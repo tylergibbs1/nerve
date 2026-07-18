@@ -69,12 +69,6 @@ function ProofStage({ proof }: { proof: JplHarnessProof }) {
         </div>
       </div>
 
-      <div className="showcase-transform" aria-hidden="true">
-        <span>Imported</span>
-        <div />
-        <strong>→</strong>
-      </div>
-
       <div className="showcase-evidence">
         <div className="showcase-panel-head">
           <div>
@@ -310,35 +304,19 @@ function RoverShowcase() {
           <h2>WireViz is the source. Nerve is the review step after it.</h2>
           <p>
             This is not a replacement pitch. WireViz gives engineers concise wiring docs and
-            diagrams. Nerve reads those files and adds repeatable checks and a reviewable record.
+            diagrams, and it is the input here. Nerve reads those files and adds what a release
+            review needs.
           </p>
         </div>
-        <table className="showcase-comparison" aria-label="WireViz and Nerve comparison">
-          <thead>
-            <tr className="comparison-head">
-              <th scope="col">WireViz</th>
-              <th scope="col">Nerve adds</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Readable YAML for connectors, cables, and connections</td>
-              <td>A typed model of the design with a stable fingerprint</td>
-            </tr>
-            <tr>
-              <td>Wiring diagrams and source-level documentation</td>
-              <td>{JPL_SHOWCASE_SUMMARY.ruleCount} repeatable checks that can block a release</td>
-            </tr>
-            <tr>
-              <td>A strong design description</td>
-              <td>BOM, cut list, labels, test plan, PDF, and machine-readable files</td>
-            </tr>
-            <tr>
-              <td>The facts the author supplied</td>
-              <td>A review record that says what was checked and what remains unknown</td>
-            </tr>
-          </tbody>
-        </table>
+        {/* Stated as what Nerve adds, not as a column-by-column scoreboard
+            against WireViz — the source deserves better than being the losing
+            half of a comparison table. */}
+        <ul className="showcase-adds">
+          <li>A typed model of the design with a stable fingerprint</li>
+          <li>{JPL_SHOWCASE_SUMMARY.ruleCount} repeatable checks that can block a release</li>
+          <li>BOM, cut list, labels, test plan, PDF, and machine-readable files</li>
+          <li>A review record that says what was checked and what remains unknown</li>
+        </ul>
       </section>
 
       <footer className="showcase-caveat">
