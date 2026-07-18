@@ -11,6 +11,7 @@ import { SourcePane } from "../components/SourcePane.js"
 import { RenderErrorBoundary } from "../components/RenderErrorBoundary.js"
 import { AiPane } from "../components/AiPane.js"
 import { useIsDirty } from "../lib/useSources.js"
+import { useMediaQuery } from "../lib/useMediaQuery.js"
 import { projectMeta } from "../lib/projects.js"
 
 export const Route = createFileRoute("/projects/$projectId")({
@@ -28,11 +29,37 @@ export const Route = createFileRoute("/projects/$projectId")({
     context.queryClient.ensureQueryData(compileQueryOptions(params.projectId)),
   pendingComponent: () => <div className="status">Compiling…</div>,
   errorComponent: ({ error }) => (
-    <div className="status error">Compile failed: {String(error)}</div>
-  ),
-  notFoundComponent: () => (
     <div className="status error">
-      No such project. <Link to="/projects">Back to projects</Link>
+      <span className="status-title">This harness didn&rsquo;t compile</span>
+      <p className="status-detail">
+        The compiler stopped before it produced a result, so there is nothing to show yet. Edit
+        the source and it will retry, or open another harness.
+      </p>
+      <span className="status-cause">{String(error)}</span>
+      <span className="status-actions">
+        <Button variant="secondary" size="xs" onClick={() => window.location.reload()}>
+          Retry
+        </Button>
+        <Button variant="outline" size="xs" asChild>
+          <Link to="/projects">All harnesses</Link>
+        </Button>
+      </span>
+    </div>
+  ),
+  // Not an error state: nothing broke, the address just doesn't name
+  // anything. The red heading belongs to failures.
+  notFoundComponent: () => (
+    <div className="status">
+      <span className="status-title">No harness by that name</span>
+      <p className="status-detail">
+        The link may be out of date, or the harness was opened from a share link that this
+        browser no longer holds.
+      </p>
+      <span className="status-actions">
+        <Button variant="secondary" size="xs" asChild>
+          <Link to="/projects">All harnesses</Link>
+        </Button>
+      </span>
     </div>
   ),
   component: ProjectWorkspace
@@ -155,9 +182,19 @@ function WorkspaceTabs({ projectId }: { projectId: string }) {
   )
 }
 
+// Three side-by-side panes need ~820px before the assistant is narrower than
+// its own hint text. Below that the split stacks instead of squeezing: one
+// switch at a named threshold, not three panes trying to stay fluid.
+const STACK_WORKSPACE_BELOW = "(max-width: 820px)"
+
 function ProjectWorkspace() {
   const { projectId } = Route.useParams()
-  const workspaceLayout = useDefaultLayout({ id: "nerve-workspace-3", panelIds: ["ai", "source", "render"] })
+  const stacked = useMediaQuery(STACK_WORKSPACE_BELOW)
+  // Separate ids: sizes saved for a row of panes are meaningless as a column.
+  const workspaceLayout = useDefaultLayout({
+    id: stacked ? "nerve-workspace-3-stacked" : "nerve-workspace-3",
+    panelIds: ["ai", "source", "render"]
+  })
   const { data } = useSuspenseQuery(compileQueryOptions(projectId))
   const dirty = useIsDirty(projectId)
 
@@ -176,19 +213,32 @@ function ProjectWorkspace() {
       </div>
       {/* Datum-style resizable split; layout persisted to localStorage. */}
       <Group
-        orientation="horizontal"
-        className="workspace-split"
+        key={stacked ? "stacked" : "split"}
+        orientation={stacked ? "vertical" : "horizontal"}
+        className={stacked ? "workspace-split workspace-split-stacked" : "workspace-split"}
         {...workspaceLayout}
       >
-        <Panel id="ai" defaultSize="22%" minSize="220px" maxSize="34%" collapsible>
+        <Panel
+          id="ai"
+          defaultSize={stacked ? "26%" : "22%"}
+          minSize={stacked ? "150px" : "220px"}
+          maxSize={stacked ? "50%" : "34%"}
+          collapsible
+        >
           <AiPane projectId={projectId} />
         </Panel>
         <Separator className="pane-handle" />
-        <Panel id="source" defaultSize="38%" minSize="300px" maxSize="60%" collapsible>
+        <Panel
+          id="source"
+          defaultSize={stacked ? "37%" : "38%"}
+          minSize={stacked ? "140px" : "300px"}
+          maxSize={stacked ? "60%" : "60%"}
+          collapsible
+        >
           <SourcePane projectId={projectId} />
         </Panel>
         <Separator className="pane-handle" />
-        <Panel id="render" minSize="25%">
+        <Panel id="render" minSize={stacked ? "160px" : "25%"}>
           <div className="render-pane">
             <RenderErrorBoundary resetKey={projectId}>
               <Outlet />

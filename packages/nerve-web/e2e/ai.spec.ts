@@ -116,8 +116,8 @@ test("a tool call patches the editor", async ({ page }) => {
   await expect(page.locator(".ai-msg.assistant")).toContainText("Renamed the label.", {
     timeout: 30_000
   })
-  // A tool pill rendered for the patch (edit_harness_source renders "patch").
-  await expect(page.locator(".ai-msg.assistant .ai-pills")).toContainText("patch")
+  // The step is reported in plain language, not as the tool's function name.
+  await expect(page.locator(".ai-msg.assistant .ai-steps")).toContainText("Edited the harness")
   // The editor document reflects the AI's edit (same automation hook as smoke).
   await expect.poll(
     async () =>

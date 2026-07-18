@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
+import { Button } from "../ui/button.js"
 import { decodeShareFiles } from "../lib/share.js"
 import { registerProjectFiles } from "../lib/sources.js"
 
@@ -32,14 +33,21 @@ function SharedLanding() {
   }, [navigate])
 
   return (
-    <div className="status">
-      {bad ? (
-        <>
-          This share link is malformed or empty. <Link to="/projects">Back to projects</Link>
-        </>
-      ) : (
-        "Opening shared harness…"
-      )}
-    </div>
+    bad ? (
+      <div className="status error">
+        <span className="status-title">This share link didn&rsquo;t open</span>
+        <p className="status-detail">
+          A share link carries the whole harness in the part of the URL after the #, so it breaks
+          if it was truncated in transit. Ask for the full link, or start from a harness here.
+        </p>
+        <span className="status-actions">
+          <Button variant="secondary" size="xs" asChild>
+            <Link to="/projects">All harnesses</Link>
+          </Button>
+        </span>
+      </div>
+    ) : (
+      <div className="status">Opening shared harness…</div>
+    )
   )
 }

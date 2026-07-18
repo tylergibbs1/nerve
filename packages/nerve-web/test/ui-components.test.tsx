@@ -7,7 +7,6 @@
 import { describe, expect, it } from "vitest"
 import { render, screen } from "@testing-library/react"
 import { Button } from "../src/ui/button.js"
-import { Badge } from "../src/ui/badge.js"
 import { Input } from "../src/ui/input.js"
 
 describe("Button", () => {
@@ -33,14 +32,6 @@ describe("Button", () => {
   it("disabled is a DOM attribute, not just paint", () => {
     render(<Button disabled>Busy</Button>)
     expect((screen.getByRole("button", { name: "Busy" }) as HTMLButtonElement).disabled).toBe(true)
-  })
-})
-
-describe("Badge", () => {
-  it("destructive variant carries the error treatment", () => {
-    render(<Badge variant="destructive">1 ERROR</Badge>)
-    const el = screen.getByText("1 ERROR")
-    expect(el.className).toContain("destructive")
   })
 })
 
