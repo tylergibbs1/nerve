@@ -9,13 +9,17 @@
 // - removed `glass` variant and `touch-target` (utility not ported)
 // - sans medium instead of the source's mono-uppercase voice: label
 //   hierarchy comes from weight and color; mono is reserved for code/IDs
+// - invisible ::after grows the hit area on coarse pointers to 44x44
+//   (WCAG 2.5.5) without changing the visual size (tokenbase pattern).
+//   FOOTGUN: two small buttons within ~16px of each other overlap hit
+//   areas on touch — the later-in-DOM one wins the tap.
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../lib/utils.js"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-[color,background-color,border-color,transform] duration-200 active:scale-[0.96] motion-reduce:active:scale-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
+  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium select-none transition-[color,background-color,border-color,transform] duration-200 motion-safe:active:scale-[0.96] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 after:absolute after:inset-0 after:content-[''] pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-full pointer-coarse:after:min-h-11 pointer-coarse:after:min-w-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
   {
     variants: {
       variant: {
