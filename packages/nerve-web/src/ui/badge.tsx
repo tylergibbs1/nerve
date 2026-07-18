@@ -3,16 +3,19 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../lib/utils.js"
 
+// Two-tier badge system (tokenbase): colored STATUS pills signal health —
+// the thing you act on; muted META tags mark properties with no value color.
 const badgeVariants = cva(
-  "inline-flex items-center whitespace-nowrap border px-2 py-0.5 text-[11px] font-medium select-none transition-colors focus:outline-hidden focus:ring-1 focus:ring-ring",
+  "inline-flex items-center whitespace-nowrap rounded-full border border-transparent px-2 py-0.5 text-[11px] font-medium select-none transition-colors focus:outline-hidden focus:ring-1 focus:ring-ring",
   {
     variants: {
       variant: {
-        default: "border-foreground/50 bg-transparent text-foreground",
-        secondary: "border-border bg-transparent text-muted-foreground",
+        default: "bg-muted text-muted-foreground",
+        secondary: "bg-muted/60 text-muted-foreground",
         outline: "border-border bg-transparent text-muted-foreground",
-        accent: "border-accent bg-transparent text-accent",
-        destructive: "border-destructive/50 bg-transparent text-destructive"
+        success: "border-success/30 bg-success/10 text-success",
+        accent: "border-warning/30 bg-warning/10 text-warning",
+        destructive: "border-destructive/30 bg-destructive/10 text-destructive"
       }
     },
     defaultVariants: {

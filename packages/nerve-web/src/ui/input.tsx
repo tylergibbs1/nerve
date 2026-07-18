@@ -1,4 +1,4 @@
-// Ported from grayhavenindustries/components/ui/input.tsx (underline style).
+// Tokenbase filled input: quiet fill, no border, ring on focus.
 import * as React from "react"
 import { cn } from "../lib/utils.js"
 
@@ -10,11 +10,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         type={type}
         className={cn(
-          "flex h-12 w-full border-0 border-b-2 border-border bg-transparent px-0 py-3 text-base font-normal text-foreground transition-colors duration-200",
+          "flex h-9 w-full min-w-0 rounded-full border border-transparent bg-input/50 px-3 py-1 text-sm font-normal text-foreground transition-[color,background-color,box-shadow] duration-200",
           "file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
-          "placeholder:text-sm placeholder:text-muted-foreground",
-          "hover:border-muted-foreground",
-          "focus-visible:outline-hidden focus-visible:border-accent",
+          "placeholder:text-muted-foreground",
+          "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
           "disabled:cursor-not-allowed disabled:opacity-50",
           "aria-invalid:border-destructive",
           className

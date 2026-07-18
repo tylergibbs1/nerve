@@ -19,26 +19,26 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../lib/utils.js"
 
 const buttonVariants = cva(
-  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium select-none transition-[color,background-color,border-color,transform] duration-200 motion-safe:active:scale-[0.96] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 after:absolute after:inset-0 after:content-[''] pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-full pointer-coarse:after:min-h-11 pointer-coarse:after:min-w-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
+  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium select-none transition-[color,background-color,border-color,transform] duration-200 motion-safe:active:scale-[0.96] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 after:absolute after:inset-0 after:content-[''] pointer-coarse:after:top-1/2 pointer-coarse:after:left-1/2 pointer-coarse:after:size-full pointer-coarse:after:min-h-11 pointer-coarse:after:min-w-11 pointer-coarse:after:-translate-x-1/2 pointer-coarse:after:-translate-y-1/2 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
   {
     variants: {
       variant: {
-        default: "bg-foreground text-background hover:bg-accent-hover hover:text-background",
+        default: "bg-foreground text-background hover:bg-foreground/85",
         outline:
-          "border border-foreground bg-transparent text-foreground hover:border-accent hover:text-accent",
+          "border border-border bg-transparent text-foreground hover:bg-muted",
         secondary:
-          "border border-border bg-transparent text-muted-foreground hover:border-accent hover:text-accent",
-        ghost: "bg-transparent text-muted-foreground hover:text-accent",
-        accent: "bg-accent text-background hover:bg-accent-hover",
-        destructive: "bg-destructive text-background hover:bg-destructive/90",
-        link: "text-foreground underline-offset-4 hover:underline hover:text-accent"
+          "bg-muted text-foreground hover:bg-[color-mix(in_oklch,var(--color-muted),var(--color-foreground)_6%)]",
+        ghost: "bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
+        accent: "bg-foreground text-background hover:bg-foreground/85",
+        destructive: "bg-destructive/10 text-destructive hover:bg-destructive/20",
+        link: "text-foreground underline-offset-4 hover:underline"
       },
       size: {
-        default: "h-12 px-8 py-3",
-        sm: "h-10 px-6",
+        default: "h-10 px-5",
+        sm: "h-8 px-4",
         xs: "h-7 px-3.5 text-xs",
-        lg: "h-14 px-12",
-        icon: "size-12"
+        lg: "h-12 px-7",
+        icon: "size-10"
       }
     },
     defaultVariants: {

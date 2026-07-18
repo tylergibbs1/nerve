@@ -1,63 +1,44 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
-/* Self-hosted brand fonts (copied from the company repo). Archivo is a
-   variable font: the 400-700 range declaration is required or browsers
-   synthesize bold for the 500-700 usages. */
-@font-face {
-  font-family: "Archivo";
-  src: url("/fonts/Archivo-var.woff2") format("woff2");
-  font-weight: 400 700;
-  font-display: swap;
-}
-@font-face {
-  font-family: "IBM Plex Mono";
-  src: url("/fonts/IBMPlexMono-400.woff2") format("woff2");
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: "IBM Plex Mono";
-  src: url("/fonts/IBMPlexMono-500.woff2") format("woff2");
-  font-weight: 500;
-  font-display: swap;
-}
-@font-face {
-  font-family: "IBM Plex Mono";
-  src: url("/fonts/IBMPlexMono-600.woff2") format("woff2");
-  font-weight: 600;
-  font-display: swap;
-}
-/* Tailwind theme bridge: the reference repo's shadcn-style semantic tokens
-   (globals.css + tailwind.config.ts) mapped onto Tailwind v4. The ported
-   ui/ components consume these via bg-foreground etc. */
+/* Tokenbase design language: near-black canvas, hierarchy from weight and
+   color, hairlines that divide but never frame, no shadows — depth is a
+   small luminance step (background -> card -> popover). Geist for display,
+   Inter for UI, Geist Mono reserved for code, IDs, and numbers. */
 @theme static {
-  --color-background: #000000;
-  --color-foreground: #ffffff;
-  --color-card: #0a0a0a;
-  --color-muted: #161616;
-  --color-muted-foreground: hsl(0 0% 53%);
-  --color-border: hsl(0 0% 14%);
-  --color-accent: #ffffff;
-  --color-accent-hover: #bfbfbf;
-  --color-destructive: #f87171;
-  --color-ring: #ffffff;
-  --font-sans: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  --color-background: oklch(0.145 0 0);
+  --color-foreground: oklch(0.946 0 0);
+  --color-card: oklch(0.213 0 0);
+  --color-popover: oklch(0.239 0 0);
+  --color-muted: oklch(0.26 0 0);
+  --color-muted-foreground: oklch(0.77 0 0);
+  --color-border: oklch(0.285 0 0);
+  --color-input: oklch(0.285 0 0);
+  --color-accent: oklch(0.946 0 0);
+  --color-accent-hover: #ffffff;
+  --color-destructive: oklch(0.704 0.191 22.216);
+  --color-success: oklch(0.751 0.149 162.48);
+  --color-warning: oklch(0.774 0.165 70.08);
+  --color-info: oklch(0.76 0.141 237.323);
+  --color-ring: oklch(0.724 0.187 49.178);
+  --font-sans: "Inter Variable", system-ui, -apple-system, sans-serif;
+  --font-heading: "Geist Variable", "Inter Variable", system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-card: 14px;
   --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.6, 1);
 }
 
-/* Grayhaven monochrome: true-black ground, panels step up, white signal,
-   signature gray, 14%-white hairlines. No brand hues; severity colors are
-   functional only. Hierarchy comes from weight and color, not from caps or
-   letterspacing — mono is reserved for code, IDs, and numbers. */
 :root {
   /* Legacy aliases — single source of truth is the @theme block above
      (Tailwind v4 emits @theme static tokens as runtime custom properties). */
   --bg: var(--color-background);
   --panel: var(--color-card);
+  --popover: var(--color-popover);
   --muted-bg: var(--color-muted);
   --border: var(--color-border);
   --text: var(--color-foreground);
@@ -65,11 +46,13 @@
   --accent: var(--color-accent);
   --accent-hover: var(--color-accent-hover);
   --error: var(--color-destructive);
-  --warning: #d4a017;
-  --info: #3b82f6;
-  --ok: #4ade80;
+  --warning: var(--color-warning);
+  --info: var(--color-info);
+  --ok: var(--color-success);
+  --ring: var(--color-ring);
   --mono: var(--font-mono);
   --sans: var(--font-sans);
+  --heading: var(--font-heading);
 }
 
 * { box-sizing: border-box; }
@@ -87,6 +70,8 @@ body {
   color: var(--text);
   background: var(--bg);
 }
+/* Display voice: Geist with tight tracking; body stays Inter. */
+h1, h2, h3 { font-family: var(--heading); }
 
 a { color: var(--accent); text-decoration: none; }
 /* Prose links get the link-accessible recipe; chrome links stay bare. */
@@ -97,20 +82,17 @@ a { color: var(--accent); text-decoration: none; }
 }
 .status a:hover { color: var(--accent-hover); text-decoration-thickness: 2px; }
 
-/* Focus doctrine (reference globals.css): visible ring on keyboard focus. */
+/* Focus: the sunset ring (tokenbase) — the one licensed accent in chrome. */
 *:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgb(255 255 255 / 0.2);
 }
 a:focus-visible, button:focus-visible, input:focus-visible,
 textarea:focus-visible, select:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
-  border-radius: 4px;
-  box-shadow: 0 0 0 4px rgb(255 255 255 / 0.2);
 }
-::selection { background: rgb(255 255 255 / 0.3); }
+::selection { background: rgb(255 255 255 / 0.25); }
 
 /* Quiet section label: sentence-case sans, muted — hierarchy from color,
    not caps or brackets. */
@@ -222,9 +204,7 @@ textarea:focus-visible, select:focus-visible {
   padding: 0 24px 4px;
   font-size: 11px;
   letter-spacing: 0.01em;
-  /* WCAG AA: was muted@60% (~2.8:1 on black, axe-serious); hsl 58% ≈ 5:1
-     keeps the quiet-gray doctrine while passing. */
-  color: hsl(0 0% 58%);
+  color: var(--muted);
 }
 .docs-llms {
   margin-top: auto;
@@ -232,8 +212,7 @@ textarea:focus-visible, select:focus-visible {
   /* Filename — mono is for code and IDs. */
   font-family: var(--mono);
   font-size: 11px;
-  /* WCAG AA on true black (axe-serious at muted@70%). */
-  color: hsl(0 0% 58%);
+  color: var(--muted);
 }
 .docs-llms:hover { color: var(--muted); }
 .docs-md-actions {
@@ -255,7 +234,7 @@ textarea:focus-visible, select:focus-visible {
 /* marked output: bare pre/table/inline-code get the doc voices. */
 .docs-body pre {
   background: var(--panel);
-  border: 1px solid var(--border);
+  border-radius: 8px;
   padding: 16px 18px;
   margin: 16px 0 0;
   font-family: var(--mono);
@@ -268,7 +247,7 @@ textarea:focus-visible, select:focus-visible {
 /* lezer classHighlighter tokens, grayscale doctrine (mirrors cm-theme). */
 .docs-body .tok-keyword, .docs-body .tok-moduleKeyword { color: #ffffff; font-weight: 600; }
 .docs-body .tok-string, .docs-body .tok-string2 { color: #bfbfbf; }
-.docs-body .tok-comment, .docs-body .tok-lineComment { color: hsl(0 0% 53%); }
+.docs-body .tok-comment, .docs-body .tok-lineComment { color: var(--muted); }
 .docs-body .tok-number, .docs-body .tok-bool { color: #d9d9d9; }
 .docs-body .tok-typeName, .docs-body .tok-className { color: #d9d9d9; }
 .docs-body .tok-propertyName, .docs-body .tok-variableName, .docs-body .tok-function { color: #ffffff; }
@@ -289,7 +268,7 @@ textarea:focus-visible, select:focus-visible {
 }
 .docs-body table td {
   padding: 10px 16px 10px 0;
-  border-bottom: 1px solid hsl(0 0% 14% / 0.6);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   color: var(--muted);
   vertical-align: top;
 }
@@ -345,7 +324,7 @@ textarea:focus-visible, select:focus-visible {
 
 .doc-code {
   background: var(--panel);
-  border: 1px solid var(--border);
+  border-radius: 8px;
   padding: 16px 18px;
   margin: 16px 0 0;
   font-family: var(--mono);
@@ -420,12 +399,12 @@ textarea:focus-visible, select:focus-visible {
   display: block;
   color: var(--text);
   background: var(--panel);
-  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
   padding: clamp(24px, 4vw, 40px);
   overflow: hidden;
-  transition: border-color 220ms var(--ease-default), transform 220ms var(--ease-out);
+  transition: background-color 220ms var(--ease-default), transform 220ms var(--ease-out);
 }
-.landing-proof:hover { border-color: var(--muted); transform: translateY(-3px); }
+.landing-proof:hover { background: var(--popover); transform: translateY(-3px); }
 .landing-proof-head {
   font-size: 12px;
   line-height: 1.4;
@@ -484,24 +463,26 @@ textarea:focus-visible, select:focus-visible {
 }
 .page-header { margin-bottom: 32px; }
 
+/* Cards are barely-lifted surfaces: luminance step, 14px corner, no border. */
 .project-card {
   display: block;
   padding: 24px;
   margin-top: 12px;
   background: var(--panel);
-  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
   color: inherit;
+  transition: background-color 200ms var(--ease-default);
+}
+.project-card:hover { background: var(--popover); }
+/* The "Start a harness" action: dashed hairline on the bare canvas. */
+.project-card-new {
+  background: transparent;
+  border: 1px dashed var(--border);
+  margin-bottom: 28px;
   transition: border-color 200ms var(--ease-default);
 }
-.project-card:hover { border-color: var(--muted); }
-/* The "Start a harness" action reads as primary: accented edge + tint. */
-.project-card-new {
-  border-style: dashed;
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
-  margin-bottom: 28px;
-}
-.project-card-new:hover { border-color: var(--accent); }
-.project-card-new h3 { color: var(--accent); }
+.project-card-new:hover { background: transparent; border-color: var(--muted); }
+.project-card-new h3 { color: var(--text); }
 .project-card h3 {
   margin: 0 0 4px;
   font-size: 16px;
@@ -516,9 +497,8 @@ textarea:focus-visible, select:focus-visible {
   margin-bottom: 28px;
   background: var(--text);
   color: var(--bg);
-  border-color: var(--text);
 }
-.project-card-featured:hover { border-color: var(--text); }
+.project-card-featured:hover { background: #ffffff; }
 .project-card-featured h3 { color: var(--bg); margin-top: 14px; }
 .project-card-featured p { color: hsl(0 0% 24%); max-width: 560px; }
 .project-card-label {
@@ -573,6 +553,8 @@ textarea:focus-visible, select:focus-visible {
   grid-template-columns: repeat(6, minmax(0, 1fr));
   margin-top: clamp(60px, 8vw, 104px);
   border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
 }
 .showcase-picker button {
   min-width: 0;
@@ -601,7 +583,7 @@ textarea:focus-visible, select:focus-visible {
   margin-top: 6px;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
-  color: hsl(0 0% 58%);
+  color: var(--muted);
 }
 .showcase-picker button[aria-pressed="true"] small { color: hsl(0 0% 30%); }
 
@@ -610,8 +592,9 @@ textarea:focus-visible, select:focus-visible {
   grid-template-columns: minmax(0, 1fr) 78px minmax(0, 1fr);
   min-height: 620px;
   margin-top: 16px;
-  border: 1px solid var(--border);
   background: var(--panel);
+  border-radius: var(--radius-card);
+  overflow: hidden;
 }
 .showcase-source, .showcase-evidence { min-width: 0; }
 .showcase-source { display: flex; flex-direction: column; }
@@ -905,13 +888,13 @@ textarea:focus-visible, select:focus-visible {
   color: var(--muted);
   font-size: 13px;
   white-space: nowrap;
-  border: 1px solid transparent;
-  transition: color 200ms var(--ease-default), border-color 200ms var(--ease-default),
+  border-radius: 9999px;
+  transition: color 200ms var(--ease-default),
     background-color 200ms var(--ease-default), scale 200ms var(--ease-default);
 }
-.tabs a:hover { color: var(--text); border-color: var(--border); }
+.tabs a:hover { color: var(--text); background: var(--muted-bg); }
 .tabs a:active { scale: 0.96; }
-.tabs a.active { color: var(--accent); border-color: var(--border); background: var(--panel); }
+.tabs a.active { color: var(--text); background: var(--muted-bg); }
 
 .workspace-body { flex: 1; min-height: 0; overflow: auto; padding: 16px 20px; }
 
@@ -941,7 +924,7 @@ textarea:focus-visible, select:focus-visible {
 .ai-hint { font-size: 12px; color: var(--muted); line-height: 1.6; text-wrap: pretty; }
 .ai-msg.user .ai-text {
   background: var(--muted-bg);
-  border: 1px solid var(--border);
+  border-radius: 10px;
   padding: 7px 10px;
   font-size: 14px;
   line-height: 1.5;
@@ -1005,10 +988,9 @@ textarea:focus-visible, select:focus-visible {
 .sheet-hint {
   margin-left: auto;
   font-size: 11px;
-  /* WCAG AA on true black (axe: 3.28:1 at muted@70%). */
-  color: hsl(0 0% 58%);
+  color: var(--muted);
 }
-.diagram-pane { background: #fafafa; border: 1px solid var(--border); overflow: auto; }
+.diagram-pane { background: #fafafa; border-radius: 8px; overflow: auto; }
 .diagram-pane svg { display: block; }
 /* Label halos: paint the sheet background behind annotation glyphs so
    labels stay legible where wires cross (paint-order, view-layer only). */
@@ -1032,8 +1014,8 @@ textarea:focus-visible, select:focus-visible {
   right: 12px;
   z-index: 5;
   width: 240px;
-  background: var(--panel);
-  border: 1px solid var(--border);
+  background: var(--popover);
+  border-radius: 8px;
   padding: 10px 12px 12px;
   font-family: var(--mono);
   font-size: 11px;
@@ -1055,9 +1037,10 @@ textarea:focus-visible, select:focus-visible {
   padding: 4px;
   list-style: none;
   width: 280px;
-  background: var(--panel);
-  border: 1px solid var(--border);
+  background: var(--popover);
+  border-radius: 8px;
 }
+.search-results button { border-radius: 6px; }
 .search-results button {
   display: flex;
   justify-content: space-between;
@@ -1099,14 +1082,13 @@ textarea:focus-visible, select:focus-visible {
 .diagnostics-panel .diag-chip {
   font-family: var(--mono);
   font-size: 10px;
-  padding: 1px 6px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  padding: 1px 7px;
+  border-radius: 9999px;
   background: var(--muted-bg);
   color: var(--muted);
 }
 .diagnostics-panel button.diag-chip.ref { cursor: pointer; color: var(--text); }
-.diagnostics-panel button.diag-chip.ref:hover:not(:disabled) { border-color: var(--text); }
+.diagnostics-panel button.diag-chip.ref:hover:not(:disabled) { background: var(--popover); }
 
 /* Net hover-highlighting (delegated; .hl set by SchematicSheet). */
 .diagram-pane svg [data-wire] { transition: opacity 150ms var(--ease-out); }
@@ -1137,7 +1119,7 @@ table.data th {
 }
 table.data td {
   padding: 10px 16px 10px 0;
-  border-bottom: 1px solid hsl(0 0% 14% / 0.6);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   font-variant-numeric: tabular-nums;
 }
 /* Column voices: codes/IDs mono, numerics tabular muted, prose sans. */
@@ -1145,8 +1127,8 @@ table.data td.cell-code { font-family: var(--mono); font-size: 12px; }
 table.data td.cell-num { color: var(--muted); }
 table.data td.cell-text { white-space: normal; }
 .table-empty {
-  border: 1px solid var(--border);
   background: var(--panel);
+  border-radius: 8px;
   padding: 32px 16px;
   text-align: center;
   font-size: 13px;
@@ -1171,15 +1153,14 @@ table.data td.cell-text { white-space: normal; }
   display: flex;
   gap: 10px;
   padding: 6px 0;
-  border-bottom: 1px solid hsl(0 0% 14% / 0.5);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
   font-size: 12px;
 }
 .diag:last-child { border-bottom: 0; }
 .diag .code { min-width: 110px; font-family: var(--mono); font-size: 11px; font-weight: 600; }
-/* Errors are the one licensed alarm hue; warnings = white "needs your
-   action", info descends to muted (monochrome doctrine). */
+/* Severity carries the semantic hue; info descends to muted. */
 .diag.error .code { color: var(--error); }
-.diag.warning .code { color: var(--accent); }
+.diag.warning .code { color: var(--warning); }
 .diag.info .code { color: var(--muted); }
 .diag .target { min-width: 180px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
 
@@ -1193,7 +1174,6 @@ table.data td.cell-text { white-space: normal; }
   height: 100%;
   min-height: 0;
   background: var(--panel);
-  border: 1px solid var(--border);
   overflow: hidden;
 }
 .source-toolbar {
@@ -1202,7 +1182,7 @@ table.data td.cell-text { white-space: normal; }
   gap: 12px;
   padding: 8px 12px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--panel);
 }
 .auto-toggle {
   display: inline-flex;

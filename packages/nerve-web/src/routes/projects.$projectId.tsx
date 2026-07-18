@@ -108,7 +108,7 @@ function ProjectWorkspace() {
           rev {data.hir.harness.revision} · {data.hir.connectors.length} connectors ·{" "}
           {data.hir.wires.length} wires
         </span>
-        <Badge variant={errors > 0 ? "destructive" : warnings > 0 ? "accent" : "default"}>
+        <Badge variant={errors > 0 ? "destructive" : warnings > 0 ? "accent" : "success"}>
           {errors > 0
             ? `${errors} error${errors === 1 ? "" : "s"}`
             : warnings > 0
