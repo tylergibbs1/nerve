@@ -247,8 +247,6 @@ function RoverShowcase() {
           <a href={sourceUrl} target="_blank" rel="noreferrer">
             View the original files ↗
           </a>
-          <span>{JPL_SOURCE.license}</span>
-          <span>commit {JPL_SOURCE.commit.slice(0, 8)}</span>
           <span>{JPL_SHOWCASE_SUMMARY.conductors} wires across six harnesses</span>
         </div>
       </header>
@@ -338,7 +336,7 @@ function RoverShowcase() {
           state. Findings are prompts for an engineer to review, not a claim that the physical rover
           harness is unsafe, not a certification, and not an endorsement by NASA or JPL. For example,{" "}
           <code>G</code> versus <code>GND</code> may be an intentional alias that an engineer should
-          confirm and record.
+          confirm and record. Source: {JPL_SOURCE.license}, commit {JPL_SOURCE.commit.slice(0, 8)}.
         </p>
       </footer>
     </article>

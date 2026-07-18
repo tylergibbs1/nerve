@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import rulesMeta from "../docs/rules-meta.json"
 
 export const Route = createFileRoute("/")({
   component: Landing
@@ -13,8 +12,7 @@ function Landing() {
         <h1>Check a harness before it reaches the floor.</h1>
         <p className="landing-sub">
           Nerve is an open-source compiler for wiring harnesses. Bring in a design and it produces
-          the diagrams, parts lists, and checks a review needs. A review tool, not a certification
-          service.
+          the diagrams, parts lists, and checks a review needs.
         </p>
         <div className="landing-links">
           <Link to="/showcase" className="landing-cta">
@@ -28,26 +26,16 @@ function Landing() {
       </section>
 
       <Link to="/showcase" className="landing-proof" aria-label="See the NASA JPL rover harness import">
-        <div className="landing-proof-head">
-          <span>Real-world test</span>
-          <span>NASA JPL open-source rover</span>
-        </div>
+        <span className="landing-proof-head">Tested on NASA JPL's open-source rover</span>
         <h2>WireViz → Nerve</h2>
         <p>Six real rover harnesses, imported from their original files. Nothing retyped.</p>
-        <div className="landing-proof-flow" aria-hidden="true">
-          <span>source.yml</span>
-          <i />
-          <strong>{rulesMeta.length} checks</strong>
-          <i />
-          <span>review</span>
-        </div>
         <dl>
           <div>
             <dt>Import</dt>
             <dd>0 errors</dd>
           </div>
           <div>
-            <dt>Front encoder</dt>
+            <dt>Review</dt>
             <dd>2 findings</dd>
           </div>
           <div>
