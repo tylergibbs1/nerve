@@ -10,7 +10,13 @@
  *   diff geometry.
  * - bom/cut-list/label-schedule/diagnostics.json: JSON twins of the CSVs.
  */
-import { computeNets, isPinEndpoint, type Hir, type HirEndpoint } from "@grayhaven/nerve"
+import {
+  analyzeElectricalConstraints,
+  computeNets,
+  isPinEndpoint,
+  type Hir,
+  type HirEndpoint
+} from "@grayhaven/nerve"
 import { schematicDrawing } from "./svg.js"
 import { boardDrawing } from "./board.js"
 import { connectorFacesDrawing } from "./faces.js"
@@ -31,7 +37,8 @@ export const graphJson = (hir: Hir): string => {
         kind: "pin",
         connector: c.ref,
         pin: p.pin,
-        ...(p.signal !== undefined ? { signal: p.signal } : {})
+        ...(p.signal !== undefined ? { signal: p.signal } : {}),
+        ...(p.electrical !== undefined ? { electrical: p.electrical } : {})
       }))
     ]),
     ...hir.splices.map((s) => ({ id: `splice:${s.id}`, kind: "splice", splice: s.id }))
@@ -49,7 +56,8 @@ export const graphJson = (hir: Hir): string => {
     id: `net-${i + 1}`,
     nodes: m
   }))
-  return stringify({ schemaVersion: hir.schemaVersion, harness: hir.harness, nodes, edges, nets })
+  const electrical = analyzeElectricalConstraints(hir)
+  return stringify({ schemaVersion: hir.schemaVersion, harness: hir.harness, nodes, edges, nets, electrical })
 }
 
 export const renderLayoutJson = (hir: Hir): string =>

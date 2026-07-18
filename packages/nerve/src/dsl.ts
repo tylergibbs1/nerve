@@ -17,6 +17,8 @@ import type {
   LabelDef,
   LabelProps,
   PinAssignments,
+  PinElectrical,
+  PinElectricalAssignments,
   PinRef,
   ProtectionDef,
   ProtectionProps,
@@ -36,6 +38,13 @@ const toRef = (target: ConnectorInstance | string): string =>
  */
 export type PinPartAssignment = string | Readonly<Record<string | number, string>>
 
+export interface ConnectorProps {
+  readonly pins: PinAssignments
+  readonly terminals?: PinPartAssignment
+  readonly seals?: PinPartAssignment
+  readonly electrical?: PinElectricalAssignments
+}
+
 const expandPinParts = (
   assignment: PinPartAssignment | undefined,
   pins: Readonly<Record<string, string>>
@@ -53,15 +62,15 @@ const expandPinParts = (
 export const connector = (
   ref: string,
   part: ConnectorPart,
-  opts: {
-    readonly pins: PinAssignments
-    readonly terminals?: PinPartAssignment
-    readonly seals?: PinPartAssignment
-  }
+  opts: ConnectorProps
 ): ConnectorInstance => {
   const pins: Record<string, string> = {}
   for (const [pin, signal] of Object.entries(opts.pins)) {
     pins[String(pin)] = signal
+  }
+  const electrical: Record<string, PinElectrical> = {}
+  for (const [pin, semantics] of Object.entries(opts.electrical ?? {})) {
+    electrical[String(pin)] = semantics
   }
   return {
     kind: "connector",
@@ -70,6 +79,7 @@ export const connector = (
     pins,
     terminals: expandPinParts(opts.terminals, pins),
     seals: expandPinParts(opts.seals, pins),
+    electrical,
     pin: (pin: string | number): PinRef => ({
       kind: "pin-ref",
       connector: ref,

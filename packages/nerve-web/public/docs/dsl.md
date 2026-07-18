@@ -49,7 +49,7 @@ This section is extracted from `@grayhaven/nerve` at build time; it cannot drift
 
 ```ts
 harness(id: string, props: HarnessProps)
-connector(ref: string, part: ConnectorPart, opts: { readonly pins: PinAssignments; readonly terminals?: PinPartAssignment; readonly seals?: PinPartAssignment })
+connector(ref: string, part: ConnectorPart, opts: ConnectorProps)
 wire(id: string, from: EndpointInput, to: EndpointInput, props: WireProps = {})
 splice(id: string, props: SpliceProps = {})
 cable(id: string, props: CableProps = {})
@@ -101,6 +101,25 @@ defineConfig(config: NerveConfig)
 | `insertionTool` | `string` | no |  |
 | `extractionTool` | `string` | no |  |
 | `provenance` | `PartProvenance` | no |  |
+
+### ConnectorProps
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `pins` | `PinAssignments` | yes |  |
+| `terminals` | `PinPartAssignment` | no |  |
+| `seals` | `PinPartAssignment` | no |  |
+| `electrical` | `PinElectricalAssignments` | no |  |
+
+### PinElectrical
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `role` | `ElectricalRole` | no |  |
+| `voltage` | `VoltageRange` | no |  |
+| `currentA` | `number` | no | Role-relative: source capacity or sink demand. |
+| `protocol` | `string` | no |  |
+| `differential` | `DifferentialSemantics` | no |  |
 
 ### WireProps
 

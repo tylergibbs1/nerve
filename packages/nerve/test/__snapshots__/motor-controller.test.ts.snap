@@ -83,21 +83,52 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
       "pinCount": 8,
       "pins": [
         {
+          "electrical": {
+            "currentA": 5,
+            "role": "source",
+            "voltage": {
+              "maxV": 26,
+              "minV": 22,
+            },
+          },
           "pin": "1",
           "signal": "VBAT_24V",
           "terminal": "43030-0007",
         },
         {
+          "electrical": {
+            "role": "ground",
+            "voltage": {
+              "maxV": 0,
+              "minV": 0,
+            },
+          },
           "pin": "2",
           "signal": "GND",
           "terminal": "43030-0007",
         },
         {
+          "electrical": {
+            "differential": {
+              "pair": "CAN",
+              "polarity": "positive",
+            },
+            "protocol": "CAN",
+            "role": "bidirectional",
+          },
           "pin": "3",
           "signal": "CAN_H",
           "terminal": "43030-0007",
         },
         {
+          "electrical": {
+            "differential": {
+              "pair": "CAN",
+              "polarity": "negative",
+            },
+            "protocol": "CAN",
+            "role": "bidirectional",
+          },
           "pin": "4",
           "signal": "CAN_L",
           "terminal": "43030-0007",
@@ -152,21 +183,52 @@ exports[`PRD §9.1 motor-controller harness (golden) > matches the golden HIR sn
       "pinCount": 8,
       "pins": [
         {
+          "electrical": {
+            "currentA": 4,
+            "role": "sink",
+            "voltage": {
+              "maxV": 30,
+              "minV": 18,
+            },
+          },
           "pin": "1",
           "signal": "VBAT_24V",
           "terminal": "43031-0007",
         },
         {
+          "electrical": {
+            "role": "ground",
+            "voltage": {
+              "maxV": 0,
+              "minV": 0,
+            },
+          },
           "pin": "2",
           "signal": "GND",
           "terminal": "43031-0007",
         },
         {
+          "electrical": {
+            "differential": {
+              "pair": "CAN",
+              "polarity": "positive",
+            },
+            "protocol": "CAN",
+            "role": "bidirectional",
+          },
           "pin": "3",
           "signal": "CAN_H",
           "terminal": "43031-0007",
         },
         {
+          "electrical": {
+            "differential": {
+              "pair": "CAN",
+              "polarity": "negative",
+            },
+            "protocol": "CAN",
+            "role": "bidirectional",
+          },
           "pin": "4",
           "signal": "CAN_L",
           "terminal": "43031-0007",

@@ -146,5 +146,29 @@
   {
     "code": "HK-ELEC-011",
     "name": "uncoveredNet"
+  },
+  {
+    "code": "HK-ELEC-012",
+    "name": "multipleElectricalSources"
+  },
+  {
+    "code": "HK-ELEC-013",
+    "name": "undrivenElectricalLoad"
+  },
+  {
+    "code": "HK-ELEC-014",
+    "name": "voltageDomainMismatch"
+  },
+  {
+    "code": "HK-ELEC-015",
+    "name": "protocolMismatch"
+  },
+  {
+    "code": "HK-ELEC-016",
+    "name": "differentialSemanticConflict"
+  },
+  {
+    "code": "HK-ELEC-017",
+    "name": "sourceCurrentExceeded"
   }
 ]

@@ -26,10 +26,9 @@ import {
   type BranchProps,
   type CableProps,
   type ConnectorPart,
+  type ConnectorProps,
   type HarnessDesign,
   type LabelProps,
-  type PinAssignments,
-  type PinPartAssignment,
   type SpliceProps,
   type WireProps
 } from "@grayhaven/nerve"
@@ -58,13 +57,7 @@ const endpoint = (s: string) => {
   return { kind: "pin-ref" as const, connector: s.slice(0, dot), pin: s.slice(dot + 1) }
 }
 
-export function Connector(props: {
-  ref: string
-  part: ConnectorPart
-  pins: PinAssignments
-  terminals?: PinPartAssignment
-  seals?: PinPartAssignment
-}) {
+export function Connector(props: { ref: string; part: ConnectorPart } & ConnectorProps) {
   const { ref, part, ...rest } = props
   return connectorFn(ref, part, rest)
 }

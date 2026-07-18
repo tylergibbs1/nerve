@@ -12,7 +12,9 @@ import {
   rule,
   type Hir,
   type HirEndpoint,
+  type ElectricalConstraintKind,
   type Rule,
+  type RuleContext,
   type ShopProfile
 } from "@grayhaven/nerve"
 import {
@@ -1070,6 +1072,74 @@ export const uncoveredNet: Rule = rule(
   { code: "HK-ELEC-011" }
 )
 
+/** Adapt one core electrical-analysis finding kind into an independently
+ * configurable built-in rule. The analyzer owns inference; this layer only
+ * assigns the stable rule name, code, and default severity. */
+const electricalFindingRule = (
+  name: string,
+  kind: ElectricalConstraintKind,
+  severity: typeof Err | typeof Warn,
+  code: string
+): Rule => rule(
+  name,
+  (ctx: RuleContext) => {
+    for (const finding of ctx.electrical.findings) {
+      if (finding.kind !== kind) continue
+      const [target, ...targets] = finding.pins
+      ctx.report({
+        severity,
+        message: finding.message,
+        ...(target !== undefined ? { target } : {}),
+        ...(targets.length > 0 ? { targets } : {}),
+        ...(finding.data !== undefined ? { data: finding.data } : {})
+      })
+    }
+  },
+  { code }
+)
+
+export const multipleElectricalSources: Rule = electricalFindingRule(
+  "multipleElectricalSources",
+  "multiple-sources",
+  Err,
+  "HK-ELEC-012"
+)
+
+export const undrivenElectricalLoad: Rule = electricalFindingRule(
+  "undrivenElectricalLoad",
+  "undriven-load",
+  Warn,
+  "HK-ELEC-013"
+)
+
+export const voltageDomainMismatch: Rule = electricalFindingRule(
+  "voltageDomainMismatch",
+  "voltage-incompatible",
+  Err,
+  "HK-ELEC-014"
+)
+
+export const protocolMismatch: Rule = electricalFindingRule(
+  "protocolMismatch",
+  "protocol-mismatch",
+  Err,
+  "HK-ELEC-015"
+)
+
+export const differentialSemanticConflict: Rule = electricalFindingRule(
+  "differentialSemanticConflict",
+  "differential-conflict",
+  Err,
+  "HK-ELEC-016"
+)
+
+export const sourceCurrentExceeded: Rule = electricalFindingRule(
+  "sourceCurrentExceeded",
+  "source-current-exceeded",
+  Err,
+  "HK-ELEC-017"
+)
+
 /**
  * builtinRules with the shop-capability rules parameterized by a profile
  * (PRD §10.5 config: `defineConfig({ shop: { … } })`). Same rule names and
@@ -1127,5 +1197,11 @@ export const builtinRules: ReadonlyArray<Rule> = [
   emcAggressorVictimShareBranch,
   wireTempBelowAmbient,
   overcurrentExceedsConductor,
-  uncoveredNet
+  uncoveredNet,
+  multipleElectricalSources,
+  undrivenElectricalLoad,
+  voltageDomainMismatch,
+  protocolMismatch,
+  differentialSemanticConflict,
+  sourceCurrentExceeded
 ]

@@ -11,7 +11,12 @@
  * downstream rules meaningless. Domain rules (gauge vs current, twisted
  * pairs, seals, ...) belong to `@grayhaven/nerve-rules`.
  */
-import type { HarnessDesign } from "./domain.js"
+import type {
+  DifferentialPolarity,
+  ElectricalRole,
+  HarnessDesign,
+  PinElectrical
+} from "./domain.js"
 import { Codes, DiagnosticSeverity, type Diagnostic } from "./diagnostics.js"
 import { canonicalGauge } from "./gauge.js"
 import { endpointLabel, HIR_SCHEMA_VERSION, refs } from "./hir/core.js"
@@ -47,6 +52,20 @@ const compareStrings = (a: string, b: string): number =>
 const isPositiveFinite = (value: number): boolean => Number.isFinite(value) && value > 0
 const isNonNegativeFinite = (value: number): boolean => Number.isFinite(value) && value >= 0
 const isPositiveInteger = (value: number): boolean => Number.isInteger(value) && value > 0
+
+const electricalRoles: ReadonlySet<string> = new Set([
+  "source",
+  "sink",
+  "bidirectional",
+  "passive",
+  "ground"
+])
+const isElectricalRole = (value: unknown): value is ElectricalRole =>
+  typeof value === "string" && electricalRoles.has(value)
+
+const differentialPolarities: ReadonlySet<string> = new Set(["positive", "negative"])
+const isDifferentialPolarity = (value: unknown): value is DifferentialPolarity =>
+  typeof value === "string" && differentialPolarities.has(value)
 
 /** Numeric conductor labels have one canonical identity (`01` and `1` are
  * the same conductor); non-numeric labels such as `red` remain valid. */
@@ -88,6 +107,154 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
     })
   }
 
+  const electricalByConnector = new Map<
+    string,
+    Readonly<Record<string, PinElectrical>>
+  >()
+
+  const normalizePinElectrical = (
+    connectorRef: string,
+    pins: Readonly<Record<string, string>>,
+    assignments: Readonly<Record<string, PinElectrical>>
+  ): Readonly<Record<string, PinElectrical>> => {
+    const normalized: Record<string, PinElectrical> = {}
+    for (const [pin, electrical] of Object.entries(assignments).sort(([a], [b]) =>
+      comparePins(a, b)
+    )) {
+      const target = refs.pin(connectorRef, pin)
+      if (!Object.hasOwn(pins, pin)) {
+        report(
+          Codes.InvalidPinElectrical,
+          `Connector ${connectorRef} assigns electrical semantics to pin ${pin}, but that pin is absent from its pin assignments.`,
+          target
+        )
+        continue
+      }
+
+      let voltage: PinElectrical["voltage"]
+      if (electrical.voltage !== undefined) {
+        const { minV, maxV } = electrical.voltage
+        const validMin = minV === undefined || Number.isFinite(minV)
+        const validMax = maxV === undefined || Number.isFinite(maxV)
+        if (!validMin) {
+          report(
+            Codes.InvalidPinElectrical,
+            `Pin ${connectorRef}.${pin} has a non-finite minimum voltage.`,
+            target,
+            DiagnosticSeverity.Error,
+            { data: { field: "voltage.minV" } }
+          )
+        }
+        if (!validMax) {
+          report(
+            Codes.InvalidPinElectrical,
+            `Pin ${connectorRef}.${pin} has a non-finite maximum voltage.`,
+            target,
+            DiagnosticSeverity.Error,
+            { data: { field: "voltage.maxV" } }
+          )
+        }
+        if (
+          validMin &&
+          validMax &&
+          minV !== undefined &&
+          maxV !== undefined &&
+          minV > maxV
+        ) {
+          report(
+            Codes.InvalidPinElectrical,
+            `Pin ${connectorRef}.${pin} has voltage range ${minV}–${maxV}V; minV must not exceed maxV.`,
+            target,
+            DiagnosticSeverity.Error,
+            { data: { minV, maxV } }
+          )
+        } else {
+          voltage = {
+            ...(validMin && minV !== undefined ? { minV } : {}),
+            ...(validMax && maxV !== undefined ? { maxV } : {})
+          }
+        }
+      }
+
+      let role: ElectricalRole | undefined
+      if (electrical.role !== undefined) {
+        if (!isElectricalRole(electrical.role)) {
+          report(
+            Codes.InvalidPinElectrical,
+            `Pin ${connectorRef}.${pin} has invalid electrical role "${String(electrical.role)}".`,
+            target,
+            DiagnosticSeverity.Error,
+            { data: { field: "role" } }
+          )
+        } else role = electrical.role
+      }
+
+      let currentA: number | undefined
+      if (electrical.currentA !== undefined) {
+        if (!isPositiveFinite(electrical.currentA)) {
+          report(
+            Codes.InvalidPinElectrical,
+            `Pin ${connectorRef}.${pin} has current ${electrical.currentA}A; currentA must be positive and finite.`,
+            target,
+            DiagnosticSeverity.Error,
+            { data: { field: "currentA" } }
+          )
+        } else currentA = electrical.currentA
+      }
+
+      let protocol: string | undefined
+      if (electrical.protocol !== undefined) {
+        protocol = electrical.protocol.trim()
+        if (protocol === "") {
+          report(
+            Codes.InvalidPinElectrical,
+            `Pin ${connectorRef}.${pin} has a blank protocol name.`,
+            target,
+            DiagnosticSeverity.Error,
+            { data: { field: "protocol" } }
+          )
+          protocol = undefined
+        }
+      }
+
+      let differential: PinElectrical["differential"]
+      if (electrical.differential !== undefined) {
+        const pair = electrical.differential.pair.trim()
+        const polarity = electrical.differential.polarity
+        if (pair === "") {
+          report(
+            Codes.InvalidPinElectrical,
+            `Pin ${connectorRef}.${pin} has a blank differential pair name.`,
+            target,
+            DiagnosticSeverity.Error,
+            { data: { field: "differential.pair" } }
+          )
+        }
+        if (!isDifferentialPolarity(polarity)) {
+          report(
+            Codes.InvalidPinElectrical,
+            `Pin ${connectorRef}.${pin} has invalid differential polarity "${String(polarity)}".`,
+            target,
+            DiagnosticSeverity.Error,
+            { data: { field: "differential.polarity" } }
+          )
+        }
+        if (pair !== "" && isDifferentialPolarity(polarity)) {
+          differential = { pair, polarity }
+        }
+      }
+
+      normalized[pin] = {
+        ...(role !== undefined ? { role } : {}),
+        ...(voltage !== undefined ? { voltage } : {}),
+        ...(currentA !== undefined ? { currentA } : {}),
+        ...(protocol !== undefined ? { protocol } : {}),
+        ...(differential !== undefined ? { differential } : {})
+      }
+    }
+    return normalized
+  }
+
   // --- Connectors ---------------------------------------------------------
   const connectorByRef = new Map<string, (typeof design.connectors)[number]>()
   for (const c of design.connectors) {
@@ -100,6 +267,10 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
       continue
     }
     connectorByRef.set(c.ref, c)
+    electricalByConnector.set(
+      c.ref,
+      normalizePinElectrical(c.ref, c.pins, c.electrical)
+    )
     if (!isPositiveInteger(c.part.pinCount)) {
       report(
         Codes.InvalidConnectorQuantity,
@@ -175,7 +346,8 @@ export const compileDesign = (design: HarnessDesign): CompileResult => {
               pin,
               signal,
               terminal: c.terminals[pin],
-              seal: c.seals[pin]
+              seal: c.seals[pin],
+              electrical: electricalByConnector.get(c.ref)?.[pin]
             })
           )
       })

@@ -101,7 +101,7 @@ This section is extracted from `@grayhaven/nerve` at build time; it cannot drift
 
 ```ts
 harness(id: string, props: HarnessProps)
-connector(ref: string, part: ConnectorPart, opts: { readonly pins: PinAssignments; readonly terminals?: PinPartAssignment; readonly seals?: PinPartAssignment })
+connector(ref: string, part: ConnectorPart, opts: ConnectorProps)
 wire(id: string, from: EndpointInput, to: EndpointInput, props: WireProps = {})
 splice(id: string, props: SpliceProps = {})
 cable(id: string, props: CableProps = {})
@@ -153,6 +153,25 @@ defineConfig(config: NerveConfig)
 | `insertionTool` | `string` | no |  |
 | `extractionTool` | `string` | no |  |
 | `provenance` | `PartProvenance` | no |  |
+
+### ConnectorProps
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `pins` | `PinAssignments` | yes |  |
+| `terminals` | `PinPartAssignment` | no |  |
+| `seals` | `PinPartAssignment` | no |  |
+| `electrical` | `PinElectricalAssignments` | no |  |
+
+### PinElectrical
+
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `role` | `ElectricalRole` | no |  |
+| `voltage` | `VoltageRange` | no |  |
+| `currentA` | `number` | no | Role-relative: source capacity or sink demand. |
+| `protocol` | `string` | no |  |
+| `differential` | `DifferentialSemantics` | no |  |
 
 ### WireProps
 
@@ -393,7 +412,7 @@ The CLI loads design files through `@grayhaven/nerve-compiler` (jiti under the h
 
 ---
 
-# 37 built-in validation rules.
+# 43 built-in validation rules.
 
 Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated from the shipped `builtinRules` array in `@grayhaven/nerve-rules`; it cannot drift from the code. Custom rules use the same `rule()` API and get their own codes.
 
@@ -436,6 +455,12 @@ Stable `HK-*` codes, suitable for CI gating and waivers. This table is generated
 | `HK-ELEC-009` | `wireTempBelowAmbient` | A wire's temperature rating must meet its branch's ambient. |
 | `HK-ELEC-010` | `overcurrentExceedsConductor` | A fuse/breaker rating can't exceed the ampacity of the thinnest wire it protects. |
 | `HK-ELEC-011` | `uncoveredNet` | Every electrical net needs at least two accessible connector pins for continuity testing. |
+| `HK-ELEC-012` | `multipleElectricalSources` | A net must not join multiple declared electrical sources. |
+| `HK-ELEC-013` | `undrivenElectricalLoad` | Only a fully role-typed net can be undriven; each sink needs a source or bidirectional driver. |
+| `HK-ELEC-014` | `voltageDomainMismatch` | A source output range must be wholly accepted by connected typed ports; explicitly incompatible complete ranges are rejected. |
+| `HK-ELEC-015` | `protocolMismatch` | Declared protocol identities must agree across an electrical net. |
+| `HK-ELEC-016` | `differentialSemanticConflict` | A differential pair must preserve its declared pair identity and polarity semantics. |
+| `HK-ELEC-017` | `sourceCurrentExceeded` | The total declared sink demand on a net must not exceed its source capacity. |
 
 ## Example diagnostic
 
@@ -492,7 +517,7 @@ Array of:
 | `voltageLimitV` | `number` | no |  |
 | `crimpTool` | `string` | no |  |
 | `provenance` | `{ source, datasheet, verification, lastVerified }` | no |  |
-| `pins` | `Array<{ pin, signal, terminal, seal }>` | yes |  |
+| `pins` | `Array<{ pin, signal, terminal, seal, electrical }>` | yes |  |
 
 ## wires
 

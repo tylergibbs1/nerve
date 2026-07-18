@@ -7,7 +7,7 @@
     },
     {
       "name": "connector",
-      "signature": "connector(ref: string, part: ConnectorPart, opts: { readonly pins: PinAssignments; readonly terminals?: PinPartAssignment; readonly seals?: PinPartAssignment })",
+      "signature": "connector(ref: string, part: ConnectorPart, opts: ConnectorProps)",
       "doc": "Place a connector in the harness: `connector(\"J1\", MolexMicroFit[\"43025-0800\"], { pins: {...}, terminals: \"43030-0007\" })`."
     },
     {
@@ -248,6 +248,70 @@
         {
           "name": "provenance",
           "type": "PartProvenance",
+          "optional": true,
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "ConnectorProps",
+      "props": [
+        {
+          "name": "pins",
+          "type": "PinAssignments",
+          "optional": false,
+          "doc": ""
+        },
+        {
+          "name": "terminals",
+          "type": "PinPartAssignment",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "seals",
+          "type": "PinPartAssignment",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "electrical",
+          "type": "PinElectricalAssignments",
+          "optional": true,
+          "doc": ""
+        }
+      ]
+    },
+    {
+      "name": "PinElectrical",
+      "props": [
+        {
+          "name": "role",
+          "type": "ElectricalRole",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "voltage",
+          "type": "VoltageRange",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "currentA",
+          "type": "number",
+          "optional": true,
+          "doc": "Role-relative: source capacity or sink demand."
+        },
+        {
+          "name": "protocol",
+          "type": "string",
+          "optional": true,
+          "doc": ""
+        },
+        {
+          "name": "differential",
+          "type": "DifferentialSemantics",
           "optional": true,
           "doc": ""
         }

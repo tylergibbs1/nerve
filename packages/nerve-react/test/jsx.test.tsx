@@ -14,6 +14,36 @@ const PINS = {
   5: "ENC_A", 6: "ENC_B", 7: "MOTOR_TEMP", 8: "SHIELD_DRAIN"
 } as const
 
+const CONTROLLER_ELECTRICAL = {
+  1: { role: "source", voltage: { minV: 22, maxV: 26 }, currentA: 5 },
+  2: { role: "ground", voltage: { minV: 0, maxV: 0 } },
+  3: {
+    role: "bidirectional",
+    protocol: "CAN",
+    differential: { pair: "CAN", polarity: "positive" }
+  },
+  4: {
+    role: "bidirectional",
+    protocol: "CAN",
+    differential: { pair: "CAN", polarity: "negative" }
+  }
+} as const
+
+const MOTOR_ELECTRICAL = {
+  1: { role: "sink", voltage: { minV: 18, maxV: 30 }, currentA: 4 },
+  2: { role: "ground", voltage: { minV: 0, maxV: 0 } },
+  3: {
+    role: "bidirectional",
+    protocol: "CAN",
+    differential: { pair: "CAN", polarity: "positive" }
+  },
+  4: {
+    role: "bidirectional",
+    protocol: "CAN",
+    differential: { pair: "CAN", polarity: "negative" }
+  }
+} as const
+
 const jsxStyle = (
   <Harness id="motor-controller-harness" revision="A" units="mm">
     <Connector
@@ -21,12 +51,14 @@ const jsxStyle = (
       part={MolexMicroFit["43025-0800"]}
       pins={PINS}
       terminals={{ 1: "43030-0007", 2: "43030-0007", 3: "43030-0007", 4: "43030-0007" }}
+      electrical={CONTROLLER_ELECTRICAL}
     />
     <Connector
       ref="M1"
       part={MolexMicroFit["43020-0800"]}
       pins={PINS}
       terminals={{ 1: "43031-0007", 2: "43031-0007", 3: "43031-0007", 4: "43031-0007" }}
+      electrical={MOTOR_ELECTRICAL}
     />
     <Wire id="W1" from="J1.1" to="M1.1" gauge="20AWG" color="red" length={420} signal="VBAT_24V" />
     <Wire id="W2" from="J1.2" to="M1.2" gauge="20AWG" color="black" length={420} signal="GND" />

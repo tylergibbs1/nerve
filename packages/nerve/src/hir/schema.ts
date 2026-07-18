@@ -26,11 +26,35 @@ export const HirSpliceRef = Schema.Struct({
 /** A wire endpoint: a connector pin or a splice node. */
 export const HirEndpoint = Schema.Union(HirPinRef, HirSpliceRef)
 
+// Effect Schema ^3.16.0: composed only from the Struct/Literal/optional
+// primitives already used throughout this file because external docs were
+// unavailable in the implementation environment.
+export const HirVoltageRange = Schema.Struct({
+  minV: Schema.optional(Schema.Number),
+  maxV: Schema.optional(Schema.Number)
+})
+
+export const HirDifferentialSemantics = Schema.Struct({
+  pair: Schema.String,
+  polarity: Schema.Literal("positive", "negative")
+})
+
+export const HirPinElectrical = Schema.Struct({
+  role: Schema.optional(
+    Schema.Literal("source", "sink", "bidirectional", "passive", "ground")
+  ),
+  voltage: Schema.optional(HirVoltageRange),
+  currentA: Schema.optional(Schema.Number),
+  protocol: Schema.optional(Schema.String),
+  differential: Schema.optional(HirDifferentialSemantics)
+})
+
 export const HirPin = Schema.Struct({
   pin: Schema.String,
   signal: Schema.optional(Schema.String),
   terminal: Schema.optional(Schema.String),
-  seal: Schema.optional(Schema.String)
+  seal: Schema.optional(Schema.String),
+  electrical: Schema.optional(HirPinElectrical)
 })
 
 export const HirProvenance = Schema.Struct({
@@ -206,6 +230,8 @@ export type HirBomItem = Schema.Schema.Type<typeof HirBomItem>
 export type HirPinRef = Schema.Schema.Type<typeof HirPinRef>
 export type HirSpliceRef = Schema.Schema.Type<typeof HirSpliceRef>
 export type HirEndpoint = Schema.Schema.Type<typeof HirEndpoint>
+export type HirPin = Schema.Schema.Type<typeof HirPin>
+export type HirPinElectrical = Schema.Schema.Type<typeof HirPinElectrical>
 export type HirSplice = Schema.Schema.Type<typeof HirSplice>
 export type HirCable = Schema.Schema.Type<typeof HirCable>
 export type HirProtection = Schema.Schema.Type<typeof HirProtection>
@@ -226,5 +252,4 @@ export const encodeHir = Schema.encodeSync(Hir)
  */
 export const hirJsonSchema = (): unknown =>
   JSON.parse(JSON.stringify(JSONSchema.make(Hir)))
-
 

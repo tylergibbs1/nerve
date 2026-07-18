@@ -13,6 +13,9 @@ export type {
   ConnectorGender,
   ConnectorInstance,
   ConnectorPart,
+  DifferentialPolarity,
+  DifferentialSemantics,
+  ElectricalRole,
   HarnessDesign,
   HarnessProps,
   KnownWireColor,
@@ -20,6 +23,8 @@ export type {
   LabelProps,
   PartProvenance,
   PinAssignments,
+  PinElectrical,
+  PinElectricalAssignments,
   PinRef,
   ProtectionDef,
   ProtectionProps,
@@ -27,6 +32,7 @@ export type {
   SpliceProps,
   SpliceRef,
   Units,
+  VoltageRange,
   WireDef,
   WireEndpoint,
   WireProps
@@ -41,6 +47,7 @@ export {
   protection,
   splice,
   wire,
+  type ConnectorProps,
   type EndpointInput,
   type PinPartAssignment
 } from "./dsl.js"
@@ -65,6 +72,8 @@ export {
   HirConnector,
   HirEndpoint,
   HirLabel,
+  HirPin,
+  HirPinElectrical,
   HirPinRef,
   HirProtection,
   HirSplice,
@@ -73,6 +82,15 @@ export {
 } from "./hir/schema.js"
 
 export { compileDesign, type CompileResult } from "./compile.js"
+
+export {
+  analyzeElectricalConstraints,
+  type ElectricalAnalysis,
+  type ElectricalConstraintFinding,
+  type ElectricalConstraintKind,
+  type ElectricalNetSemantics,
+  type ElectricalPinFact
+} from "./electrical.js"
 
 export { canonicalGauge, parseAwg, type KnownGauge } from "./gauge.js"
 
