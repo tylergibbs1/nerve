@@ -10,6 +10,7 @@ import type { QueryClient } from "@tanstack/react-query"
 import { warmCompiler } from "../lib/compile-client.js"
 import { Button } from "@/components/ui/button"
 import { CommandPalette } from "../components/CommandPalette.js"
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 
 interface RouterContext {
   queryClient: QueryClient
@@ -41,22 +42,22 @@ function GitHubMark() {
 
 function RootError({ error, reset }: ErrorComponentProps) {
   return (
-    <div className="status error">
-      <span className="status-title">Something broke on this page</span>
-      <p className="status-detail">
-        Nothing was lost — harnesses are held in this browser, not on a server. Try again, and
-        reload if it keeps happening.
-      </p>
-      <span className="status-cause">{error instanceof Error ? error.message : String(error)}</span>
-      <span className="status-actions">
-        <Button variant="secondary" size="xs" onClick={() => reset()}>
+    <Empty className="app-status app-status--error">
+        <EmptyHeader>
+          <EmptyTitle>Something broke on this page</EmptyTitle>
+          <EmptyDescription>Nothing was lost — harnesses are held in this browser, not on a server. Try again, and
+        reload if it keeps happening.</EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <span className="status-cause">{error instanceof Error ? error.message : String(error)}</span>
+<Button variant="secondary" size="xs" onClick={() => reset()}>
           Try again
         </Button>
         <Button variant="outline" size="xs" onClick={() => window.location.reload()}>
           Reload
         </Button>
-      </span>
-    </div>
+        </EmptyContent>
+      </Empty>
   )
 }
 

@@ -1288,41 +1288,12 @@ table.data td.cell-text { white-space: normal; }
   .diag .code, .diag button.target { display: flex; align-items: center; align-self: stretch; }
 }
 
-/* Pending and failure states. Both centre in whatever they fill — a route
-   shell or a single render pane — so neither reads as a line that was left
-   pinned to the corner. Pending stays a quiet sentence (it is about to be
-   replaced); a failure is terminal, so it gets a title, a plain-language
-   sentence, and a way out. */
-.status {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  min-height: 240px;
-  padding: 48px 24px;
-  color: var(--fg-muted);
-  font-size: 13px;
-  line-height: 1.6;
-  text-align: center;
-}
-.status-title {
-  font-family: var(--heading);
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--text);
-  text-wrap: balance;
-}
-.status-detail {
-  max-width: 460px;
-  margin: 0;
-  color: var(--fg-muted);
-  text-wrap: pretty;
-}
-/* The raw message is machine output — mono, and quieter than the sentence
-   that explains it. */
+/* Failure and pending states render as shadcn <Empty>; it owns the layout
+   and typography. Only two things are ours: the machine-readable cause line,
+   and a severity hue on the title so a failure reads differently from an
+   empty result. */
+.app-status { flex: 1; min-height: 240px; }
+.app-status--error [data-slot="empty-title"] { color: var(--error); }
 .status-cause {
   max-width: 560px;
   overflow-wrap: anywhere;
@@ -1331,14 +1302,8 @@ table.data td.cell-text { white-space: normal; }
   line-height: 1.6;
   color: color-mix(in srgb, var(--fg-muted) 78%, transparent);
 }
-.status-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-/* The prose-link underline above is for links in a sentence; an action
-   rendered as a button already reads as one. */
-.status-actions a[data-slot="button"],
-.status-actions a[data-slot="button"]:hover { text-decoration: none; }
-/* Severity stays a hue on the label, not on the whole block — a paragraph
-   of red reads as alarm, not as information. */
-.status.error .status-title { color: var(--error); }
+/* Pending is still a plain quiet line, not a whole empty state. */
+.status { padding: 24px; color: var(--fg-muted); font-size: 13px; }
 
 .source-pane {
   display: flex;
