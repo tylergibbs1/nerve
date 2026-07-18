@@ -92,8 +92,12 @@ const evaluateProject = async (
   fsMap: Readonly<Record<string, string>>,
   entrypoint: string
 ): Promise<HarnessDesign> => {
-  const { transform } = await import("sucrase")
-  const { evaluateFsMap } = await import("../lib/fs-eval.js")
+  // Independent lazy chunks: load concurrently, still out of the initial bundle.
+  // sucrase 3.35.1 exports `transform` as a sync named export returning `.code`.
+  const [{ transform }, { evaluateFsMap }] = await Promise.all([
+    import("sucrase"),
+    import("../lib/fs-eval.js")
+  ])
   return evaluateFsMap(fsMap, entrypoint, {
     modules: SANDBOX_MODULES,
     transform: (source) =>

@@ -70,9 +70,19 @@ export function DataTable<T>({
           <TableRow key={hg.id}>
             {hg.headers.map((header) => {
               const canSort = sortable && header.column.getCanSort()
+              // @tanstack/react-table 8.21.3: getIsSorted() is
+              // `false | "asc" | "desc"`. WAI-ARIA puts aria-sort on the
+              // column header cell, and at most one header may be other than
+              // "none" — the routes build `sorting` from a single sortBy
+              // search param, so only one column is ever non-false here.
               const dir = header.column.getIsSorted()
+              const ariaSort = dir === "asc" ? "ascending" : dir === "desc" ? "descending" : "none"
               return (
-                <TableHead key={header.id} className={canSort ? "sortable" : undefined}>
+                <TableHead
+                  key={header.id}
+                  className={canSort ? "sortable" : undefined}
+                  aria-sort={canSort ? ariaSort : undefined}
+                >
                   {canSort ? (
                     <button
                       type="button"
