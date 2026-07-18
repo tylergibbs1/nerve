@@ -4,7 +4,20 @@ import { setCompileResult } from "../lib/compile-client.js"
 import { getApiKey, runAgentTurn, setApiKey, type AgentEvent, type ChatTurn } from "../lib/ai.js"
 import { useMinimumLoading } from "../lib/useMinimumLoading.js"
 import { Button } from "../ui/button.js"
-import { Badge } from "../ui/badge.js"
+/**
+ * What the assistant did, in the words a reader would use for it. The model
+ * calls these tools `edit_harness_source` and `rewrite_harness_source`; those
+ * are function names, and the pane is not the place to read them.
+ */
+function stepLabel(name: string, status: "running" | "ok" | "failed"): string {
+  const verbs =
+    name === "edit_harness_source"
+      ? (["Editing the harness", "Edited the harness", "Couldn't edit the harness"] as const)
+      : name === "rewrite_harness_source"
+        ? (["Rewriting the harness", "Rewrote the harness", "Couldn't rewrite the harness"] as const)
+        : (["Working on the harness", "Changed the harness", "Couldn't change the harness"] as const)
+  return status === "running" ? verbs[0] : status === "ok" ? verbs[1] : verbs[2]
+}
 import { Input } from "../ui/input.js"
 import { Textarea } from "../ui/textarea.js"
 
@@ -31,17 +44,11 @@ const MessageRow = memo(function MessageRow({
   return (
     <div className={`ai-msg ${message.role}`}>
       {message.pills !== undefined && message.pills.length > 0 && (
-        <div className="ai-pills">
+        <div className="ai-steps">
           {message.pills.map((p, j) => (
-            <Badge
-              key={j}
-              variant={p.status === "ok" ? "default" : p.status === "failed" ? "destructive" : "secondary"}
-              className={p.status === "running" ? "ai-pill-running" : undefined}
-              title={p.detail}
-            >
-              {p.status === "running" ? "⋯ " : p.status === "ok" ? "✓ " : "✕ "}
-              {p.name === "edit_harness_source" ? "patch" : p.name === "rewrite_harness_source" ? "rewrite" : p.name}
-            </Badge>
+            <span key={j} className={`ai-step ${p.status}`} title={p.detail}>
+              {stepLabel(p.name, p.status)}
+            </span>
           ))}
         </div>
       )}

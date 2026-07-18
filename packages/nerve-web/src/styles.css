@@ -1077,8 +1077,14 @@ textarea:focus-visible, select:focus-visible {
 }
 .ai-msg.assistant .ai-text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: var(--text); }
 .ai-text.thinking { color: var(--muted); font-size: 12px; }
-.ai-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
-.ai-pill-running { animation: ai-pulse 1.2s var(--ease-smooth) infinite; }
+/* What the assistant did reads as quiet status text, not chrome: colour and
+   weight carry the state, the same way .showcase-gate does. These were pills,
+   and a pill here made every other small label in the app read as a badge. */
+.ai-steps { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
+.ai-step { font-size: 12px; line-height: 1.5; color: var(--muted); }
+.ai-step.ok { color: var(--text); }
+.ai-step.failed { color: var(--error); }
+.ai-step.running { animation: ai-pulse 1.2s var(--ease-smooth) infinite; }
 @keyframes ai-pulse { 50% { opacity: 0.45; } }
 .ai-input { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--border); }
 
@@ -1579,7 +1585,7 @@ table.data th.sortable:hover { color: var(--text); }
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .ai-pill-running { animation: none; opacity: 0.7; }
+  .ai-step.running { animation: none; opacity: 0.7; }
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
   .tabs a:active { scale: none; }
 }
