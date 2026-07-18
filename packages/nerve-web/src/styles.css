@@ -402,7 +402,7 @@ textarea:focus-visible, select:focus-visible {
   border-radius: var(--radius-card);
   padding: clamp(24px, 4vw, 40px);
   overflow: hidden;
-  transition: background-color 220ms var(--ease-default), transform 220ms var(--ease-out);
+  transition: background-color 200ms var(--ease-default), transform 200ms var(--ease-out);
 }
 .landing-proof:hover { background: var(--popover); transform: translateY(-3px); }
 .landing-proof-head {
@@ -735,7 +735,7 @@ textarea:focus-visible, select:focus-visible {
 }
 .showcase-no-findings { padding: 30px 22px; border-bottom: 1px solid var(--border); }
 .showcase-no-findings strong { font-size: 14px; }
-.showcase-no-findings p { max-width: 440px; margin: 8px 0 0; color: var(--muted); line-height: 1.55; }
+.showcase-no-findings p { max-width: 440px; margin: 8px 0 0; color: var(--muted); line-height: 1.55; text-wrap: pretty; }
 .showcase-import-notes { padding: 16px 22px; }
 .showcase-import-notes summary {
   font-size: 12px;
@@ -1038,7 +1038,8 @@ textarea:focus-visible, select:focus-visible {
   list-style: none;
   width: 280px;
   background: var(--popover);
-  border-radius: 8px;
+  /* Concentric: 6px inner button radius + 4px padding. */
+  border-radius: 10px;
 }
 .search-results button { border-radius: 6px; }
 .search-results button {

@@ -49,7 +49,7 @@ export function DataTable<T>({
   })
 
   if (table.getRowModel().rows.length === 0) {
-    return <div className="table-empty">No rows — compile a harness that produces this artifact.</div>
+    return <div className="table-empty">No rows yet. Compile a harness that produces this output.</div>
   }
 
   return (
