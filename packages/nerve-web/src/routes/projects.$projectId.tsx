@@ -226,7 +226,17 @@ function ProjectWorkspace() {
           maxSize={stacked ? "50%" : "34%"}
           collapsible
         >
-          <AiPane projectId={projectId} />
+          {/*
+            Keyed by projectId: a project switch remounts the pane with fresh
+            state instead of re-seeding it in an effect, so an in-flight turn
+            can never append the old project's tokens to the new thread.
+            Each pane owns its boundary — a crash in one leaves the others
+            (and the editor's unsaved work) usable, which is the whole point
+            of RenderErrorBoundary.
+          */}
+          <RenderErrorBoundary resetKey={projectId}>
+            <AiPane key={projectId} projectId={projectId} />
+          </RenderErrorBoundary>
         </Panel>
         <Separator className="pane-handle" />
         <Panel
@@ -236,7 +246,11 @@ function ProjectWorkspace() {
           maxSize={stacked ? "60%" : "60%"}
           collapsible
         >
-          <SourcePane projectId={projectId} />
+          {/* Keyed for the same reason: fresh state on mount beats an effect
+              that re-seeds after commit and paints one stale frame first. */}
+          <RenderErrorBoundary resetKey={projectId}>
+            <SourcePane key={projectId} projectId={projectId} />
+          </RenderErrorBoundary>
         </Panel>
         <Separator className="pane-handle" />
         <Panel id="render" minSize={stacked ? "160px" : "25%"}>
@@ -247,7 +261,9 @@ function ProjectWorkspace() {
           </div>
         </Panel>
       </Group>
-      <DiagnosticsPanel diagnostics={data.hir.diagnostics} />
+      <RenderErrorBoundary resetKey={projectId}>
+        <DiagnosticsPanel diagnostics={data.hir.diagnostics} />
+      </RenderErrorBoundary>
     </div>
   )
 }

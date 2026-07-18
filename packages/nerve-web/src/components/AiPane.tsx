@@ -75,10 +75,17 @@ export function AiPane({ projectId }: { projectId: string }) {
   const showBusy = useMinimumLoading(busy)
   const threadRef = useRef<HTMLDivElement>(null)
 
-  // Reset the thread when switching projects.
-  useEffect(() => {
-    setMessages([])
-  }, [projectId])
+  // In-flight turn for this mount. The route keys <AiPane> by projectId, so
+  // switching projects unmounts this instance — abort here or the abandoned
+  // turn keeps streaming (and billing) with nowhere to land.
+  const turnAbort = useRef<AbortController | null>(null)
+  useEffect(
+    () => () => {
+      turnAbort.current?.abort()
+      turnAbort.current = null
+    },
+    []
+  )
 
   useEffect(() => {
     threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight })
@@ -89,6 +96,8 @@ export function AiPane({ projectId }: { projectId: string }) {
     if (text === "" || busy) return
     setInput("")
     setBusy(true)
+    const controller = new AbortController()
+    turnAbort.current = controller
     const history: ChatTurn[] = messages.map((m) => ({ role: m.role, text: m.text }))
     setMessages((prev) => [
       ...prev,
@@ -97,6 +106,9 @@ export function AiPane({ projectId }: { projectId: string }) {
     ])
 
     const onEvent = (e: AgentEvent) => {
+      // Events can still arrive from an aborted turn (a delta already read
+      // off the stream). Drop them rather than touching a dead thread.
+      if (controller.signal.aborted) return
       setMessages((prev) => {
         const next = [...prev]
         const last = next[next.length - 1]
@@ -128,11 +140,19 @@ export function AiPane({ projectId }: { projectId: string }) {
       if (e.type === "error") setInput((current) => (current === "" ? text : current))
     }
 
-    void runAgentTurn(projectId, history, text, onEvent, (result) => {
-      // Land the verified compile in the shared cache: diagram, tables and
-      // diagnostics all update live, exactly like a manual editor compile.
-      setCompileResult(queryClient, projectId, result)
-    })
+    void runAgentTurn(
+      projectId,
+      history,
+      text,
+      onEvent,
+      (result) => {
+        // Land the verified compile in the shared cache: diagram, tables and
+        // diagnostics all update live, exactly like a manual editor compile.
+        if (controller.signal.aborted) return
+        setCompileResult(queryClient, projectId, result)
+      },
+      controller.signal
+    )
   }
 
   if (!hasKey) {

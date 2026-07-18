@@ -14,6 +14,22 @@ export function DiagnosticsPanel({
 }: {
   diagnostics: ReadonlyArray<Diagnostic>
 }) {
+  // React 19.2.7: keys must be unique among siblings and stable across
+  // renders. This list is rebuilt per keystroke under auto-compile and it
+  // reorders and filters, so an index key reattaches the row's focused button
+  // to a different diagnostic. `Diagnostic` (packages/nerve/src/diagnostics.ts)
+  // carries no id, so the key is its identifying content — the same `code`
+  // recurs across many `target`s, and one `target` collects several findings
+  // whose `message` names the specific refs and measured values. `occurrences`
+  // then suffixes any exact content repeat, so siblings can never collide.
+  const occurrences = new Map<string, number>()
+  const keyFor = (d: Diagnostic): string => {
+    const base = `${d.code}|${d.target ?? ""}|${d.message}`
+    const seen = occurrences.get(base) ?? 0
+    occurrences.set(base, seen + 1)
+    return seen === 0 ? base : `${base}#${seen}`
+  }
+
   return (
     <div
       className="diagnostics-panel"
@@ -24,7 +40,7 @@ export function DiagnosticsPanel({
     >
       <h3>Issues ({diagnostics.length})</h3>
       {diagnostics.length === 0 && <div className="diag">No issues found.</div>}
-      {diagnostics.map((d, i) => {
+      {diagnostics.map((d) => {
         const sel = d.target !== undefined ? selectionFromTarget(d.target) : undefined
         const refChips =
           d.targets !== undefined
@@ -35,7 +51,7 @@ export function DiagnosticsPanel({
           // focusable, and axe forbids nested interactive controls) — the
           // target becomes a real button instead (§11.3: selecting a
           // diagnostic selects its object everywhere).
-          <div key={i} className={`diag ${d.severity}`}>
+          <div key={keyFor(d)} className={`diag ${d.severity}`}>
             <Link to="/docs/rules" className="code" title={ruleSummaries.get(d.code)}>
               {d.code}
             </Link>

@@ -74,14 +74,19 @@ export function SourcePane({ projectId }: { projectId: string }) {
     view.dispatch(setDiagnostics(view.state, toEditorDiagnostics(text, diags)))
   }
 
-  // Re-seed when switching projects (the pane persists across them).
+  // The route keys <SourcePane> by projectId, so a project switch remounts
+  // this with fresh state — no re-seeding effect, and therefore no frame of
+  // the previous project's source painted before it corrects.
+  //
+  // activeEntrypoint is module state, not component state, so unlike
+  // everything else the old effect reset, it does NOT come back fresh with
+  // the mount: a project last left on variants/long.ts keeps that entrypoint
+  // while the tab strip shows the entry file. The mount-time auto-compile
+  // happens to realign it, but only when auto-compile is on — so carry the
+  // deleted effect's one non-state side effect over explicitly.
   useEffect(() => {
-    setActiveFile(ENTRY_FILE)
     setActiveEntrypoint(projectId, ENTRY_FILE)
-    setLocalSource(getFileSource(projectId, ENTRY_FILE))
-    lastCompiled.current = undefined
-    setUndoSnapshot(undefined)
-  }, [projectId])
+  }, [])
 
   // Unregister the editor view when the pane unmounts.
   useEffect(() => () => registerEditor(null), [])

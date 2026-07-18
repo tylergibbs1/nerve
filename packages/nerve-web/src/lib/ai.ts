@@ -224,14 +224,23 @@ const applyTool = async (
  * One user turn through the agent loop: stream text, execute tools with
  * compile verification, feed diagnostics back, repeat until the model
  * stops calling tools.
+ *
+ * `signal` cancels the turn. Abandoning a turn without it (switching
+ * projects mid-stream) leaves the request streaming to nowhere and billing
+ * tokens, so the caller aborts on unmount and the loop stops between rounds.
  */
 export const runAgentTurn = async (
   projectId: string,
   history: ReadonlyArray<ChatTurn>,
   userMessage: string,
   onEvent: (e: AgentEvent) => void,
-  onSourceApplied: (result: CompileResult) => void
+  onSourceApplied: (result: CompileResult) => void,
+  signal?: AbortSignal
 ): Promise<void> => {
+  // Read through a call, not `signal?.aborted` inline: the flag flips during
+  // the awaits below, and TS would narrow a direct property check to false.
+  const aborted = (): boolean => signal?.aborted === true
+
   const apiKey = getApiKey()
   if (apiKey === undefined) {
     onEvent({ type: "error", text: "No API key configured." })
@@ -256,16 +265,23 @@ export const runAgentTurn = async (
 
   try {
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-      const stream = await client.responses.create({
-        model: MODEL,
-        instructions: systemPrompt(projectId),
-        reasoning: { effort: "medium" },
-        max_output_tokens: 16000,
-        tools: TOOLS,
-        input,
-        ...(previousResponseId !== undefined ? { previous_response_id: previousResponseId } : {}),
-        stream: true
-      })
+      if (aborted()) return
+      // openai 6.48.0: request options are the second argument and carry
+      // `signal?: AbortSignal` — aborting it tears down the SSE connection
+      // (internal/request-options.d.ts).
+      const stream = await client.responses.create(
+        {
+          model: MODEL,
+          instructions: systemPrompt(projectId),
+          reasoning: { effort: "medium" },
+          max_output_tokens: 16000,
+          tools: TOOLS,
+          input,
+          ...(previousResponseId !== undefined ? { previous_response_id: previousResponseId } : {}),
+          stream: true
+        },
+        { signal }
+      )
 
       let finalResponse: Response | undefined
       for await (const event of stream) {
@@ -277,6 +293,9 @@ export const runAgentTurn = async (
           throw new Error(event.response.error?.message ?? "Response failed")
         }
       }
+      // Abandoned mid-stream: don't run this round's tools, which would
+      // write patches into a project the user has already left.
+      if (aborted()) return
       if (finalResponse === undefined) throw new Error("Stream ended without a completed response")
       previousResponseId = finalResponse.id
 
@@ -324,6 +343,8 @@ export const runAgentTurn = async (
     onEvent({ type: "error", text: `Stopped after ${MAX_TOOL_ROUNDS} tool rounds without finishing.` })
   } catch (e) {
     const { default: OpenAI } = await import("openai")
+    // A deliberate cancellation is not a failure to report.
+    if (aborted() || e instanceof OpenAI.APIUserAbortError) return
     if (e instanceof OpenAI.AuthenticationError) {
       onEvent({ type: "error", text: "Invalid API key — check it in the panel header." })
     } else if (e instanceof OpenAI.APIConnectionError) {
