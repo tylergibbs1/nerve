@@ -42,15 +42,20 @@ function GitHubMark() {
 function RootError({ error, reset }: ErrorComponentProps) {
   return (
     <div className="status error">
-      <p>{error instanceof Error ? error.message : String(error)}</p>
-      <div className="flex gap-3">
-        <Button variant="outline" size="xs" onClick={() => reset()}>
+      <span className="status-title">Something broke on this page</span>
+      <p className="status-detail">
+        Nothing was lost — harnesses are held in this browser, not on a server. Try again, and
+        reload if it keeps happening.
+      </p>
+      <span className="status-cause">{error instanceof Error ? error.message : String(error)}</span>
+      <span className="status-actions">
+        <Button variant="secondary" size="xs" onClick={() => reset()}>
           Try again
         </Button>
         <Button variant="outline" size="xs" onClick={() => window.location.reload()}>
           Reload
         </Button>
-      </div>
+      </span>
     </div>
   )
 }

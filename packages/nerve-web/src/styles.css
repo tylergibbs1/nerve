@@ -39,6 +39,12 @@
 }
 
 :root {
+  /* Chrome geometry. The bars and the diagnostics drawer are the fixed
+     furniture the panes are measured against, so their sizes are named here
+     rather than repeated as magic numbers down the file. */
+  --topbar-height: 56px;
+  --diagnostics-max-height: 200px;
+
   /* Legacy aliases — single source of truth is the @theme block above
      (Tailwind v4 emits @theme static tokens as runtime custom properties). */
   --bg: var(--color-background);
@@ -107,14 +113,36 @@ textarea:focus-visible, select:focus-visible {
   color: var(--muted);
 }
 
-.app-shell { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+/* The shell owns the viewport; every scroll happens in a pane inside it.
+   overscroll-behavior stops a pane hitting its end from chaining into the
+   page (and taking pull-to-refresh with it). */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overscroll-behavior: none;
+}
+/* Reaching the end of one pane shouldn't start scrolling the pane behind it. */
+.render-pane,
+.docs-body,
+.diagnostics-panel,
+.ai-thread,
+.showcase,
+.docs-nav {
+  overscroll-behavior: contain;
+}
 
 .topbar {
   display: flex;
   align-items: center;
   gap: 12px;
-  height: 56px;
-  padding: 0 24px;
+  height: var(--topbar-height);
+  /* Notched phones in landscape put the cutout over the brand otherwise.
+     max(…, 0px) because the inset is already 0 where the browser constrains
+     the layout viewport for us. */
+  padding-left: calc(24px + max(env(safe-area-inset-left), 0px));
+  padding-right: calc(24px + max(env(safe-area-inset-right), 0px));
   background: var(--bg);
   border-bottom: 1px solid var(--border);
   color: var(--text);
@@ -132,15 +160,34 @@ textarea:focus-visible, select:focus-visible {
 }
 .topbar .brand svg { flex-shrink: 0; }
 .topbar .brand:hover { color: var(--accent-hover); }
-.topnav { margin-left: auto; display: flex; gap: 18px; }
+.topnav { margin-left: auto; display: flex; align-self: stretch; gap: 18px; }
+/* Links stretch to the 56px bar so the hit area matches the row, not the
+   13px glyph box (WCAG 2.5.5) — nothing moves on screen. */
 .topnav a {
+  display: inline-flex;
+  align-items: center;
   font-size: 13px;
   color: var(--muted);
   transition: color var(--motion-fast) var(--ease-out);
 }
 .topnav a:hover { color: var(--text); }
 .topnav a.active { color: var(--accent); }
-.topnav .gh-link { display: inline-flex; align-items: center; }
+.topnav .gh-link { position: relative; padding-inline: 4px; }
+/* The icon-only link is 15px wide — grow it sideways on touch the same way
+   ui/button.tsx does, via an invisible ::after. The 18px row gap keeps the
+   grown boxes from overlapping their neighbours. */
+@media (pointer: coarse) {
+  .topnav .gh-link::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    min-width: 44px;
+    height: 100%;
+    translate: -50% -50%;
+  }
+}
 .landing-links a.gh-inline { display: inline-flex; align-items: center; gap: 6px; }
 
 .app-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
@@ -342,10 +389,39 @@ textarea:focus-visible, select:focus-visible {
 .doc-entry p { margin-top: 10px; }
 @media (max-width: 760px) {
   .docs { flex-direction: column; }
-  .docs-nav { width: 100%; flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid var(--border); padding: 8px 12px; }
-  .docs-nav a { border-left: none; padding: 6px 10px; }
+  /* One scrolling strip, not a wrapped block: wrapping put a ~350px wall of
+     links above every page, so the doc started below the fold. */
+  .docs-nav {
+    width: 100%;
+    flex: 0 0 auto;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 12px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .docs-nav::-webkit-scrollbar { display: none; }
+  .docs-group { flex-direction: row; align-items: center; gap: 2px; margin-bottom: 0; }
+  /* Group names are a sidebar affordance; in a strip they'd out-number the
+     links. The active colour carries the position instead. */
+  .docs-group-label { display: none; }
+  .docs-nav a { border-left: none; padding: 6px 10px; white-space: nowrap; }
+  .docs-llms { margin-top: 0; padding: 0 10px; white-space: nowrap; }
   /* Nav stacks on top here — drop the sidebar-balancing right pad. */
-  .docs-body { padding: 40px; }
+  .docs-body { padding: 32px 20px; }
+  /* Floated right, this row was wider than the viewport and hung off both
+     edges. Let it sit above the heading and wrap. */
+  .docs-md-actions {
+    float: none;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+  }
 }
 
 /* Landing: the product thesis on the left, inspectable corpus proof on the right. */
@@ -917,6 +993,18 @@ textarea:focus-visible, select:focus-visible {
 }
 
 .tabs { position: relative; display: flex; gap: 2px; margin-left: auto; }
+/* Once the header wraps, the strip is full-width and the last tabs fall off
+   the edge with no way to reach them — scroll it. */
+@media (max-width: 900px) {
+  .tabs {
+    margin-left: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+}
 .tabs a {
   position: relative;
   z-index: 1;
@@ -966,7 +1054,16 @@ textarea:focus-visible, select:focus-visible {
   padding: 8px 12px;
   border-bottom: 1px solid var(--border);
 }
-.ai-setup { padding: 16px 12px; display: flex; flex-direction: column; gap: 10px; }
+/* min-height:0 + scroll: the setup form is a fixed-height flex child, so in a
+   short pane it was clipping the key field rather than scrolling to it. */
+.ai-setup {
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+}
 .ai-setup p { font-size: 12px; color: var(--muted); line-height: 1.55; margin: 0; }
 .ai-thread { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 .ai-hint { font-size: 12px; color: var(--muted); line-height: 1.6; text-wrap: pretty; }
@@ -1028,15 +1125,37 @@ textarea:focus-visible, select:focus-visible {
 .pane-handle:hover::after, .pane-handle[data-state="drag"]::after {
   background: var(--muted);
 }
+/* Stacked mode: the same handle, turned through 90°. */
+.workspace-split-stacked .pane-handle {
+  width: auto;
+  height: 7px;
+  border-left: 0;
+  border-top: 1px solid var(--border);
+}
+.workspace-split-stacked .pane-handle::after {
+  top: 2px;
+  left: 50%;
+  width: 28px;
+  height: 2px;
+  transform: translateX(-50%);
+}
+/* Panes stack, so each keeps its own hairline instead of a vertical rule. */
+.workspace-split-stacked .ai-pane { border-right: 0; }
 
 /* Drawings render as light "drawing sheets" on the dark workspace. */
 .sheet-wrap { display: flex; flex-direction: column; gap: 8px; }
-.sheet-actions { display: flex; align-items: center; gap: 12px; }
+.sheet-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
 .sheet-actions .docs-action { border-bottom: none; }
 .sheet-hint {
   margin-left: auto;
   font-size: 11px;
   color: var(--muted);
+}
+/* The hint answers to the pane it lives in, not the window — dragging the
+   divider narrow is the common case, and at that width it was wrapping into
+   the actions instead of sitting after them. */
+@container (max-width: 560px) {
+  .sheet-hint { margin-left: 0; flex-basis: 100%; }
 }
 .diagram-pane { background: #fafafa; border-radius: 8px; overflow: auto; }
 .diagram-pane svg { display: block; }
@@ -1167,9 +1286,12 @@ table.data td.cell-text { white-space: normal; }
 .diagnostics-panel {
   border-top: 1px solid var(--border);
   background: var(--panel);
-  max-height: 200px;
+  /* A flat 200px took a third of a short laptop window away from the editor;
+     cap it against the viewport too. */
+  max-height: min(var(--diagnostics-max-height), 32dvh);
   overflow: auto;
-  padding: 8px 20px;
+  /* Last thing above the home indicator — clear it. */
+  padding: 8px 20px calc(8px + max(env(safe-area-inset-bottom), 0px));
 }
 .diagnostics-panel h3 {
   margin: 4px 0 8px;
@@ -1201,9 +1323,72 @@ table.data td.cell-text { white-space: normal; }
   cursor: pointer;
 }
 .diag button.target:hover { color: var(--text); }
+/* 110px + 180px of fixed minimums left the message a ~90px gutter on a
+   phone, wrapping every row to seven lines. Put the ids on their own line
+   and give the message the full width. */
+@media (max-width: 680px) {
+  .diag { flex-wrap: wrap; gap: 4px 10px; }
+  .diag .code, .diag .target { min-width: 0; }
+  .diag .message { flex: 1 0 100%; }
+}
+/* Touch rows: grow the row, not the ids — a 44px box on an 18px id would
+   overlap the neighbouring row (see the footgun note in ui/button.tsx). */
+@media (pointer: coarse) {
+  .diag { padding: 11px 0; }
+  .diag .code, .diag button.target { display: flex; align-items: center; align-self: stretch; }
+}
 
-.status { padding: 24px; color: var(--muted); font-size: 13px; }
-.status.error { color: var(--error); }
+/* Pending and failure states. Both centre in whatever they fill — a route
+   shell or a single render pane — so neither reads as a line that was left
+   pinned to the corner. Pending stays a quiet sentence (it is about to be
+   replaced); a failure is terminal, so it gets a title, a plain-language
+   sentence, and a way out. */
+.status {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 240px;
+  padding: 48px 24px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
+}
+.status-title {
+  font-family: var(--heading);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-wrap: balance;
+}
+.status-detail {
+  max-width: 460px;
+  margin: 0;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+/* The raw message is machine output — mono, and quieter than the sentence
+   that explains it. */
+.status-cause {
+  max-width: 560px;
+  overflow-wrap: anywhere;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--muted) 78%, transparent);
+}
+.status-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+/* The prose-link underline above is for links in a sentence; an action
+   rendered as a button already reads as one. */
+.status-actions a[data-slot="button"],
+.status-actions a[data-slot="button"]:hover { text-decoration: none; }
+/* Severity stays a hue on the label, not on the whole block — a paragraph
+   of red reads as alarm, not as information. */
+.status.error .status-title { color: var(--error); }
 
 
 .source-pane {
@@ -1307,9 +1492,18 @@ table.data th.sortable:hover { color: var(--text); }
 }
 
 @media (max-width: 680px) {
-  .topbar { padding-inline: 16px; }
+  /* svh, not dvh: mobile browser chrome hides and shows as you scroll, and
+     with dvh the whole three-pane column resized under the finger doing it.
+     svh pins the shell to the smallest viewport so nothing reflows. */
+  .app-shell { height: 100svh; }
+
+  .topbar {
+    padding-left: calc(16px + max(env(safe-area-inset-left), 0px));
+    padding-right: calc(16px + max(env(safe-area-inset-right), 0px));
+  }
   .topbar .brand { gap: 7px; font-size: 13px; }
-  .topnav { gap: 12px; }
+  /* 12px left the grown touch boxes overlapping their neighbours. */
+  .topnav { gap: 16px; }
   .topnav a { font-size: 12px; }
   .landing { padding: 44px 20px 64px; gap: 52px; }
   .landing h1 { font-size: clamp(32px, 10vw, 44px); }
@@ -1318,6 +1512,15 @@ table.data th.sortable:hover { color: var(--text); }
   .landing-proof { padding: 24px; }
   .landing-proof h2 { margin-top: 32px; }
   .landing-proof dl { grid-template-columns: 1fr; gap: 12px; }
+
+  /* The header wrapped to four rows and took a quarter of the screen off the
+     panes below it. Tighter gutters, plus a search field that gives up its
+     fixed 208px so Share and Export can sit beside it, fits it into three. */
+  .workspace-header { gap: 6px 10px; padding: 8px 16px; }
+  .workspace-header .meta { font-size: 11px; }
+  .workspace-header .searchbox { flex: 1 1 120px; min-width: 0; }
+  .workspace-header .searchbox input { width: 100%; }
+  .workspace-header .search-results { width: min(280px, calc(100vw - 32px)); }
 
   .showcase { padding: 44px 20px 72px; }
   .showcase-hero h1 { font-size: clamp(39px, 13vw, 60px); }
@@ -1395,6 +1598,10 @@ table.data th.sortable:hover { color: var(--text); }
   top: 15vh;
   transform: translateX(-50%);
   width: min(560px, calc(100vw - 32px));
+  /* Never taller than what's left below the 15vh offset, so a long result
+     list scrolls inside the panel instead of running off the screen. */
+  max-height: calc(85dvh - max(env(safe-area-inset-bottom), 0px) - 16px);
+  overflow: auto;
   background: var(--popover);
   border-radius: var(--radius-card);
   padding: 8px;

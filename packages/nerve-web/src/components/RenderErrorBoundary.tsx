@@ -29,10 +29,17 @@ export class RenderErrorBoundary extends Component<Props, State> {
     if (this.state.error === undefined) return this.props.children
     return (
       <div className="status error">
-        <p>This view failed to render: {this.state.error.message}</p>
-        <Button variant="secondary" size="xs" onClick={() => this.setState({ error: undefined })}>
-          Try again
-        </Button>
+        <span className="status-title">This view didn&rsquo;t render</span>
+        <p className="status-detail">
+          The harness itself is fine — the editor beside this pane still has your work. Try the
+          view again, or switch tabs and come back.
+        </p>
+        <span className="status-cause">{this.state.error.message}</span>
+        <span className="status-actions">
+          <Button variant="secondary" size="xs" onClick={() => this.setState({ error: undefined })}>
+            Try again
+          </Button>
+        </span>
       </div>
     )
   }
