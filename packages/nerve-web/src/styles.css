@@ -31,6 +31,11 @@
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.6, 1);
+  /* Motion ladder (fluid-functionalism): the bigger the thing that moves,
+     the slower it moves. Nothing invents its own duration. */
+  --motion-fast: 80ms;
+  --motion-moderate: 160ms;
+  --motion-slow: 240ms;
 }
 
 :root {
@@ -131,7 +136,7 @@ textarea:focus-visible, select:focus-visible {
 .topnav a {
   font-size: 13px;
   color: var(--muted);
-  transition: color 200ms var(--ease-default);
+  transition: color var(--motion-fast) var(--ease-out);
 }
 .topnav a:hover { color: var(--text); }
 .topnav a.active { color: var(--accent); }
@@ -162,7 +167,7 @@ textarea:focus-visible, select:focus-visible {
   font-size: 13px;
   color: var(--muted);
   border-left: 2px solid transparent;
-  transition: color 200ms var(--ease-default), border-color 200ms var(--ease-default);
+  transition: color var(--motion-fast) var(--ease-out), border-color var(--motion-fast) var(--ease-out);
 }
 .docs-nav a:hover { color: var(--text); }
 .docs-nav a.active { color: var(--accent); border-left-color: var(--accent); }
@@ -228,7 +233,7 @@ textarea:focus-visible, select:focus-visible {
   font-size: 11px;
   color: var(--muted);
   border-bottom: 1px solid var(--border);
-  transition: color 200ms var(--ease-default), border-color 200ms var(--ease-default);
+  transition: color var(--motion-fast) var(--ease-out), border-color var(--motion-fast) var(--ease-out);
 }
 .docs-md-link:hover { color: var(--text); border-color: var(--muted); }
 /* marked output: bare pre/table/inline-code get the doc voices. */
@@ -402,7 +407,7 @@ textarea:focus-visible, select:focus-visible {
   border-radius: var(--radius-card);
   padding: clamp(24px, 4vw, 40px);
   overflow: hidden;
-  transition: background-color 200ms var(--ease-default), transform 200ms var(--ease-out);
+  transition: background-color var(--motion-moderate) var(--ease-out), transform var(--motion-moderate) var(--ease-out);
 }
 .landing-proof:hover { background: var(--popover); transform: translateY(-3px); }
 .landing-proof-head {
@@ -471,7 +476,7 @@ textarea:focus-visible, select:focus-visible {
   background: var(--panel);
   border-radius: var(--radius-card);
   color: inherit;
-  transition: background-color 200ms var(--ease-default);
+  transition: background-color var(--motion-moderate) var(--ease-out);
 }
 .project-card:hover { background: var(--popover); }
 /* The "Start a harness" action: dashed hairline on the bare canvas. */
@@ -882,20 +887,33 @@ textarea:focus-visible, select:focus-visible {
   white-space: nowrap;
 }
 
-.tabs { display: flex; gap: 2px; margin-left: auto; }
+.tabs { position: relative; display: flex; gap: 2px; margin-left: auto; }
 .tabs a {
+  position: relative;
+  z-index: 1;
   padding: 6px 12px;
   color: var(--muted);
   font-size: 13px;
   white-space: nowrap;
   border-radius: 9999px;
-  /* Press feedback is instant (100ms); color settles at the house 200ms. */
-  transition: color 200ms var(--ease-default),
-    background-color 200ms var(--ease-default), scale 100ms var(--ease-out);
+  transition: color var(--motion-fast) var(--ease-out), scale 100ms var(--ease-out);
 }
-.tabs a:hover { color: var(--text); background: var(--muted-bg); }
+.tabs a:hover { color: var(--text); }
 .tabs a:active { scale: 0.96; }
 .tabs a.active { color: var(--text); background: var(--muted-bg); }
+/* Hover-as-preview: one pill slides between tabs (fluid-functionalism).
+   Deliberate deviation from compositor-only motion: width must animate for
+   the pill to fit each label; the element is tiny and the strip is short. */
+.tab-hover-pill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  border-radius: 9999px;
+  background: var(--muted-bg);
+  pointer-events: none;
+  transition: translate var(--motion-moderate) var(--ease-out),
+    width var(--motion-moderate) var(--ease-out);
+}
 
 .workspace-body { flex: 1; min-height: 0; overflow: auto; padding: 16px 20px; }
 

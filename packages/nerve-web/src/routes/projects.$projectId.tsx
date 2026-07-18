@@ -1,8 +1,8 @@
 import { createFileRoute, Link, notFound, Outlet, retainSearchParams } from "@tanstack/react-router"
 import { Group, Panel, Separator, useDefaultLayout } from "react-resizable-panels"
 import { useSuspenseQuery } from "@tanstack/react-query"
-import { compileQueryOptions, countDiagnostics, exportPacket } from "../lib/compile-client.js"
-import { useState } from "react"
+import { compileQueryOptions, exportPacket } from "../lib/compile-client.js"
+import { useRef, useState } from "react"
 import { Button } from "../ui/button.js"
 import { SearchBox } from "../components/SearchBox.js"
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js"
@@ -10,7 +10,6 @@ import { SourcePane } from "../components/SourcePane.js"
 import { AiPane } from "../components/AiPane.js"
 import { useIsDirty } from "../lib/useSources.js"
 import { projectMeta } from "../lib/projects.js"
-import { Badge } from "../ui/badge.js"
 
 export const Route = createFileRoute("/projects/$projectId")({
   search: {
@@ -90,12 +89,45 @@ function ShareButton({ projectId }: { projectId: string }) {
   )
 }
 
+/** Tab strip with a hover pill that slides between tabs (hover as preview). */
+function WorkspaceTabs({ projectId }: { projectId: string }) {
+  const listRef = useRef<HTMLElement>(null)
+  const [hover, setHover] = useState<{ x: number; w: number } | null>(null)
+  const onEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const list = listRef.current
+    if (list === null) return
+    const item = e.currentTarget.getBoundingClientRect()
+    setHover({ x: item.left - list.getBoundingClientRect().left, w: item.width })
+  }
+  return (
+    <nav className="tabs" ref={listRef} onMouseLeave={() => setHover(null)}>
+      {hover !== null && (
+        <span
+          className="tab-hover-pill"
+          style={{ translate: `${hover.x}px 0`, width: hover.w }}
+          aria-hidden="true"
+        />
+      )}
+      {TABS.map((tab) => (
+        <Link
+          key={tab.to}
+          to={tab.to}
+          params={{ projectId }}
+          activeProps={{ className: "active" }}
+          onMouseEnter={onEnter}
+        >
+          {tab.label}
+        </Link>
+      ))}
+    </nav>
+  )
+}
+
 function ProjectWorkspace() {
   const { projectId } = Route.useParams()
   const workspaceLayout = useDefaultLayout({ id: "nerve-workspace-3", panelIds: ["ai", "source", "render"] })
   const { data } = useSuspenseQuery(compileQueryOptions(projectId))
   const dirty = useIsDirty(projectId)
-  const { errors, warnings } = countDiagnostics(data.hir.diagnostics)
 
   return (
     <div className="workspace">
@@ -104,32 +136,11 @@ function ProjectWorkspace() {
           {data.hir.harness.id}
           {dirty ? " •" : ""}
         </h2>
-        <span className="meta">
-          rev {data.hir.harness.revision} · {data.hir.connectors.length} connectors ·{" "}
-          {data.hir.wires.length} wires
-        </span>
-        <Badge variant={errors > 0 ? "destructive" : warnings > 0 ? "accent" : "success"}>
-          {errors > 0
-            ? `${errors} error${errors === 1 ? "" : "s"}`
-            : warnings > 0
-              ? `${warnings} warning${warnings === 1 ? "" : "s"}`
-              : "No issues"}
-        </Badge>
+        <span className="meta">rev {data.hir.harness.revision}</span>
         <SearchBox hir={data.hir} projectId={projectId} />
         <ShareButton projectId={projectId} />
         <ExportButton projectId={projectId} />
-        <nav className="tabs">
-          {TABS.map((tab) => (
-            <Link
-              key={tab.to}
-              to={tab.to}
-              params={{ projectId }}
-              activeProps={{ className: "active" }}
-            >
-              {tab.label}
-            </Link>
-          ))}
-        </nav>
+        <WorkspaceTabs projectId={projectId} />
       </div>
       {/* Datum-style resizable split; layout persisted to localStorage. */}
       <Group
