@@ -4,7 +4,7 @@
  */
 import { useEffect } from "react"
 import type { Hir } from "@grayhaven/nerve"
-import { Button } from "../ui/button.js"
+import { Button } from "@/components/ui/button"
 import { jumpToSource } from "../lib/editor-registry.js"
 import { setSelection, useSelection, type Selection } from "../lib/selection.js"
 

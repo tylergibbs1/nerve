@@ -6,6 +6,9 @@ import react from "@vitejs/plugin-react"
 import { tanstackRouter } from "@tanstack/router-plugin/vite"
 import { SITE } from "./scripts/site.js"
 
+// shadcn generates "@/..." imports; mirror the tsconfig path alias here.
+const srcDir = fileURLToPath(new URL("./src", import.meta.url))
+
 const genScript = fileURLToPath(new URL("./scripts/gen-llms.ts", import.meta.url))
 
 // Agent-readable docs variants regenerate on every build AND dev-server
@@ -64,6 +67,7 @@ export default defineConfig({
       }
     }
   },
+  resolve: { alias: { "@": srcDir } },
   css: { devSourcemap: true },
   worker: { format: "es" },
   optimizeDeps: {

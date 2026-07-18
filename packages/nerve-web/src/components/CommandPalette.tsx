@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from "react"
 import { useNavigate } from "@tanstack/react-router"
-import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "../ui/command.js"
+import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
 const PAGES = [
   { label: "Home", to: "/" },

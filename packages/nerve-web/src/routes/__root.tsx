@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-router"
 import type { QueryClient } from "@tanstack/react-query"
 import { warmCompiler } from "../lib/compile-client.js"
-import { Button } from "../ui/button.js"
+import { Button } from "@/components/ui/button"
 import { CommandPalette } from "../components/CommandPalette.js"
 
 interface RouterContext {

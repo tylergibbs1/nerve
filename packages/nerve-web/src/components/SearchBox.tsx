@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "@tanstack/react-router"
 import type { Hir } from "@grayhaven/nerve"
-import { Command, CommandInput, CommandItem, CommandList } from "../ui/command.js"
+import { Command, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { setSelection, type Selection } from "../lib/selection.js"
 
 interface Hit {

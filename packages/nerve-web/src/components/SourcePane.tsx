@@ -29,8 +29,8 @@ import {
   setFileSource,
   subscribeSource
 } from "../lib/sources.js"
-import { Button } from "../ui/button.js"
-import { Checkbox } from "../ui/checkbox.js"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 
 /**
  * Persistent source editor (PRD §11.1 left pane). Auto-compiles on type;

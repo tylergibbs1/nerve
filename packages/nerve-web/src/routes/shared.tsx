@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { Button } from "../ui/button.js"
+import { Button } from "@/components/ui/button"
 import { decodeShareFiles } from "../lib/share.js"
 import { registerProjectFiles } from "../lib/sources.js"
 

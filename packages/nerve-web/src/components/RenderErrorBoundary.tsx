@@ -1,5 +1,5 @@
 import { Component, type ReactNode } from "react"
-import { Button } from "../ui/button.js"
+import { Button } from "@/components/ui/button"
 
 interface Props {
   /** Remounting key: an error state resets when this changes. */
