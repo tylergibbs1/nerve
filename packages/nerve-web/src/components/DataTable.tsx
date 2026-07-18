@@ -7,6 +7,8 @@ import {
   type OnChangeFn,
   type SortingState
 } from "@tanstack/react-table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 
 /** Per-column type treatment (reference admin tables): IDs/codes get mono,
  * numerics get sans + tabular-nums + muted, prose stays sans foreground. */
@@ -49,19 +51,28 @@ export function DataTable<T>({
   })
 
   if (table.getRowModel().rows.length === 0) {
-    return <div className="table-empty">No rows yet. Compile a harness that produces this output.</div>
+    return (
+      <Empty className="table-empty">
+        <EmptyHeader>
+          <EmptyTitle>No rows yet</EmptyTitle>
+          <EmptyDescription>
+            Compile a harness that produces this output and the rows appear here.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    )
   }
 
   return (
-    <table className="data">
-      <thead>
+    <Table className="data">
+      <TableHeader>
         {table.getHeaderGroups().map((hg) => (
-          <tr key={hg.id}>
+          <TableRow key={hg.id}>
             {hg.headers.map((header) => {
               const canSort = sortable && header.column.getCanSort()
               const dir = header.column.getIsSorted()
               return (
-                <th key={header.id} className={canSort ? "sortable" : undefined}>
+                <TableHead key={header.id} className={canSort ? "sortable" : undefined}>
                   {canSort ? (
                     <button
                       type="button"
@@ -80,24 +91,24 @@ export function DataTable<T>({
                   ) : header.isPlaceholder ? null : (
                     flexRender(header.column.columnDef.header, header.getContext())
                   )}
-                </th>
+                </TableHead>
               )
             })}
-          </tr>
+          </TableRow>
         ))}
-      </thead>
-      <tbody>
+      </TableHeader>
+      <TableBody>
         {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
+          <TableRow key={row.id}>
             {row.getVisibleCells().map((cell) => (
-              <td key={cell.id} className={cellClass(cell.column.columnDef.meta?.kind)}>
+              <TableCell key={cell.id} className={cellClass(cell.column.columnDef.meta?.kind)}>
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
+              </TableCell>
             ))}
-          </tr>
+          </TableRow>
         ))}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
   )
 }
 

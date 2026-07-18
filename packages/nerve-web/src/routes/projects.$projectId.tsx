@@ -3,8 +3,8 @@ import { Group, Panel, Separator, useDefaultLayout } from "react-resizable-panel
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { compileQueryOptions, exportPacket } from "../lib/compile-client.js"
 import { useRef, useState } from "react"
-import { Button } from "../ui/button.js"
-import { Input } from "../ui/input.js"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { SearchBox } from "../components/SearchBox.js"
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js"
 import { SourcePane } from "../components/SourcePane.js"
@@ -13,6 +13,7 @@ import { AiPane } from "../components/AiPane.js"
 import { useIsDirty } from "../lib/useSources.js"
 import { useMediaQuery } from "../lib/useMediaQuery.js"
 import { projectMeta } from "../lib/projects.js"
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 
 export const Route = createFileRoute("/projects/$projectId")({
   search: {
@@ -29,38 +30,38 @@ export const Route = createFileRoute("/projects/$projectId")({
     context.queryClient.ensureQueryData(compileQueryOptions(params.projectId)),
   pendingComponent: () => <div className="status">Compiling…</div>,
   errorComponent: ({ error }) => (
-    <div className="status error">
-      <span className="status-title">This harness didn&rsquo;t compile</span>
-      <p className="status-detail">
-        The compiler stopped before it produced a result, so there is nothing to show yet. Edit
-        the source and it will retry, or open another harness.
-      </p>
-      <span className="status-cause">{String(error)}</span>
-      <span className="status-actions">
-        <Button variant="secondary" size="xs" onClick={() => window.location.reload()}>
+    <Empty className="app-status app-status--error">
+        <EmptyHeader>
+          <EmptyTitle>This harness didn&rsquo;t compile</EmptyTitle>
+          <EmptyDescription>The compiler stopped before it produced a result, so there is nothing to show yet. Edit
+        the source and it will retry, or open another harness.</EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <span className="status-cause">{String(error)}</span>
+<Button variant="secondary" size="xs" onClick={() => window.location.reload()}>
           Retry
         </Button>
         <Button variant="outline" size="xs" asChild>
           <Link to="/projects">All harnesses</Link>
         </Button>
-      </span>
-    </div>
+        </EmptyContent>
+      </Empty>
   ),
   // Not an error state: nothing broke, the address just doesn't name
   // anything. The red heading belongs to failures.
   notFoundComponent: () => (
-    <div className="status">
-      <span className="status-title">No harness by that name</span>
-      <p className="status-detail">
-        The link may be out of date, or the harness was opened from a share link that this
-        browser no longer holds.
-      </p>
-      <span className="status-actions">
-        <Button variant="secondary" size="xs" asChild>
+    <Empty className="app-status">
+        <EmptyHeader>
+          <EmptyTitle>No harness by that name</EmptyTitle>
+          <EmptyDescription>The link may be out of date, or the harness was opened from a share link that this
+        browser no longer holds.</EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+<Button variant="secondary" size="xs" asChild>
           <Link to="/projects">All harnesses</Link>
         </Button>
-      </span>
-    </div>
+        </EmptyContent>
+      </Empty>
   ),
   component: ProjectWorkspace
 })

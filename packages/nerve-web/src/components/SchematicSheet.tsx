@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { Hir } from "@grayhaven/nerve"
-import { Button } from "../ui/button.js"
+import { Button } from "@/components/ui/button"
 import { Inspector } from "./Inspector.js"
 import { selectionFromElement, selectorFor, setSelection, useSelection } from "../lib/selection.js"
 

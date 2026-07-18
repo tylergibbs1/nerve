@@ -6,8 +6,8 @@
  */
 import { describe, expect, it } from "vitest"
 import { render, screen } from "@testing-library/react"
-import { Button } from "../src/ui/button.js"
-import { Input } from "../src/ui/input.js"
+import { Button } from "../src/components/ui/button"
+import { Input } from "../src/components/ui/input"
 
 describe("Button", () => {
   it("renders a real button with variant + size classes", () => {

@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { setCompileResult } from "../lib/compile-client.js"
 import { getApiKey, runAgentTurn, setApiKey, type AgentEvent, type ChatTurn } from "../lib/ai.js"
 import { useMinimumLoading } from "../lib/useMinimumLoading.js"
-import { Button } from "../ui/button.js"
+import { Button } from "@/components/ui/button"
 /**
  * What the assistant did, in the words a reader would use for it. The model
  * calls these tools `edit_harness_source` and `rewrite_harness_source`; those
@@ -18,8 +18,8 @@ function stepLabel(name: string, status: "running" | "ok" | "failed"): string {
         : (["Working on the harness", "Changed the harness", "Couldn't change the harness"] as const)
   return status === "running" ? verbs[0] : status === "ok" ? verbs[1] : verbs[2]
 }
-import { Input } from "../ui/input.js"
-import { Textarea } from "../ui/textarea.js"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 
 interface ToolPill {
   readonly name: string

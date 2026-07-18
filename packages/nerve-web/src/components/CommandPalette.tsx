@@ -1,11 +1,18 @@
 /**
- * Global ⌘K command palette — navigation only (v1). Owns its open state;
- * Escape is handled on the input (not a window listener) so it can never
- * fight the Inspector's Escape handling. cmdk does the filtering.
+ * Global ⌘K command palette — navigation only (v1). Owns its open state and
+ * renders through shadcn's CommandDialog, so the focus trap, scroll lock,
+ * scrim and Escape-to-close come from Radix Dialog instead of hand-rolled
+ * markup. cmdk does the filtering.
+ *
+ * Escape no longer fights the Inspector: the palette autofocuses its input,
+ * and Inspector.tsx ignores Escape whose target is an INPUT.
+ *
+ * Verified against the versions in this project: react 19.1, cmdk 1.1.1,
+ * radix-ui 1.6.2 (Dialog), shadcn 4.13.1 (nova preset).
  */
 import { useEffect, useState } from "react"
 import { useNavigate } from "@tanstack/react-router"
-import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "../ui/command.js"
+import { Command, CommandDialog, CommandEmpty, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 
 const PAGES = [
   { label: "Home", to: "/" },
@@ -48,73 +55,63 @@ export function CommandPalette() {
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [])
 
-  if (!open) return null
-
   const close = () => setOpen(false)
 
   return (
-    <>
-      <div className="palette-scrim" onClick={close} />
-      <div className="palette-panel" role="dialog" aria-modal="true" aria-label="Command palette">
-        <Command label="Command palette">
-          <CommandInput
-            autoFocus
-            placeholder="Where to?"
-            className="h-9 text-sm"
-            onKeyDown={(e) => {
-              if (e.key !== "Escape") return
-              e.preventDefault()
-              e.stopPropagation()
-              close()
-            }}
-          />
-          <CommandList>
-            <CommandEmpty>No matches.</CommandEmpty>
-            {PAGES.map((p) => (
-              <CommandItem
-                key={p.to}
-                value={p.label}
-                className="palette-item"
-                onSelect={() => {
-                  void navigate({ to: p.to })
-                  close()
-                }}
-              >
-                {p.label}
-              </CommandItem>
-            ))}
-            {WORKSPACES.map((w) => (
-              <CommandItem
-                key={w.projectId}
-                value={w.label}
-                className="palette-item"
-                onSelect={() => {
-                  void navigate({
-                    to: "/projects/$projectId/diagram",
-                    params: { projectId: w.projectId }
-                  })
-                  close()
-                }}
-              >
-                {w.label}
-              </CommandItem>
-            ))}
-            {DOCS.map((d) => (
-              <CommandItem
-                key={d.to}
-                value={d.label}
-                className="palette-item"
-                onSelect={() => {
-                  void navigate({ to: d.to })
-                  close()
-                }}
-              >
-                {d.label}
-              </CommandItem>
-            ))}
-          </CommandList>
-        </Command>
-      </div>
-    </>
+    <CommandDialog
+      open={open}
+      onOpenChange={setOpen}
+      // Renders as a visually hidden DialogTitle/DialogDescription pair, so the
+      // dialog keeps the accessible name the old aria-label carried.
+      title="Command palette"
+      description="Search pages, workspaces and docs."
+      className="sm:max-w-[560px]"
+    >
+      <Command label="Command palette">
+        <CommandInput autoFocus placeholder="Where to?" className="h-9 text-sm" />
+        <CommandList>
+          <CommandEmpty>No matches.</CommandEmpty>
+          {PAGES.map((p) => (
+            <CommandItem
+              key={p.to}
+              value={p.label}
+              onSelect={() => {
+                void navigate({ to: p.to })
+                close()
+              }}
+            >
+              {p.label}
+            </CommandItem>
+          ))}
+          {WORKSPACES.map((w) => (
+            <CommandItem
+              key={w.projectId}
+              value={w.label}
+              onSelect={() => {
+                void navigate({
+                  to: "/projects/$projectId/diagram",
+                  params: { projectId: w.projectId }
+                })
+                close()
+              }}
+            >
+              {w.label}
+            </CommandItem>
+          ))}
+          {DOCS.map((d) => (
+            <CommandItem
+              key={d.to}
+              value={d.label}
+              onSelect={() => {
+                void navigate({ to: d.to })
+                close()
+              }}
+            >
+              {d.label}
+            </CommandItem>
+          ))}
+        </CommandList>
+      </Command>
+    </CommandDialog>
   )
 }

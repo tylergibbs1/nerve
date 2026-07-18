@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from "react"
-import { Button } from "../ui/button.js"
+import { Button } from "@/components/ui/button"
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 
 interface Props {
   /** Remounting key: an error state resets when this changes. */
@@ -28,19 +29,21 @@ export class RenderErrorBoundary extends Component<Props, State> {
   override render() {
     if (this.state.error === undefined) return this.props.children
     return (
-      <div className="status error">
-        <span className="status-title">This view didn&rsquo;t render</span>
-        <p className="status-detail">
-          The harness itself is fine — the editor beside this pane still has your work. Try the
-          view again, or switch tabs and come back.
-        </p>
-        <span className="status-cause">{this.state.error.message}</span>
-        <span className="status-actions">
-          <Button variant="secondary" size="xs" onClick={() => this.setState({ error: undefined })}>
+      <Empty className="app-status app-status--error">
+        <EmptyHeader>
+          <EmptyTitle>This view didn&rsquo;t render</EmptyTitle>
+          <EmptyDescription>
+            The harness itself is fine — the editor beside this pane still has your work. Try the
+            view again, or switch tabs and come back.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <span className="status-cause">{this.state.error.message}</span>
+          <Button variant="secondary" size="sm" onClick={() => this.setState({ error: undefined })}>
             Try again
           </Button>
-        </span>
-      </div>
+        </EmptyContent>
+      </Empty>
     )
   }
 }

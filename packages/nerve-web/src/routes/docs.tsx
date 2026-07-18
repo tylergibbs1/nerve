@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router"
-import { Button, buttonVariants } from "../ui/button.js"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "../lib/utils.js"
 
 export const Route = createFileRoute("/docs")({

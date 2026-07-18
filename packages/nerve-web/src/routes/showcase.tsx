@@ -8,7 +8,7 @@ import {
   JPL_SOURCE,
   type JplHarnessProof
 } from "../showcase/jpl-rover.js"
-import { Button } from "../ui/button.js"
+import { Button } from "@/components/ui/button"
 
 export const Route = createFileRoute("/showcase")({
   head: () => ({
