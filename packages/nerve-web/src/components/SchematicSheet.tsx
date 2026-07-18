@@ -30,6 +30,8 @@ export function SchematicSheet({
   const paneRef = useRef<HTMLDivElement | null>(null)
   const zoomRef = useRef(1)
   const [copied, setCopied] = useState(false)
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(copiedTimer.current), [])
 
   const attach = useCallback((pane: HTMLDivElement | null) => {
     paneRef.current = pane
@@ -107,7 +109,8 @@ export function SchematicSheet({
   const copy = () => {
     void navigator.clipboard.writeText(svg).then(() => {
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      clearTimeout(copiedTimer.current)
+      copiedTimer.current = setTimeout(() => setCopied(false), 2000)
     })
   }
   const downloadBlob = (contents: string, name: string, type: string) => {

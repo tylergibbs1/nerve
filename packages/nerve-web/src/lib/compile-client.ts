@@ -12,12 +12,8 @@
  * - The worker RPC honors Query's abort signal, and a worker crash rejects
  *   every pending request instead of stranding queries in `pending` forever.
  */
-import {
-  queryOptions,
-  useQuery,
-  type QueryClient
-} from "@tanstack/react-query"
-import { ENTRY_FILE, getFiles, getSource, isDirty, listFiles } from "./sources.js"
+import { queryOptions, type QueryClient } from "@tanstack/react-query"
+import { ENTRY_FILE, getFiles, getSource, isDirty } from "./sources.js"
 import { PROJECTS } from "./projects.js"
 import type { CompileRequest, CompileResponse, CompileResult } from "./compile-types.js"
 
@@ -126,9 +122,6 @@ export const compileProjectFile = (
     signal
   )
 
-/** Whether the project carries more than one source file. */
-export const isMultiFile = (projectId: string): boolean => listFiles(projectId).length > 1
-
 /** Build the full manufacturing packet (zip) in the worker. Byte-identical
  * to `nerve export` because it runs the same pure exporters on the same HIR. */
 export const exportPacket = (projectId: string): Promise<Uint8Array> =>
@@ -170,9 +163,6 @@ export const setCompileResult = (
   queryClient.setQueryData(compileQueryOptions(projectId).queryKey, result)
 }
 
-export const useCompile = (projectId: string) =>
-  useQuery(compileQueryOptions(projectId))
-
 export interface DiagnosticCounts {
   readonly errors: number
   readonly warnings: number
@@ -191,12 +181,3 @@ export const countDiagnostics = (
   }
   return { errors, warnings, total: diagnostics.length }
 }
-
-// Module-scope selector: the stable reference lets Query memoize the
-// select result instead of recomputing on every render.
-const selectCounts = (r: CompileResult): DiagnosticCounts =>
-  countDiagnostics(r.hir.diagnostics)
-
-/** Selector-based subscription for components that need only the counts. */
-export const useDiagnosticCounts = (projectId: string) =>
-  useQuery({ ...compileQueryOptions(projectId), select: selectCounts })

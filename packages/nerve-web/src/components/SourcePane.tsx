@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef, useState } from "react"
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useDebouncedValue } from "@tanstack/react-pacer"
 import CodeMirror from "@uiw/react-codemirror"
@@ -41,14 +41,20 @@ export function SourcePane({ projectId }: { projectId: string }) {
   // compile ENTRYPOINT — opening variants/long.ts renders the long SKU.
   const [activeFile, setActiveFile] = useState(ENTRY_FILE)
   // Mirror activeFile into a ref so the compile mutation's async onSuccess
-  // can tell whether the user has since switched tabs.
+  // can tell whether the user has since switched tabs. Updated at commit,
+  // which lands before any async onSuccess can read it.
   const activeFileRef = useRef(activeFile)
-  activeFileRef.current = activeFile
+  useEffect(() => {
+    activeFileRef.current = activeFile
+  }, [activeFile])
   const files = listFiles(projectId)
   const [source, setLocalSource] = useState(() => getFileSource(projectId, ENTRY_FILE))
   const [autoCompile, setAutoCompile] = useState(true)
   const lastCompiled = useRef<string | undefined>(undefined)
   const viewRef = useRef<EditorView | null>(null)
+  // True while this component writes to the source store, so the subscribe
+  // listener can ignore its own synchronous self-notifies.
+  const selfWrite = useRef(false)
   // Pre-reset snapshot of every file; present only until the next edit,
   // project switch, or undo.
   const [undoSnapshot, setUndoSnapshot] = useState<Readonly<Record<string, string>> | undefined>(undefined)
@@ -75,14 +81,12 @@ export function SourcePane({ projectId }: { projectId: string }) {
     () =>
       subscribeSource((changed, origin) => {
         if (changed !== projectId) return
+        if (selfWrite.current) return
         const text = getFileSource(projectId, activeFile)
-        setLocalSource((local) => {
-          if (local === text) return local
-          // Same-tab external writes (AI pane) arrive compile-verified;
-          // remote-tab keystrokes do not — let auto-compile pick them up.
-          if (origin === "local") lastCompiled.current = text
-          return text
-        })
+        // Same-tab external writes (the AI pane) arrive compile-verified;
+        // remote-tab keystrokes do not — let auto-compile pick them up.
+        if (origin === "local") lastCompiled.current = text
+        setLocalSource(text)
       }),
     [projectId, activeFile]
   )
@@ -141,7 +145,10 @@ export function SourcePane({ projectId }: { projectId: string }) {
 
   const onChange = (text: string) => {
     setLocalSource(text)
+    // Notify is synchronous — bracket the write so the listener skips it.
+    selfWrite.current = true
     setFileSource(projectId, activeFile, text)
+    selfWrite.current = false
     setUndoSnapshot(undefined)
   }
 
@@ -155,22 +162,29 @@ export function SourcePane({ projectId }: { projectId: string }) {
     compile.mutate({ path, text })
   }
 
-  // Keep the status span mounted; animate visibility.
-  const status = compile.isError
-    ? { kind: "error" as const, text: String(compile.error.message) }
-    : compile.isSuccess
-      ? {
-          kind: "ok" as const,
-          text: (() => {
-            const { errors, warnings } = countDiagnostics(compile.data.hir.diagnostics)
-            const n = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`
-            return `Compiled · ${n(errors, "error")}, ${n(warnings, "warning")}`
-          })()
-        }
-      : undefined
-  const lastStatus = useRef(status)
-  if (status !== undefined) lastStatus.current = status
-  const shown = status ?? lastStatus.current
+  // Keep the status span mounted; animate visibility. Memoized so the
+  // render-phase retention setState below cannot loop.
+  const status = useMemo(
+    () =>
+      compile.isError
+        ? { kind: "error" as const, text: String(compile.error.message) }
+        : compile.isSuccess
+          ? {
+              kind: "ok" as const,
+              text: (() => {
+                const { errors, warnings } = countDiagnostics(compile.data.hir.diagnostics)
+                const n = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`
+                return `Compiled · ${n(errors, "error")}, ${n(warnings, "warning")}`
+              })()
+            }
+          : undefined,
+    [compile.isError, compile.isSuccess, compile.error, compile.data]
+  )
+  // "Storing information from previous renders": retain the last real status
+  // while the mutation is idle/pending.
+  const [retainedStatus, setRetainedStatus] = useState(status)
+  if (status !== undefined && status !== retainedStatus) setRetainedStatus(status)
+  const shown = status ?? retainedStatus
 
   return (
     <div className="source-pane">
@@ -225,9 +239,11 @@ export function SourcePane({ projectId }: { projectId: string }) {
             variant="secondary"
             size="xs"
             onClick={() => {
+              selfWrite.current = true
               for (const [path, text] of Object.entries(undoSnapshot)) {
                 setFileSource(projectId, path, text)
               }
+              selfWrite.current = false
               setActiveFile(ENTRY_FILE)
               setLocalSource(undoSnapshot[ENTRY_FILE] ?? "")
               lastCompiled.current = undefined

@@ -303,30 +303,32 @@ function RoverShowcase() {
             diagrams. Nerve reads those files and adds repeatable checks and a reviewable record.
           </p>
         </div>
-        <div className="showcase-comparison" role="table" aria-label="WireViz and Nerve comparison">
-          <div className="comparison-head" role="row">
-            <span role="columnheader">WireViz</span>
-            <span role="columnheader">Nerve adds</span>
-          </div>
-          <div role="row">
-            <span role="cell">Readable YAML for connectors, cables, and connections</span>
-            <span role="cell">A typed model of the design with a stable fingerprint</span>
-          </div>
-          <div role="row">
-            <span role="cell">Wiring diagrams and source-level documentation</span>
-            <span role="cell">
-              {JPL_SHOWCASE_SUMMARY.ruleCount} repeatable checks that can block a release
-            </span>
-          </div>
-          <div role="row">
-            <span role="cell">A strong design description</span>
-            <span role="cell">BOM, cut list, labels, test plan, PDF, and machine-readable files</span>
-          </div>
-          <div role="row">
-            <span role="cell">The facts the author supplied</span>
-            <span role="cell">A review record that says what was checked and what remains unknown</span>
-          </div>
-        </div>
+        <table className="showcase-comparison" aria-label="WireViz and Nerve comparison">
+          <thead>
+            <tr className="comparison-head">
+              <th scope="col">WireViz</th>
+              <th scope="col">Nerve adds</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Readable YAML for connectors, cables, and connections</td>
+              <td>A typed model of the design with a stable fingerprint</td>
+            </tr>
+            <tr>
+              <td>Wiring diagrams and source-level documentation</td>
+              <td>{JPL_SHOWCASE_SUMMARY.ruleCount} repeatable checks that can block a release</td>
+            </tr>
+            <tr>
+              <td>A strong design description</td>
+              <td>BOM, cut list, labels, test plan, PDF, and machine-readable files</td>
+            </tr>
+            <tr>
+              <td>The facts the author supplied</td>
+              <td>A review record that says what was checked and what remains unknown</td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
       <footer className="showcase-caveat">

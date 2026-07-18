@@ -826,18 +826,29 @@ textarea:focus-visible, select:focus-visible {
 .showcase-export > span { font-size: 12px; color: var(--muted); }
 
 .showcase-comparison {
+  width: 100%;
   min-width: 640px;
   margin-top: 34px;
+  border-collapse: collapse;
   border-top: 1px solid var(--border);
 }
-.showcase-comparison > div {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border-bottom: 1px solid var(--border);
+.showcase-comparison tr { border-bottom: 1px solid var(--border); }
+.showcase-comparison th, .showcase-comparison td {
+  width: 50%;
+  padding: 18px 24px 18px 0;
+  font-size: 13px;
+  line-height: 1.55;
+  text-align: left;
+  vertical-align: top;
+  color: var(--muted);
+  font-weight: 400;
 }
-.showcase-comparison span { padding: 18px 24px 18px 0; font-size: 13px; line-height: 1.55; color: var(--muted); }
-.showcase-comparison span + span { padding-left: 24px; border-left: 1px solid var(--border); color: var(--text); }
-.showcase-comparison .comparison-head span {
+.showcase-comparison th + th, .showcase-comparison td + td {
+  padding-left: 24px;
+  border-left: 1px solid var(--border);
+  color: var(--text);
+}
+.showcase-comparison thead th {
   padding-block: 11px;
   font-size: 12px;
   font-weight: 500;

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { memo, useEffect, useRef, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { setCompileResult } from "../lib/compile-client.js"
 import { getApiKey, runAgentTurn, setApiKey, type AgentEvent, type ChatTurn } from "../lib/ai.js"
@@ -15,8 +15,43 @@ interface ToolPill {
 }
 
 interface Message extends ChatTurn {
+  readonly id: string
   readonly pills?: ReadonlyArray<ToolPill>
 }
+
+// Streaming replaces only the last array element, so memo lets every earlier
+// row skip re-rendering on each token.
+const MessageRow = memo(function MessageRow({
+  message,
+  showThinking
+}: {
+  message: Message
+  showThinking: boolean
+}) {
+  return (
+    <div className={`ai-msg ${message.role}`}>
+      {message.pills !== undefined && message.pills.length > 0 && (
+        <div className="ai-pills">
+          {message.pills.map((p, j) => (
+            <Badge
+              key={j}
+              variant={p.status === "ok" ? "default" : p.status === "failed" ? "destructive" : "secondary"}
+              className={p.status === "running" ? "ai-pill-running" : undefined}
+              title={p.detail}
+            >
+              {p.status === "running" ? "⋯ " : p.status === "ok" ? "✓ " : "✕ "}
+              {p.name === "edit_harness_source" ? "patch" : p.name === "rewrite_harness_source" ? "rewrite" : p.name}
+            </Badge>
+          ))}
+        </div>
+      )}
+      {message.text !== "" && <div className="ai-text">{message.text}</div>}
+      {message.role === "assistant" && message.text === "" && (message.pills === undefined || message.pills.length === 0) && showThinking && (
+        <div className="ai-text thinking">thinking…</div>
+      )}
+    </div>
+  )
+})
 
 /**
  * AI copilot pane (datum's chat-pane pattern, PRD §12). Edits the harness
@@ -48,7 +83,11 @@ export function AiPane({ projectId }: { projectId: string }) {
     setInput("")
     setBusy(true)
     const history: ChatTurn[] = messages.map((m) => ({ role: m.role, text: m.text }))
-    setMessages((prev) => [...prev, { role: "user", text }, { role: "assistant", text: "" }])
+    setMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: "user", text },
+      { id: crypto.randomUUID(), role: "assistant", text: "" }
+    ])
 
     const onEvent = (e: AgentEvent) => {
       setMessages((prev) => {
@@ -150,27 +189,7 @@ export function AiPane({ projectId }: { projectId: string }) {
           </p>
         )}
         {messages.map((m, i) => (
-          <div key={i} className={`ai-msg ${m.role}`}>
-            {m.pills !== undefined && m.pills.length > 0 && (
-              <div className="ai-pills">
-                {m.pills.map((p, j) => (
-                  <Badge
-                    key={j}
-                    variant={p.status === "ok" ? "default" : p.status === "failed" ? "destructive" : "secondary"}
-                    className={p.status === "running" ? "ai-pill-running" : undefined}
-                    title={p.detail}
-                  >
-                    {p.status === "running" ? "⋯ " : p.status === "ok" ? "✓ " : "✕ "}
-                    {p.name === "edit_harness_source" ? "patch" : p.name === "rewrite_harness_source" ? "rewrite" : p.name}
-                  </Badge>
-                ))}
-              </div>
-            )}
-            {m.text !== "" && <div className="ai-text">{m.text}</div>}
-            {m.role === "assistant" && m.text === "" && (m.pills === undefined || m.pills.length === 0) && showBusy && i === messages.length - 1 && (
-              <div className="ai-text thinking">thinking…</div>
-            )}
-          </div>
+          <MessageRow key={m.id} message={m} showThinking={showBusy && i === messages.length - 1} />
         ))}
       </div>
       <div className="ai-input">

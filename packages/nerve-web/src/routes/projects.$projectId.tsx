@@ -7,6 +7,7 @@ import { Button } from "../ui/button.js"
 import { SearchBox } from "../components/SearchBox.js"
 import { DiagnosticsPanel } from "../components/DiagnosticsPanel.js"
 import { SourcePane } from "../components/SourcePane.js"
+import { RenderErrorBoundary } from "../components/RenderErrorBoundary.js"
 import { AiPane } from "../components/AiPane.js"
 import { useIsDirty } from "../lib/useSources.js"
 import { projectMeta } from "../lib/projects.js"
@@ -74,8 +75,10 @@ function ExportButton({ projectId }: { projectId: string }) {
 function ShareButton({ projectId }: { projectId: string }) {
   const [copied, setCopied] = useState(false)
   const run = async () => {
-    const { shareUrl } = await import("../lib/share.js")
-    const { getFiles } = await import("../lib/sources.js")
+    const [{ shareUrl }, { getFiles }] = await Promise.all([
+      import("../lib/share.js"),
+      import("../lib/sources.js")
+    ])
     // Encode the whole project so multi-file projects don't lose their
     // extra files; single-entry projects still get a compact v1 link.
     await navigator.clipboard.writeText(shareUrl(getFiles(projectId)))
@@ -158,7 +161,9 @@ function ProjectWorkspace() {
         <Separator className="pane-handle" />
         <Panel id="render" minSize="25%">
           <div className="render-pane">
-            <Outlet />
+            <RenderErrorBoundary resetKey={projectId}>
+              <Outlet />
+            </RenderErrorBoundary>
           </div>
         </Panel>
       </Group>
