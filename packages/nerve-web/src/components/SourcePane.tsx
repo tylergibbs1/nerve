@@ -85,9 +85,12 @@ export function SourcePane({ projectId }: { projectId: string }) {
   // while the tab strip shows the entry file. The mount-time auto-compile
   // happens to realign it, but only when auto-compile is on — so carry the
   // deleted effect's one non-state side effect over explicitly.
+  // projectId IS in the deps even though the key means this only ever runs on
+  // mount: with an empty array the effect silently captures a stale projectId
+  // the moment anyone removes that key, and nothing would fail loudly.
   useEffect(() => {
     setActiveEntrypoint(projectId, ENTRY_FILE)
-  }, [])
+  }, [projectId])
 
   // Unregister the editor view when the pane unmounts.
   useEffect(() => () => registerEditor(null), [])
