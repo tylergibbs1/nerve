@@ -68,6 +68,24 @@ export function SourcePane({ projectId }: { projectId: string }) {
   // project switch, or undo.
   const [undoSnapshot, setUndoSnapshot] = useState<Readonly<Record<string, string>> | undefined>(undefined)
 
+  // Reset and "Undo reset" each unmount themselves: activating one flips the
+  // dirty/snapshot state that renders it, and the other takes its place. Left
+  // alone the browser drops focus to <body>, so a keyboard user is dumped at
+  // the top of the document mid-task. Hand focus to the control that replaced
+  // the one they activated — it is where the undo/redo of that action lives.
+  const resetRef = useRef<HTMLButtonElement>(null)
+  const undoRef = useRef<HTMLButtonElement>(null)
+  const focusAfterSwap = useRef<"reset" | "undo" | null>(null)
+  // undoSnapshot is what swaps the pair, so its change is the commit where the
+  // replacement button exists to receive focus.
+  useEffect(() => {
+    const target = focusAfterSwap.current
+    if (target === null) return
+    focusAfterSwap.current = null
+    const el = target === "undo" ? undoRef.current : resetRef.current
+    el?.focus()
+  }, [undoSnapshot])
+
   // Push HK diagnostics into the lint gutter whenever a compile lands.
   const publishDiagnostics = (text: string, diags: ReadonlyArray<{ readonly code: string; readonly severity: string; readonly message: string; readonly target?: string | undefined }>) => {
     const view = viewRef.current
@@ -254,9 +272,11 @@ export function SourcePane({ projectId }: { projectId: string }) {
         </span>
         {hasBundledSource(projectId) && isDirty(projectId) && (
           <Button
+            ref={resetRef}
             variant="secondary"
             size="xs"
             onClick={() => {
+              focusAfterSwap.current = "undo"
               const snapshot = getFiles(projectId)
               setUndoSnapshot(snapshot)
               const text = resetSource(projectId)
@@ -270,9 +290,11 @@ export function SourcePane({ projectId }: { projectId: string }) {
         )}
         {undoSnapshot !== undefined && (
           <Button
+            ref={undoRef}
             variant="secondary"
             size="xs"
             onClick={() => {
+              focusAfterSwap.current = "reset"
               selfWrite.current = true
               for (const [path, text] of Object.entries(undoSnapshot)) {
                 setFileSource(projectId, path, text)
