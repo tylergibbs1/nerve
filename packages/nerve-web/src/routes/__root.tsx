@@ -11,6 +11,7 @@ import { warmCompiler } from "../lib/compile-client.js"
 import { Button } from "@/components/ui/button"
 import { CommandPalette } from "../components/CommandPalette.js"
 import { LiveRegion } from "../lib/announce.js"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty"
 
 interface RouterContext {
@@ -73,40 +74,50 @@ function RootLayout() {
   }, [])
 
   return (
-    <div className="app-shell">
-      <HeadContent />
-      <header className="topbar">
-        <Link to="/" className="brand">
-          <GrayhavenMark />
-          Grayhaven Nerve
-        </Link>
-        <nav className="topnav">
-          <Link to="/showcase" activeProps={{ className: "active" }}>
-            Showcase
+    <TooltipProvider>
+      <div className="app-shell">
+        <HeadContent />
+        <header className="topbar">
+          <Link to="/" className="brand">
+            <GrayhavenMark />
+            Grayhaven Nerve
           </Link>
-          <Link to="/projects" activeProps={{ className: "active" }}>
-            Projects
-          </Link>
-          <Link to="/docs" activeProps={{ className: "active" }}>
-            Docs
-          </Link>
-          <a
-            className="gh-link"
-            href="https://github.com/tylergibbs1/nerve"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub repository"
-          >
-            <GitHubMark />
-          </a>
-        </nav>
-      </header>
-      <main className="app-main">
-        <Outlet />
-      </main>
-      <CommandPalette />
-      {/* One live region for the whole app; see lib/announce.tsx. */}
-      <LiveRegion />
-    </div>
+          <nav className="topnav">
+            <Link to="/showcase" activeProps={{ className: "active" }}>
+              Showcase
+            </Link>
+            <Link to="/projects" activeProps={{ className: "active" }}>
+              Projects
+            </Link>
+            <Link to="/docs" activeProps={{ className: "active" }}>
+              Docs
+            </Link>
+            {/* The one icon-only control in the chrome. aria-label already
+                named it for assistive tech; the tooltip is what tells a
+                sighted user what the glyph does. */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <a
+                  className="gh-link"
+                  href="https://github.com/tylergibbs1/nerve"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="GitHub repository"
+                >
+                  <GitHubMark />
+                </a>
+              </TooltipTrigger>
+              <TooltipContent>GitHub repository</TooltipContent>
+            </Tooltip>
+          </nav>
+        </header>
+        <main className="app-main">
+          <Outlet />
+        </main>
+        <CommandPalette />
+        {/* One live region for the whole app; see lib/announce.tsx. */}
+        <LiveRegion />
+      </div>
+    </TooltipProvider>
   )
 }
