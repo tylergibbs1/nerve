@@ -2,7 +2,7 @@
  * Selected-object inspector (PRD §11.3): a quiet overlay card describing
  * whatever is selected in any sheet, with a jump to its source definition.
  */
-import { useEffect } from "react"
+import { useCallback, useEffect, useRef, type RefObject } from "react"
 import type { Hir } from "@grayhaven/nerve"
 import { Button } from "@/components/ui/button"
 // shadcn/ui 4.13.1, "radix-nova" style: Card owns the surface, radius, and
@@ -58,8 +58,34 @@ const rows = (hir: Hir, sel: Selection): Array<readonly [string, string]> => {
   ]
 }
 
-export function Inspector({ hir }: { hir: Hir }) {
+export function Inspector({
+  hir,
+  focusOnClose
+}: {
+  hir: Hir
+  /**
+   * Stable focusable element to hand focus back to when the card closes —
+   * the sheet the selection was made in. The clicked SVG geometry itself is
+   * not focusable and is destroyed on every recompile, so the sheet's
+   * tabIndex=0 region is the predictable landing spot.
+   */
+  focusOnClose?: RefObject<HTMLElement | null>
+}) {
   const sel = useSelection()
+  const cardRef = useRef<HTMLDivElement | null>(null)
+  // Closing unmounts this card, so whatever was focused inside it is
+  // destroyed and focus silently falls to <body>. Move focus out first.
+  // Only when focus is actually inside the card: Escape pressed elsewhere
+  // must not yank the caret across the app.
+  // React 19.1 — function components receive `ref` as an ordinary prop, so
+  // Card's {...props} spread lands it on the underlying div (no forwardRef).
+  const close = useCallback(() => {
+    const active = document.activeElement
+    if (active !== null && cardRef.current?.contains(active) === true) {
+      focusOnClose?.current?.focus()
+    }
+    setSelection(undefined)
+  }, [focusOnClose])
   // Escape clears the selection while the inspector is showing — unless a
   // text field has focus (Escape there belongs to the field/editor).
   useEffect(() => {
@@ -73,11 +99,11 @@ export function Inspector({ hir }: { hir: Hir }) {
       ) {
         return
       }
-      setSelection(undefined)
+      close()
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [sel])
+  }, [sel, close])
   if (sel === undefined) return null
   const data = rows(hir, sel)
   if (data.length === 0) return null
@@ -88,6 +114,7 @@ export function Inspector({ hir }: { hir: Hir }) {
     // Card's own bg-card is one luminance step lower than a floating overlay
     // wants. No CardTitle: the kind label is a quiet .spec-tag, not a heading.
     <Card
+      ref={cardRef}
       size="sm"
       className="inspector bg-popover"
       role="region"
@@ -100,7 +127,7 @@ export function Inspector({ hir }: { hir: Hir }) {
             variant="ghost"
             size="xs"
             aria-label="Close inspector"
-            onClick={() => setSelection(undefined)}
+            onClick={close}
           >
             ✕
           </Button>

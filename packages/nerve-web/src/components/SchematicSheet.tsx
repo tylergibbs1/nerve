@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import type { Hir } from "@grayhaven/nerve"
 import { Button } from "@/components/ui/button"
 import { Inspector } from "./Inspector.js"
@@ -33,6 +33,28 @@ export function SchematicSheet({
   const copiedTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => () => clearTimeout(copiedTimer.current), [])
 
+  // Zoom is a ref written straight onto the SVG element's style, but the
+  // markup is replaced wholesale by dangerouslySetInnerHTML on every
+  // recompile — which drops the inline style while zoomRef still reads e.g.
+  // 2x, so the next tick jumps. React 19.1: a callback ref only re-runs on
+  // attach/detach, never when a prop like __html changes, so `attach` cannot
+  // notice the swap. Hoisted out of `attach` so the swap effect below can
+  // re-apply it too.
+  const applyZoom = useCallback((z: number) => {
+    const svgEl = paneRef.current?.querySelector("svg")
+    if (svgEl === null || svgEl === undefined) return
+    const natural = Number(svgEl.getAttribute("width"))
+    if (Number.isNaN(natural)) return
+    svgEl.style.width = `${natural * z}px`
+    svgEl.style.height = "auto"
+  }, [])
+
+  // Re-apply the held zoom to the freshly injected markup. Layout effect, so
+  // it lands before paint and the sheet never flashes back to natural size.
+  useLayoutEffect(() => {
+    applyZoom(zoomRef.current)
+  }, [svg, applyZoom])
+
   const attach = useCallback((pane: HTMLDivElement | null) => {
     paneRef.current = pane
     if (pane === null) return
@@ -49,14 +71,6 @@ export function SchematicSheet({
       for (const el of pane.querySelectorAll(`[data-wire="${CSS.escape(ref)}"]`)) {
         el.classList.add("hl")
       }
-    }
-    const applyZoom = (z: number) => {
-      const svgEl = pane.querySelector("svg")
-      if (svgEl === null) return
-      const natural = Number(svgEl.getAttribute("width"))
-      if (Number.isNaN(natural)) return
-      svgEl.style.width = `${natural * z}px`
-      svgEl.style.height = "auto"
     }
     const wheel = (e: WheelEvent) => {
       if (!e.ctrlKey && !e.metaKey) return
@@ -112,7 +126,7 @@ export function SchematicSheet({
       pane.removeEventListener("keydown", keydown)
       pane.removeEventListener("wheel", wheel)
     }
-  }, [])
+  }, [applyZoom])
 
   // Persistent cross-view selection highlight (PRD §11.3): survives both
   // selection changes and innerHTML swaps on recompile.
@@ -169,7 +183,9 @@ export function SchematicSheet({
         </Button>
         <span className="sheet-hint">⌘+scroll or ± to zoom · hover a wire</span>
       </div>
-      <Inspector hir={hir} />
+      {/* Closing the inspector sends focus back to the sheet the selection
+          came from, not to <body>. */}
+      <Inspector hir={hir} focusOnClose={paneRef} />
       <div
         className="diagram-pane"
         ref={attach}
