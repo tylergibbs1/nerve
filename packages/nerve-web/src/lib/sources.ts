@@ -57,6 +57,11 @@ const initial: Readonly<Record<string, Readonly<Record<string, string>>>> = {
 
 const edited = new Map<string, string>() // `${projectId} ${path}` → source
 
+// Per project, the set of paths whose current source differs from its
+// bundled baseline. Seeded by one full scan the first time a project is
+// asked about, then maintained incrementally — see `dirtySet`/`trackDirty`.
+const dirtyPaths = new Map<string, Set<string>>()
+
 const editKey = (projectId: string, path: string): string => `${projectId} ${path}`
 
 // Entry file keeps the legacy storage key (existing saved edits survive);
@@ -143,6 +148,10 @@ export const registerProjectFiles = (
 ): void => {
   for (const [path, source] of Object.entries(files)) edited.set(editKey(projectId, path), source)
   registered.set(projectId, Object.keys(files))
+  // This rewrites the file SET, not just one file's text, so the cached
+  // dirty set no longer describes the project — drop it and let the next
+  // `isDirty` reseed by scanning. Registration is rare (one share link).
+  dirtyPaths.delete(projectId)
   if (projectId === "shared") {
     // A fresh registration supersedes anything a previous link left behind.
     sharedHydrated = true
@@ -172,7 +181,48 @@ export const getFileSource = (projectId: string, path: string): string =>
   initial[projectId]?.[path] ??
   ""
 
-/** The whole project as an fsMap for the compile worker. */
+/** The bundled baseline for one file; "" for files with no bundled source
+ * (the shared project's, which are dirty the moment they hold any text). */
+const baselineSource = (projectId: string, path: string): string =>
+  initial[projectId]?.[path] ?? ""
+
+// The dirty set for a project, seeded on first use. The seed is the same
+// full scan `isDirty` used to run, but it runs ONCE per project instead of
+// once per keystroke: every later write updates the set through
+// `trackDirty`, which is a single string compare.
+const dirtySet = (projectId: string): Set<string> => {
+  let paths = dirtyPaths.get(projectId)
+  if (paths === undefined) {
+    paths = new Set(
+      listFiles(projectId).filter(
+        (p) => getFileSource(projectId, p) !== baselineSource(projectId, p)
+      )
+    )
+    dirtyPaths.set(projectId, paths)
+  }
+  return paths
+}
+
+// Incremental maintenance: one file changed, so only that file is re-diffed.
+// Editing back to the exact bundled text drops the path from the set, which
+// is what lets the flag flip false again.
+const trackDirty = (projectId: string, path: string, source: string): void => {
+  const paths = dirtySet(projectId)
+  if (source === baselineSource(projectId, path)) paths.delete(path)
+  else paths.add(path)
+}
+
+/** The whole project as an fsMap for the compile worker.
+ *
+ * NOTE: this builds a FRESH object on every call. Nothing memoizes it, and
+ * that is deliberate — the sources it reads (the `edited` map, localStorage,
+ * sessionStorage) can all change from outside this module (another tab, the
+ * AI pane, a share-link registration), so a cache here could serve stale
+ * files to the compiler. The hazard to know about: never pass `getFiles`
+ * straight to `useSyncExternalStore`. React compares snapshots with
+ * `Object.is`, so a new object every call reads as "changed every time" and
+ * re-renders forever. Derive a primitive (see `isDirty`) or hold the result
+ * in state instead. */
 export const getFiles = (projectId: string): Readonly<Record<string, string>> =>
   Object.fromEntries(listFiles(projectId).map((p) => [p, getFileSource(projectId, p)]))
 
@@ -203,13 +253,16 @@ if (channel !== undefined) {
   channel.onmessage = (
     e: MessageEvent<{ projectId: string; path?: string; source: string }>
   ) => {
-    edited.set(editKey(e.data.projectId, e.data.path ?? ENTRY_FILE), e.data.source)
+    const path = e.data.path ?? ENTRY_FILE
+    edited.set(editKey(e.data.projectId, path), e.data.source)
+    trackDirty(e.data.projectId, path, e.data.source)
     notify(e.data.projectId, "remote")
   }
 }
 
 export const setFileSource = (projectId: string, path: string, source: string): void => {
   edited.set(editKey(projectId, path), source)
+  trackDirty(projectId, path, source)
   persist(projectId, path, source)
   channel?.postMessage({ projectId, path, source })
   notify(projectId, "local")
@@ -219,11 +272,13 @@ export const setFileSource = (projectId: string, path: string, source: string): 
 export const setSource = (projectId: string, source: string): void =>
   setFileSource(projectId, ENTRY_FILE, source)
 
-/** True when any file differs from the bundled example. */
-export const isDirty = (projectId: string): boolean =>
-  listFiles(projectId).some(
-    (p) => getFileSource(projectId, p) !== (initial[projectId]?.[p] ?? "")
-  )
+/** True when any file differs from the bundled example.
+ *
+ * O(1) after the project's first call. `useIsDirty` runs this on every source
+ * notification — i.e. every keystroke — and React may call a snapshot more
+ * than once per render, so the old full-project diff was pure waste to
+ * produce a boolean that flips at most once per session. */
+export const isDirty = (projectId: string): boolean => dirtySet(projectId).size > 0
 
 /** Discard all edits and return to the bundled entry source. */
 export const resetSource = (projectId: string): string => {
@@ -235,5 +290,7 @@ export const resetSource = (projectId: string): string => {
       // ignore
     }
   }
+  // Every file is back to its baseline by construction, so the set is empty.
+  dirtyPaths.set(projectId, new Set())
   return initial[projectId]?.[ENTRY_FILE] ?? ""
 }
